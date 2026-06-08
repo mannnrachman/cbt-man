@@ -1,0 +1,110 @@
+// Backup / restore snapshot CBT berbasis database server.
+import { z } from "zod";
+import {
+  usersRepo,
+  groupsRepo,
+  modulRepo,
+  topikRepo,
+  soalRepo,
+  ujianRepo,
+  tokenRepo,
+  sesiRepo,
+  configRepo,
+  hydrateRepos,
+  invalidateReposCache,
+} from "./repos";
+import {
+  UserSchema,
+  GroupSchema,
+  ModulSchema,
+  TopikSchema,
+  SoalSchema,
+  UjianSchema,
+  TokenUjianSchema,
+  SesiUjianSchema,
+  ConfigSchema,
+} from "./types";
+import { importBackupServer, resetAllDataServer } from "@/lib/server/repos/functions";
+
+export const BackupSchema = z.object({
+  app: z.literal("cbtman"),
+  version: z.literal(1),
+  exportedAt: z.number(),
+  users: z.array(UserSchema),
+  groups: z.array(GroupSchema),
+  modul: z.array(ModulSchema),
+  topik: z.array(TopikSchema),
+  soal: z.array(SoalSchema),
+  ujian: z.array(UjianSchema),
+  token: z.array(TokenUjianSchema),
+  sesi: z.array(SesiUjianSchema),
+  config: ConfigSchema,
+});
+export type Backup = z.infer<typeof BackupSchema>;
+
+export function exportBackup(): Backup {
+  return {
+    app: "cbtman",
+    version: 1,
+    exportedAt: Date.now(),
+    users: usersRepo.all(),
+    groups: groupsRepo.all(),
+    modul: modulRepo.all(),
+    topik: topikRepo.all(),
+    soal: soalRepo.all(),
+    ujian: ujianRepo.all(),
+    token: tokenRepo.all(),
+    sesi: sesiRepo.all(),
+    config: configRepo.get(),
+  };
+}
+
+export function downloadBackup(): void {
+  const data = exportBackup();
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `cbtman-backup-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export async function importBackup(raw: unknown): Promise<Backup> {
+  const data = BackupSchema.parse(raw);
+  await importBackupServer({
+    data: {
+      users: data.users,
+      groups: data.groups,
+      modul: data.modul,
+      topik: data.topik,
+      soal: data.soal,
+      ujian: data.ujian,
+      token: data.token,
+      sesi: data.sesi,
+      config: data.config,
+    },
+  });
+  invalidateReposCache();
+  await hydrateRepos();
+  return data;
+}
+
+export async function resetAllData(): Promise<void> {
+  await resetAllDataServer();
+  invalidateReposCache();
+  await hydrateRepos();
+}
+
+export function backupSummary(b: Backup) {
+  return {
+    users: b.users.length,
+    groups: b.groups.length,
+    modul: b.modul.length,
+    topik: b.topik.length,
+    soal: b.soal.length,
+    ujian: b.ujian.length,
+    sesi: b.sesi.length,
+    token: b.token.length,
+  };
+}
