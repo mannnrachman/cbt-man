@@ -1,0 +1,160 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  admin
+  operator
+  peserta
+}
+
+enum TipeSoal {
+  pg
+  multi
+  bs
+  essay
+}
+
+enum Kesulitan {
+  mudah
+  sedang
+  sulit
+}
+
+enum StatusSesi {
+  belum
+  sedang
+  selesai
+  kedaluwarsa
+}
+
+model Group {
+  id         String   @id
+  nama       String
+  keterangan String   @default("")
+  users      User[]
+}
+
+model User {
+  id              String      @id
+  username        String      @unique
+  passwordHash    String
+  namaLengkap     String
+  role            Role
+  allowedTopikIds String      @default("[]")
+  groupId         String?
+  detail          String?
+  aktif           Boolean     @default(true)
+  createdAt       BigInt
+  group           Group?      @relation(fields: [groupId], references: [id])
+  createdUjians   Ujian[]     @relation("UjianCreator")
+  sesi            SesiUjian[] @relation("SesiPeserta")
+}
+
+model Modul {
+  id     String  @id
+  nama   String
+  aktif  Boolean @default(true)
+  topik  Topik[]
+}
+
+model Topik {
+  id      String @id
+  modulId String
+  nama    String
+  modul   Modul  @relation(fields: [modulId], references: [id], onDelete: Cascade)
+  soal    Soal[]
+}
+
+model Soal {
+  id            String      @id
+  topikId       String
+  detail        String
+  tipe          TipeSoal
+  kesulitan     Kesulitan
+  audioFileId   String?
+  audioPlayOnce Boolean     @default(false)
+  pembahasan    String      @default("")
+  createdAt     BigInt
+  topik         Topik       @relation(fields: [topikId], references: [id], onDelete: Cascade)
+  jawaban       Jawaban[]
+}
+
+model Jawaban {
+  id      String @id
+  soalId   String
+  detail   String
+  benar    Boolean
+  soal     Soal   @relation(fields: [soalId], references: [id], onDelete: Cascade)
+}
+
+model Ujian {
+  id               String     @id
+  nama             String
+  deskripsi        String     @default("")
+  durasiMenit      Int
+  poinBenar        Float      @default(1)
+  poinSalah        Float      @default(0)
+  poinKosong       Float      @default(0)
+  beginAt          BigInt?
+  endAt            BigInt?
+  tokenAktif       Boolean    @default(false)
+  ipRange          String     @default("")
+  groupIds         String     @default("[]")
+  topicSets        String     @default("[]")
+  showResult       Boolean    @default(true)
+  showResultDetail Boolean    @default(false)
+  fullscreenWajib  Boolean    @default(true)
+  maxPindahTab     Int        @default(3)
+  blokirShortcut   Boolean    @default(true)
+  createdBy        String
+  createdAt        BigInt
+  creator          User       @relation("UjianCreator", fields: [createdBy], references: [id])
+  tokens           TokenUjian[]
+  sesi             SesiUjian[]
+}
+
+model TokenUjian {
+  id         String  @id
+  ujianId     String
+  kode       String
+  dipakaiOleh String?
+  dipakaiAt  BigInt?
+  ujian      Ujian   @relation(fields: [ujianId], references: [id], onDelete: Cascade)
+}
+
+model SesiUjian {
+  id           String      @id
+  ujianId      String
+  pesertaId    String
+  status       StatusSesi
+  mulaiAt      BigInt?
+  selesaiAt    BigInt?
+  endsAt       BigInt?
+  soalIds      String      @default("[]")
+  jawabanOrder String      @default("{}")
+  jawaban      String      @default("[]")
+  pelanggaran  Int         @default(0)
+  skorTotal    Float?
+  maxSkor      Float?
+  gradedAt     BigInt?
+  gradedBy     String?
+  createdAt    BigInt
+  ujian        Ujian       @relation(fields: [ujianId], references: [id], onDelete: Cascade)
+  peserta      User        @relation("SesiPeserta", fields: [pesertaId], references: [id])
+}
+
+model AppConfig {
+  id           String @id @default("app")
+  appName      String @default("CBT-MAN")
+  appDeskripsi String @default("Aplikasi ujian berbasis komputer")
+  pesanLogin   String @default("Selamat datang di aplikasi ujian online")
+  mobileLock   Boolean @default(false)
+  multiDevice  Boolean @default(false)
+  roleAccess   String @default("{}")
+}
