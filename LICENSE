@@ -1,68 +1,103 @@
-CBT-MAN Upgrade Non-Commercial License
+mannnrachman Collaborative Non-Commercial Software License 1.0 (NCU-1.0)
+
 Copyright (c) 2026 mannnrachman
 
-1. Purpose
+Preamble
 
-This project is shared for learning, evaluation, internal organizational use,
-and collaborative improvement.
+This software is made available for learning, internal evaluation, educational use,
+and collaborative improvement. It is an upgraded continuation of source material
+that was helpful to the author, and it is shared in that same constructive spirit.
 
-The author created this upgraded version because the existing source material
-was genuinely helpful, and this repository is intended as an improved and
-more maintainable continuation in that spirit.
+This license permits use, study, modification, and redistribution on a
+non-commercial basis. It does not permit commercial sale, paid redistribution,
+or commercialization of the software as a product or service without prior
+written permission.
 
-2. Permission Granted
+1. Definitions
 
-Permission is granted, free of charge, to any person or organization obtaining
-a copy of this software and associated documentation files (the "Software") to:
+"Software" means this repository and any source code, documentation, assets,
+configuration, examples, or derivative works distributed with it.
+
+"Non-Commercial Use" means use that is not primarily intended for or directed
+ toward commercial advantage, monetary compensation, paid access, resale,
+ productization, or revenue generation.
+
+"Commercial Use" includes, without limitation:
+- selling the Software;
+- reselling copies of the Software;
+- offering the Software as a paid hosted service;
+- packaging the Software as a paid template, starter kit, installation package,
+  or deployment bundle;
+- sublicensing or redistributing the Software as part of a paid offering;
+- using the Software in a manner whose primary purpose is monetized access,
+  monetized redistribution, or commercial resale.
+
+2. Grant of Rights
+
+Subject to the terms of this license, permission is hereby granted, free of
+charge, to any person or organization obtaining a copy of the Software to:
 
 - use the Software for personal learning;
 - study and modify the Software;
-- run the Software for internal, non-commercial educational or organizational use;
-- share modifications or improvements under the same non-commercial spirit;
-- contribute fixes, features, or documentation back to this project.
+- run the Software for internal, educational, research, or evaluation purposes;
+- redistribute the Software or modified versions of it for non-commercial use;
+- contribute fixes, documentation, and improvements back to the project.
 
-3. Commercial Use Prohibited
+3. Conditions
 
-You may not, without prior written permission from the author:
+If you distribute the Software or a modified version of it, you must:
 
-- sell this Software;
-- resell copies of this Software;
-- sell access to this Software;
-- host this Software as a paid service or paid SaaS offering;
-- package this Software as a paid template, installation service, starter kit,
-  or commercial deployment bundle;
-- sublicense, distribute, or transfer this Software as part of a commercial
-  product or paid offering;
-- use this Software or a modified version of it in a way whose primary purpose
-  is direct commercial sale or monetized redistribution.
+- retain this license in full;
+- preserve copyright notices and attribution statements;
+- clearly indicate that the Software is licensed under NCU-1.0;
+- clearly indicate whether changes were made;
+- not impose additional terms that conflict with this license.
 
-For the avoidance of doubt: **selling this application is not allowed**.
+4. Commercial Use Restriction
 
-4. Redistribution
+You may not engage in Commercial Use of the Software without prior written
+permission from the copyright holder.
 
-If you redistribute this Software or modified versions of it, you must:
+For clarity, the following are prohibited without prior written permission:
 
-- keep this license text;
-- preserve copyright and attribution notices;
-- clearly state that the software is provided under a non-commercial license;
-- clearly indicate if you modified the Software.
+- selling this application;
+- reselling this repository or derivative copies of it;
+- offering paid hosting or paid SaaS based primarily on this Software;
+- distributing the Software as part of a paid commercial package;
+- productizing the Software for paid client delivery where the Software itself
+  is a core sellable asset;
+- using the Software as a paid template or resale-ready codebase.
 
-5. No Warranty
+For the avoidance of doubt: selling this application is not allowed.
+
+5. No Trademark Grant
+
+This license does not grant any right to use the name, identity, branding,
+or marks of the author except as reasonably necessary for attribution.
+
+6. No Warranty
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM,
-OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE,
+ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
 
-6. Request for Respectful Use
+7. Termination
 
-This repository exists because prior source material helped the author.
-Please respect that spirit by improving, learning from, and using the project
-responsibly — not by turning it into something to be sold.
+Any rights granted under this license terminate automatically if you violate
+its terms. Upon termination, you must cease prohibited use and distribution
+of the Software.
 
-7. Contact
+8. Request for Respectful Use
 
-For commercial licensing or alternative permission, contact the repository owner.
+This repository exists because earlier source material materially assisted the
+author. Please respect that context. Use the project to learn, evaluate,
+improve, and collaborate — not to commercialize or resell it.
+
+9. Alternative Licensing
+
+If you require commercial use rights or alternative licensing terms, you must
+obtain prior written permission from the copyright holder.

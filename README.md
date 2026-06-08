@@ -1,71 +1,76 @@
 # CBT-MAN Upgrade
 
-CBT-MAN Upgrade is a **school-oriented Computer-Based Test (CBT)** application built with **TanStack Start, React, TypeScript, Prisma, and SQLite**.
+![License: NCU-1.0](https://img.shields.io/badge/license-NCU--1.0-red)
+![Commercial Use](https://img.shields.io/badge/commercial%20use-prohibited-critical)
+![Status](https://img.shields.io/badge/status-active-2ea44f)
 
-This repository exists because the original available source was genuinely helpful to me. I used that help as a foundation, then upgraded and extended the application to make it more robust, more realistic for demos, and better suited for continued development.
+CBT-MAN Upgrade is a school-oriented **Computer-Based Test (CBT)** application built with **TanStack Start, React, TypeScript, Prisma, and SQLite**.
 
-This project is intended for:
-- product previews
-- feature development
+This repository is an upgraded continuation of source material that was genuinely useful to me. I did not build it in isolation; I improved it because the earlier work gave me a meaningful head start. This project is my effort to refine that foundation into something more stable, more realistic for demonstration, and more maintainable for ongoing development.
+
+It is intended for:
+- internal evaluation
+- product preview environments
 - admin / teacher / student workflow testing
-- local demo environments
-- experimentation with a gradual migration from browser-only storage to server-backed persistence
+- non-commercial educational use
+- iterative technical improvement
 
-It now includes a **realistic Indonesian-school demo dataset**, so the app feels like a living CBT system instead of an empty prototype.
+It now includes a realistic Indonesian-school demo dataset, allowing the application to behave like an active CBT deployment rather than an empty prototype.
 
-> **Important:** This project is shared for learning, internal use, evaluation, and further improvement.
-> **Selling this application, reselling copies, or offering it as a paid product/service is not allowed.**
+> [!IMPORTANT]
+> This repository is provided for learning, evaluation, internal use, and collaborative improvement.
+> **Commercial sale, resale, paid hosting, paid distribution, and productized resale of this application are prohibited.**
 
 ---
 
 ## Table of Contents
 
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Current Architecture Status](#current-architecture-status)
-- [Core Data Domains](#core-data-domains)
-- [Realistic Demo Seeder](#realistic-demo-seeder)
+- [Key Capabilities](#key-capabilities)
+- [Technology Stack](#technology-stack)
+- [Current Architectural Position](#current-architectural-position)
+- [Core Domain Model](#core-domain-model)
+- [Realistic Demo Seeding](#realistic-demo-seeding)
 - [Demo Accounts](#demo-accounts)
 - [Getting Started](#getting-started)
-- [Useful Scripts](#useful-scripts)
+- [Useful Commands](#useful-commands)
 - [Project Structure](#project-structure)
-- [How Data Flows](#how-data-flows)
+- [Application Data Flow](#application-data-flow)
 - [Recommended Verification](#recommended-verification)
 - [Contributing](#contributing)
 - [License and Usage Restrictions](#license-and-usage-restrictions)
-- [Acknowledgment](#acknowledgment)
+- [Acknowledgment and Source Context](#acknowledgment-and-source-context)
 
 ---
 
-## Features
+## Key Capabilities
 
-- **Question bank management** organized as `Module → Topic → Question`
-- Support for multiple **question types**:
+- Structured question bank management using `Module → Topic → Question`
+- Multiple supported question types:
   - single-choice (`pg`)
   - multiple-choice (`multi`)
   - true/false (`bs`)
   - essay (`essay`)
-- **Exam management** with:
-  - duration rules
+- Exam configuration with:
+  - duration control
   - correct / incorrect / blank scoring
   - exam tokens
-  - participant group restrictions
+  - participant-group restrictions
   - question and answer shuffling
   - required fullscreen mode
-  - tab-switch detection / basic anti-cheat controls
-- **Exam session lifecycle** with statuses:
+  - tab-switch detection / basic anti-cheat protections
+- Participant exam sessions with status tracking:
   - pending
   - in progress
   - finished
   - expired
-- **Manual essay grading** for admin/operator roles
-- **Results, evaluation, reports, leaderboard, and participant monitoring**
-- **Server-side persistence** via Prisma + SQLite
-- **Realistic seeded demo data** for local previews and development
+- Manual essay evaluation for admin/operator flows
+- Result views, evaluation screens, reports, leaderboard views, and participant monitoring
+- SQLite-backed persistence through Prisma
+- Realistic shared seed data for local demos, previews, and development
 
 ---
 
-## Tech Stack
+## Technology Stack
 
 ### Frontend
 - [TanStack Start](https://tanstack.com/start)
@@ -75,7 +80,7 @@ It now includes a **realistic Indonesian-school demo dataset**, so the app feels
 - Radix UI
 - Zustand
 
-### Backend / Persistence
+### Backend and Persistence
 - Prisma
 - SQLite
 - TanStack server functions
@@ -87,23 +92,23 @@ It now includes a **realistic Indonesian-school demo dataset**, so the app feels
 
 ---
 
-## Current Architecture Status
+## Current Architectural Position
 
-This project currently uses a **hybrid transitional architecture**:
+This project currently follows a **hybrid transitional architecture**.
 
-- **core CBT data is stored on the server** using Prisma + SQLite
-- the UI still uses a **client-side repository/cache facade** in `src/lib/cbt/repos.ts`
-- mutations are handled through **optimistic client updates**, then persisted asynchronously to the server
+- Core CBT data is persisted on the server through **Prisma + SQLite**.
+- The UI still relies on a **client-side repository/cache facade** in `src/lib/cbt/repos.ts`.
+- Most mutations are handled through **optimistic client updates**, then persisted asynchronously to the server.
 
-That means:
-- this is **no longer a localStorage-only app** for core business data
-- but it is also **not yet fully server-driven per route/page**
+In practical terms:
+- the system is **no longer localStorage-only** for core business data;
+- the system is **not yet fully server-driven on every route**.
 
-This approach keeps the old UI model working while allowing the system to migrate progressively to a more robust server-backed design.
+This is a deliberate transitional state that preserves the existing interaction model while progressively moving the application toward a more robust server-backed architecture.
 
 ---
 
-## Core Data Domains
+## Core Domain Model
 
 The current application models include:
 
@@ -118,43 +123,43 @@ The current application models include:
 - `SesiUjian`
 - `AppConfig`
 
-Database schema:
+Primary schema location:
 - `prisma/schema.prisma`
 
 ---
 
-## Realistic Demo Seeder
+## Realistic Demo Seeding
 
-The seeding system has been upgraded so the application feels like a real school CBT deployment during preview and testing.
+The seeding system has been upgraded so the application can be demonstrated and tested using data that resembles an actual school deployment.
 
-Current seeded coverage includes:
-- multiple **class groups**
-- demo accounts for **admin**, **operator**, **teachers**, and **students**
+Seed coverage currently includes:
+- multiple class groups
+- admin, operator, teacher, and student accounts
 - Mathematics, Physics, and Biology modules
-- realistic topic breakdowns
+- realistic topic distribution
 - objective and essay questions
-- multiple exams with different configurations
+- multiple exams with different rules
 - active and unused exam tokens
-- participant sessions in different states:
+- participant sessions across several states:
   - not started
-  - currently in progress
+  - in progress
   - completed
   - graded
-  - partially graded essay workflows
+  - partially graded essay cases
 
-The shared seed source is centralized in:
+Shared seed source:
 - `src/lib/server/db/seed-shared.mjs`
 
-Prisma seed entry point:
+Prisma seed entry:
 - `prisma/seed.mjs`
 
-This keeps the **CLI seed path** and **server-side seed path** aligned, so they do not drift over time.
+This design ensures that the CLI seeding path and the server-side seeding path remain aligned over time.
 
 ---
 
 ## Demo Accounts
 
-> Seed data may evolve, but the following default accounts are currently created by the shared seed dataset.
+> These accounts reflect the current shared seed dataset and may evolve as the project grows.
 
 ### Admin
 - `admin / admin123`
@@ -189,12 +194,12 @@ npm install
 
 ### 2. Prepare the database
 
-Make sure `DATABASE_URL` points to a SQLite database.
+Ensure that `DATABASE_URL` points to a SQLite database.
 
-Relevant config:
+Relevant configuration:
 - `prisma.config.ts`
 
-If needed, run migrations:
+Run migrations if required:
 
 ```bash
 npm run prisma:migrate
@@ -206,13 +211,13 @@ npm run prisma:migrate
 npm run prisma:seed
 ```
 
-### 4. Start development mode
+### 4. Start the development server
 
 ```bash
 npm run dev
 ```
 
-### 5. Build for production testing
+### 5. Build the project
 
 ```bash
 npm run build
@@ -220,7 +225,7 @@ npm run build
 
 ---
 
-## Useful Scripts
+## Useful Commands
 
 ```bash
 npm run dev
@@ -244,40 +249,40 @@ node scripts/check-admin-routes.mjs
 
 ```text
 prisma/
-  schema.prisma        # database schema
+  schema.prisma        # Database schema
   seed.mjs             # Prisma seeder entry point
 
 src/
   components/          # UI and CBT-specific components
   lib/
-    cbt/               # types, repos, auth, exam logic
-    server/            # server functions, DB helpers, shared seed logic
+    cbt/               # Types, repos, auth, exam logic
+    server/            # Server functions, DB helpers, shared seed logic
   routes/              # TanStack Start file-based routes
 
 scripts/
   check-admin-routes.mjs
 ```
 
-Most important files to understand the system:
+Key files for understanding the system:
 - `src/lib/cbt/repos.ts` — client cache / repository facade
 - `src/lib/server/repos/functions.ts` — server persistence bridge
 - `src/lib/cbt/exam.ts` — exam session creation and grading logic
-- `src/lib/server/db/seed-shared.mjs` — main realistic demo dataset
+- `src/lib/server/db/seed-shared.mjs` — primary realistic demo dataset
 - `prisma/schema.prisma` — database model definitions
 
 ---
 
-## How Data Flows
+## Application Data Flow
 
-1. The UI hydrates initial state from a server snapshot
-2. That snapshot is loaded into the client-side repo cache
-3. Admin and participant pages read data from that cache
-4. On mutation, the cache is updated first
-5. The change is then persisted to SQLite through server functions
+1. The UI hydrates initial state from a server snapshot.
+2. That snapshot is loaded into the client-side repository cache.
+3. Admin and participant routes read data from the cache layer.
+4. When data changes, the client cache is updated first.
+5. The mutation is then persisted to SQLite through server functions.
 
 Implications:
-- the UX feels fast
-- but client cache can become stale if persistence fails or if another tab/device changes the same data
+- the application feels responsive in the browser;
+- the cache can become stale if persistence fails or if another tab/device changes the same records.
 
 ---
 
@@ -295,87 +300,39 @@ npm run build
 
 ---
 
-## Notes and Limitations
-
-- Core CBT data is already backed by **SQLite**, not pure browser storage.
-- Some areas are still transitional remnants of the older browser-heavy architecture.
-- File/audio handling still needs special treatment if the app is pushed toward a fully server-side setup.
-- The current build may emit Vite chunk-size warnings, but these are **not blocking** for local development.
-
----
-
-## Technical Roadmap
-
-Reasonable next steps for this project include:
-
-- migrating from global client repo cache to more server-driven loaders/queries
-- improving error handling for optimistic mutations
-- adding invalidation/refetch behavior after writes
-- upgrading auth toward server sessions/cookies
-- moving file/audio storage from browser storage to server storage
-- adding automated tests for exam-taking and grading flows
-
----
-
 ## Contributing
 
-Contributions are welcome **as long as they respect the intent and restrictions of this repository**.
+Please read [`CONTRIBUTING.md`](./CONTRIBUTING.md) before opening a pull request.
 
-Please contribute in ways that improve the project for learning, internal usage, demos, maintenance, stability, accessibility, and feature quality.
-
-### Please do
-- open issues for bugs, inconsistencies, and UX problems
-- propose focused pull requests
-- improve typing, validation, tests, docs, or developer experience
-- improve performance and reliability
-- preserve the school-oriented CBT domain model unless a change is clearly discussed
-
-### Please do not
-- submit changes intended to turn this repository into a commercial resale package
-- remove attribution/context about the origin and upgrade purpose of this project
-- use contributed changes to justify selling this repository or derived copies
-
-### Recommended contribution flow
-1. Fork the repository
-2. Create a feature branch
-3. Make focused changes
-4. Run verification commands
-5. Open a pull request with clear notes
+In short:
+- contributions are welcome;
+- contributions must respect the non-commercial nature of this repository;
+- contributions should preserve the educational and maintenance-oriented purpose of the project.
 
 ---
 
 ## License and Usage Restrictions
 
-This repository is released under a **custom non-commercial license**.
+This repository is licensed under the **mannnrachman Collaborative Non-Commercial Software License 1.0 (`NCU-1.0`)**.
 
-### In plain language
-You may:
-- study the code
-- use it for learning
-- use it for internal evaluation
-- adapt it for non-commercial organizational or educational purposes
-- contribute improvements back
+This means, in summary:
+- you may study, run, adapt, and improve the software for non-commercial purposes;
+- you may not sell the software, resell copies, offer paid hosting, or commercialize it as a product or service without prior written permission.
 
-You may **not**:
-- sell this application
-- resell copies of this repository
-- sell hosted versions of this application
-- package it as a paid template, SaaS, install service, or productized solution
-- sublicense it for commercial distribution
-
-If you need different usage rights, contact the repository owner first.
-
-See the full license text in:
-- `LICENSE`
+For the full legal text, see:
+- [`LICENSE`](./LICENSE)
 
 ---
 
-## Acknowledgment
+## Acknowledgment and Source Context
 
-I built this upgrade because the existing source helped me a lot.
+This repository was not created in a vacuum.
 
-This repository is my way of giving back through improvements: better persistence, better demo data, stronger runtime safety, and a more maintainable CBT foundation.
+It exists because previously available source material helped me substantially. Rather than merely copying it, I chose to invest time in upgrading the application: improving data persistence, strengthening runtime safety, making the seeded environment more realistic, and shaping the codebase into something easier to maintain.
 
-Please respect that spirit.
+That history matters.
 
-**Do not sell this application.**
+Please respect the spirit of the project:
+- acknowledge that it builds upon helpful prior work;
+- use it to learn, evaluate, and improve;
+- do not repackage or sell it as a commercial product.
