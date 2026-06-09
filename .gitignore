@@ -39,3 +39,14 @@ Thumbs.db
 
 # local tool state
 *.pid
+
+# claude code local tooling/skills
+.claude/
+
+# playwright test outputs / generated evidence (regenerable)
+artifacts/
+tests/output/
+playwright-report/
+# generated per-flow evidence manifests (keep only planned *-flows definitions)
+tests/meta/roles/*.evidence.json
+!tests/meta/roles/*-flows.evidence.json
