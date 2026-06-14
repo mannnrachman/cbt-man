@@ -317,6 +317,11 @@ export const mutateEntity = createServerFn({ method: "POST" })
             }
           } else {
             const item = payload as User;
+            // Deteksi transisi deaktivasi (aktif true → false) utk revoke sesi instan (atomic dgn upsert).
+            const prev = await tx.user.findUnique({
+              where: { id: item.id },
+              select: { aktif: true },
+            });
             await tx.user.upsert({
               where: { id: item.id },
               update: {
@@ -343,6 +348,10 @@ export const mutateEntity = createServerFn({ method: "POST" })
                 createdAt: BigInt(item.createdAt),
               },
             });
+            // Revoke sesi instan saat deaktivasi (true → false); atomic dalam transaksi yang sama.
+            if (prev?.aktif === true && item.aktif === false) {
+              await tx.session.deleteMany({ where: { userId: item.id } });
+            }
           }
         });
       }
