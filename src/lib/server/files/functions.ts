@@ -126,3 +126,46 @@ export const getStoredFileUrl = createServerFn({ method: "GET" })
       dataBase64: body.toString("base64"),
     };
   });
+
+const fileBackupSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  mime: z.string(),
+  size: z.number(),
+  createdAt: z.number(),
+  extension: z.string(),
+  dataBase64: z.string(),
+});
+
+// Export seluruh file asset (meta + blob base64) untuk paket backup.
+export const exportFilesServer = createServerFn({ method: "GET" }).handler(async () => {
+  const metas = await listMetas();
+  const files = await Promise.all(
+    metas.map(async (meta) => {
+      const body = await readFile(filePath(meta.id, meta.extension));
+      return { ...meta, dataBase64: body.toString("base64") };
+    }),
+  );
+  return files;
+});
+
+// Restore file asset dari paket backup (overwrite existing di data/uploads/).
+export const importFilesServer = createServerFn({ method: "POST" })
+  .validator(z.array(fileBackupSchema))
+  .handler(async ({ data }) => {
+    await ensureUploadsDir();
+    for (const item of data) {
+      const buffer = Buffer.from(item.dataBase64, "base64");
+      await writeFile(filePath(item.id, item.extension), buffer);
+      const meta: StoredFileRecord = {
+        id: item.id,
+        name: item.name,
+        mime: item.mime,
+        size: item.size,
+        createdAt: item.createdAt,
+        extension: item.extension,
+      };
+      await writeFile(metaPath(item.id), JSON.stringify(meta, null, 2));
+    }
+    return { ok: true as const };
+  });

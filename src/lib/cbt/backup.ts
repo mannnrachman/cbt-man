@@ -25,6 +25,17 @@ import {
   ConfigSchema,
 } from "./types";
 import { importBackupServer, resetAllDataServer } from "@/lib/server/repos/functions";
+import { exportFilesServer, importFilesServer } from "@/lib/server/files/functions";
+
+const FileBackupSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  mime: z.string(),
+  size: z.number(),
+  createdAt: z.number(),
+  extension: z.string(),
+  dataBase64: z.string(),
+});
 
 export const BackupSchema = z.object({
   app: z.literal("cbtman"),
@@ -39,10 +50,12 @@ export const BackupSchema = z.object({
   token: z.array(TokenUjianSchema),
   sesi: z.array(SesiUjianSchema),
   config: ConfigSchema,
+  files: z.array(FileBackupSchema).optional(),
 });
 export type Backup = z.infer<typeof BackupSchema>;
 
-export function exportBackup(): Backup {
+export async function exportBackup(): Promise<Backup> {
+  const files = await exportFilesServer();
   return {
     app: "cbtman",
     version: 1,
@@ -56,11 +69,12 @@ export function exportBackup(): Backup {
     token: tokenRepo.all(),
     sesi: sesiRepo.all(),
     config: configRepo.get(),
+    files,
   };
 }
 
-export function downloadBackup(): void {
-  const data = exportBackup();
+export async function downloadBackup(): Promise<void> {
+  const data = await exportBackup();
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -85,6 +99,7 @@ export async function importBackup(raw: unknown): Promise<Backup> {
       config: data.config,
     },
   });
+  await importFilesServer({ data: data.files ?? [] });
   invalidateReposCache();
   await hydrateRepos();
   return data;
@@ -106,5 +121,6 @@ export function backupSummary(b: Backup) {
     ujian: b.ujian.length,
     sesi: b.sesi.length,
     token: b.token.length,
+    files: b.files?.length ?? 0,
   };
 }

@@ -57,7 +57,9 @@ function ToolsPage() {
           code: iss.code,
         }));
         setValidationErrors(issues);
-        toast.error(`Struktur backup tidak valid (${issues.length} masalah). Lihat detail di dialog.`);
+        toast.error(
+          `Struktur backup tidak valid (${issues.length} masalah). Lihat detail di dialog.`,
+        );
         return;
       }
       setValidationErrors(null);
@@ -117,7 +119,7 @@ function ToolsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button onClick={downloadBackup}>
+          <Button onClick={() => void downloadBackup()}>
             <Download className="mr-1 h-4 w-4" /> Download backup
           </Button>
         </CardContent>
@@ -212,13 +214,21 @@ function ToolsPage() {
       </Dialog>
 
       {/* Reset confirm */}
-      <Dialog open={confirmReset} onOpenChange={(o) => { if (!o) { setConfirmReset(false); setConfirmText(""); } }}>
+      <Dialog
+        open={confirmReset}
+        onOpenChange={(o) => {
+          if (!o) {
+            setConfirmReset(false);
+            setConfirmText("");
+          }
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="text-destructive">Reset semua data?</DialogTitle>
             <DialogDescription>
-              Semua pengguna, soal, ujian, dan sesi akan terhapus. Ketik <strong>HAPUS</strong> untuk
-              konfirmasi.
+              Semua pengguna, soal, ujian, dan sesi akan terhapus. Ketik <strong>HAPUS</strong>{" "}
+              untuk konfirmasi.
             </DialogDescription>
           </DialogHeader>
           <div>
@@ -231,7 +241,13 @@ function ToolsPage() {
             />
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => { setConfirmReset(false); setConfirmText(""); }}>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setConfirmReset(false);
+                setConfirmText("");
+              }}
+            >
               Batal
             </Button>
             <Button variant="destructive" onClick={doReset}>
