@@ -13,7 +13,11 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/pengaturan")({
   loader: async () => {
-    await hydrateRepos();
+    try {
+      await hydrateRepos();
+    } catch {
+      // Fallback ke cache; jangan brick navigasi saat snapshot gagal.
+    }
   },
   component: PengaturanPage,
 });

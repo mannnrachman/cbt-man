@@ -22,7 +22,11 @@ import { RichEditor } from "@/components/cbt/RichEditor";
 
 export const Route = createFileRoute("/_authenticated/admin/ujian/$id")({
   loader: async () => {
-    await hydrateRepos();
+    try {
+      await hydrateRepos();
+    } catch {
+      // Fallback ke cache; jangan brick navigasi saat snapshot gagal.
+    }
   },
   component: UjianEditor,
 });

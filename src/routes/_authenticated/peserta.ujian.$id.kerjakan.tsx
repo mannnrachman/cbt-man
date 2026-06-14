@@ -16,7 +16,11 @@ import { Flag, Clock } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/peserta/ujian/$id/kerjakan")({
   loader: async () => {
-    await hydrateRepos();
+    try {
+      await hydrateRepos();
+    } catch {
+      // Fallback ke cache; jangan brick navigasi saat snapshot gagal.
+    }
   },
   component: Kerjakan,
 });
