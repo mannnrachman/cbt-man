@@ -504,17 +504,11 @@ async function authorizeMutation(
 
   if (caller.role === "peserta") {
     if (entity === "token" && action === "upsert") {
-      const item = payload as TokenUjian;
-      if (item.dipakaiOleh !== caller.id) return { ok: false, error: "Forbidden" };
-      if (!(await pesertaCanTouchUjian(caller, item.ujianId)))
-        return { ok: false, error: "Forbidden" };
-      const existing = await prisma.tokenUjian.findUnique({ where: { id: item.id } });
-      if (!existing) return { ok: false, error: "Forbidden" };
-      if (existing.ujianId !== item.ujianId || existing.kode !== item.kode)
-        return { ok: false, error: "Forbidden" };
-      if (existing.dipakaiOleh && existing.dipakaiOleh !== caller.id)
-        return { ok: false, error: "Forbidden" };
-      return { ok: true };
+      // Closed (Issue #9): peserta token writes are single-use claims and must
+      // go through the atomic `claimExamToken` server fn. This generic upsert
+      // path was a non-atomic findUnique->check->write that two participants
+      // could race to double-claim a token, so it is rejected outright.
+      return { ok: false, error: "Forbidden" };
     }
 
     if (entity === "sesi" && action === "upsert") {
@@ -689,6 +683,85 @@ export const generateExamTokensServer = createServerFn({ method: "POST" })
     }
 
     return { ok: true as const, tokens: created };
+  });
+
+// ---------------------------------------------------------------------------
+// Atomic single-use token claim (Issue #9)
+//
+// The old flow read the token from the client cache, checked `dipakaiOleh`
+// locally, then upserted it back — a read-then-write race where two
+// participants could both observe an unused token and both start the exam.
+// (The generic peserta `token`/`upsert` path in `authorizeMutation` carried
+// the same race and is now closed, so this is the ONLY peserta token-write.)
+//
+// The fix is a single conditional `updateMany`: only rows that are still
+// unused (`dipakaiOleh: null`) OR already owned by this caller are flipped to
+// the caller. SQLite serializes the racing writes, so exactly one participant
+// matches a row (`count === 1`) and the loser matches nothing (`count === 0`).
+// Re-claiming by the same participant is idempotent. The `@@unique([ujianId,
+// kode])` constraint keeps the match to a single row, so the success payload
+// is built from the values we just wrote — no non-transactional re-read.
+// ---------------------------------------------------------------------------
+export const claimExamToken = createServerFn({ method: "POST" })
+  .validator(
+    z.object({
+      ujianId: z.string().min(1),
+      kode: z.string().min(1),
+    }),
+  )
+  .handler(async ({ data }) => {
+    const caller = await requireCaller();
+    if (!caller) return { ok: false as const, error: "Unauthorized" };
+    if (caller.role !== "peserta") return { ok: false as const, error: "Forbidden" };
+    if (!(await pesertaCanTouchUjian(caller, data.ujianId))) {
+      return { ok: false as const, error: "Forbidden" };
+    }
+
+    const kode = data.kode.trim().toUpperCase();
+    const dipakaiAt = Date.now();
+
+    // Single atomic conditional update: claim only if unused or already ours.
+    const result = await prisma.tokenUjian.updateMany({
+      where: {
+        ujianId: data.ujianId,
+        kode,
+        OR: [{ dipakaiOleh: null }, { dipakaiOleh: caller.id }],
+      },
+      data: { dipakaiOleh: caller.id, dipakaiAt: toBigInt(dipakaiAt) },
+    });
+
+    if (result.count === 0) {
+      // Disambiguate why nothing matched: unknown code vs. taken by someone
+      // else. This read only chooses an error message; it never gates the
+      // claim (the claim already failed atomically above).
+      const existing = await prisma.tokenUjian.findFirst({
+        where: { ujianId: data.ujianId, kode },
+        select: { id: true },
+      });
+      if (!existing) return { ok: false as const, error: "Token tidak valid untuk ujian ini" };
+      return { ok: false as const, error: "Token sudah dipakai peserta lain" };
+    }
+
+    // Resolve the immutable row `id` for the client cache patch. The row was
+    // just claimed (count >= 1), so a miss here means the exam (and its
+    // cascade-deleted tokens) was removed in the gap between the update and
+    // this read — the claim is moot, so report a transient failure rather
+    // than fabricate an id that would push a phantom row into the cache.
+    const claimedId = await prisma.tokenUjian.findFirst({
+      where: { ujianId: data.ujianId, kode },
+      select: { id: true },
+    });
+    if (!claimedId) {
+      return { ok: false as const, error: "Token tidak dapat diklaim, silakan coba lagi" };
+    }
+    const token: TokenUjian = {
+      id: claimedId.id,
+      ujianId: data.ujianId,
+      kode,
+      dipakaiOleh: caller.id,
+      dipakaiAt,
+    };
+    return { ok: true as const, token };
   });
 
 export const getCbtSnapshot = createServerFn({ method: "GET" }).handler(async () => {

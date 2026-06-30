@@ -1,4 +1,5 @@
 import {
+  claimExamToken as claimExamTokenServer,
   getCbtSnapshot,
   getPublicBootConfigServer,
   mutateEntity,
@@ -90,6 +91,23 @@ export async function hydrateRepos(): Promise<void> {
 
 export async function loadPublicBootConfig(): Promise<PublicBootConfig> {
   return getPublicBootConfigServer();
+}
+
+// Atomic single-use token claim (Issue #9). The server performs the
+// conditional update; on success we patch the local cache so a subsequent
+// `tokenRepo.byId`/`all()` read reflects the claim without a full re-hydrate.
+export async function claimExamToken(
+  ujianId: string,
+  kode: string,
+): Promise<{ ok: true; token: TokenUjian } | { ok: false; error: string }> {
+  const result = await claimExamTokenServer({ data: { ujianId, kode } });
+  if (result.ok) {
+    const next = cache.token.slice();
+    upsertArrayItem(next, result.token);
+    cache.token = next;
+    return { ok: true, token: result.token };
+  }
+  return { ok: false, error: result.error };
 }
 
 function upsertArrayItem<T extends { id: string }>(list: T[], item: T) {

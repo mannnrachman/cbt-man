@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useParams, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { ujianRepo, sesiRepo, tokenRepo, hydrateRepos } from "@/lib/cbt/repos";
+import { ujianRepo, sesiRepo, tokenRepo, hydrateRepos, claimExamToken } from "@/lib/cbt/repos";
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import { findOrCreateSesi, startSesi } from "@/lib/cbt/exam";
 import {
@@ -136,19 +136,24 @@ function PreUjianContent({
         toast.error("Masukkan token");
         return;
       }
+      // Advisory pre-check only: surface an obvious "already used by someone
+      // else" from the local cache for a snappier message. On a cache miss or
+      // any stale state we FALL THROUGH to the server — `claimExamToken` is the
+      // sole authority and must not be short-circuited by the client cache
+      // (e.g. a token generated after this client hydrated).
       const tokenRow = tokenRepo
         .all()
         .find((t) => t.ujianId === ujian.id && t.kode.toUpperCase() === kode);
-      if (!tokenRow) {
-        toast.error("Token tidak valid untuk ujian ini");
-        return;
-      }
-      if (tokenRow.dipakaiOleh && tokenRow.dipakaiOleh !== user.id) {
+      if (tokenRow?.dipakaiOleh && tokenRow.dipakaiOleh !== user.id) {
         toast.error("Token sudah dipakai peserta lain");
         return;
       }
-      if (!tokenRow.dipakaiOleh) {
-        tokenRepo.upsert({ ...tokenRow, dipakaiOleh: user.id, dipakaiAt: Date.now() });
+      // Atomic claim (Issue #9): must succeed before any session is created.
+      // Two participants racing the same unused token cannot both win here.
+      const claim = await claimExamToken(ujian.id, kode);
+      if (!claim.ok) {
+        toast.error(claim.error);
+        return;
       }
     }
     if (ujian.fullscreenWajib) {
