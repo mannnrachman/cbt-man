@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Clock, FileText, CalendarClock, CalendarX } from "lucide-react";
 import { getExamAvailabilityStatus } from "@/lib/cbt/availability";
+import { RichView } from "@/components/cbt/RichEditor";
 
 export const Route = createFileRoute("/_authenticated/peserta/")({
   component: PesertaDashboard,
@@ -54,9 +55,9 @@ function PesertaDashboard() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div
+                  <RichView
                     className="text-sm text-muted-foreground line-clamp-3"
-                    dangerouslySetInnerHTML={{ __html: u.deskripsi }}
+                    html={u.deskripsi}
                   />
                   {availability === "upcoming" && (
                     <div className="flex items-start gap-2 rounded border border-info/30 bg-info/10 p-2 text-xs">

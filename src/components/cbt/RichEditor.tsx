@@ -19,35 +19,53 @@ import {
   Code,
   FolderOpen,
 } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  listFiles,
-  getObjectURL,
-  extractFileIds,
-  type FileMeta,
-} from "@/lib/cbt/files";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { listFiles, getObjectURL, extractFileIds, type FileMeta } from "@/lib/cbt/files";
+import { sanitizeHtml } from "@/lib/cbt/sanitize";
 
-function renderMath(html: string): string {
-  let out = html.replace(/\$\$([^$]+?)\$\$/g, (_, tex) => {
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function renderMathSegment(text: string): string {
+  let out = text.replace(/\$\$([^$]+?)\$\$/g, (_, tex) => {
     try {
-      return `<span class="katex-block">${katex.renderToString(tex, { displayMode: true, throwOnError: false })}</span>`;
+      return `<span class="katex-block">${katex.renderToString(tex, { displayMode: true, throwOnError: false, trust: false, strict: "ignore", output: "html" })}</span>`;
     } catch {
       return _;
     }
   });
   out = out.replace(/\$([^$\n]+?)\$/g, (_, tex) => {
     try {
-      return katex.renderToString(tex, { displayMode: false, throwOnError: false });
+      return katex.renderToString(tex, {
+        displayMode: false,
+        throwOnError: false,
+        trust: false,
+        strict: "ignore",
+        output: "html",
+      });
     } catch {
       return _;
     }
   });
   return out;
+}
+
+function renderMath(html: string): string {
+  // Render math ONLY on text between tags, never inside a tag/attribute.
+  // A `$...$` that survived sanitization inside an attribute value could
+  // otherwise expand into KaTeX markup and break out of the attribute,
+  // re-introducing structural HTML after the sanitizer has run. Splitting on
+  // tags keeps `sanitizeHtml` the final structural gate (works in both the
+  // browser and node/SSR — no DOM required).
+  return html.replace(/<[^>]+>|[^<]+/g, (segment) =>
+    segment.startsWith("<") ? segment : renderMathSegment(segment),
+  );
 }
 
 function useFileUrls(html: string) {
@@ -79,9 +97,15 @@ export function RichView({ html, className }: { html: string; className?: string
   const fileMap = useFileUrls(html || "");
   const rendered = useMemo(() => {
     let h = html || "";
+    // 1. Rewrite file://<id> references to data: URLs (must precede sanitize
+    //    so the resulting <img src="data:..."> survives the allowlist).
     for (const [id, url] of Object.entries(fileMap)) {
       h = h.split(`file://${id}`).join(url);
     }
+    // 2. Strip any executable/unsafe HTML from the authored content.
+    h = sanitizeHtml(h);
+    // 3. Render KaTeX last: its output is trusted code-generated HTML with
+    //    required inline styles that sanitization would otherwise remove.
     return renderMath(h);
   }, [html, fileMap]);
   return (
@@ -170,14 +194,19 @@ export function RichEditor({
   function insertCode() {
     const code = window.prompt("Kode:");
     if (!code) return;
-    insertHtml(`<pre class="bg-muted p-2 rounded text-xs"><code>${code.replace(/</g, "&lt;")}</code></pre>`);
+    insertHtml(
+      `<pre class="bg-muted p-2 rounded text-xs"><code>${code.replace(/</g, "&lt;")}</code></pre>`,
+    );
   }
 
   function pickFromManager(meta: FileMeta) {
+    // Escape the file name before interpolating into HTML attributes / text so
+    // a crafted file name cannot inject markup into the editor content.
+    const safeName = escapeHtml(meta.name);
     if (meta.mime.startsWith("image/")) {
-      insertHtml(`<img src="file://${meta.id}" alt="${meta.name}" />`);
+      insertHtml(`<img src="file://${meta.id}" alt="${safeName}" />`);
     } else {
-      insertHtml(`<a href="file://${meta.id}">${meta.name}</a>`);
+      insertHtml(`<a href="file://${meta.id}">${safeName}</a>`);
     }
     setPickerOpen(false);
   }

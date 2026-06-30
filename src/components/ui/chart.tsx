@@ -68,6 +68,14 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
     return null;
   }
 
+  // NOTE: this `dangerouslySetInnerHTML` injects CSS custom properties, NOT
+  // user-authored content. The values come from the developer-supplied chart
+  // `config` (theme/color tokens), so it is an allowlisted exception to the
+  // rich-text sanitization rule (Issue #11). As defense-in-depth we still
+  // accept only values that look like safe CSS color tokens and drop anything
+  // else (which would otherwise allow a `}` breakout if config were tainted).
+  const isSafeCssColor = (value: string): boolean => /^[#a-zA-Z0-9().,%\s_-]+$/.test(value);
+
   return (
     <style
       dangerouslySetInnerHTML={{
@@ -78,7 +86,7 @@ ${prefix} [data-chart=${id}] {
 ${colorConfig
   .map(([key, itemConfig]) => {
     const color = itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
-    return color ? `  --color-${key}: ${color};` : null;
+    return color && isSafeCssColor(color) ? `  --color-${key}: ${color};` : null;
   })
   .join("\n")}
 }
