@@ -123,72 +123,82 @@ function SoalPage() {
         </div>
       </div>
 
-      {/* Sleek List Section */}
-      <section className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500">Daftar Soal ({shown.length})</h2>
-        </div>
+      {/* Cards Section */}
+      <div className="space-y-6">
+        {shown.map((s, i) => (
+          <div key={s.id} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col">
+            {/* Header */}
+            <div className="flex flex-wrap items-center justify-between px-5 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="flex items-center justify-center w-6 h-6 rounded bg-slate-200 dark:bg-slate-700 font-mono text-xs font-bold text-slate-600 dark:text-slate-300">
+                  {i + 1}
+                </span>
+                <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                  {TIPE_LABEL[s.tipe]}
+                </span>
+                <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                  s.kesulitan === 'mudah' ? 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400' :
+                  s.kesulitan === 'sedang' ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400' :
+                  'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400'
+                }`}>
+                  {KES_LABEL[s.kesulitan]}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button size="sm" variant="ghost" className="h-7 px-2 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100" onClick={() => { setEditing(s); setOpen(true); }}>
+                  <Pencil className="h-3.5 w-3.5 sm:mr-1.5" /> <span className="hidden sm:inline">Edit</span>
+                </Button>
+                <div className="w-px h-4 bg-slate-200 dark:bg-slate-700"></div>
+                <Button size="sm" variant="ghost" className="h-7 px-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950" onClick={() => remove(s.id)}>
+                  <Trash2 className="h-3.5 w-3.5 sm:mr-1.5" /> <span className="hidden sm:inline">Hapus</span>
+                </Button>
+              </div>
+            </div>
+            
+            {/* Content */}
+            <div className="p-5 space-y-5">
+              <div className="text-sm prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed">
+                <RichView html={s.detail} />
+              </div>
+              
+              {s.tipe !== "essay" && (
+                <div className="grid gap-2">
+                  {s.jawaban.map((j, idx) => (
+                    <div key={j.id} className={`flex items-start gap-3 p-3 rounded-lg border transition-colors ${
+                      j.benar 
+                        ? 'bg-emerald-50/50 border-emerald-500 dark:bg-emerald-950/20 dark:border-emerald-500/50' 
+                        : 'bg-white border-slate-200 dark:bg-slate-900 dark:border-slate-800'
+                    }`}>
+                      <span className={`flex shrink-0 items-center justify-center w-6 h-6 rounded-md font-mono text-sm font-semibold ${
+                        j.benar 
+                          ? 'bg-emerald-500 text-white dark:bg-emerald-600' 
+                          : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                      }`}>
+                        {String.fromCharCode(65 + idx)}
+                      </span>
+                      <div className={`flex-1 text-sm pt-0.5 ${j.benar ? 'text-emerald-900 dark:text-emerald-100' : 'text-slate-700 dark:text-slate-300'}`}>
+                        <RichView html={j.detail} className="inline" />
+                      </div>
+                      {j.benar && (
+                        <div className="flex shrink-0 items-center justify-center h-6">
+                          <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
         
-        <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800">
-          {shown.map((s, i) => (
-            <div key={s.id} className="group flex flex-col md:flex-row items-start justify-between p-5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors gap-6">
-              
-              <div className="flex-1 w-full space-y-3">
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs font-semibold text-slate-400">#{i + 1}</span>
-                  <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                    {TIPE_LABEL[s.tipe]}
-                  </span>
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-                    s.kesulitan === 'mudah' ? 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400' :
-                    s.kesulitan === 'sedang' ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400' :
-                    'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400'
-                  }`}>
-                    {KES_LABEL[s.kesulitan]}
-                  </span>
-                </div>
-                
-                <div className="text-sm prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed">
-                  <RichView html={s.detail} />
-                </div>
-                
-                {s.tipe !== "essay" && (
-                  <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/60">
-                    <ul className="space-y-2 text-sm">
-                      {s.jawaban.map((j, idx) => (
-                        <li key={j.id} className={`flex items-start gap-2 ${j.benar ? 'text-emerald-700 dark:text-emerald-400 font-medium' : 'text-slate-600 dark:text-slate-400'}`}>
-                          <span className="font-mono mt-0.5 min-w-[20px]">{String.fromCharCode(65 + idx)}.</span>
-                          <span className="flex-1">
-                            <RichView html={j.detail} className="inline" />
-                          </span>
-                          {j.benar && <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5 text-emerald-500" />}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-              
-              <div className="flex md:flex-col items-center gap-2 md:opacity-0 group-hover:opacity-100 transition-opacity shrink-0 w-full md:w-auto justify-end">
-                <Button size="sm" variant="outline" className="h-8 w-full md:w-auto bg-white dark:bg-slate-900 shadow-sm" onClick={() => { setEditing(s); setOpen(true); }}>
-                  <Pencil className="mr-2 h-3.5 w-3.5" /> Edit
-                </Button>
-                <Button size="sm" variant="ghost" className="h-8 w-full md:w-auto text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950" onClick={() => remove(s.id)}>
-                  <Trash2 className="mr-2 h-3.5 w-3.5" /> Hapus
-                </Button>
-              </div>
-
-            </div>
-          ))}
-          
-          {shown.length === 0 && (
-            <div className="py-16 text-center">
-              <BookOpen className="h-10 w-10 text-slate-300 mx-auto mb-3" />
-              <p className="text-slate-500">Tidak ada soal yang ditemukan.</p>
-            </div>
-          )}
-        </div>
-      </section>
+        {shown.length === 0 && (
+          <div className="py-20 text-center bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+            <BookOpen className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+            <p className="text-slate-500 font-medium">Belum ada soal untuk topik ini.</p>
+          </div>
+        )}
+      </div>
 
       <SoalDialog open={open} onOpenChange={setOpen} editing={editing} topikId={topikId} onSaved={refresh} />
     </div>
