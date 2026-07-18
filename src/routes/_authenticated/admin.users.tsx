@@ -80,85 +80,69 @@ function UsersPage() {
       </div>
 
       {/* List Section */}
-      <AdminPageContent>
-        <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800">
-          {shown.map((u) => (
-            <div key={u.id} className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:px-6 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors gap-4">
-              
-              {/* User Info */}
-              <div className="flex items-center gap-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold uppercase shrink-0">
-                  {u.namaLengkap.charAt(0)}
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">{u.namaLengkap}</h3>
-                    <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-semibold tracking-wide uppercase text-slate-500">
+            <AdminPageContent className="p-0">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-semibold">
+              <tr>
+                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left border-r border-slate-200 dark:border-slate-800">Username</th>
+                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left border-r border-slate-200 dark:border-slate-800">Nama Lengkap</th>
+                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center border-r border-slate-200 dark:border-slate-800">Peran</th>
+                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center border-r border-slate-200 dark:border-slate-800">Status</th>
+                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {shown.map((u) => (
+                <tr key={u.id} className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                  <td className="p-4 font-medium text-slate-900 dark:text-slate-100 border-r border-slate-200 dark:border-slate-800 text-left">{u.username}</td>
+                  <td className="p-4 text-slate-600 dark:text-slate-400 border-r border-slate-200 dark:border-slate-800 text-left">{u.namaLengkap}</td>
+                  <td className="p-4 text-center border-r border-slate-200 dark:border-slate-800">
+                    <span className="px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
                       {u.role === "super_admin" ? "Super Admin" : u.role === "admin_prodi" ? "Admin Prodi" : u.role === "evaluator" ? "Evaluator" : u.role}
                     </span>
-                    {!u.aktif && (
-                      <span className="px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-[10px] font-semibold tracking-wide uppercase text-red-600 dark:text-red-400">
-                        Nonaktif
-                      </span>
+                  </td>
+                  <td className="p-4 text-center border-r border-slate-200 dark:border-slate-800">
+                    {u.aktif ? (
+                      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-success/15 text-success">Aktif</span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-destructive/15 text-destructive">Nonaktif</span>
                     )}
-                  </div>
-                  <p className="text-xs font-mono text-slate-500 mt-0.5 truncate">{u.username}</p>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-8 w-8 p-0 text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                  onClick={() => {
-                    setEditing(u);
-                    setOpen(true);
-                  }}
-                  title="Edit"
-                >
-                  <Pencil className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-8 w-8 p-0 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
-                  title="Hapus"
-                  onClick={() => {
-                    if (!confirm("Hapus pengguna ini?")) return;
-                    usersRepo.remove(u.id);
-                    refresh();
-                  }}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-8 w-8 p-0 text-slate-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950"
-                  title="Hentikan semua sesi aktif"
-                  onClick={async () => {
-                    if (!confirm("Hentikan semua sesi aktif pengguna ini? (Force logout)")) return;
-                    try {
-                      const res = await revokeUserSessionsServer({ data: { userId: u.id } });
-                      if (res.ok) toast.success("Sesi berhasil dihentikan. Pengguna akan ter-logout.");
-                      else toast.error(res.error ?? "Gagal menghentikan sesi");
-                    } catch {
-                      toast.error("Gagal menghentikan sesi");
-                    }
-                  }}
-                >
-                  <LogOut className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          ))}
-          {shown.length === 0 && (
-            <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">
-              Tidak ada data pengguna yang sesuai.
-            </div>
-          )}
+                  </td>
+                  <td className="p-4 text-center space-x-2">
+                    <Button variant="outline" size="sm" onClick={() => { setEditing(u); setOpen(true); }} className="h-8">
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" className="h-8 text-destructive hover:bg-destructive/10" onClick={() => {
+                      if (confirm("Hapus pengguna ini?")) {
+                        usersRepo.remove(u.id);
+                        refresh();
+                      }
+                    }}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" className="h-8 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950" onClick={async () => {
+                      if (!confirm("Hentikan semua sesi aktif pengguna ini? (Force logout)")) return;
+                      try {
+                        const res = await revokeUserSessionsServer({ data: { userId: u.id } });
+                        if (res.ok) toast.success("Sesi berhasil dihentikan. Pengguna akan ter-logout.");
+                        else toast.error(res.error ?? "Gagal menghentikan sesi");
+                      } catch {
+                        toast.error("Gagal menghentikan sesi");
+                      }
+                    }}>
+                      <LogOut className="h-4 w-4" />
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+              {shown.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-slate-500">Tidak ada data pengguna.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </AdminPageContent>
 

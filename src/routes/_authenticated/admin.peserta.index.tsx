@@ -7,6 +7,7 @@ import { upsertUserServer } from "@/lib/server/users/functions";
 import { uid } from "@/lib/cbt/storage";
 import type { Group, User } from "@/lib/cbt/types";
 import { Card, CardContent } from "@/components/ui/card";
+import { AdminPage, AdminPageHeader, AdminPageContent } from "@/components/cbt/AdminPage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -83,38 +84,35 @@ function PesertaPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Akun Peserta</h1>
-          <p className="text-sm text-slate-500">
-            Kelola data mahasiswa, grup kelas, dan cetak kartu ujian.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <input id="file-upload" type="file" accept=".xlsx,.xls" hidden onChange={(e) => {
-            const f = e.target.files?.[0]; if (f) importExcel(f); e.target.value = "";
-          }} />
-          <Button variant="outline" size="sm" onClick={() => document.getElementById("file-upload")?.click()} className="h-9">
-            <Upload className="mr-2 h-4 w-4" /> Import Excel
-          </Button>
-          <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1"></div>
-          <Link to="/admin/peserta/group">
-            <Button variant="outline" size="sm" className="h-9">
-              <UsersIcon className="mr-2 h-4 w-4" /> Grup Kelas
+        <AdminPage>
+      <AdminPageHeader
+        title="Akun Peserta"
+        description="Kelola data mahasiswa, grup kelas, dan import akun dari Excel."
+        action={
+          <div className="flex flex-wrap items-center gap-2">
+            <input id="file-upload" type="file" accept=".xlsx,.xls" hidden onChange={(e) => {
+              const f = e.target.files?.[0]; if (f) importExcel(f); e.target.value = "";
+            }} />
+            <Button variant="outline" size="sm" onClick={() => document.getElementById("file-upload")?.click()} className="h-9">
+              <Upload className="mr-2 h-4 w-4" /> Import Excel
             </Button>
-          </Link>
-          <Link to="/admin/peserta/kartu">
-            <Button variant="outline" size="sm" className="h-9">
-              <Printer className="mr-2 h-4 w-4" /> Cetak Kartu
+            <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1"></div>
+            <Link to="/admin/peserta/group">
+              <Button variant="outline" size="sm" className="h-9">
+                <UsersIcon className="mr-2 h-4 w-4" /> Grup Kelas
+              </Button>
+            </Link>
+            <Link to="/admin/peserta/kartu">
+              <Button variant="outline" size="sm" className="h-9">
+                <Printer className="mr-2 h-4 w-4" /> Cetak Kartu
+              </Button>
+            </Link>
+            <Button onClick={() => { setEditing(null); setOpen(true); }} size="sm" className="h-9">
+              <Plus className="mr-2 h-4 w-4" /> Tambah Peserta
             </Button>
-          </Link>
-          <Button onClick={() => { setEditing(null); setOpen(true); }} size="sm" className="h-9">
-            <Plus className="mr-2 h-4 w-4" /> Tambah Peserta
-          </Button>
-        </div>
-      </div>
+          </div>
+        }
+      />
 
       {/* Toolbar */}
       <div className="flex flex-col sm:flex-row gap-3">
@@ -136,73 +134,61 @@ function PesertaPage() {
       </div>
 
       {/* List Section */}
-      <div className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 overflow-hidden shadow-sm">
-        
-        <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800">
-          {shown.map((p) => (
-            <div key={p.id} className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:px-6 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors gap-4">
-              
-              {/* User Info */}
-              <div className="flex items-center gap-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold uppercase">
-                  {p.namaLengkap.charAt(0)}
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">{p.namaLengkap}</h3>
-                    <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-semibold tracking-wide text-slate-500">
-                      Grup: {groups.find((g) => g.id === p.groupId)?.nama ?? "-"}
+      <AdminPageContent className="p-0">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-semibold">
+              <tr>
+                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left border-r border-slate-200 dark:border-slate-800">Username</th>
+                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left border-r border-slate-200 dark:border-slate-800">Nama Lengkap</th>
+                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center border-r border-slate-200 dark:border-slate-800">Grup / Kelas</th>
+                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center border-r border-slate-200 dark:border-slate-800">Status</th>
+                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {shown.map((p) => (
+                <tr key={p.id} className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                  <td className="p-4 font-medium text-slate-900 dark:text-slate-100 border-r border-slate-200 dark:border-slate-800 text-left">{p.username}</td>
+                  <td className="p-4 text-slate-600 dark:text-slate-400 border-r border-slate-200 dark:border-slate-800 text-left">{p.namaLengkap}</td>
+                  <td className="p-4 text-center border-r border-slate-200 dark:border-slate-800">
+                    <span className="px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                      {groups.find((g) => g.id === p.groupId)?.nama ?? "-"}
                     </span>
-                    {!p.aktif && (
-                      <span className="px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-[10px] font-semibold tracking-wide uppercase text-red-600 dark:text-red-400">
-                        Nonaktif
-                      </span>
+                  </td>
+                  <td className="p-4 text-center border-r border-slate-200 dark:border-slate-800">
+                    {p.aktif ? (
+                      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">Aktif</span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400">Nonaktif</span>
                     )}
-                  </div>
-                  <p className="text-xs font-mono text-slate-500 mt-0.5">{p.username}</p>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-8 w-8 p-0 text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                  onClick={() => {
-                    setEditing(p);
-                    setOpen(true);
-                  }}
-                  title="Edit"
-                >
-                  <Pencil className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-8 w-8 p-0 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
-                  title="Hapus"
-                  onClick={() => {
-                    if (!confirm("Hapus peserta ini?")) return;
-                    usersRepo.remove(p.id);
-                    refresh();
-                  }}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          ))}
-          {shown.length === 0 && (
-            <div className="py-12 text-center text-slate-400 text-sm">
-              Tidak ada data peserta yang sesuai.
-            </div>
-          )}
+                  </td>
+                  <td className="p-4 text-center space-x-2">
+                    <Button variant="outline" size="sm" onClick={() => { setEditing(p); setOpen(true); }} className="h-8">
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" className="h-8 text-destructive hover:bg-destructive/10" onClick={() => {
+                      if (confirm("Hapus peserta ini?")) {
+                        usersRepo.remove(p.id);
+                        refresh();
+                      }
+                    }}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+              {shown.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-slate-500">Tidak ada data peserta yang sesuai.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
-      </div>
-
-      <PesertaDialog open={open} onOpenChange={setOpen} editing={editing} groups={groups} onSaved={refresh} />
-    </div>
+      </AdminPageContent>
+<PesertaDialog open={open} onOpenChange={setOpen} editing={editing} groups={groups} onSaved={refresh} />
+    </AdminPage>
   );
 }
 
