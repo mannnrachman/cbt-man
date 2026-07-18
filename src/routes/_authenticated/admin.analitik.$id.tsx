@@ -127,14 +127,14 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-muted/50 text-left text-muted-foreground font-medium border-b">
+              <thead className="bg-white dark:bg-slate-950 text-left text-slate-900 dark:text-slate-100 font-semibold border-b">
                 <tr>
-                  <th className="p-4 font-semibold">Peserta</th>
-                  <th className="p-4 font-semibold">Status</th>
-                  <th className="p-4 font-semibold">Mulai</th>
-                  <th className="p-4 font-semibold">Skor</th>
-                  <th className="p-4 font-semibold">Pelanggaran</th>
-                  <th className="p-4 font-semibold text-right">Aksi</th>
+                  <th className="p-4 font-semibold text-slate-700 dark:text-slate-300">Peserta</th>
+                  <th className="p-4 font-semibold text-slate-700 dark:text-slate-300">Status</th>
+                  <th className="p-4 font-semibold text-slate-700 dark:text-slate-300">Mulai</th>
+                  <th className="p-4 font-semibold text-slate-700 dark:text-slate-300">Skor</th>
+                  <th className="p-4 font-semibold text-slate-700 dark:text-slate-300">Pelanggaran</th>
+                  <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-right">Aksi</th>
                 </tr>
               </thead>
               <tbody>
