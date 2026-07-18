@@ -207,63 +207,73 @@ function ModulPage() {
         )}
       </div>
 
-      <AdminPageContent>
-        <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800">
-          {shown.map((m) => {
-            const tAll = topikRepo.all().filter((t) => t.modulId === m.id);
-            const t = allowedSet ? tAll.filter((x) => allowedSet.has(x.id)) : tAll;
-            const tIds = new Set(t.map((x) => x.id));
-            const sCount = soalRepo.all().filter((s) => tIds.has(s.topikId)).length;
-            const mkName = m.mataKuliahId ? mkList.find((x) => x.id === m.mataKuliahId)?.nama : null;
+            <AdminPageContent className="p-0">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-semibold">
+              <tr>
+                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left border-r border-slate-200 dark:border-slate-800">Nama Modul</th>
+                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left border-r border-slate-200 dark:border-slate-800">Mata Kuliah</th>
+                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center border-r border-slate-200 dark:border-slate-800">Topik</th>
+                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center border-r border-slate-200 dark:border-slate-800">Soal</th>
+                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {shown.map((m) => {
+                const tAll = topikRepo.all().filter((t) => t.modulId === m.id);
+                const t = allowedSet ? tAll.filter((x) => allowedSet.has(x.id)) : tAll;
+                const tIds = new Set(t.map((x) => x.id));
+                const sCount = soalRepo.all().filter((s) => tIds.has(s.topikId)).length;
+                const mkName = m.mataKuliahId ? mkList.find((x) => x.id === m.mataKuliahId)?.nama : null;
 
-            return (
-              <div key={m.id} className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:px-6 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors gap-4">
-                
-                <div className="flex items-center gap-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
-                    <FileText className="h-5 w-5" />
-                  </div>
-                  <div className="flex-1 min-w-0 space-y-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <Link to="/admin/modul/$id/topik" params={{ id: m.id }} className="text-sm font-semibold text-slate-900 dark:text-slate-100 hover:text-primary transition-colors truncate">
+                return (
+                  <tr key={m.id} className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                    <td className="p-4 font-medium text-slate-900 dark:text-slate-100 border-r border-slate-200 dark:border-slate-800">
+                      <Link to="/admin/modul/$id/topik" params={{ id: m.id }} className="hover:text-primary transition-colors">
                         {m.nama}
                       </Link>
-                      {mkName && (
-                        <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-semibold tracking-wide uppercase text-slate-500">
+                    </td>
+                    <td className="p-4 text-slate-600 dark:text-slate-400 border-r border-slate-200 dark:border-slate-800">
+                      {mkName ? (
+                        <span className="px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
                           {mkName}
                         </span>
+                      ) : (
+                        <span className="text-slate-400">-</span>
                       )}
-                    </div>
-                    <div className="flex items-center gap-4 text-xs font-medium text-slate-500 mt-1">
-                      <span className="flex items-center gap-1.5"><FileText className="w-3.5 h-3.5 text-slate-400"/> {t.length} Topik</span>
-                      <span className="flex items-center gap-1.5"><ChevronRight className="w-3.5 h-3.5 text-slate-400"/> {sCount} Soal</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                  <Button size="sm" variant="outline" className="h-8 shadow-sm bg-white dark:bg-slate-900" onClick={() => exportBank(m)} title="Export JSON">
-                    <Download className="mr-2 h-3.5 w-3.5" /> Export
-                  </Button>
-                  {canEdit && (
-                    <Button size="sm" variant="ghost" className="h-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950" onClick={() => remove(m.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
-                  <Button size="sm" className="h-8 shadow-sm" asChild>
-                    <Link to="/admin/modul/$id/topik" params={{ id: m.id }}>
-                      Kelola Topik
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            );
-          })}
-          {shown.length === 0 && (
-            <div className="p-8 text-center text-slate-500 text-sm">
-              Belum ada modul bank soal.
-            </div>
-          )}
+                    </td>
+                    <td className="p-4 text-center border-r border-slate-200 dark:border-slate-800">
+                      <span className="font-semibold text-slate-700 dark:text-slate-300">{t.length}</span>
+                    </td>
+                    <td className="p-4 text-center border-r border-slate-200 dark:border-slate-800">
+                      <span className="font-semibold text-slate-700 dark:text-slate-300">{sCount}</span>
+                    </td>
+                    <td className="p-4 text-center space-x-2">
+                      <Button size="sm" variant="outline" className="h-8 shadow-sm" asChild>
+                        <Link to="/admin/modul/$id/topik" params={{ id: m.id }}>
+                          Kelola Topik
+                        </Link>
+                      </Button>
+                      <Button size="sm" variant="outline" className="h-8 shadow-sm bg-white dark:bg-slate-900" onClick={() => exportBank(m)} title="Export JSON">
+                        <Download className="h-4 w-4" />
+                      </Button>
+                      {canEdit && (
+                        <Button size="sm" variant="ghost" className="h-8 text-destructive hover:bg-destructive/10" onClick={() => remove(m.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+              {shown.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-slate-500">Belum ada modul bank soal.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </AdminPageContent>
     </AdminPage>
