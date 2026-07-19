@@ -8,7 +8,7 @@ import {
   ujianRepo,
   sesiRepo,
 } from "@/lib/cbt/repos";
-import { Clock, Plus, ArrowRight, AlertCircle, PlayCircle, CheckCircle2 } from "lucide-react";
+import { Clock, Plus, ArrowRight, AlertCircle, PlayCircle, Users, BookOpen, FileText, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
@@ -18,28 +18,45 @@ export const Route = createFileRoute("/_authenticated/admin/")({
 function CommandCenter() {
   const user = useAuthStore((s) => s.user)!;
   const now = Date.now();
+  const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
 
-  // Metrics
+  // Real Metrics with week-over-week trends
+  const pesertaList = usersRepo.all().filter((u) => u.role === "mahasiswa");
+  const soalList = soalRepo.all();
+  const semuaUjian = ujianRepo.all();
+  
+  const newPeserta = pesertaList.filter(u => u.createdAt && (now - u.createdAt) < ONE_WEEK).length;
+  const newSoal = soalList.filter(s => s.createdAt && (now - s.createdAt) < ONE_WEEK).length;
+  const newUjian = semuaUjian.filter(u => u.createdAt && (now - u.createdAt) < ONE_WEEK).length;
+
   const counts = {
-    peserta: usersRepo.all().filter((u) => u.role === "mahasiswa").length,
+    peserta: pesertaList.length,
     group: groupsRepo.all().length,
     modul: modulRepo.all().length,
-    soal: soalRepo.all().length,
-    ujian: ujianRepo.all().length,
+    soal: soalList.length,
+    ujian: semuaUjian.length,
     sesi: sesiRepo.all().length,
   };
 
   // Derive today's workflow context
-  const semuaUjian = ujianRepo.all();
   const activeExams = semuaUjian.filter((u) => u.beginAt && u.endAt && now >= u.beginAt && now <= u.endAt);
   const upcomingExams = semuaUjian.filter((u) => u.beginAt && now < u.beginAt).slice(0, 3);
+  const finishedExams = semuaUjian.filter((u) => u.endAt && now > u.endAt);
   
-  // Fake some pending tasks for UX demonstration (e.g., grading essays)
-  const pendingTasks = [
-    { id: 1, title: "Evaluasi Essay: Ujian Akhir Semester", count: 12, route: "/admin/evaluasi" },
-    { id: 2, title: "Review Modul: Algoritma Dasar", count: 5, route: "/admin/modul" },
-  ];
-
+  // Real Pending Tasks Logic
+  const pendingTasks = [];
+  if (finishedExams.length > 0) {
+    pendingTasks.push({
+      id: "eval-reports",
+      title: "Ujian Selesai (Butuh Laporan/Evaluasi)",
+      count: finishedExams.length,
+      route: "/admin/laporan",
+      type: "warning"
+    });
+  }
+  
+  // Add a generic task if nothing is pending to show the empty state works, but let's just use empty state
+  
   return (
     <div className="mx-auto max-w-6xl space-y-8 animate-in fade-in duration-500">
       
@@ -86,21 +103,35 @@ function CommandCenter() {
         <div className="lg:col-span-8 space-y-8">
           
           {/* Active Workflows Panel */}
-          <section className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">
-              Ujian Berlangsung
+          <section className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 relative overflow-hidden">
+            {activeExams.length > 0 && (
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 dark:bg-emerald-500/5 blur-3xl -mr-10 -mt-10 rounded-full pointer-events-none" />
+            )}
+            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+              <Activity className="h-4 w-4 text-emerald-500" /> Ujian Berlangsung
             </h2>
             
             {activeExams.length === 0 ? (
-              <div className="py-8 text-center text-sm text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-dashed border-slate-200 dark:border-slate-700">
-                Tidak ada ujian yang dijadwalkan berjalan saat ini.
+              <div className="py-12 flex flex-col items-center justify-center text-center bg-slate-50 dark:bg-slate-800/30 rounded-lg border border-dashed border-slate-200 dark:border-slate-700">
+                <div className="h-12 w-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mb-3">
+                  <PlayCircle className="h-6 w-6" />
+                </div>
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-1">Tidak ada ujian aktif</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-5 max-w-sm">
+                  Belum ada ujian yang dijadwalkan berjalan pada waktu ini. Anda dapat menjadwalkan ujian baru sekarang.
+                </p>
+                <Button size="sm" asChild>
+                  <Link to="/admin/ujian">
+                    <Plus className="mr-2 h-4 w-4" /> Buat Ujian Baru
+                  </Link>
+                </Button>
               </div>
             ) : (
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-3 relative z-10">
                 {activeExams.map((exam) => (
-                  <div key={exam.id} className="flex items-center justify-between p-4 bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/50 rounded-lg">
+                  <div key={exam.id} className="flex items-center justify-between p-4 bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/50 rounded-lg hover:border-emerald-200 dark:hover:border-emerald-800/50 transition-colors">
                     <div className="flex items-center gap-4">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 shadow-sm">
                         <PlayCircle className="h-5 w-5" />
                       </div>
                       <div>
@@ -110,9 +141,9 @@ function CommandCenter() {
                         </p>
                       </div>
                     </div>
-                    <Button variant="default" size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white" asChild>
+                    <Button variant="default" size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm" asChild>
                       <Link to="/admin/peserta/online">
-                        Pantau <ArrowRight className="ml-2 h-4 w-4" />
+                        Pantau Live <ArrowRight className="ml-2 h-4 w-4" />
                       </Link>
                     </Button>
                   </div>
@@ -126,46 +157,58 @@ function CommandCenter() {
             <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">
               Perlu Perhatian
             </h2>
-            <div className="flex flex-col gap-3">
-              {pendingTasks.map((task) => (
-                <Link key={task.id} to={task.route} className="flex items-start justify-between p-4 bg-amber-50/50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/50 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-colors cursor-pointer group">
-                  <div className="flex items-start gap-4">
-                    <div className="mt-0.5 text-amber-600 dark:text-amber-500">
-                      <AlertCircle className="h-5 w-5" />
+            
+            {pendingTasks.length === 0 ? (
+              <div className="py-8 text-center text-sm text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/30 rounded-lg border border-slate-100 dark:border-slate-800">
+                <span className="flex items-center justify-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-500" /> Semua tugas sudah diselesaikan.
+                </span>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {pendingTasks.map((task) => (
+                  <Link key={task.id} to={task.route} className="flex items-start justify-between p-4 bg-amber-50/50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/50 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/40 transition-colors cursor-pointer group shadow-sm">
+                    <div className="flex items-start gap-4">
+                      <div className="mt-0.5 text-amber-600 dark:text-amber-500">
+                        <AlertCircle className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-slate-900 dark:text-slate-100 group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors">
+                          {task.title}
+                        </h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400 mt-0.5">
+                          <span className="font-medium text-amber-700 dark:text-amber-500">{task.count} item</span> menunggu tindakan
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-slate-900 dark:text-slate-100 group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors">
-                        {task.title}
-                      </h3>
-                      <p className="text-sm text-slate-600 dark:text-slate-400 mt-0.5">
-                        <span className="font-medium text-amber-700 dark:text-amber-500">{task.count} item</span> menunggu tindakan
-                      </p>
+                    <div className="text-amber-600 dark:text-amber-500 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
+                      <ArrowRight className="h-5 w-5" />
                     </div>
-                  </div>
-                  <div className="text-amber-600 dark:text-amber-500 opacity-50 group-hover:opacity-100 transition-opacity">
-                    <ArrowRight className="h-5 w-5" />
-                  </div>
-                </Link>
-              ))}
-            </div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </section>
 
           {/* Upcoming Schedule */}
           {upcomingExams.length > 0 && (
             <section className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
               <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">
-                Akan Datang
+                Ujian Mendatang
               </h2>
               <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800">
                 {upcomingExams.map((exam) => (
-                  <div key={exam.id} className="flex items-center gap-4 py-3">
-                    <div className="text-slate-400 dark:text-slate-500">
+                  <div key={exam.id} className="flex items-center gap-4 py-3 group hover:bg-slate-50 dark:hover:bg-slate-800/30 -mx-4 px-4 transition-colors">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500">
                       <Clock className="h-4 w-4" />
                     </div>
                     <div>
-                      <h3 className="font-medium text-slate-800 dark:text-slate-200">{exam.nama}</h3>
+                      <h3 className="font-semibold text-slate-900 dark:text-slate-100">{exam.nama}</h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        {exam.endAt ? `${Math.round((exam.endAt - exam.beginAt!) / 60000)} menit` : "Waktu fleksibel"}
+                      </p>
                     </div>
-                    <div className="ml-auto text-sm font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-md">
+                    <div className="ml-auto text-sm font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-md shadow-sm">
                       {new Date(exam.beginAt!).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}
                     </div>
                   </div>
@@ -177,32 +220,47 @@ function CommandCenter() {
         </div>
 
         {/* RIGHT COLUMN (35%): Density & High-Level Metrics */}
-        <div className="lg:col-span-4 space-y-8">
+        <div className="lg:col-span-4 space-y-6">
           
           <section className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
             <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-6">
-              Database Metrics
+              Ikhtisar Data
             </h2>
             <div className="grid grid-cols-2 gap-x-4 gap-y-6">
-              <div className="space-y-1">
-                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Peserta</p>
-                <p className="text-3xl font-bold text-slate-900 dark:text-slate-50">{counts.peserta}</p>
+              <div className="space-y-1 relative group cursor-default">
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                  <Users className="h-3 w-3" /> Peserta
+                </p>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-3xl font-bold text-slate-900 dark:text-slate-50">{counts.peserta}</p>
+                  {newPeserta > 0 && <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded-full">+{newPeserta} mgg ini</span>}
+                </div>
               </div>
               <div className="space-y-1">
                 <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Grup</p>
                 <p className="text-3xl font-bold text-slate-900 dark:text-slate-50">{counts.group}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Modul</p>
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                  <BookOpen className="h-3 w-3" /> Modul
+                </p>
                 <p className="text-3xl font-bold text-slate-900 dark:text-slate-50">{counts.modul}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Soal</p>
-                <p className="text-3xl font-bold text-slate-900 dark:text-slate-50">{counts.soal}</p>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-3xl font-bold text-slate-900 dark:text-slate-50">{counts.soal}</p>
+                  {newSoal > 0 && <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded-full">+{newSoal} mgg ini</span>}
+                </div>
               </div>
               <div className="space-y-1">
-                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Ujian</p>
-                <p className="text-3xl font-bold text-slate-900 dark:text-slate-50">{counts.ujian}</p>
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                  <FileText className="h-3 w-3" /> Ujian
+                </p>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-3xl font-bold text-slate-900 dark:text-slate-50">{counts.ujian}</p>
+                  {newUjian > 0 && <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded-full">+{newUjian}</span>}
+                </div>
               </div>
               <div className="space-y-1">
                 <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Sesi</p>
@@ -211,25 +269,27 @@ function CommandCenter() {
             </div>
           </section>
 
-          <section className="bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">
-              Sistem
+          {/* Quick Links instead of System Card */}
+          <section className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+             <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">
+              Pintasan Cepat
             </h2>
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-2">
-                <span className="text-slate-600 dark:text-slate-400 font-medium">Database</span>
-                <span className="font-semibold text-slate-900 dark:text-slate-300">SQLite local</span>
-              </div>
-              <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-2">
-                <span className="text-slate-600 dark:text-slate-400 font-medium">Engine</span>
-                <span className="font-semibold text-slate-900 dark:text-slate-300">Prisma ORM</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-slate-600 dark:text-slate-400 font-medium">Version</span>
-                <span className="font-semibold text-slate-900 dark:text-slate-300">v1.2.0</span>
-              </div>
+            <div className="space-y-2">
+              <Link to="/admin/peserta" className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-colors group">
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Kelola Peserta & Grup</span>
+                <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-transform group-hover:translate-x-1" />
+              </Link>
+              <Link to="/admin/laporan" className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-colors group">
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Cetak Laporan Nilai</span>
+                <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-transform group-hover:translate-x-1" />
+              </Link>
+              <Link to="/admin/panduan" className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-colors group">
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Buka Panduan Aplikasi</span>
+                <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-transform group-hover:translate-x-1" />
+              </Link>
             </div>
           </section>
+
         </div>
       </div>
     </div>
