@@ -37,13 +37,28 @@ function AkademikLayout() {
     <div className="mx-auto max-w-6xl space-y-6">
       
       {/* Header */}
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">
-          Data Akademik
-        </h1>
-        <p className="text-sm text-slate-500 dark:text-slate-400">
-          Kelola data induk institusi. Konfigurasi di sini akan menjadi fondasi bagi pengelolaan mahasiswa, dosen, dan mata kuliah.
-        </p>
+      <div className="space-y-4">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">
+            Data Akademik
+          </h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Kelola data induk institusi. Konfigurasi di sini akan menjadi fondasi bagi pengelolaan mahasiswa, dosen, dan mata kuliah.
+          </p>
+        </div>
+
+        {/* Informasi Penekanan (Alert) */}
+        <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 rounded-lg p-4 flex gap-3 text-sm">
+          <div className="text-amber-600 dark:text-amber-500 mt-0.5">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <div>
+            <p className="font-semibold text-amber-800 dark:text-amber-400 mb-0.5">Perhatian: Modifikasi Struktur Induk</p>
+            <p className="text-amber-700 dark:text-amber-500/90 leading-relaxed">
+              Penghapusan atau perubahan mendasar pada <strong>Fakultas, Jurusan, atau Program Studi</strong> dapat menyebabkan data mahasiswa dan modul bank soal yang terkait menjadi tidak sinkron (<em>orphaned</em>). Pastikan Anda hanya mengubah data ini jika benar-benar diperlukan.
+            </p>
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8 items-start">
