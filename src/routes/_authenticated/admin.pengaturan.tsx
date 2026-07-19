@@ -10,7 +10,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Settings, Upload, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
-import { AdminPage, AdminPageHeader, AdminPageContent } from "@/components/cbt/AdminPage";
 
 export const Route = createFileRoute("/_authenticated/admin/pengaturan")({
   loader: async () => {
@@ -58,12 +57,16 @@ function PengaturanPage() {
   }
 
   return (
-    <AdminPage className="max-w-6xl pb-20">
-      <div className="flex flex-col gap-2 md:flex-row md:items-end justify-between pb-4">
-        <AdminPageHeader
-          title="Pengaturan Aplikasi"
-          description="Konfigurasi institusi, keamanan, browser ujian, dan branding CBT."
-        />
+    <div className="mx-auto max-w-6xl space-y-6 pb-20">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-zinc-100">
+            Pengaturan Aplikasi
+          </h1>
+          <p className="text-sm text-slate-500 dark:text-zinc-400">
+            Konfigurasi institusi, keamanan, browser ujian, dan branding CBT.
+          </p>
+        </div>
         <Button onClick={save} className="h-10 px-8 shadow-sm">
           Simpan Semua
         </Button>
@@ -176,7 +179,7 @@ function PengaturanPage() {
         </div>
       </div>
 
-    </AdminPage>
+    </div>
   );
 }
 
