@@ -41,7 +41,7 @@ function AkademikLayout() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-12 space-y-12">
         {/* Header */}
         <div className="space-y-4">
-          <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-slate-900 dark:text-zinc-50">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-zinc-100 tracking-tight">
             Data Akademik
           </h1>
           <p className="text-base text-slate-500 dark:text-zinc-400 font-medium max-w-2xl leading-relaxed">
