@@ -136,7 +136,7 @@ export async function pesertaCanTouchUjian(
 	const groupIds = parseJson<string[]>(ujian.groupIds, []);
 	return (
 		groupIds.length === 0 ||
-		(!!caller.groupId && groupIds.includes(caller.groupId))
+		  (!!caller.unitId && groupIds.includes(caller.unitId))
 	);
 }
 
