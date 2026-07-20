@@ -60,141 +60,122 @@ function OnlinePage() {
   }, [tick, search]);
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 pb-20">
+    <div className="mx-auto max-w-6xl space-y-8 pb-20">
       
-      {/* Functional Feature Heading */}
-      <div className="border-b border-slate-200 dark:border-slate-800 pb-5">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-800/50 text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-              <span className="relative flex h-1.5 w-1.5 items-center justify-center">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
-              </span>
-              Sistem Pengawasan Aktif
-            </div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Pantau Ujian Live</h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              Monitoring real-time aktivitas peserta, pelacakan progres, dan deteksi anomali.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl shadow-sleek hover:shadow-md transition-shadow flex items-center gap-4">
-          <div className="h-12 w-12 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center border border-emerald-100 dark:border-emerald-800/30">
-            <Activity className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-          </div>
-          <div>
-            <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Sesi Aktif</div>
-            <div className="text-2xl font-black text-slate-900 dark:text-slate-100 leading-none">
-              {sesis.length} <span className="text-sm font-semibold text-slate-400">peserta</span>
-            </div>
-          </div>
+      {/* Sleek Enterprise Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-200/80 dark:border-slate-800/80">
+        <div className="space-y-1.5">
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-zinc-100">
+            Pantau Ujian Live
+          </h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Monitoring aktivitas peserta secara real-time.
+          </p>
         </div>
         
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl shadow-sleek hover:shadow-md transition-shadow flex items-center gap-4">
-          <div className="h-12 w-12 rounded-xl bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center border border-rose-100 dark:border-rose-800/30">
-            <AlertTriangle className="h-6 w-6 text-rose-600 dark:text-rose-400" />
+        {/* Minimalist Data Points */}
+        <div className="flex items-center gap-8 text-sm">
+          <div className="flex flex-col items-end">
+            <span className="text-[10px] font-medium uppercase tracking-widest text-slate-400 mb-0.5">Sesi Aktif</span>
+            <span className="text-xl font-medium text-slate-900 dark:text-white tabular-nums leading-none">{sesis.length}</span>
           </div>
-          <div>
-            <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Pelanggaran</div>
-            <div className="text-2xl font-black text-slate-900 dark:text-slate-100 leading-none">
-              {totalPelanggaran} <span className="text-sm font-semibold text-slate-400">insiden</span>
-            </div>
+          <div className="w-px h-8 bg-slate-200 dark:bg-slate-800" />
+          <div className="flex flex-col items-end">
+            <span className="text-[10px] font-medium uppercase tracking-widest text-slate-400 mb-0.5">Pelanggaran</span>
+            <span className="text-xl font-medium text-red-600 dark:text-red-400 tabular-nums leading-none">{totalPelanggaran}</span>
           </div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl shadow-sleek hover:shadow-md transition-shadow flex items-center gap-4">
-          <div className="h-12 w-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center border border-blue-100 dark:border-blue-800/30">
-            <CheckCircle2 className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-          </div>
-          <div>
-            <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Rata-rata Progress</div>
-            <div className="text-2xl font-black text-slate-900 dark:text-slate-100 leading-none">
-              {Math.round(avgProgress)}%
-            </div>
+          <div className="w-px h-8 bg-slate-200 dark:bg-slate-800" />
+          <div className="flex flex-col items-end">
+            <span className="text-[10px] font-medium uppercase tracking-widest text-slate-400 mb-0.5">Rata-rata Progress</span>
+            <span className="text-xl font-medium text-slate-900 dark:text-white tabular-nums leading-none">{Math.round(avgProgress)}%</span>
           </div>
         </div>
       </div>
 
-      {/* Main Table Area */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sleek overflow-hidden flex flex-col">
-        <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100 px-1 uppercase tracking-wider">Daftar Peserta Live</h2>
-          <div className="relative w-full sm:w-72">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+      {/* Main Content Area */}
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Daftar Peserta</h2>
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input 
               placeholder="Cari nama atau ujian..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-700 text-sm rounded-xl focus-visible:ring-emerald-500"
+              className="pl-9 h-9 bg-transparent border-slate-200 dark:border-slate-800 text-sm focus-visible:ring-1 focus-visible:ring-slate-300 dark:focus-visible:ring-slate-700 shadow-none transition-all duration-300 ease-spring"
             />
           </div>
         </div>
 
-        <div className="divide-y divide-slate-200 dark:divide-slate-800/50">
-          {sesis.map(({ s, u, ex, dijawab, totalSoal, progress }) => {
-            const sisaMs = s.endsAt ? Math.max(0, s.endsAt - Date.now()) : 0;
-            const isCritical = sisaMs > 0 && sisaMs < 300000;
-            
-            return (
-              <div key={s.id} className="p-4 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-6">
-                
-                <div className="flex items-center gap-4 min-w-0 md:w-1/3">
-                  <div className="hidden sm:flex h-10 w-10 shrink-0 rounded-xl bg-slate-100 dark:bg-slate-800 items-center justify-center border border-slate-200 dark:border-slate-700">
-                    <Users className="h-5 w-5 text-slate-500" />
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100 truncate">{u?.namaLengkap ?? "Unknown"}</h3>
-                    <div className="text-[12px] font-medium text-slate-500 truncate mt-0.5">{ex?.nama ?? "Unknown Exam"}</div>
-                  </div>
-                </div>
-
-                <div className="flex-1 w-full max-w-xs md:max-w-md">
-                  <div className="flex justify-between items-center text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">
-                    <span>Progress Pengerjaan</span>
-                    <span className="text-slate-700 dark:text-slate-300">{dijawab} / {totalSoal} Soal</span>
-                  </div>
-                  <div className="w-full bg-slate-100 dark:bg-slate-800/80 rounded-full h-2 overflow-hidden shadow-inner">
-                    <div className="bg-emerald-500 h-full rounded-full transition-all duration-500" style={{ width: `${progress}%` }} />
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-6 shrink-0 md:w-1/4 justify-between md:justify-end">
-                  <div className="text-right">
-                    <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Sisa Waktu</div>
-                    <div className={`font-mono text-sm font-bold flex items-center justify-end gap-1.5 ${isCritical ? 'text-rose-600 animate-pulse' : 'text-slate-900 dark:text-slate-100'}`}>
-                      <Timer className="h-4 w-4" />
-                      {fmtSisa(sisaMs)}
+        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden">
+          <div className="divide-y divide-slate-100 dark:divide-slate-800/60">
+            {sesis.map(({ s, u, ex, dijawab, totalSoal, progress }) => {
+              const sisaMs = s.endsAt ? Math.max(0, s.endsAt - Date.now()) : 0;
+              const isCritical = sisaMs > 0 && sisaMs < 300000;
+              
+              return (
+                <div key={s.id} className="group p-4 flex flex-col md:flex-row md:items-center justify-between gap-6 transition-all duration-300 ease-spring hover:bg-slate-50 dark:hover:bg-slate-800/30">
+                  
+                  {/* User Info */}
+                  <div className="flex items-center gap-3 min-w-0 md:w-1/3">
+                    <div className="flex h-8 w-8 shrink-0 rounded-full bg-slate-100 dark:bg-slate-800 items-center justify-center border border-slate-200 dark:border-slate-700">
+                      <Users className="h-3.5 w-3.5 text-slate-500" />
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="font-medium text-sm text-slate-900 dark:text-slate-100 truncate group-hover:text-primary transition-colors duration-300 ease-spring">{u?.namaLengkap ?? "Unknown"}</h3>
+                      <div className="text-xs text-slate-500 truncate">{ex?.nama ?? "Unknown Exam"}</div>
                     </div>
                   </div>
 
-                  <div className="w-24 text-right">
-                    <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Status</div>
-                    {s.pelanggaran > 0 ? (
-                      <div className="inline-flex items-center justify-center px-2 py-0.5 rounded text-xs font-bold bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800">
-                        {s.pelanggaran} INSIDEN
+                  {/* Progress Bar */}
+                  <div className="flex-1 w-full max-w-xs md:max-w-sm">
+                    <div className="flex justify-between items-center text-xs text-slate-500 mb-1.5">
+                      <span>{dijawab} / {totalSoal} Soal</span>
+                      <span className="font-medium text-slate-700 dark:text-slate-300 tabular-nums">{Math.round(progress)}%</span>
+                    </div>
+                    <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                      <div className="bg-primary h-full rounded-full transition-all duration-500 ease-out" style={{ width: `${progress}%` }} />
+                    </div>
+                  </div>
+
+                  {/* Status & Time */}
+                  <div className="flex items-center gap-6 shrink-0 md:w-1/4 justify-between md:justify-end">
+                    <div className="text-right">
+                      <div className="text-[10px] font-medium uppercase tracking-widest text-slate-400 mb-0.5">Sisa Waktu</div>
+                      <div className={`font-mono text-sm font-medium tabular-nums ${isCritical ? 'text-red-600 animate-pulse' : 'text-slate-700 dark:text-slate-300'}`}>
+                        {fmtSisa(sisaMs)}
                       </div>
-                    ) : (
-                      <div className="inline-flex items-center justify-center px-2 py-0.5 rounded text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
-                        AMAN
-                      </div>
-                    )}
+                    </div>
+
+                    <div className="w-24 text-right">
+                      <div className="text-[10px] font-medium uppercase tracking-widest text-slate-400 mb-1">Status</div>
+                      {s.pelanggaran > 0 ? (
+                        <div className="flex items-center justify-end gap-1.5 text-xs font-medium text-red-600 dark:text-red-400">
+                          <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                          </span>
+                          {s.pelanggaran} Insiden
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-end gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                          Aman
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
 
-          {sesis.length === 0 && (
-            <div className="py-16 flex flex-col items-center justify-center text-center">
-              <MonitorPlay className="h-12 w-12 text-slate-200 dark:text-slate-800 mb-4" />
-              <p className="text-slate-500 font-medium text-sm">Tidak ada peserta yang sedang aktif.</p>
-            </div>
-          )}
+            {sesis.length === 0 && (
+              <div className="py-12 flex flex-col items-center justify-center text-center">
+                <MonitorPlay className="h-8 w-8 text-slate-300 dark:text-slate-700 mb-3" />
+                <p className="text-slate-500 text-sm">Belum ada peserta yang aktif.</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

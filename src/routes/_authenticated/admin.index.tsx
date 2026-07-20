@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import {
   usersRepo,
-  groupsRepo,
+  unitAkademikRepo,
   modulRepo,
   soalRepo,
   ujianRepo,
@@ -23,7 +23,8 @@ import {
   BarChart3,
   MonitorPlay,
   ShieldCheck,
-  Zap
+  Zap,
+  CheckCircle2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -47,7 +48,7 @@ function CommandCenter() {
 
   const counts = {
     peserta: pesertaList.length,
-    group: groupsRepo.all().length,
+    unit: unitAkademikRepo.all().length,
     modul: modulRepo.all().length,
     soal: soalList.length,
     ujian: semuaUjian.length,
