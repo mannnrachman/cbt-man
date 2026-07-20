@@ -183,149 +183,197 @@ function PreUjianContent({
   const smt = ujian.semesterId ? semesterRepo.byId(ujian.semesterId) : null;
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8 pb-20 animate-in fade-in duration-500">
-      {/* Header Info */}
-      <div className="space-y-4">
-        <Link to="/peserta" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors mb-2">
-          ← Kembali ke Daftar Ujian
-        </Link>
-        <div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
-            {ujian.nama}
-          </h1>
-          {mk && (
-            <div className="flex items-center gap-2 mt-3 text-lg font-medium text-primary/80 dark:text-primary/70">
-              <BookOpen className="h-5 w-5" />
-              <span>{mk.nama}</span>
-              {smt && (
-                <>
-                  <span className="text-slate-300 dark:text-slate-700">•</span>
-                  <span>{smt.nama}</span>
-                </>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
+    <div className="relative min-h-[calc(100vh-4rem)] bg-slate-50/50 dark:bg-slate-950">
+      {/* Dynamic Background Elements */}
+      <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-blue-600/10 via-indigo-600/5 to-transparent dark:from-blue-500/10 dark:via-indigo-500/5 pointer-events-none" />
+      <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-500/20 dark:bg-blue-500/10 blur-[100px] rounded-full pointer-events-none" />
+      <div className="absolute top-40 -left-40 w-72 h-72 bg-indigo-500/20 dark:bg-indigo-500/10 blur-[80px] rounded-full pointer-events-none" />
 
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col">
-        {/* Exam Stats Bar */}
-        <div className="bg-slate-50 dark:bg-slate-800/40 p-5 sm:p-6 border-b border-slate-200 dark:border-slate-800 flex flex-wrap gap-4 items-center">
-          <div className="flex items-center gap-2 bg-white dark:bg-slate-950 px-4 py-2 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800">
-            <Clock className="h-4 w-4 text-blue-500" />
-            <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{ujian.durasiMenit} Menit</span>
-          </div>
-          <div className="flex items-center gap-2 bg-white dark:bg-slate-950 px-4 py-2 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800">
-            <FileText className="h-4 w-4 text-emerald-500" />
-            <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{ujian.topicSets.reduce((a, b) => a + b.jumlah, 0)} Soal</span>
-          </div>
-        </div>
-        
-        {/* Exam Instructions */}
-        <div className="p-6 sm:p-8 space-y-8">
-          <div className="prose prose-slate dark:prose-invert max-w-none prose-sm sm:prose-base text-slate-600 dark:text-slate-300">
-            <RichView html={ujian.deskripsi || "<p><em>Tidak ada instruksi khusus dari pengajar.</em></p>"} />
-          </div>
-
-          {!examAllowed && (
-            <div
-              role="alert"
-              data-testid="exam-availability-blocked"
-              className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/20 p-4 flex items-start gap-3"
-            >
-              <BlockedIcon className="h-5 w-5 text-red-600 dark:text-red-500 shrink-0 mt-0.5" />
+      <div className="relative max-w-4xl mx-auto px-4 py-8 sm:py-12 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        {/* Header Info */}
+        <div className="space-y-6">
+          <Link to="/peserta" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group">
+            <span className="group-hover:-translate-x-1 transition-transform mr-1">←</span> Kembali ke Daftar Ujian
+          </Link>
+          <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/40 dark:border-slate-800/60 p-6 sm:p-8 rounded-3xl shadow-xl shadow-slate-200/40 dark:shadow-black/20">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
               <div>
-                <h4 className="font-semibold text-red-800 dark:text-red-400">
-                  {availability === "upcoming" ? "Ujian Belum Dimulai" : "Ujian Telah Berakhir"}
-                </h4>
-                <p className="text-sm text-red-600 dark:text-red-400/80 mt-1">{blockedMessage}</p>
+                <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300">
+                  {ujian.nama}
+                </h1>
+                {mk && (
+                  <div className="flex items-center gap-2 mt-4 text-sm sm:text-base font-medium text-blue-600 dark:text-blue-400">
+                    <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                      <BookOpen className="h-4 w-4" />
+                    </div>
+                    <span>{mk.nama}</span>
+                    {smt && (
+                      <>
+                        <span className="text-slate-300 dark:text-slate-700 mx-1">•</span>
+                        <span>{smt.nama}</span>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-row sm:flex-col gap-3 shrink-0">
+                <div className="flex items-center gap-3 bg-white dark:bg-slate-800/80 px-4 py-3 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/50">
+                  <div className="p-2 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-500">
+                    <Clock className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Durasi</div>
+                    <div className="text-sm font-bold text-slate-700 dark:text-slate-200">{ujian.durasiMenit} Menit</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 bg-white dark:bg-slate-800/80 px-4 py-3 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/50">
+                  <div className="p-2 rounded-full bg-indigo-50 dark:bg-indigo-900/20 text-indigo-500">
+                    <FileText className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Soal</div>
+                    <div className="text-sm font-bold text-slate-700 dark:text-slate-200">{ujian.topicSets.reduce((a, b) => a + b.jumlah, 0)} Butir</div>
+                  </div>
+                </div>
               </div>
             </div>
-          )}
+          </div>
+        </div>
 
-          {sesiSelesai && (
-            <div className="rounded-xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/20 p-4 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center shrink-0">
-                  <FileText className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-emerald-800 dark:text-emerald-400">Anda sudah menyelesaikan ujian ini</h4>
-                  <p className="text-sm text-emerald-600 dark:text-emerald-400/80">Tidak dapat mengulang ujian yang telah disubmit.</p>
-                </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content: Instructions & Details */}
+          <div className="lg:col-span-2 space-y-6">
+            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-lg shadow-slate-200/30 dark:shadow-black/20 p-6 sm:p-8 overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-slate-100 to-transparent dark:from-slate-800 rounded-bl-full opacity-50 pointer-events-none" />
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                Informasi & Instruksi
+              </h2>
+              <div className="prose prose-slate dark:prose-invert max-w-none prose-sm sm:prose-base text-slate-600 dark:text-slate-300">
+                <RichView html={ujian.deskripsi || "<p><em>Tidak ada instruksi khusus dari pengajar.</em></p>"} />
               </div>
-              <Button asChild size="sm" className="shrink-0 bg-emerald-600 hover:bg-emerald-700 text-white">
-                <Link to="/peserta/ujian/$id/hasil" params={{ id: ujian.id }}>
-                  Lihat Nilai
-                </Link>
-              </Button>
             </div>
-          )}
 
-          {/* Exam Rules Block */}
-          <div className="rounded-xl border border-amber-200 dark:border-amber-900/40 bg-amber-50/50 dark:bg-amber-950/20 p-5 sm:p-6 space-y-4">
-            <div className="flex items-center gap-2 font-bold text-amber-800 dark:text-amber-500">
-              <AlertTriangle className="h-5 w-5" />
-              <h3>Aturan & Tata Tertib Ujian</h3>
+            {/* Exam Rules Block */}
+            <div className="relative overflow-hidden rounded-3xl border border-amber-200/60 dark:border-amber-900/40 bg-gradient-to-br from-amber-50/80 to-orange-50/80 dark:from-amber-950/30 dark:to-orange-950/30 backdrop-blur-md p-6 sm:p-8 shadow-inner">
+              <div className="absolute top-0 right-0 p-6 opacity-10">
+                <AlertTriangle className="w-32 h-32 text-amber-500" />
+              </div>
+              <div className="relative">
+                <div className="flex items-center gap-3 font-bold text-amber-900 dark:text-amber-500 mb-4">
+                  <div className="p-2 rounded-xl bg-amber-100 dark:bg-amber-900/50">
+                    <AlertTriangle className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-lg">Aturan & Tata Tertib</h3>
+                </div>
+                <ul className="grid grid-cols-1 gap-3 text-sm text-amber-800 dark:text-amber-300/80">
+                  {ujian.fullscreenWajib && (
+                    <li className="flex items-start gap-3 bg-white/40 dark:bg-black/20 p-3 rounded-xl border border-amber-100/50 dark:border-amber-900/30">
+                      <div className="mt-0.5 w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                      <span>Ujian wajib dikerjakan dalam mode <strong>Fullscreen</strong> (Layar Penuh).</span>
+                    </li>
+                  )}
+                  {ujian.maxPindahTab > 0 && (
+                    <li className="flex items-start gap-3 bg-white/40 dark:bg-black/20 p-3 rounded-xl border border-amber-100/50 dark:border-amber-900/30">
+                      <div className="mt-0.5 w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                      <span>Toleransi pindah tab maksimal <strong>{ujian.maxPindahTab} kali</strong>. Lebih dari itu ujian dikumpulkan otomatis.</span>
+                    </li>
+                  )}
+                  {ujian.blokirShortcut && (
+                    <li className="flex items-start gap-3 bg-white/40 dark:bg-black/20 p-3 rounded-xl border border-amber-100/50 dark:border-amber-900/30">
+                      <div className="mt-0.5 w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                      <span>Fungsi <strong>Copy, Paste, dan Klik Kanan</strong> dinonaktifkan secara sistem.</span>
+                    </li>
+                  )}
+                  <li className="flex items-start gap-3 bg-white/40 dark:bg-black/20 p-3 rounded-xl border border-amber-100/50 dark:border-amber-900/30">
+                    <div className="mt-0.5 w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                    <span>Waktu berjalan mundur dan tidak dapat dihentikan setelah "Mulai".</span>
+                  </li>
+                </ul>
+              </div>
             </div>
-            <ul className="ml-5 list-disc text-sm text-amber-700/80 dark:text-amber-400/80 space-y-2">
-              {ujian.fullscreenWajib && (
-                <li>Ujian wajib dikerjakan dalam mode <strong className="text-amber-900 dark:text-amber-300">Fullscreen</strong> (Layar Penuh). Menutup layar penuh mungkin akan dianggap sebagai kecurangan.</li>
-              )}
-              {ujian.maxPindahTab > 0 && (
-                <li>Toleransi pindah tab/aplikasi maksimal <strong className="text-amber-900 dark:text-amber-300">{ujian.maxPindahTab} kali</strong>. Lebih dari itu, ujian akan dikumpulkan otomatis secara paksa.</li>
-              )}
-              {ujian.blokirShortcut && (
-                <li>Fungsi <strong className="text-amber-900 dark:text-amber-300">Copy, Paste, dan Klik Kanan</strong> dinonaktifkan secara sistem.</li>
-              )}
-              <li>Waktu akan terus berjalan mundur dan tidak dapat dihentikan (*pause*) begitu Anda menekan tombol "Mulai".</li>
-              <li>Pastikan koneksi internet Anda stabil. Jawaban akan disinkronkan secara otomatis.</li>
-            </ul>
           </div>
 
-          {/* Action Area */}
-          <div className="bg-slate-50 dark:bg-slate-800/30 p-6 sm:p-8 rounded-xl border border-slate-200 dark:border-slate-800 space-y-6">
-            {ujian.tokenAktif && (
-              <div className="space-y-2 max-w-sm">
-                <Label htmlFor={tokenInputId} className="text-base font-semibold text-slate-900 dark:text-white">Token Akses Ujian</Label>
-                <div className="relative">
-                  <Input 
-                    id={tokenInputId} 
-                    value={token} 
-                    onChange={(e) => setToken(e.target.value)}
-                    placeholder="Contoh: X7Y9Q"
-                    className="h-12 text-center text-xl font-bold tracking-[0.3em] uppercase bg-white dark:bg-slate-950 border-slate-300 dark:border-slate-700 placeholder:tracking-normal placeholder:font-normal placeholder:text-sm"
-                  />
+          {/* Sidebar Action Area */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-8 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-6 sm:p-8 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-2xl shadow-blue-500/5 space-y-8">
+              
+              {!examAllowed && (
+                <div className="rounded-2xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 p-5 flex flex-col items-center text-center gap-3">
+                  <div className="p-3 bg-red-100 dark:bg-red-900/50 rounded-full">
+                    <BlockedIcon className="h-6 w-6 text-red-600 dark:text-red-500" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-red-800 dark:text-red-400">
+                      {availability === "upcoming" ? "Belum Dimulai" : "Telah Berakhir"}
+                    </h4>
+                    <p className="text-xs text-red-600/80 dark:text-red-400/80 mt-1">{blockedMessage}</p>
+                  </div>
                 </div>
-                <p className="text-xs text-slate-500">Minta token akses ujian kepada pengawas ruangan Anda.</p>
-              </div>
-            )}
-            
-            <label className="flex items-start gap-3 cursor-pointer group">
-              <div className="relative flex items-center justify-center shrink-0 mt-0.5">
-                <input 
-                  type="checkbox" 
-                  className="peer appearance-none w-5 h-5 border-2 border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-slate-900 checked:bg-primary checked:border-primary transition-colors cursor-pointer" 
-                  checked={agree} 
-                  onChange={(e) => setAgree(e.target.checked)} 
-                />
-                <svg className="absolute w-3 h-3 text-white pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <span className="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors leading-relaxed">
-                Saya telah membaca aturan ujian di atas. Saya siap dan bersedia mengerjakan ujian ini dengan jujur dan tanpa bantuan dari pihak manapun.
-              </span>
-            </label>
-            
-            <Button 
-              size="lg" 
-              className="w-full h-14 text-base font-bold uppercase tracking-wide shadow-md hover:shadow-lg transition-all disabled:opacity-50" 
-              onClick={mulai} 
-              disabled={!!sesiSelesai || !examAllowed || !agree}
-            >
-              {sesiSelesai ? "Anda Telah Selesai" : "Mulai Ujian Sekarang"}
-            </Button>
+              )}
+
+              {sesiSelesai && (
+                <div className="rounded-2xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/30 p-5 flex flex-col items-center text-center gap-4">
+                  <div className="p-3 bg-emerald-100 dark:bg-emerald-900/50 rounded-full">
+                    <ShieldOff className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-emerald-800 dark:text-emerald-400">Ujian Telah Selesai</h4>
+                    <p className="text-xs text-emerald-600/80 dark:text-emerald-400/80 mt-1">Anda sudah mensubmit ujian ini.</p>
+                  </div>
+                  <Button asChild className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-lg shadow-emerald-600/20">
+                    <Link to="/peserta/ujian/$id/hasil" params={{ id: ujian.id }}>
+                      Lihat Hasil Ujian
+                    </Link>
+                  </Button>
+                </div>
+              )}
+
+              {examAllowed && !sesiSelesai && (
+                <div className="space-y-6">
+                  {ujian.tokenAktif && (
+                    <div className="space-y-3">
+                      <Label htmlFor={tokenInputId} className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                        Token Akses Ujian
+                      </Label>
+                      <Input 
+                        id={tokenInputId} 
+                        value={token} 
+                        onChange={(e) => setToken(e.target.value)}
+                        placeholder="Contoh: X7Y9Q"
+                        className="h-14 text-center text-xl font-black tracking-[0.2em] uppercase bg-slate-50 dark:bg-slate-950/50 border-slate-300 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-blue-500/20 transition-all placeholder:tracking-normal placeholder:font-normal placeholder:text-sm"
+                      />
+                      <p className="text-[11px] text-center text-slate-500 font-medium uppercase tracking-wider">Minta token ke pengawas ruangan</p>
+                    </div>
+                  )}
+                  
+                  <label className="flex items-start gap-3 cursor-pointer group p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 border border-transparent hover:border-slate-200 dark:hover:border-slate-700/50 transition-colors">
+                    <div className="relative flex items-center justify-center shrink-0 mt-0.5">
+                      <input 
+                        type="checkbox" 
+                        className="peer appearance-none w-5 h-5 border-2 border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-slate-900 checked:bg-blue-600 checked:border-blue-600 transition-all cursor-pointer" 
+                        checked={agree} 
+                        onChange={(e) => setAgree(e.target.checked)} 
+                      />
+                      <svg className="absolute w-3 h-3 text-white pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity scale-50 peer-checked:scale-100 duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <span className="text-xs font-medium text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors leading-relaxed">
+                      Saya siap dan bersedia mengerjakan ujian ini secara jujur.
+                    </span>
+                  </label>
+                  
+                  <Button 
+                    size="lg" 
+                    className="w-full h-14 rounded-xl text-sm font-bold tracking-wide shadow-xl hover:shadow-blue-500/25 hover:-translate-y-0.5 transition-all bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 border-0" 
+                    onClick={mulai} 
+                    disabled={!examAllowed || !agree}
+                  >
+                    MULAI UJIAN
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

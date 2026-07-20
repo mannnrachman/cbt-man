@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { groupsRepo, usersRepo, configRepo } from "@/lib/cbt/repos";
+import { usersRepo, unitAkademikRepo, configRepo } from "@/lib/cbt/repos";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -11,9 +11,9 @@ export const Route = createFileRoute("/_authenticated/admin/peserta/kartu")({
 });
 
 function KartuPage() {
-  const [groupId, setGroupId] = useState<string>("all");
-  const groups = groupsRepo.all();
-  const peserta = usersRepo.all().filter((u) => u.role === "mahasiswa" && (groupId === "all" || u.groupId === groupId));
+  const [unitId, setUnitId] = useState<string>("all");
+  const units = unitAkademikRepo.all();
+  const peserta = usersRepo.all().filter((u) => u.role === "mahasiswa" && (unitId === "all" || u.unitId === unitId));
   const appName = configRepo.get().appName;
 
   return (
@@ -24,11 +24,11 @@ function KartuPage() {
           <p className="text-sm text-muted-foreground">Catatan: password hanya bisa dicetak jika diketahui (default: <code>username + "123"</code>). Untuk akun lama, reset dulu password-nya.</p>
         </div>
         <div className="flex gap-2">
-          <Select value={groupId} onValueChange={setGroupId}>
+          <Select value={unitId} onValueChange={setUnitId}>
             <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Semua group</SelectItem>
-              {groups.map((g) => <SelectItem key={g.id} value={g.id}>{g.nama}</SelectItem>)}
+              <SelectItem value="all">Semua unit</SelectItem>
+              {units.map((u) => <SelectItem key={u.id} value={u.id}>{u.nama}</SelectItem>)}
             </SelectContent>
           </Select>
           <Button onClick={() => window.print()}><Printer className="mr-1 h-4 w-4" />Cetak</Button>
@@ -37,7 +37,7 @@ function KartuPage() {
 
       <div className="grid grid-cols-2 gap-3 print:grid-cols-2 md:grid-cols-3">
         {peserta.map((p) => {
-          const g = groups.find((x) => x.id === p.groupId);
+          const u = units.find((x) => x.id === p.unitId);
           return (
             <Card key={p.id} className="p-4 break-inside-avoid">
               <div className="mb-2 flex items-center gap-2 border-b pb-2 text-sm font-semibold">
@@ -48,7 +48,7 @@ function KartuPage() {
                 <div><span className="text-muted-foreground">Nama:</span> <strong>{p.namaLengkap}</strong></div>
                 <div><span className="text-muted-foreground">Username:</span> <code>{p.username}</code></div>
                 <div><span className="text-muted-foreground">Password awal:</span> <code>{p.username}123</code></div>
-                <div><span className="text-muted-foreground">Group:</span> {g?.nama ?? "-"}</div>
+                <div><span className="text-muted-foreground">Unit:</span> {u?.nama ?? "-"}</div>
               </div>
             </Card>
           );

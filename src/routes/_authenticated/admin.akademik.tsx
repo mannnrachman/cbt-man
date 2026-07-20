@@ -10,9 +10,7 @@ const TREE_MENU = [
   {
     section: "Struktur Institusi",
     items: [
-      { label: "Fakultas", to: "/admin/akademik/fakultas", icon: Building2, indent: 0 },
-      { label: "Jurusan", to: "/admin/akademik/jurusan", icon: Network, indent: 1 },
-      { label: "Program Studi", to: "/admin/akademik/prodi", icon: GraduationCap, indent: 2 },
+      { label: "Fakultas & Jurusan", to: "/admin/akademik", icon: Network, indent: 0 },
     ]
   },
   {
@@ -55,7 +53,7 @@ function AkademikLayout() {
           <div>
             <p className="font-semibold text-amber-800 dark:text-amber-400 mb-0.5">Perhatian: Modifikasi Struktur Induk</p>
             <p className="text-amber-700 dark:text-amber-500/90 leading-relaxed">
-              Penghapusan atau perubahan mendasar pada <strong>Fakultas, Jurusan, atau Program Studi</strong> dapat menyebabkan data mahasiswa dan modul bank soal yang terkait menjadi tidak sinkron (<em>orphaned</em>). Pastikan Anda hanya mengubah data ini jika benar-benar diperlukan.
+              Penghapusan atau perubahan mendasar pada <strong>Fakultas atau Jurusan</strong> dapat menyebabkan data mahasiswa dan modul bank soal yang terkait menjadi tidak sinkron (<em>orphaned</em>). Pastikan Anda hanya mengubah data ini jika benar-benar diperlukan.
             </p>
           </div>
         </div>

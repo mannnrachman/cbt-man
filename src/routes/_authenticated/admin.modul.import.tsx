@@ -64,31 +64,63 @@ function ImportPage() {
   function downloadTemplate() {
     const ws = XLSX.utils.json_to_sheet([
       {
-        tipe: "pg",
-        kesulitan: "mudah",
-        pertanyaan: "2+2 = ?",
-        opsi_a: "3",
-        opsi_b: "4",
-        opsi_c: "5",
-        opsi_d: "6",
-        benar: "B",
+        No: 1,
+        Jenis: "SOAL",
+        Kode: "Q",
+        Isi: "Apa nama alat pada gambar berikut?",
+        Gambar: "https://contoh-website.com/mikroskop.jpg",
+        "Status Jawaban": "",
+        "Tingkat kesulitan Soal": 1,
       },
       {
-        tipe: "pg",
-        kesulitan: "sedang",
-        pertanyaan: "Ibukota Indonesia?",
-        opsi_a: "Bandung",
-        opsi_b: "Jakarta",
-        opsi_c: "Medan",
-        opsi_d: "Surabaya",
-        benar: "B",
+        No: "",
+        Jenis: "JAWABAN",
+        Kode: "A",
+        Isi: "Mikroskop",
+        Gambar: "",
+        "Status Jawaban": 1,
+        "Tingkat kesulitan Soal": "",
       },
-      { tipe: "bs", kesulitan: "mudah", pertanyaan: "Matahari terbit di barat.", benar: "Salah" },
-      { tipe: "essay", kesulitan: "sulit", pertanyaan: "Jelaskan fotosintesis dalam 2 paragraf." },
+      {
+        No: "",
+        Jenis: "JAWABAN",
+        Kode: "A",
+        Isi: "Teleskop",
+        Gambar: "",
+        "Status Jawaban": 0,
+        "Tingkat kesulitan Soal": "",
+      },
+      {
+        No: "",
+        Jenis: "JAWABAN",
+        Kode: "A",
+        Isi: "Stetoskop",
+        Gambar: "",
+        "Status Jawaban": 0,
+        "Tingkat kesulitan Soal": "",
+      },
+      {
+        No: "",
+        Jenis: "JAWABAN",
+        Kode: "A",
+        Isi: "Periskop",
+        Gambar: "",
+        "Status Jawaban": 0,
+        "Tingkat kesulitan Soal": "",
+      },
+      {
+        No: 2,
+        Jenis: "SOAL",
+        Kode: "Q",
+        Isi: "Jelaskan proses fotosintesis secara ringkas.",
+        Gambar: "",
+        "Status Jawaban": "",
+        "Tingkat kesulitan Soal": 3,
+      },
     ]);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "soal");
-    XLSX.writeFile(wb, "template-soal.xlsx");
+    XLSX.writeFile(wb, "template-soal-baru.xlsx");
   }
 
   async function loadFile(file: File) {
@@ -101,71 +133,87 @@ function ImportPage() {
     const sheet = wb.Sheets[wb.SheetNames[0]];
     const rows: Record<string, unknown>[] = XLSX.utils.sheet_to_json(sheet, { defval: "" });
     const out: PreviewRow[] = [];
-    for (const r of rows) {
-      const tipe = String(r.tipe ?? "pg").toLowerCase() as TipeSoal;
-      const kesulitan = String(r.kesulitan ?? "sedang").toLowerCase() as Kesulitan;
-      const pertanyaan = String(r.pertanyaan ?? r.soal ?? "").trim();
-      if (!pertanyaan) {
-        out.push({ valid: false, error: "Pertanyaan kosong", soal: {} as Soal });
-        continue;
-      }
-      if (!["pg", "multi", "bs", "essay"].includes(tipe)) {
-        out.push({ valid: false, error: `Tipe tidak valid: ${tipe}`, soal: {} as Soal });
-        continue;
-      }
-      if (!["mudah", "sedang", "sulit"].includes(kesulitan)) {
-        out.push({ valid: false, error: `Kesulitan tidak valid`, soal: {} as Soal });
-        continue;
-      }
+    let currentSoal: Soal | null = null;
+    let currentError: string | undefined;
 
-      let jawaban: Jawaban[] = [];
-      let error: string | undefined;
-      if (tipe === "essay") jawaban = [];
-      else if (tipe === "bs") {
-        const benar = String(r.benar ?? "")
-          .toLowerCase()
-          .startsWith("b");
-        jawaban = [
-          { id: uid("j_"), detail: "Benar", benar },
-          { id: uid("j_"), detail: "Salah", benar: !benar },
-        ];
+    const commitCurrentSoal = () => {
+      if (!currentSoal) return;
+      
+      if (currentSoal.jawaban.length === 0) {
+        currentSoal.tipe = "essay";
       } else {
-        const opts: string[] = [];
-        for (const k of ["opsi_a", "opsi_b", "opsi_c", "opsi_d", "opsi_e", "opsi_f"]) {
-          const v = String(r[k] ?? "").trim();
-          if (v) opts.push(v);
+        const correctCount = currentSoal.jawaban.filter(j => j.benar).length;
+        if (correctCount > 1) {
+          currentSoal.tipe = "multi";
+        } else {
+          currentSoal.tipe = "pg";
         }
-        if (opts.length < 2) {
-          error = "Minimal 2 opsi";
+        if (currentSoal.jawaban.length < 2) {
+          currentError = "Soal pilihan ganda minimal 2 opsi jawaban";
         }
-        const benarStr = String(r.benar ?? "")
-          .toUpperCase()
-          .trim();
-        const benarIdx =
-          tipe === "multi"
-            ? benarStr
-                .split(/[,\s]+/)
-                .map((c) => c.charCodeAt(0) - 65)
-                .filter((i) => i >= 0 && i < opts.length)
-            : [benarStr.charCodeAt(0) - 65];
-        if (!benarIdx.length || benarIdx.some((i) => i < 0 || i >= opts.length))
-          error = "Kolom 'benar' tidak valid";
-        jawaban = opts.map((o, i) => ({ id: uid("j_"), detail: o, benar: benarIdx.includes(i) }));
       }
+      
+      out.push({ soal: currentSoal, valid: !currentError, error: currentError });
+      currentSoal = null;
+      currentError = undefined;
+    };
 
-      const soal: Soal = {
-        id: uid("s_"),
-        topikId,
-        detail: pertanyaan,
-        tipe,
-        kesulitan,
-        audioPlayOnce: false,
-        jawaban,
-        pembahasan: "",
-        createdAt: Date.now(),
-      };
-      out.push({ soal, valid: !error, error });
+    for (const r of rows) {
+      const jenis = String(r.Jenis ?? "").toUpperCase().trim();
+      const kode = String(r.Kode ?? "").toUpperCase().trim();
+      
+      if (jenis === "SOAL" || kode === "Q") {
+        commitCurrentSoal();
+        
+        let isi = String(r.Isi ?? "").trim();
+        const gambar = String(r.Gambar ?? "").trim();
+        const tingkat = String(r["Tingkat kesulitan Soal"] ?? "2").trim();
+        
+        if (!isi && !gambar) {
+          currentError = "Isi pertanyaan kosong";
+        }
+        
+        if (gambar) {
+          isi = `<div class="mb-4"><img src="${gambar}" alt="Gambar Soal" class="max-w-full h-auto rounded-md shadow-sm border border-slate-200 dark:border-slate-800" /></div>${isi}`;
+        }
+        
+        let kesulitan: Kesulitan = "sedang";
+        if (tingkat === "1") kesulitan = "mudah";
+        else if (tingkat === "3") kesulitan = "sulit";
+        
+        currentSoal = {
+          id: uid("s_"),
+          topikId,
+          detail: isi,
+          tipe: "pg",
+          kesulitan,
+          audioPlayOnce: false,
+          jawaban: [],
+          pembahasan: "",
+          createdAt: Date.now(),
+        };
+      } 
+      else if (jenis === "JAWABAN" || kode === "A") {
+        if (!currentSoal) continue; // Orphaned answer, skip
+        
+        let isi = String(r.Isi ?? "").trim();
+        const gambar = String(r.Gambar ?? "").trim();
+        const statusStr = String(r["Status Jawaban"] ?? "0").trim();
+        const status = statusStr === "1" || statusStr.toLowerCase() === "benar" || statusStr.toLowerCase() === "true";
+        
+        if (gambar) {
+          isi = `<div class="mb-2"><img src="${gambar}" alt="Gambar Opsi" class="max-w-xs h-auto rounded shadow-sm border border-slate-200 dark:border-slate-800" /></div>${isi}`;
+        }
+        
+        currentSoal.jawaban.push({
+          id: uid("j_"),
+          detail: isi,
+          benar: status,
+        });
+      }
     }
+    
+    commitCurrentSoal();
     setPreview(out);
   }
 
@@ -250,11 +298,11 @@ function ImportPage() {
               Pilih File
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Kolom: <code>tipe</code> (pg/multi/bs/essay), <code>kesulitan</code>{" "}
-            (mudah/sedang/sulit), <code>pertanyaan</code>, <code>opsi_a</code>…<code>opsi_f</code>,{" "}
-            <code>benar</code> (huruf opsi, mis. "B" atau untuk multi "A,C"). Untuk B-S:{" "}
-            <code>benar</code> = "Benar" atau "Salah".
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            <strong>Format Kolom Baru:</strong> <code>No</code>, <code>Jenis</code> (SOAL/JAWABAN), <code>Kode</code> (Q/A), <code>Isi</code>, <code>Gambar</code>, <code>Status Jawaban</code> (1/0), <code>Tingkat kesulitan Soal</code> (1/2/3).
+            <br/>Setiap baris <strong>SOAL</strong> akan diikuti oleh baris-baris <strong>JAWABAN</strong> opsinya di bawah.
+            Tipe soal (PG/Multi/Essay) akan dideteksi otomatis berdasarkan jumlah jawaban. 
+            Untuk kolom <code>Gambar</code>, isikan URL gambar yang sudah diunggah di File Manager.
           </p>
         </CardContent>
       </Card>

@@ -19,25 +19,16 @@ export const StatusSesiEnum = z.enum([
 export type StatusSesi = z.infer<typeof StatusSesiEnum>;
 
 // ---------------- Master Akademik ----------------
-export const FakultasSchema = z.object({
-	id: z.string(),
-	nama: z.string(),
-});
-export type Fakultas = z.infer<typeof FakultasSchema>;
+export const TipeUnitAkademikEnum = z.enum(["fakultas", "jurusan", "prodi", "semester", "kelas", "kategori_bebas"]);
+export type TipeUnitAkademik = z.infer<typeof TipeUnitAkademikEnum>;
 
-export const JurusanSchema = z.object({
+export const UnitAkademikSchema = z.object({
 	id: z.string(),
 	nama: z.string(),
-	fakultasId: z.string(),
+	tipe: TipeUnitAkademikEnum,
+	parentId: z.string().nullable(),
 });
-export type Jurusan = z.infer<typeof JurusanSchema>;
-
-export const ProgramStudiSchema = z.object({
-	id: z.string(),
-	nama: z.string(),
-	jurusanId: z.string(),
-});
-export type ProgramStudi = z.infer<typeof ProgramStudiSchema>;
+export type UnitAkademik = z.infer<typeof UnitAkademikSchema>;
 
 export const TahunAkademikSchema = z.object({
 	id: z.string(),
@@ -58,8 +49,8 @@ export const MataKuliahSchema = z.object({
 	kode: z.string(),
 	nama: z.string(),
 	sks: z.number().int().default(2),
-	prodiId: z.string(),
-	semesterId: z.string(),
+	unitId: z.string().optional(),
+	semesterId: z.string().optional(),
 });
 export type MataKuliah = z.infer<typeof MataKuliahSchema>;
 
@@ -71,22 +62,13 @@ export const UserSchema = z.object({
 	namaLengkap: z.string(),
 	role: RoleEnum,
 	allowedTopikIds: z.array(z.string()).default([]),
-	groupId: z.string().optional(),
-	prodiId: z.string().optional(),
+	unitId: z.string().optional(),
 	mataKuliahIds: z.array(z.string()).default([]),
 	detail: z.string().optional(),
 	aktif: z.boolean().default(true),
 	createdAt: z.number(),
 });
 export type User = z.infer<typeof UserSchema>;
-
-export const GroupSchema = z.object({
-	id: z.string(),
-	nama: z.string(),
-	keterangan: z.string().default(""),
-	prodiId: z.string().optional(),
-});
-export type Group = z.infer<typeof GroupSchema>;
 
 // ---------------- Bank Soal ----------------
 export const ModulSchema = z.object({

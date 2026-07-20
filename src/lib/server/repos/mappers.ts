@@ -1,14 +1,11 @@
 import { z } from "zod";
-import type { AppConfig, Group, Modul, NavKey, Soal, SesiUjian, TokenUjian, Topik, Ujian, User, Fakultas, Jurusan, ProgramStudi, TahunAkademik, Semester, MataKuliah } from "@/lib/cbt/types";
+import type { AppConfig, Modul, NavKey, Soal, SesiUjian, TokenUjian, Topik, Ujian, User, UnitAkademik, TahunAkademik, Semester, MataKuliah } from "@/lib/cbt/types";
 import { prisma } from "@/lib/server/db/prisma";
 import { parseJson, toNumber } from "@/lib/server/db/json";
 
 export type Snapshot = {
 	users: User[];
-	groups: Group[];
-	fakultas: Fakultas[];
-	jurusan: Jurusan[];
-	prodi: ProgramStudi[];
+	unitAkademik: UnitAkademik[];
 	tahunAkademik: TahunAkademik[];
 	semester: Semester[];
 	mataKuliah: MataKuliah[];
@@ -32,10 +29,7 @@ export type SoalRow = Awaited<ReturnType<typeof prisma.soal.findMany>>[number] &
 };
 export type SnapshotRows = {
 	users: UserRow[];
-	groups: Group[];
-	fakultas: Fakultas[];
-	jurusan: Jurusan[];
-	prodi: ProgramStudi[];
+	unitAkademik: Awaited<ReturnType<typeof prisma.unitAkademik.findMany>>;
 	tahunAkademik: TahunAkademik[];
 	semester: Semester[];
 	mataKuliah: MataKuliah[];
@@ -51,10 +45,7 @@ export type SnapshotRows = {
 export const roleSchema = z.enum(["super_admin", "admin_prodi", "evaluator", "mahasiswa"]);
 export const entitySchema = z.enum([
 	"users",
-	"groups",
-	"fakultas",
-	"jurusan",
-	"prodi",
+	"unitAkademik",
 	"tahunAkademik",
 	"semester",
 	"mataKuliah",
@@ -71,8 +62,7 @@ export const upsertUserSchema = z.object({
 	namaLengkap: z.string().min(1),
 	role: roleSchema,
 	allowedTopikIds: z.array(z.string()).default([]),
-	groupId: z.string().min(1).optional(),
-	prodiId: z.string().min(1).optional(),
+	unitId: z.string().min(1).optional(),
 	mataKuliahIds: z.array(z.string()).default([]),
 	detail: z.string().optional(),
 	aktif: z.boolean(),
@@ -100,8 +90,7 @@ export function mapUser(row: UserRow): User {
 		namaLengkap: row.namaLengkap,
 		role: row.role,
 		allowedTopikIds: parseJson(row.allowedTopikIds, []),
-		groupId: row.groupId ?? undefined,
-		prodiId: row.prodiId ?? undefined,
+		unitId: row.unitId ?? undefined,
 		mataKuliahIds: parseJson(row.mataKuliahIds, []),
 		detail: row.detail ?? undefined,
 		aktif: row.aktif,

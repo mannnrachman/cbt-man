@@ -22,6 +22,7 @@ const LABEL: Record<NavKey, string> = {
   leaderboard: "Leaderboard Ujian",
   pengaturan: "Pengaturan Sistem",
   tools: "Backup & Restore",
+  panduan: "Panduan Pengguna",
 };
 
 export const Route = createFileRoute("/_authenticated/admin/users/roles")({
@@ -56,7 +57,7 @@ function RolesPage() {
         allowedTopikIds: has
           ? u.allowedTopikIds.filter((x) => x !== topikId)
           : [...u.allowedTopikIds, topikId],
-        groupId: u.groupId,
+        unitId: u.unitId,
         detail: u.detail,
         aktif: u.aktif,
         createdAt: u.createdAt,
@@ -78,13 +79,13 @@ function RolesPage() {
         </Link>
         <h1 className="text-2xl font-semibold tracking-tight">Hak Akses Role</h1>
         <p className="text-sm text-muted-foreground">
-          Atur menu yang bisa diakses Admin Prodi dan Evaluator, serta topik mana yang boleh mereka kelola.
+          Atur menu yang bisa diakses Admin Jurusan dan Evaluator, serta topik mana yang boleh mereka kelola.
         </p>
       </div>
 
       <Card>
         <CardContent className="space-y-3 p-4">
-          <h3 className="font-medium">Menu yang bisa diakses Admin Prodi</h3>
+          <h3 className="font-medium">Menu yang bisa diakses Admin Jurusan</h3>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {NAV_KEYS.filter((k) => k !== "users" && k !== "pengaturan" && k !== "tools").map(
               (k) => (
@@ -122,16 +123,16 @@ function RolesPage() {
 
       <Card>
         <CardContent className="space-y-4 p-4">
-          <h3 className="font-medium">Topik yang boleh dikelola Admin Prodi & Evaluator</h3>
+          <h3 className="font-medium">Topik yang boleh dikelola Admin Jurusan & Evaluator</h3>
           {managers.length === 0 && (
-            <p className="text-sm text-muted-foreground">Belum ada Admin Prodi atau Evaluator.</p>
+            <p className="text-sm text-muted-foreground">Belum ada Admin Jurusan atau Evaluator.</p>
           )}
           {managers.map((u) => (
             <div key={u.id} className="rounded border p-3">
               <div className="mb-2 font-medium">
                 {u.namaLengkap}{" "}
                 <span className="text-xs text-muted-foreground">
-                  ({u.role === "admin_prodi" ? "Admin Prodi" : "Evaluator"})
+                  ({u.role === "admin_prodi" ? "Admin Jurusan" : "Evaluator"})
                 </span>
               </div>
               <div className="space-y-2">

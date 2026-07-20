@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Settings, Upload, Image as ImageIcon } from "lucide-react";
+import { Settings, Upload, Image as ImageIcon, Save } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/pengaturan")({
@@ -73,14 +73,14 @@ function PengaturanPage() {
       </div>
 
       {/* Section 1: Identitas Aplikasi */}
-      <div className="space-y-4">
-        <div className="space-y-1">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Identitas Aplikasi</h2>
-          <p className="text-sm text-slate-500">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-12">
+        <div className="space-y-2 lg:col-span-1">
+          <h2 id="identitas-heading" className="text-lg font-semibold text-slate-900 dark:text-white">Identitas Aplikasi</h2>
+          <p className="text-sm text-slate-500 leading-relaxed">
             Informasi ini akan ditampilkan di halaman login dan pada panel atas dasbor aplikasi.
           </p>
         </div>
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        <div role="region" aria-labelledby="identitas-heading" className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
           <div className="p-6 space-y-6">
             
             <div className="space-y-2.5">
@@ -113,7 +113,8 @@ function PengaturanPage() {
                     <input 
                       type="file" 
                       accept="image/*" 
-                      className="hidden" 
+                      className="hidden"
+                      aria-hidden="true"
                       ref={fileInputRef} 
                       onChange={handleLogoUpload}
                     />
@@ -149,17 +150,17 @@ function PengaturanPage() {
         </div>
       </div>
 
-      <div className="h-px w-full bg-slate-200 dark:bg-slate-800/60" />
+      <div className="h-px w-full bg-slate-200 dark:bg-slate-800/60 my-10" />
 
       {/* Section 2: Kebijakan Ujian */}
-      <div className="space-y-4">
-        <div className="space-y-1">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Kebijakan Ujian</h2>
-          <p className="text-sm text-slate-500">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-12">
+        <div className="space-y-2 lg:col-span-1">
+          <h2 id="kebijakan-heading" className="text-lg font-semibold text-slate-900 dark:text-white">Kebijakan Ujian</h2>
+          <p className="text-sm text-slate-500 leading-relaxed">
             Konfigurasi keamanan dan pembatasan akses perangkat untuk melindungi integritas pelaksanaan ujian.
           </p>
         </div>
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
+        <div role="region" aria-labelledby="kebijakan-heading" className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
           <ToggleRow
             label="Kunci akses dari perangkat Mobile"
             desc="Mencegah peserta mengakses aplikasi ujian melalui smartphone atau tablet."

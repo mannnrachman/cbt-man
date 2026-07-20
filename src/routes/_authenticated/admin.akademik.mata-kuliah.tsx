@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { mataKuliahRepo, prodiRepo, semesterRepo, tahunAkademikRepo } from "@/lib/cbt/repos";
+import { mataKuliahRepo, unitAkademikRepo, semesterRepo, tahunAkademikRepo } from "@/lib/cbt/repos";
 import { mutateMataKuliahServer } from "@/lib/server/akademik/functions";
 import { uid } from "@/lib/cbt/storage";
 import type { MataKuliah } from "@/lib/cbt/types";
@@ -31,22 +31,22 @@ export const Route = createFileRoute("/_authenticated/admin/akademik/mata-kuliah
 
 function MataKuliahPage() {
   const [items, setItems] = useState<MataKuliah[]>(mataKuliahRepo.all());
-  const prodiList = prodiRepo.all();
+  const unitList = unitAkademikRepo.all();
   const semesterList = semesterRepo.all();
   const taList = tahunAkademikRepo.all();
   
   const [editing, setEditing] = useState<MataKuliah | null>(null);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ id: "", kode: "", nama: "", sks: 2, prodiId: "", semesterId: "" });
+  const [form, setForm] = useState({ id: "", kode: "", nama: "", sks: 2, unitId: "", semesterId: "" });
 
   function handleAdd() {
-    setForm({ id: uid("mk_"), kode: "", nama: "", sks: 2, prodiId: "", semesterId: "" });
+    setForm({ id: uid("mk_"), kode: "", nama: "", sks: 2, unitId: "", semesterId: "" });
     setEditing(null);
     setOpen(true);
   }
 
   function handleEdit(item: MataKuliah) {
-    setForm({ id: item.id, kode: item.kode, nama: item.nama, sks: item.sks, prodiId: item.prodiId, semesterId: item.semesterId });
+    setForm({ id: item.id, kode: item.kode, nama: item.nama, sks: item.sks, unitId: item.unitId || "", semesterId: item.semesterId || "" });
     setEditing(item);
     setOpen(true);
   }
@@ -64,8 +64,8 @@ function MataKuliahPage() {
   }
 
   async function save() {
-    if (!form.nama.trim() || !form.kode.trim() || !form.prodiId || !form.semesterId) {
-      toast.error("Kode, Nama, Prodi, dan Semester wajib diisi");
+    if (!form.nama.trim() || !form.kode.trim() || !form.unitId || !form.semesterId) {
+      toast.error("Kode, Nama, Unit, dan Semester wajib diisi");
       return;
     }
     const payload: MataKuliah = { 
@@ -73,7 +73,7 @@ function MataKuliahPage() {
       kode: form.kode.trim(), 
       nama: form.nama.trim(), 
       sks: form.sks,
-      prodiId: form.prodiId,
+      unitId: form.unitId,
       semesterId: form.semesterId 
     };
     const res = await mutateMataKuliahServer({ data: { action: "upsert", payload } });
@@ -102,7 +102,7 @@ function MataKuliahPage() {
       <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 overflow-hidden">
         <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800/60">
           {items.map((item) => {
-            const prodi = prodiList.find((p) => p.id === item.prodiId);
+            const unit = unitList.find((p) => p.id === item.unitId);
             const semester = semesterList.find((s) => s.id === item.semesterId);
             const ta = taList.find((t) => t.id === semester?.tahunAkademikId);
             return (
@@ -118,7 +118,7 @@ function MataKuliahPage() {
                     </span>
                   </div>
                   <div className="text-xs text-slate-500 mt-1.5 flex flex-wrap items-center gap-3">
-                    <span className="flex items-center gap-1"><span className="text-slate-400">Prodi:</span> <span className="font-medium text-slate-600 dark:text-slate-300">{prodi?.nama ?? "-"}</span></span>
+                    <span className="flex items-center gap-1"><span className="text-slate-400">Unit:</span> <span className="font-medium text-slate-600 dark:text-slate-300">{unit?.nama ?? "-"}</span></span>
                     <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
                     <span className="flex items-center gap-1"><span className="text-slate-400">Semester:</span> <span className="font-medium text-slate-600 dark:text-slate-300">{semester?.nama ?? "-"} {ta ? `(${ta.nama})` : ""}</span></span>
                   </div>
@@ -175,13 +175,13 @@ function MataKuliahPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Program Studi</Label>
-              <Select value={form.prodiId} onValueChange={(v) => setForm({ ...form, prodiId: v })}>
+              <Label>Unit Akademik</Label>
+              <Select value={form.unitId} onValueChange={(v) => setForm({ ...form, unitId: v })}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Pilih Prodi" />
+                  <SelectValue placeholder="Pilih Unit Akademik" />
                 </SelectTrigger>
                 <SelectContent>
-                  {prodiList.map((p) => (
+                  {unitList.map((p) => (
                     <SelectItem key={p.id} value={p.id}>
                       {p.nama}
                     </SelectItem>

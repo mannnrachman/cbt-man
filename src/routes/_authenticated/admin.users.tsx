@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { usersRepo, prodiRepo } from "@/lib/cbt/repos";
+import { usersRepo, unitAkademikRepo } from "@/lib/cbt/repos";
 import { revokeUserSessionsServer, upsertUserServer } from "@/lib/server/users/functions";
 import { uid } from "@/lib/cbt/storage";
 import type { Role, User } from "@/lib/cbt/types";
@@ -50,7 +50,7 @@ function UsersPage() {
     <AdminPage>
       <AdminPageHeader
         title="Pengguna Sistem"
-        description="Kelola akses akun admin, operator prodi, dan evaluator."
+        description="Kelola akses akun admin, admin jurusan, dan evaluator."
         action={
           <Button onClick={() => { setEditing(null); setOpen(true); }} className="h-9">
             <Plus className="mr-2 h-4 w-4" /> Tambah Akun
@@ -73,7 +73,7 @@ function UsersPage() {
           <SelectContent>
             <SelectItem value="all">Semua Peran</SelectItem>
             <SelectItem value="super_admin">Super Admin</SelectItem>
-            <SelectItem value="admin_prodi">Admin Prodi</SelectItem>
+            <SelectItem value="admin_prodi">Admin Jurusan</SelectItem>
             <SelectItem value="evaluator">Evaluator</SelectItem>
           </SelectContent>
         </Select>
@@ -99,7 +99,7 @@ function UsersPage() {
                   <td className="p-4 text-slate-600 dark:text-slate-400 border-r border-slate-200 dark:border-slate-800 text-left">{u.namaLengkap}</td>
                   <td className="p-4 text-center border-r border-slate-200 dark:border-slate-800">
                     <span className="px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-                      {u.role === "super_admin" ? "Super Admin" : u.role === "admin_prodi" ? "Admin Prodi" : u.role === "evaluator" ? "Evaluator" : u.role}
+                      {u.role === "super_admin" ? "Super Admin" : u.role === "admin_prodi" ? "Admin Jurusan" : u.role === "evaluator" ? "Evaluator" : u.role}
                     </span>
                   </td>
                   <td className="p-4 text-center border-r border-slate-200 dark:border-slate-800">
@@ -166,7 +166,7 @@ function UserDialog({
     username: "",
     namaLengkap: "",
     role: "admin_prodi" as Role,
-    prodiId: "",
+    unitId: "",
     aktif: true,
     password: "",
   });
@@ -177,7 +177,7 @@ function UserDialog({
       username: editing?.username ?? "",
       namaLengkap: editing?.namaLengkap ?? "",
       role: editing?.role ?? "admin_prodi",
-      prodiId: editing?.prodiId ?? "",
+      unitId: editing?.unitId ?? "",
       aktif: editing?.aktif ?? true,
       password: "",
     });
@@ -197,8 +197,7 @@ function UserDialog({
         role: form.role,
         aktif: form.aktif,
         allowedTopikIds: editing?.allowedTopikIds ?? [],
-        groupId: editing?.groupId,
-        prodiId: form.prodiId || undefined,
+        unitId: form.unitId || undefined,
         detail: editing?.detail,
         createdAt: editing?.createdAt ?? Date.now(),
         newPassword: form.password.trim() || undefined,
@@ -242,21 +241,21 @@ function UserDialog({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="super_admin">Super Admin</SelectItem>
-                <SelectItem value="admin_prodi">Admin Prodi</SelectItem>
+                <SelectItem value="admin_prodi">Admin Jurusan</SelectItem>
                 <SelectItem value="evaluator">Evaluator</SelectItem>
               </SelectContent>
             </Select>
           </div>
           {(form.role === "admin_prodi" || form.role === "mahasiswa") && (
-            <div className="space-y-1">
-              <Label>Program Studi</Label>
-              <Select value={form.prodiId} onValueChange={(v) => setForm({ ...form, prodiId: v })}>
+            <div>
+              <Label>Unit Akademik (Opsional)</Label>
+              <Select value={form.unitId} onValueChange={(v) => setForm({ ...form, unitId: v })}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Pilih prodi (opsional)" />
+                  <SelectValue placeholder="Pilih unit (opsional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">-- Tidak ada --</SelectItem>
-                  {prodiRepo.all().map((p) => (
+                  <SelectItem value="none">(Tidak Ada Unit)</SelectItem>
+                  {unitAkademikRepo.all().map((p) => (
                     <SelectItem key={p.id} value={p.id}>{p.nama}</SelectItem>
                   ))}
                 </SelectContent>

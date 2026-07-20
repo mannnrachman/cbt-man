@@ -28,6 +28,7 @@ type StoredFileRecord = {
   size: number;
   createdAt: number;
   extension: string;
+  jurusanId?: string;
 };
 
 const fileSchema = z.object({
@@ -37,6 +38,7 @@ const fileSchema = z.object({
   size: z.number(),
   createdAt: z.number(),
   extension: z.string().default(""),
+  jurusanId: z.string().optional(),
 });
 
 async function pathApi() {
@@ -152,7 +154,7 @@ function extractFileIds(html: string): string[] {
 // `pesertaSnapshot` (repos/functions.ts) so authorization and visibility stay
 // consistent, and prevents a peserta from fetching arbitrary file ids.
 async function pesertaCanAccessFile(
-  caller: { id: string; role: string; groupId: string | null },
+  caller: { id: string; role: string; unitId: string | null },
   fileId: string,
 ): Promise<boolean> {
   // Group-assigned exams: groupIds empty (open to all) OR includes the group.
@@ -161,7 +163,7 @@ async function pesertaCanAccessFile(
   });
   const assigned = ujianRows.filter((u) => {
     const groupIds = parseJson<string[]>(u.groupIds, []);
-    return groupIds.length === 0 || (!!caller.groupId && groupIds.includes(caller.groupId));
+    return groupIds.length === 0 || (!!caller.unitId && groupIds.includes(caller.unitId));
   });
   const allowed = new Set<string>();
   for (const u of assigned) {
@@ -216,6 +218,7 @@ export const uploadStoredFile = createServerFn({ method: "POST" })
       name: z.string().min(1),
       mime: z.string().min(1),
       dataBase64: z.string().min(1),
+      jurusanId: z.string().optional(),
     }),
   )
   .handler(async ({ data }) => {
@@ -234,6 +237,7 @@ export const uploadStoredFile = createServerFn({ method: "POST" })
       size: buffer.byteLength,
       createdAt: Date.now(),
       extension,
+      jurusanId: data.jurusanId,
     };
 
     await writeFile(await filePath(id, extension), buffer);
@@ -301,6 +305,7 @@ const fileBackupSchema = z.object({
   createdAt: z.number(),
   extension: z.string(),
   dataBase64: z.string(),
+  jurusanId: z.string().optional(),
 });
 
 export const exportFilesServer = createServerFn({ method: "GET" }).handler(async () => {
@@ -341,6 +346,7 @@ export const importFilesServer = createServerFn({ method: "POST" })
         size: item.size,
         createdAt: item.createdAt,
         extension: item.extension,
+        jurusanId: item.jurusanId,
       };
       await writeFile(await metaPath(item.id), JSON.stringify(meta, null, 2));
     }

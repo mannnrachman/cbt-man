@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { configRepo } from "@/lib/cbt/repos";
 
@@ -45,7 +45,7 @@ function PanduanPage() {
   }, []);
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
+    <div className="mx-auto max-w-6xl space-y-6 pb-20">
       {/* Header */}
       <div className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-zinc-100">
@@ -60,7 +60,7 @@ function PanduanPage() {
         {/* Main Content */}
         <article
           ref={contentRef}
-          className="flex-1 min-w-0 space-y-10 text-sm text-slate-700 dark:text-slate-300 leading-relaxed"
+          className="flex-1 min-w-0 text-sm text-slate-700 dark:text-slate-300 leading-relaxed divide-y divide-slate-200/80 dark:divide-slate-800/80 [&>section]:py-10 first:[&>section]:pt-0"
         >
           {/* Alur Kerja Overview */}
           <section data-section="alur-kerja">
@@ -200,7 +200,7 @@ function PanduanPage() {
             ]} />
           </section>
 
-          <hr className="border-slate-200 dark:border-slate-800" />
+
 
           {/* Import */}
           <section data-section="import">
@@ -273,7 +273,7 @@ function PanduanPage() {
             </div>
           </section>
 
-          <hr className="border-slate-200 dark:border-slate-800" />
+
 
           {/* FAQ */}
           <section data-section="faq">
@@ -316,20 +316,21 @@ function PanduanPage() {
           </div>
         </article>
 
-        {/* Sticky TOC Sidebar */}
-        <nav className="hidden lg:block w-48 shrink-0 sticky top-20">
-          <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3">
+        {/* Floating TOC Sidebar */}
+        <nav aria-label="Daftar Isi Panduan" className="hidden lg:block w-56 shrink-0 sticky top-24 self-start bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm rounded-xl p-4">
+          <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-3 px-2">
             Daftar Isi
           </div>
-          <ul className="space-y-0.5 border-l border-slate-200 dark:border-slate-800">
+          <ul className="space-y-1">
             {tocSections.map((s) => (
               <li key={s.id}>
                 <a
                   href={`#${s.id}`}
-                  className={`block pl-3 py-1 text-xs transition-colors border-l-2 -ml-px ${
+                  aria-current={activeId === s.id ? "true" : undefined}
+                  className={`block px-3 py-1.5 text-xs rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 ${
                     activeId === s.id
-                      ? "border-slate-900 dark:border-zinc-100 text-slate-900 dark:text-zinc-100 font-semibold"
-                      : "border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-zinc-300"
+                      ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-zinc-100 font-semibold"
+                      : "text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-zinc-300"
                   }`}
                 >
                   {s.label}
@@ -385,8 +386,8 @@ function StepList({ steps }: { steps: React.ReactNode[] }) {
 
 function Tip({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex gap-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/40 text-sm text-blue-800 dark:text-blue-300 mb-4">
-      <span className="shrink-0 text-blue-500 font-bold text-xs mt-0.5">TIP</span>
+    <div role="note" className="flex gap-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/40 text-sm text-blue-800 dark:text-blue-300 mb-4">
+      <span className="shrink-0 text-blue-500 font-bold text-xs mt-0.5" aria-hidden="true">TIP</span>
       <span>{children}</span>
     </div>
   );
@@ -394,8 +395,8 @@ function Tip({ children }: { children: React.ReactNode }) {
 
 function Warning({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex gap-3 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/40 text-sm text-amber-800 dark:text-amber-300 mb-4">
-      <span className="shrink-0 text-amber-600 font-bold text-xs mt-0.5">⚠</span>
+    <div role="alert" className="flex gap-3 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/40 text-sm text-amber-800 dark:text-amber-300 mb-4">
+      <span className="shrink-0 text-amber-600 font-bold text-xs mt-0.5" aria-hidden="true">⚠</span>
       <span>{children}</span>
     </div>
   );
