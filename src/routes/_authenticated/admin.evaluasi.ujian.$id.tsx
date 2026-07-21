@@ -46,10 +46,10 @@ function EvaluasiUjianList() {
   const totalBelum = items.reduce((acc, curr) => acc + curr.belum, 0);
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 pb-20">
+    <div className="mx-auto max-w-6xl space-y-6 pb-20">
       <div className="mb-4">
         <Link to="/admin/evaluasi" className="inline-flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
-          ← Kembali ke Kotak Masuk
+          ← Kembali ke Penilaian Essay
         </Link>
       </div>
       
@@ -96,15 +96,11 @@ function EvaluasiUjianList() {
                       <span className="text-slate-700 dark:text-slate-300">{total - belum}</span> / {total} dinilai
                     </div>
                     {isWarning ? (
-                      <div className="flex items-center justify-end gap-1.5 text-xs font-bold text-amber-700 dark:text-amber-500 w-24 bg-amber-50 dark:bg-amber-900/20 px-2 py-1 rounded-md border border-amber-200/50 dark:border-amber-800/50">
-                        <span className="relative flex h-1.5 w-1.5 shrink-0">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500"></span>
-                        </span>
-                        {belum} tertunda
+                      <div className="flex items-center justify-center text-xs font-semibold text-accent bg-accent/10 px-2.5 py-1 rounded-md">
+                        {belum} Perlu Dinilai
                       </div>
                     ) : (
-                      <div className="text-xs font-bold text-emerald-600 dark:text-emerald-500 w-24 justify-end flex items-center gap-1 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded-md border border-emerald-100 dark:border-emerald-800/50">
+                      <div className="flex items-center justify-center text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-md">
                         Selesai
                       </div>
                     )}

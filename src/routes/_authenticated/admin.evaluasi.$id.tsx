@@ -63,13 +63,13 @@ function EvaluasiSesi() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8 pb-32">
+    <div className="mx-auto max-w-6xl space-y-8 pb-32">
       <div className="mb-6 bg-white dark:bg-slate-950 p-6 sm:p-8 rounded-[22px] border border-slate-200 dark:border-slate-800 shadow-sleek">
         <Link 
           to="/admin/evaluasi" 
           className="text-sm font-bold text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 transition-colors mb-6 inline-flex items-center gap-1"
         >
-          ← Kembali ke Kotak Masuk
+          ← Kembali
         </Link>
         <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
           {peserta?.namaLengkap || "Peserta Anonim"}
@@ -98,15 +98,11 @@ function EvaluasiSesi() {
                   Pertanyaan {idx + 1}
                 </span>
                 {isGraded ? (
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-500 flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded-md border border-emerald-100 dark:border-emerald-800/30">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-primary flex items-center gap-1.5 bg-primary/10 px-2 py-1 rounded-md border border-primary/20">
                     <CheckCircle2 className="h-3.5 w-3.5" /> Dinilai
                   </span>
                 ) : (
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-500 flex items-center gap-1.5 bg-amber-50 dark:bg-amber-900/20 px-2 py-1 rounded-md border border-amber-200/50 dark:border-amber-800/50">
-                    <span className="relative flex h-1.5 w-1.5 shrink-0">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500"></span>
-                    </span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-accent flex items-center gap-1.5 bg-accent/10 px-2 py-1 rounded-md border border-accent/20">
                     Belum
                   </span>
                 )}
@@ -114,8 +110,16 @@ function EvaluasiSesi() {
               
               <div className="p-6">
                 {/* Question Content */}
-                <div className="prose prose-sm dark:prose-invert max-w-none text-slate-900 dark:text-slate-100 mb-8">
-                  <RichView html={soal.detail} />
+                <div className="mb-6 p-6 bg-primary/5 dark:bg-primary/10 rounded-2xl border border-primary/10 dark:border-primary/20">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                    <span className="text-[11px] font-bold text-primary uppercase tracking-wider">
+                      Pertanyaan Soal
+                    </span>
+                  </div>
+                  <div className="prose prose-lg prose-slate dark:prose-invert max-w-none text-slate-900 dark:text-slate-100 font-medium leading-relaxed">
+                    <RichView html={soal.detail} />
+                  </div>
                 </div>
                 
                 {/* Student Answer */}
@@ -142,7 +146,7 @@ function EvaluasiSesi() {
                         value={j.skor ?? ""}
                         onChange={(e) => setSkor(idx, e.target.value === "" ? undefined : Number(e.target.value), j.catatanGrader ?? "")}
                         placeholder="0"
-                        className="w-20 h-10 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm font-bold text-slate-900 dark:text-slate-100 text-center pr-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
+                        className="w-20 h-10 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm font-bold text-slate-900 dark:text-slate-100 text-center pr-2 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
                       />
                     </div>
                     <span className="text-sm font-bold text-slate-500">/ {ujian.poinBenar}</span>
@@ -158,7 +162,7 @@ function EvaluasiSesi() {
                       value={j.catatanGrader ?? ""}
                       onChange={(e) => setSkor(idx, j.skor, e.target.value)}
                       placeholder="Tambahkan evaluasi (opsional)..."
-                      className="flex-1 w-full h-10 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-slate-100 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
+                      className="flex-1 w-full h-10 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-slate-100 px-4 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
                     />
                   </div>
 
@@ -185,7 +189,7 @@ function EvaluasiSesi() {
           
           <button 
             onClick={selesaikan}
-            className="flex items-center gap-2 text-sm font-bold bg-blue-600 text-white px-5 sm:px-6 py-2.5 rounded-full hover:bg-blue-500 active:bg-blue-700 shadow-md transition-colors"
+            className="flex items-center gap-2 text-sm font-bold bg-primary text-primary-foreground px-5 sm:px-6 py-2.5 rounded-full hover:opacity-90 active:scale-95 shadow-md transition-all"
           >
             <Save className="h-4 w-4" />
             Simpan Nilai

@@ -70,7 +70,7 @@ function AnalisisPage() {
   }
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="mx-auto max-w-6xl space-y-6 pb-12">
       <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6 rounded-xl border shadow-sm">
         <Link to="/admin/analitik" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 w-fit mb-3">
           ← Kembali ke daftar analitik
@@ -154,8 +154,13 @@ function AnalisisPage() {
               </div>
               <CardContent className="p-4 space-y-4">
                 {soal && (
-                  <div className="prose prose-sm max-w-none text-foreground">
-                    <RichView html={soal.detail} />
+                  <div className="mb-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800">
+                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 block">
+                      Pertanyaan Soal
+                    </span>
+                    <div className="prose prose-slate dark:prose-invert max-w-none text-slate-800 dark:text-slate-200 text-base md:text-[15px] font-medium leading-relaxed">
+                      <RichView html={soal.detail} />
+                    </div>
                   </div>
                 )}
                 
