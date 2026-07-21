@@ -16,7 +16,7 @@ export const Route = createFileRoute("/_authenticated/admin/peserta/group")({
 function GroupPage() {
   const [groups, setGroups] = useState<Group[]>(groupsRepo.all());
   const [nama, setNama] = useState("");
-  const peserta = usersRepo.all().filter((u) => u.role === "peserta");
+  const peserta = usersRepo.all().filter((u) => u.role === "mahasiswa");
 
   function add() {
     if (!nama.trim()) return;

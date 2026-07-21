@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { hydrateRepos, invalidateReposCache } from "./repos";
-import { loginServer, logoutServer, validateSessionServer } from "@/lib/server/repos/functions";
+import { loginServer, logoutServer, validateSessionServer } from "@/lib/server/auth/functions";
 import type { Role, User } from "./types";
 
 type AuthState = {

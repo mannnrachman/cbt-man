@@ -1,10 +1,19 @@
+import crypto from "crypto";
+
 const DEFAULT_ROLE_ACCESS = {
-  operator: [
+  admin_prodi: [
     "dashboard",
     "peserta",
     "modul",
     "files",
     "ujian",
+    "hasil",
+    "evaluasi",
+    "laporan",
+    "leaderboard",
+  ],
+  evaluator: [
+    "dashboard",
     "hasil",
     "evaluasi",
     "laporan",
@@ -121,21 +130,26 @@ function buildSesiRecord({ uid, now, ujian, peserta, questionEntries, answerPlan
 
 export async function createSeedDataset({ uid, now, hashPassword }) {
   const ts = now ?? Date.now();
-  const schoolName = "SMA Nusantara Cendekia";
+  const schoolName = "Universitas Teknologi Nusantara";
 
   const groups = [
-    { id: uid("g_"), nama: "X IPA 1", keterangan: `${schoolName} · Kelas X IPA 1` },
-    { id: uid("g_"), nama: "XI IPA 2", keterangan: `${schoolName} · Kelas XI IPA 2` },
-    { id: uid("g_"), nama: "XII IPS 1", keterangan: `${schoolName} · Kelas XII IPS 1` },
-    { id: uid("g_"), nama: "XII Bahasa", keterangan: `${schoolName} · Kelas XII Bahasa` },
+    { id: uid("g_"), nama: "Teknik Informatika", keterangan: `${schoolName} · Program Studi Teknik Informatika` },
+    { id: uid("g_"), nama: "Sistem Informasi", keterangan: `${schoolName} · Program Studi Sistem Informasi` },
+    { id: uid("g_"), nama: "Ilmu Komputer", keterangan: `${schoolName} · Program Studi Ilmu Komputer` },
+    { id: uid("g_"), nama: "Bisnis Digital", keterangan: `${schoolName} · Program Studi Bisnis Digital` },
   ];
+
+  const adminPassword = process.env.ADMIN_PASSWORD || (process.env.NODE_ENV === "production" ? crypto.randomBytes(8).toString("hex") : "admin123");
+  if (process.env.NODE_ENV === "production" && !process.env.ADMIN_PASSWORD) {
+    console.warn(`[WARNING] No ADMIN_PASSWORD provided in production! Generated random password for super_admin: ${adminPassword}`);
+  }
 
   const admin = {
     id: uid("u_"),
     username: "admin",
-    passwordHash: await hashPassword("admin123"),
+    passwordHash: await hashPassword(adminPassword),
     namaLengkap: "Rahmawati Kusuma, M.Pd",
-    role: "admin",
+    role: "super_admin",
     allowedTopikIds: [],
     detail: `${schoolName} · Kepala Sistem CBT`,
     aktif: true,
@@ -147,17 +161,29 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
     username: "operator1",
     passwordHash: await hashPassword("operator123"),
     namaLengkap: "Budi Santoso, S.Kom",
-    role: "operator",
+    role: "admin_prodi",
     allowedTopikIds: [],
     detail: `${schoolName} · Operator Laboratorium Komputer`,
     aktif: true,
     createdAt: ts + 1,
   };
 
+  const evaluator1 = {
+    id: uid("u_"),
+    username: "evaluator1",
+    passwordHash: await hashPassword("evaluator123"),
+    namaLengkap: "Dr. Evaluator Utama",
+    role: "evaluator",
+    allowedTopikIds: [],
+    detail: `${schoolName} · Evaluator Penilaian Ujian`,
+    aktif: true,
+    createdAt: ts + 2,
+  };
+
   const guruNames = [
-    ["guru_mtk", "Dian Puspitasari, S.Pd"],
-    ["guru_fisika", "Andri Wijaya, S.Pd"],
-    ["guru_biologi", "Rina Marlina, S.Pd"],
+    ["dosen_rpl", "Dr. Dian Puspitasari, S.Kom., M.Cs."],
+    ["dosen_db", "Prof. Andri Wijaya, Ph.D."],
+    ["dosen_algo", "Rina Marlina, M.Kom."],
   ];
 
   const pesertaSeed = [
@@ -172,30 +198,30 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
   ];
 
   const modul = [
-    { id: uid("m_"), nama: "Matematika", aktif: true },
-    { id: uid("m_"), nama: "Fisika", aktif: true },
-    { id: uid("m_"), nama: "Biologi", aktif: true },
+    { id: uid("m_"), nama: "Pemrograman Web", aktif: true },
+    { id: uid("m_"), nama: "Basis Data", aktif: true },
+    { id: uid("m_"), nama: "Algoritma", aktif: true },
   ];
 
   const topik = [
-    { id: uid("t_"), modulId: modul[0].id, nama: "Aljabar Linear" },
-    { id: uid("t_"), modulId: modul[0].id, nama: "Statistika Dasar" },
-    { id: uid("t_"), modulId: modul[1].id, nama: "Gerak dan Gaya" },
-    { id: uid("t_"), modulId: modul[1].id, nama: "Listrik Dinamis" },
-    { id: uid("t_"), modulId: modul[2].id, nama: "Sel dan Metabolisme" },
-    { id: uid("t_"), modulId: modul[2].id, nama: "Ekosistem" },
+    { id: uid("t_"), modulId: modul[0].id, nama: "HTML & CSS Dasar" },
+    { id: uid("t_"), modulId: modul[0].id, nama: "React dan State Management" },
+    { id: uid("t_"), modulId: modul[1].id, nama: "Desain Skema Relasional" },
+    { id: uid("t_"), modulId: modul[1].id, nama: "Query SQL Lanjut" },
+    { id: uid("t_"), modulId: modul[2].id, nama: "Struktur Data Pohon" },
+    { id: uid("t_"), modulId: modul[2].id, nama: "Kompleksitas Waktu (Big O)" },
   ];
 
-  const users = [admin, operator];
+  const users = [admin, operator, evaluator1];
   for (const [username, namaLengkap] of guruNames) {
     users.push({
       id: uid("u_"),
       username,
-      passwordHash: await hashPassword("guru123"),
+      passwordHash: await hashPassword("dosen123"),
       namaLengkap,
-      role: "operator",
+      role: "admin_prodi",
       allowedTopikIds: [],
-      detail: `${schoolName} · Guru mapel`,
+      detail: `${schoolName} · Dosen Pengampu`,
       aktif: true,
       createdAt: ts + users.length,
     });
@@ -206,19 +232,19 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
       username,
       passwordHash: await hashPassword("peserta123"),
       namaLengkap,
-      role: "peserta",
+      role: "mahasiswa",
       allowedTopikIds: [],
       groupId,
-      detail: `${schoolName} · Peserta aktif`,
+      detail: `${schoolName} · Mahasiswa aktif`,
       aktif: true,
       createdAt: ts + users.length,
     });
   }
 
-  const restrictedTeacher = users.find((item) => item.username === "guru_fisika");
+  const restrictedTeacher = users.find((item) => item.username === "dosen_db");
   if (restrictedTeacher) {
     restrictedTeacher.allowedTopikIds = [topik[2].id, topik[3].id];
-    restrictedTeacher.detail = `${schoolName} · Guru Fisika (akses topik terbatas)`;
+    restrictedTeacher.detail = `${schoolName} · Dosen Basis Data (akses topik terbatas)`;
   }
 
   const soalBlueprints = [
@@ -261,13 +287,13 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
     };
   });
 
-  const peserta = users.filter((item) => item.role === "peserta");
+  const peserta = users.filter((item) => item.role === "mahasiswa");
 
   const ujian = [
     {
       id: uid("ex_"),
-      nama: "PTS Matematika Kelas X",
-      deskripsi: "<p>Penilaian Tengah Semester Matematika kelas X. Kerjakan teliti dan manfaatkan waktu dengan baik.</p>",
+      nama: "Ujian Akhir Semester Pemrograman Web",
+      deskripsi: "<p>Ujian Akhir Semester untuk mata kuliah Pemrograman Web. Kerjakan dengan teliti.</p>",
       durasiMenit: 45,
       poinBenar: 10,
       poinSalah: 0,
@@ -291,8 +317,8 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
     },
     {
       id: uid("ex_"),
-      nama: "Tryout Fisika Dasar XI",
-      deskripsi: "<p>Tryout mandiri Fisika Dasar untuk latihan sebelum PAS.</p>",
+      nama: "Ujian Tengah Semester Basis Data",
+      deskripsi: "<p>Ujian Tengah Semester mata kuliah Basis Data Relasional.</p>",
       durasiMenit: 40,
       poinBenar: 5,
       poinSalah: -1,
@@ -316,8 +342,8 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
     },
     {
       id: uid("ex_"),
-      nama: "Asesmen Biologi Akhir Semester",
-      deskripsi: "<p>Asesmen akhir semester Biologi dengan kombinasi pilihan ganda dan essay.</p>",
+      nama: "Ujian Komprehensif Algoritma",
+      deskripsi: "<p>Asesmen akhir mata kuliah Algoritma dan Struktur Data.</p>",
       durasiMenit: 50,
       poinBenar: 10,
       poinSalah: 0,
@@ -341,12 +367,39 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
     },
   ];
 
+  for (let i = 1; i <= 20; i++) {
+    ujian.push({
+      id: uid("ex_"),
+      nama: `Ujian Simulasi ${i} - Tes Kemampuan Dasar`,
+      deskripsi: `<p>Ujian simulasi otomatis ke-${i} untuk pengujian performa tabel dan pagination.</p>`,
+      durasiMenit: 60,
+      poinBenar: 10,
+      poinSalah: 0,
+      poinKosong: 0,
+      beginAt: ts - parseDurationMinutes(300 + (i * 5)),
+      endAt: ts + parseDurationMinutes(1440 + (i * 10)),
+      tokenAktif: true,
+      ipRange: "",
+      groupIds: [groups[0].id, groups[1].id, groups[2].id, groups[3].id],
+      topicSets: [
+        { id: uid("ts_"), topikId: topik[0].id, jumlah: 1, jumlahOpsi: 4, acakSoal: true, acakJawaban: true },
+      ],
+      showResult: true,
+      showResultDetail: false,
+      fullscreenWajib: false,
+      maxPindahTab: 5,
+      blokirShortcut: false,
+      createdBy: admin.id,
+      createdAt: ts + 302 + i,
+    });
+  }
+
   const token = [
-    { id: uid("tk_"), ujianId: ujian[0].id, kode: "MTK-X-01", dipakaiOleh: peserta[0].id, dipakaiAt: ts - parseDurationMinutes(70) },
-    { id: uid("tk_"), ujianId: ujian[0].id, kode: "MTK-X-02" },
-    { id: uid("tk_"), ujianId: ujian[0].id, kode: "MTK-X-03" },
-    { id: uid("tk_"), ujianId: ujian[2].id, kode: "BIO-AS-01", dipakaiOleh: peserta[4].id, dipakaiAt: ts - parseDurationMinutes(120) },
-    { id: uid("tk_"), ujianId: ujian[2].id, kode: "BIO-AS-02" },
+    { id: uid("tk_"), ujianId: ujian[0].id, kode: "UAS-WEB-01", dipakaiOleh: peserta[0].id, dipakaiAt: ts - parseDurationMinutes(70) },
+    { id: uid("tk_"), ujianId: ujian[0].id, kode: "UAS-WEB-02" },
+    { id: uid("tk_"), ujianId: ujian[0].id, kode: "UAS-WEB-03" },
+    { id: uid("tk_"), ujianId: ujian[2].id, kode: "KOMP-ALG-01", dipakaiOleh: peserta[4].id, dipakaiAt: ts - parseDurationMinutes(120) },
+    { id: uid("tk_"), ujianId: ujian[2].id, kode: "KOMP-ALG-02" },
   ];
 
   const soalByTopik = Object.fromEntries(topik.map((item) => [item.id, soal.filter((entry) => entry.topikId === item.id)]));
@@ -494,9 +547,9 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
   );
 
   const config = {
-    appName: "CBT-MAN Demo Sekolah",
-    appDeskripsi: "Simulasi CBT sekolah dengan data dummy realistis untuk preview lokal.",
-    pesanLogin: "Selamat datang di portal ujian SMA Nusantara Cendekia. Gunakan akun demo sesuai peran untuk mencoba alur sistem.",
+    appName: "CBT-Kampus",
+    appDeskripsi: "Simulasi CBT Kampus dengan data dummy realistis untuk preview lokal.",
+    pesanLogin: "Selamat datang di portal ujian Universitas Teknologi Nusantara. Gunakan akun demo sesuai peran untuk mencoba alur sistem.",
     mobileLock: false,
     multiDevice: false,
     roleAccess: DEFAULT_ROLE_ACCESS,
@@ -518,6 +571,7 @@ export async function seedDatabase({ prisma, dataset, stringifyJson }) {
   await prisma.appConfig.deleteMany();
 
   await prisma.group.createMany({ data: dataset.groups });
+  // ponytail: Seed script isn't transactional because it's a one-time setup. If it fails, wipe DB and retry. Upgrade path: Use prisma.$transaction for production data migrations.
   await prisma.user.createMany({
     data: dataset.users.map((item) => ({
       ...item,

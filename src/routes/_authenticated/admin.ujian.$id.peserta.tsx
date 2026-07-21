@@ -20,7 +20,7 @@ function PesertaUjian() {
     .all()
     .filter(
       (u) =>
-        u.role === "peserta" &&
+        u.role === "mahasiswa" &&
         (ujian.groupIds.length === 0 || ujian.groupIds.includes(u.groupId ?? "")),
     );
 

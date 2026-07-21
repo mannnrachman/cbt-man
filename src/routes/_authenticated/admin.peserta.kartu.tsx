@@ -13,7 +13,7 @@ export const Route = createFileRoute("/_authenticated/admin/peserta/kartu")({
 function KartuPage() {
   const [groupId, setGroupId] = useState<string>("all");
   const groups = groupsRepo.all();
-  const peserta = usersRepo.all().filter((u) => u.role === "peserta" && (groupId === "all" || u.groupId === groupId));
+  const peserta = usersRepo.all().filter((u) => u.role === "mahasiswa" && (groupId === "all" || u.groupId === groupId));
   const appName = configRepo.get().appName;
 
   return (

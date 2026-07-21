@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { configRepo, usersRepo, topikRepo, modulRepo } from "@/lib/cbt/repos";
-import { upsertUserServer } from "@/lib/server/repos/functions";
+import { upsertUserServer } from "@/lib/server/users/functions";
 import { NAV_KEYS, type NavKey, type User } from "@/lib/cbt/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,18 +9,19 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 
 const LABEL: Record<NavKey, string> = {
-  dashboard: "Dashboard",
-  users: "Pengguna",
-  peserta: "Peserta",
-  modul: "Bank Soal",
-  files: "File Manager",
-  ujian: "Paket Ujian",
-  hasil: "Hasil",
+  dashboard: "Dashboard Utama",
+  users: "Kelola Pengguna",
+  akademik: "Data Akademik",
+  peserta: "Kelola Peserta",
+  modul: "Bank Soal & Modul",
+  files: "File Manager (Media)",
+  ujian: "Kelola Paket Ujian",
+  hasil: "Hasil Ujian & Riwayat",
   evaluasi: "Evaluasi Essay",
-  laporan: "Laporan",
-  leaderboard: "Leaderboard",
-  pengaturan: "Pengaturan",
-  tools: "Backup & Tools",
+  laporan: "Laporan & Statistik",
+  leaderboard: "Leaderboard Ujian",
+  pengaturan: "Pengaturan Sistem",
+  tools: "Backup & Restore",
 };
 
 export const Route = createFileRoute("/_authenticated/admin/users/roles")({
@@ -29,15 +30,17 @@ export const Route = createFileRoute("/_authenticated/admin/users/roles")({
 
 function RolesPage() {
   const [cfg, setCfg] = useState(configRepo.get());
-  const operatorAccess = (cfg.roleAccess.operator ?? []) as NavKey[];
-  const operators = usersRepo.all().filter((u) => u.role === "operator");
+  const adminProdiAccess = (cfg.roleAccess.admin_prodi ?? []) as NavKey[];
+  const evaluatorAccess = (cfg.roleAccess.evaluator ?? []) as NavKey[];
+  const managers = usersRepo.all().filter((u) => u.role === "admin_prodi" || u.role === "evaluator");
   const moduls = modulRepo.all();
   const topiks = topikRepo.all();
 
-  function toggleNav(key: NavKey) {
-    const has = operatorAccess.includes(key);
-    const next = has ? operatorAccess.filter((x) => x !== key) : [...operatorAccess, key];
-    const c = { ...cfg, roleAccess: { ...cfg.roleAccess, operator: next } };
+  function toggleNav(role: "admin_prodi" | "evaluator", key: NavKey) {
+    const list = (cfg.roleAccess[role] ?? []) as NavKey[];
+    const has = list.includes(key);
+    const next = has ? list.filter((x) => x !== key) : [...list, key];
+    const c = { ...cfg, roleAccess: { ...cfg.roleAccess, [role]: next } };
     configRepo.set(c);
     setCfg(c);
   }
@@ -75,42 +78,62 @@ function RolesPage() {
         </Link>
         <h1 className="text-2xl font-semibold tracking-tight">Hak Akses Role</h1>
         <p className="text-sm text-muted-foreground">
-          Atur menu yang bisa diakses operator dan topik mana yang boleh dia kelola.
+          Atur menu yang bisa diakses Admin Prodi dan Evaluator, serta topik mana yang boleh mereka kelola.
         </p>
       </div>
 
       <Card>
         <CardContent className="space-y-3 p-4">
-          <h3 className="font-medium">Menu yang bisa diakses operator (guru)</h3>
+          <h3 className="font-medium">Menu yang bisa diakses Admin Prodi</h3>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {NAV_KEYS.filter((k) => k !== "users" && k !== "pengaturan" && k !== "tools").map(
               (k) => (
                 <label key={k} className="flex items-center gap-2 rounded border p-2 text-sm">
                   <Checkbox
-                    checked={operatorAccess.includes(k)}
-                    onCheckedChange={() => toggleNav(k)}
+                    checked={adminProdiAccess.includes(k)}
+                    onCheckedChange={() => toggleNav("admin_prodi", k)}
                   />
                   {LABEL[k]}
                 </label>
               ),
             )}
           </div>
-          <p className="text-xs text-muted-foreground">
-            Admin selalu memiliki akses penuh. Menu dengan ikon kunci (Pengguna, Pengaturan, Tools)
-            hanya untuk admin.
-          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="space-y-3 p-4">
+          <h3 className="font-medium">Menu yang bisa diakses Evaluator</h3>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {NAV_KEYS.filter((k) => k !== "users" && k !== "pengaturan" && k !== "tools").map(
+              (k) => (
+                <label key={k} className="flex items-center gap-2 rounded border p-2 text-sm">
+                  <Checkbox
+                    checked={evaluatorAccess.includes(k)}
+                    onCheckedChange={() => toggleNav("evaluator", k)}
+                  />
+                  {LABEL[k]}
+                </label>
+              ),
+            )}
+          </div>
         </CardContent>
       </Card>
 
       <Card>
         <CardContent className="space-y-4 p-4">
-          <h3 className="font-medium">Topik yang boleh dikelola operator</h3>
-          {operators.length === 0 && (
-            <p className="text-sm text-muted-foreground">Belum ada operator.</p>
+          <h3 className="font-medium">Topik yang boleh dikelola Admin Prodi & Evaluator</h3>
+          {managers.length === 0 && (
+            <p className="text-sm text-muted-foreground">Belum ada Admin Prodi atau Evaluator.</p>
           )}
-          {operators.map((u) => (
+          {managers.map((u) => (
             <div key={u.id} className="rounded border p-3">
-              <div className="mb-2 font-medium">{u.namaLengkap}</div>
+              <div className="mb-2 font-medium">
+                {u.namaLengkap}{" "}
+                <span className="text-xs text-muted-foreground">
+                  ({u.role === "admin_prodi" ? "Admin Prodi" : "Evaluator"})
+                </span>
+              </div>
               <div className="space-y-2">
                 {moduls.map((m) => {
                   const ts = topiks.filter((t) => t.modulId === m.id);

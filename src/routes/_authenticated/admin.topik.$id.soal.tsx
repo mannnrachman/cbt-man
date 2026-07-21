@@ -3,14 +3,13 @@ import { useState } from "react";
 import { topikRepo, modulRepo, soalRepo } from "@/lib/cbt/repos";
 import { uid } from "@/lib/cbt/storage";
 import type { Soal, TipeSoal, Kesulitan, Jawaban } from "@/lib/cbt/types";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Pencil, Trash2, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, BookOpen, Layers, CheckCircle2, ListChecks } from "lucide-react";
 import { toast } from "sonner";
 import { RichEditor, RichView } from "@/components/cbt/RichEditor";
 import { useAuthStore } from "@/lib/cbt/auth-store";
@@ -38,11 +37,17 @@ function SoalPage() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Soal | null>(null);
 
-  if (!topik || !modul) return <div>Topik tidak ditemukan.</div>;
+  if (!topik || !modul) return (
+    <div className="flex flex-col items-center justify-center py-20 text-center">
+      <p className="text-slate-500 mb-4">Topik tidak ditemukan.</p>
+      <Button asChild variant="outline"><Link to="/admin/modul">Kembali ke Bank Soal</Link></Button>
+    </div>
+  );
+  
   if (!allowed) return (
-    <div className="rounded-md border bg-muted/30 p-4 text-sm">
-      Anda tidak memiliki akses ke topik <strong>{topik.nama}</strong>. Hubungi admin.{" "}
-      <Link to="/admin/modul" className="text-primary hover:underline">← Kembali ke Modul</Link>
+    <div className="flex items-center gap-3 rounded-xl border border-red-200/50 bg-red-50/50 dark:bg-red-950/20 p-4 text-sm text-red-700 dark:text-red-400 mt-6 max-w-4xl mx-auto">
+      Anda tidak memiliki akses ke topik <strong>{topik.nama}</strong>. Hubungi admin.
+      <Link to="/admin/modul" className="font-semibold underline ml-2">← Kembali ke Modul</Link>
     </div>
   );
 
@@ -59,72 +64,131 @@ function SoalPage() {
   );
 
   return (
-    <div className="space-y-4">
-      <div>
-        <Link to="/admin/modul" className="text-sm text-muted-foreground hover:underline">Modul</Link>
-        <span className="text-sm text-muted-foreground"> / </span>
-        <Link to="/admin/modul/$id/topik" params={{ id: modul.id }} className="text-sm text-muted-foreground hover:underline">{modul.nama}</Link>
-        <h1 className="text-2xl font-semibold tracking-tight">{topik.nama} — Soal ({soals.length})</h1>
-      </div>
-
-      <div className="flex flex-wrap gap-2">
-        <div className="relative max-w-sm flex-1">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input className="pl-8" placeholder="Cari soal…" value={query} onChange={(e) => setQuery(e.target.value)} />
+    <div className="mx-auto max-w-6xl space-y-8 animate-in fade-in duration-500 pb-12 pt-4">
+      {/* Header Section */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-end justify-between border-b border-slate-200 dark:border-white/10 pb-6">
+        <div className="space-y-2">
+          <div className="flex items-center text-sm font-medium text-muted-foreground gap-2">
+            <Link to="/admin/modul" className="hover:text-primary transition-colors flex items-center gap-1">
+              ← Modul
+            </Link>
+            <span>/</span>
+            <Link to="/admin/modul/$id/topik" params={{ id: modul.id }} className="hover:text-primary transition-colors">
+              {modul.nama}
+            </Link>
+          </div>
+          <div className="flex items-center gap-2">
+            <ListChecks className="h-6 w-6 text-slate-400" />
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{topik.nama}</h1>
+            <span className="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-bold ml-2">
+              {soals.length} Soal
+            </span>
+          </div>
         </div>
-        <Select value={tipe} onValueChange={setTipe}>
-          <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Semua tipe</SelectItem>
-            {Object.entries(TIPE_LABEL).map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}
-          </SelectContent>
-        </Select>
-        <Select value={kes} onValueChange={setKes}>
-          <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Semua kesulitan</SelectItem>
-            {Object.entries(KES_LABEL).map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}
-          </SelectContent>
-        </Select>
-        <Button onClick={() => { setEditing(null); setOpen(true); }}><Plus className="mr-1 h-4 w-4" />Soal Baru</Button>
       </div>
 
-      <div className="space-y-2">
-        {shown.map((s, i) => (
-          <Card key={s.id}>
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 space-y-2">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <span>#{i + 1}</span>
-                    <span className="rounded bg-accent px-1.5 py-0.5 font-medium text-accent-foreground">{TIPE_LABEL[s.tipe]}</span>
-                    <span className="rounded bg-muted px-1.5 py-0.5">{KES_LABEL[s.kesulitan]}</span>
-                  </div>
+      {/* Toolbar / Filters */}
+      <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Input 
+            className="pl-9 bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800" 
+            placeholder="Cari kata kunci dalam soal…" 
+            value={query} 
+            onChange={(e) => setQuery(e.target.value)} 
+          />
+        </div>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Select value={tipe} onValueChange={setTipe}>
+            <SelectTrigger className="w-full sm:w-44 bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua tipe</SelectItem>
+              {Object.entries(TIPE_LABEL).map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Select value={kes} onValueChange={setKes}>
+            <SelectTrigger className="w-full sm:w-40 bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua kesulitan</SelectItem>
+              {Object.entries(KES_LABEL).map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Button onClick={() => { setEditing(null); setOpen(true); }} className="w-full sm:w-auto font-semibold">
+            <Plus className="mr-2 h-4 w-4" />Soal Baru
+          </Button>
+        </div>
+      </div>
+
+      {/* Sleek List Section */}
+      <section className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500">Daftar Soal ({shown.length})</h2>
+        </div>
+        
+        <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800">
+          {shown.map((s, i) => (
+            <div key={s.id} className="group flex flex-col md:flex-row items-start justify-between p-5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors gap-6">
+              
+              <div className="flex-1 w-full space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-xs font-semibold text-slate-400">#{i + 1}</span>
+                  <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                    {TIPE_LABEL[s.tipe]}
+                  </span>
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                    s.kesulitan === 'mudah' ? 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400' :
+                    s.kesulitan === 'sedang' ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400' :
+                    'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400'
+                  }`}>
+                    {KES_LABEL[s.kesulitan]}
+                  </span>
+                </div>
+                
+                <div className="text-sm prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed">
                   <RichView html={s.detail} />
-                  {s.tipe !== "essay" && (
-                    <ul className="space-y-1 text-sm">
+                </div>
+                
+                {s.tipe !== "essay" && (
+                  <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/60">
+                    <ul className="space-y-2 text-sm">
                       {s.jawaban.map((j, idx) => (
-                        <li key={j.id} className={j.benar ? "text-success" : ""}>
-                          <span className="font-mono mr-1">{String.fromCharCode(65 + idx)}.</span>
-                          <span className={j.benar ? "font-medium" : ""}>
+                        <li key={j.id} className={`flex items-start gap-2 ${j.benar ? 'text-emerald-700 dark:text-emerald-400 font-medium' : 'text-slate-600 dark:text-slate-400'}`}>
+                          <span className="font-mono mt-0.5 min-w-[20px]">{String.fromCharCode(65 + idx)}.</span>
+                          <span className="flex-1">
                             <RichView html={j.detail} className="inline" />
                           </span>
-                          {j.benar && <span className="ml-2 text-xs">✓ benar</span>}
+                          {j.benar && <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5 text-emerald-500" />}
                         </li>
                       ))}
                     </ul>
-                  )}
-                </div>
-                <div className="flex gap-1">
-                  <Button size="sm" variant="ghost" onClick={() => { setEditing(s); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
-                  <Button size="sm" variant="ghost" onClick={() => remove(s.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                </div>
+                  </div>
+                )}
               </div>
-            </CardContent>
-          </Card>
-        ))}
-        {shown.length === 0 && <div className="text-center text-muted-foreground">Tidak ada soal.</div>}
-      </div>
+              
+              <div className="flex md:flex-col items-center gap-2 md:opacity-0 group-hover:opacity-100 transition-opacity shrink-0 w-full md:w-auto justify-end">
+                <Button size="sm" variant="outline" className="h-8 w-full md:w-auto bg-white dark:bg-slate-900 shadow-sm" onClick={() => { setEditing(s); setOpen(true); }}>
+                  <Pencil className="mr-2 h-3.5 w-3.5" /> Edit
+                </Button>
+                <Button size="sm" variant="ghost" className="h-8 w-full md:w-auto text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950" onClick={() => remove(s.id)}>
+                  <Trash2 className="mr-2 h-3.5 w-3.5" /> Hapus
+                </Button>
+              </div>
+
+            </div>
+          ))}
+          
+          {shown.length === 0 && (
+            <div className="py-16 text-center">
+              <BookOpen className="h-10 w-10 text-slate-300 mx-auto mb-3" />
+              <p className="text-slate-500">Tidak ada soal yang ditemukan.</p>
+            </div>
+          )}
+        </div>
+      </section>
 
       <SoalDialog open={open} onOpenChange={setOpen} editing={editing} topikId={topikId} onSaved={refresh} />
     </div>

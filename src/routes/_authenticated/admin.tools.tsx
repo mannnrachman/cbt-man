@@ -23,6 +23,7 @@ import {
 import { ensureSeed } from "@/lib/cbt/seed";
 import { Download, Upload, Trash2, AlertTriangle, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { AdminPage, AdminPageHeader } from "@/components/cbt/AdminPage";
 
 export const Route = createFileRoute("/_authenticated/admin/tools")({
   component: ToolsPage,
@@ -57,128 +58,154 @@ function ToolsPage() {
           code: iss.code,
         }));
         setValidationErrors(issues);
-        toast.error(
-          `Struktur backup tidak valid (${issues.length} masalah). Lihat detail di dialog.`,
-        );
+        toast.error("Struktur backup tidak valid");
         return;
       }
-      setValidationErrors(null);
       setPreview(parsed.data);
+      setValidationErrors(null);
     };
     reader.readAsText(f);
-    e.target.value = "";
   }
 
-  async function applyImport() {
+  function doRestore() {
     if (!preview) return;
     try {
-      await importBackup(preview);
-      toast.success("Restore database berhasil. Memuat ulang…");
-      setPreview(null);
-      setTimeout(() => window.location.reload(), 600);
-    } catch (err) {
-      toast.error("Gagal restore: " + (err as Error).message);
+      importBackup(preview);
+      toast.success("Restore berhasil! Aplikasi akan disegarkan...");
+      setTimeout(() => window.location.reload(), 1500);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : String(e));
     }
   }
 
-  async function doReset() {
+  function doReset() {
     if (confirmText !== "HAPUS") {
-      toast.error('Ketik "HAPUS" untuk konfirmasi');
+      toast.error("Ketik 'HAPUS' untuk konfirmasi");
       return;
     }
-    await resetAllData();
-    toast.success("Semua data database dihapus. Memuat ulang…");
-    setTimeout(() => window.location.reload(), 600);
-  }
-
-  async function doReseed() {
-    await ensureSeed();
-    toast.success("Seed data dimuat (hanya jika kosong).");
-    setTimeout(() => window.location.reload(), 600);
+    resetAllData();
+    ensureSeed();
+    toast.success("Database berhasil dikosongkan! Memuat data awal...");
+    setTimeout(() => window.location.reload(), 1500);
   }
 
   return (
-    <div className="space-y-6 max-w-3xl">
-      <div>
-        <Link to="/admin" className="text-sm text-muted-foreground hover:underline">
-          ← Dashboard
-        </Link>
-        <h1 className="text-2xl font-semibold tracking-tight">Backup &amp; Tools</h1>
-        <p className="text-sm text-muted-foreground">
-          Export, restore, atau reset seluruh data aplikasi dari database SQLite.
-        </p>
+    <AdminPage className="max-w-4xl pb-20">
+      <AdminPageHeader
+        title="Alat Sistem"
+        description="Fasilitas pencadangan data (backup), pemulihan (restore), dan pengaturan ulang pangkalan data."
+      />
+
+      {/* Section 1: Backup & Restore */}
+      <div className="space-y-4">
+        <div className="space-y-1">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Pencadangan Data</h2>
+          <p className="text-sm text-slate-500">
+            Amankan data aplikasi secara berkala atau pulihkan dari cadangan sebelumnya. Cadangan mencakup seluruh pengguna, soal, ujian, dan konfigurasi.
+          </p>
+        </div>
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
+          
+          {/* Export Backup Row */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+            <div className="flex-1 space-y-1">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+                  <Download className="h-4 w-4" />
+                </div>
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Unduh Berkas Cadangan</h3>
+              </div>
+              <p className="text-xs text-slate-500 pl-8">Menghasilkan berkas JSON tunggal berisi snapshot pangkalan data saat ini.</p>
+            </div>
+            <div className="shrink-0">
+              <Button onClick={() => void downloadBackup()} className="w-full sm:w-auto shadow-sm">
+                Unduh Backup
+              </Button>
+            </div>
+          </div>
+
+          {/* Restore Backup Row */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+            <div className="flex-1 space-y-1">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">
+                  <Upload className="h-4 w-4" />
+                </div>
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Pulihkan dari Cadangan</h3>
+              </div>
+              <p className="text-xs text-slate-500 pl-8">Pilih berkas JSON cadangan. Struktur data akan divalidasi terlebih dahulu.</p>
+            </div>
+            <div className="shrink-0 flex gap-2">
+              <input
+                ref={fileRef}
+                type="file"
+                accept="application/json,.json"
+                className="hidden"
+                onChange={handleFile}
+              />
+              <Button variant="outline" onClick={() => fileRef.current?.click()} className="w-full sm:w-auto bg-white dark:bg-slate-950">
+                Pilih Berkas JSON...
+              </Button>
+            </div>
+          </div>
+
+        </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Download className="h-5 w-5 text-primary" /> Export Backup
-          </CardTitle>
-          <CardDescription>
-            Unduh seluruh data (pengguna, bank soal, ujian, sesi, konfigurasi) sebagai 1 file JSON.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button onClick={() => void downloadBackup()}>
-            <Download className="mr-1 h-4 w-4" /> Download backup
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="h-px w-full bg-slate-200 dark:bg-slate-800/60" />
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Upload className="h-5 w-5 text-primary" /> Restore Backup
-          </CardTitle>
-          <CardDescription>
-            Pilih file backup JSON. Struktur akan divalidasi sebelum diterapkan (preview dulu).
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <input
-            ref={fileRef}
-            type="file"
-            accept="application/json,.json"
-            className="hidden"
-            onChange={handleFile}
-          />
-          <Button variant="outline" onClick={() => fileRef.current?.click()}>
-            <Upload className="mr-1 h-4 w-4" /> Pilih file…
-          </Button>
-        </CardContent>
-      </Card>
+      {/* Section 2: Pemeliharaan Pangkalan Data */}
+      <div className="space-y-4">
+        <div className="space-y-1">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Pengelolaan Lanjut</h2>
+          <p className="text-sm text-slate-500">
+            Aksi-aksi kritikal untuk memanipulasi pangkalan data sistem secara langsung.
+          </p>
+        </div>
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
+          
+          {/* Seed Data Row */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+            <div className="flex-1 space-y-1">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                  <RefreshCw className="h-4 w-4" />
+                </div>
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Inisialisasi Data Demo</h3>
+              </div>
+              <p className="text-xs text-slate-500 pl-8">Isi pangkalan data kosong dengan sampel otomatis (pengguna, soal, ujian).</p>
+            </div>
+            <div className="shrink-0">
+              <Button variant="outline" onClick={() => {
+                ensureSeed();
+                toast.success("Seed data dimuat (hanya jika kosong).");
+                setTimeout(() => window.location.reload(), 600);
+              }} className="w-full sm:w-auto bg-white dark:bg-slate-950">
+                Muat Seed Data
+              </Button>
+            </div>
+          </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <RefreshCw className="h-5 w-5 text-primary" /> Muat Seed Data
-          </CardTitle>
-          <CardDescription>
-            Memuat data demo (admin, guru, peserta, soal, ujian) jika database masih kosong.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button variant="outline" onClick={doReseed}>
-            Muat seed
-          </Button>
-        </CardContent>
-      </Card>
+          {/* Reset Data Row */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 bg-red-50/30 dark:bg-red-950/10 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors">
+            <div className="flex-1 space-y-1">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
+                  <AlertTriangle className="h-4 w-4" />
+                </div>
+                <h3 className="text-sm font-semibold text-red-700 dark:text-red-400">Zona Berbahaya: Hapus Semua Data</h3>
+              </div>
+              <p className="text-xs text-red-600/70 dark:text-red-400/70 pl-8">Tindakan ini akan mengosongkan seluruh pangkalan data. Tidak dapat dibatalkan!</p>
+            </div>
+            <div className="shrink-0">
+              <Button variant="destructive" onClick={() => setConfirmReset(true)} className="w-full sm:w-auto font-semibold">
+                <Trash2 className="mr-2 h-4 w-4" /> Reset Keseluruhan
+              </Button>
+            </div>
+          </div>
 
-      <Card className="border-destructive/40">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-destructive">
-            <AlertTriangle className="h-5 w-5" /> Zona Berbahaya
-          </CardTitle>
-          <CardDescription>
-            Hapus seluruh data database SQLite. Aksi ini tidak bisa dibatalkan.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button variant="destructive" onClick={() => setConfirmReset(true)}>
-            <Trash2 className="mr-1 h-4 w-4" /> Reset semua data
-          </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Preview import */}
       <Dialog open={!!preview} onOpenChange={(o) => !o && setPreview(null)}>
@@ -208,7 +235,7 @@ function ToolsPage() {
             <Button variant="ghost" onClick={() => setPreview(null)}>
               Batal
             </Button>
-            <Button onClick={applyImport}>Terapkan restore</Button>
+            <Button onClick={doRestore}>Terapkan restore</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -296,6 +323,6 @@ function ToolsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </AdminPage>
   );
 }

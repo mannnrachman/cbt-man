@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ujianRepo, tokenRepo, usersRepo } from "@/lib/cbt/repos";
-import { fetchUjianByIdServer, generateExamTokensServer } from "@/lib/server/repos/functions";
+import { fetchUjianByIdServer, generateExamTokensServer } from "@/lib/server/ujian/functions";
 import type { TokenUjian, Ujian } from "@/lib/cbt/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -86,7 +86,7 @@ function TokenPage() {
     try {
       // Server-side crypto-random generation. The client never sees the
       // random source — `randomBytes` is invoked inside the server function
-      // (see `generateExamTokensServer` in `src/lib/server/repos/functions.ts`).
+      // (see `generateExamTokensServer` in `src/lib/server/ujian/functions.ts`).
       const result = await generateExamTokensServer({
         data: { ujianId: id, jumlah },
       });

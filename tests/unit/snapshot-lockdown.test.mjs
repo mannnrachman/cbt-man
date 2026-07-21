@@ -89,7 +89,7 @@ test("login modal only follows same-origin redirect URLs", () => {
 });
 
 test("publicUser projection strips passwordHash to an empty string", () => {
-  const src = read("src/lib/server/repos/functions.ts");
+  const src = read("src/lib/server/repos/mappers.ts");
   // Locate the publicUser function body and assert it forces passwordHash: "".
   const fnIdx = src.indexOf("function publicUser(");
   assert.ok(fnIdx > 0, "publicUser function must exist");
@@ -101,14 +101,14 @@ test("publicUser projection strips passwordHash to an empty string", () => {
 });
 
 test("getCbtSnapshot fails closed without a session", () => {
-  const src = read("src/lib/server/repos/functions.ts");
-  const fnIdx = src.indexOf("export const getCbtSnapshot");
+  const serverFunctionsCode = read("src/lib/server/snapshot/functions.ts");
+  const fnIdx = serverFunctionsCode.indexOf("export const getCbtSnapshot");
   assert.ok(fnIdx > 0, "getCbtSnapshot must exist");
-  const body = src.slice(fnIdx, fnIdx + 320);
+  const body = serverFunctionsCode.slice(fnIdx, fnIdx + 320);
   // Must validate a session and throw/deny when there is no caller.
   assert.ok(
-    /validateSession\(readSessionToken\(\)\)/.test(body),
-    "must validate the session token",
+    /requireCaller\(\)/.test(body),
+    "getCbtSnapshot body must call requireCaller",
   );
   assert.ok(
     /if\s*\(!caller\)/.test(body) && /throw/.test(body),
@@ -117,7 +117,7 @@ test("getCbtSnapshot fails closed without a session", () => {
 });
 
 test("public boot config type exposes only non-sensitive branding fields", () => {
-  const src = read("src/lib/server/repos/functions.ts");
+  const src = read("src/lib/server/repos/mappers.ts");
   // The PublicBootConfig type must be a Pick limited to branding fields and
   // must not include sensitive collections.
   const typeIdx = src.indexOf("export type PublicBootConfig");

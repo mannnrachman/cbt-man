@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useParams, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ujianRepo, groupsRepo, hydrateRepos } from "@/lib/cbt/repos";
+import { ujianRepo, groupsRepo, hydrateRepos, mataKuliahRepo, semesterRepo } from "@/lib/cbt/repos";
 import { uid } from "@/lib/cbt/storage";
 import type { Ujian, TopicSet } from "@/lib/cbt/types";
 import { Card, CardContent } from "@/components/ui/card";
@@ -27,7 +27,7 @@ import {
   visibleModuls,
   visibleTopiks,
 } from "@/lib/cbt/access";
-import { fetchUjianByIdServer } from "@/lib/server/repos/functions";
+import { fetchUjianByIdServer } from "@/lib/server/ujian/functions";
 
 export const Route = createFileRoute("/_authenticated/admin/ujian/$id")({
   loader: async () => {
@@ -45,6 +45,9 @@ function UjianEditor() {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const initial = ujianRepo.byId(id);
+  
+  const mkList = mataKuliahRepo.all();
+  const smtList = semesterRepo.all();
 
   // (Must-fix #2) Re-order guards so `ujianTouchesAllowed` runs BEFORE we
   // initialize `useState` with the full ujian. If the snapshot already
@@ -173,6 +176,16 @@ function UjianEditor() {
   const groups = groupsRepo.all();
   const topiks = visibleTopiks(user);
   const moduls = visibleModuls(user);
+  
+  const sortedTopiks = [...topiks].sort((a, b) => {
+    const mA = moduls.find((m) => m.id === a.modulId);
+    const mB = moduls.find((m) => m.id === b.modulId);
+    const aIsMk = mA?.mataKuliahId === u?.mataKuliahId ? -1 : 1;
+    const bIsMk = mB?.mataKuliahId === u?.mataKuliahId ? -1 : 1;
+    if (aIsMk !== bIsMk) return aIsMk - bIsMk;
+    return a.nama.localeCompare(b.nama);
+  });
+  
   const allowedSet = allowedTopikIdSet(user);
 
   function set<K extends keyof Ujian>(k: K, v: Ujian[K]) {
@@ -251,6 +264,36 @@ function UjianEditor() {
             <Label>Deskripsi / instruksi</Label>
             <RichEditor value={u.deskripsi} onChange={(v) => set("deskripsi", v)} minHeight={80} />
           </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Mata Kuliah (Opsional)</Label>
+              <Select value={u.mataKuliahId || "none"} onValueChange={(v) => set("mataKuliahId", v === "none" ? undefined : v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Pilih Mata Kuliah" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">(Tanpa Mata Kuliah)</SelectItem>
+                  {mkList.map((mk) => (
+                    <SelectItem key={mk.id} value={mk.id}>{mk.nama}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Semester (Opsional)</Label>
+              <Select value={u.semesterId || "none"} onValueChange={(v) => set("semesterId", v === "none" ? undefined : v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Pilih Semester" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">(Tanpa Semester)</SelectItem>
+                  {smtList.map((smt) => (
+                    <SelectItem key={smt.id} value={smt.id}>{smt.nama}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -320,11 +363,12 @@ function UjianEditor() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {topiks.map((tk) => {
+                        {sortedTopiks.map((tk) => {
                           const mm = moduls.find((mm) => mm.id === tk.modulId);
+                          const isMatchMk = u.mataKuliahId && mm?.mataKuliahId === u.mataKuliahId;
                           return (
                             <SelectItem key={tk.id} value={tk.id}>
-                              {mm?.nama} — {tk.nama}
+                              {isMatchMk ? "★ " : ""} {mm?.nama} — {tk.nama}
                             </SelectItem>
                           );
                         })}

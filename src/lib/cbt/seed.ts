@@ -1,4 +1,4 @@
-import { ensureSeedServer } from "@/lib/server/repos/functions";
+import { ensureSeedServer } from "@/lib/server/auth/functions";
 import { hydrateRepos, invalidateReposCache } from "./repos";
 
 export async function ensureSeed(): Promise<void> {

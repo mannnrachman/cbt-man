@@ -74,11 +74,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "CBT-MAN — Aplikasi Ujian Berbasis Komputer" },
-      { name: "description", content: "CBT-MAN — Aplikasi ujian berbasis komputer" },
-      { name: "author", content: "CBT-MAN" },
-      { property: "og:title", content: "CBT-MAN — Aplikasi Ujian Berbasis Komputer" },
-      { property: "og:description", content: "CBT-MAN — Aplikasi ujian berbasis komputer" },
+      { title: "CBT-Kampus — Aplikasi Ujian Berbasis Komputer" },
+      { name: "description", content: "CBT-Kampus — Aplikasi ujian berbasis komputer" },
+      { name: "author", content: "CBT-Kampus" },
+      { property: "og:title", content: "CBT-Kampus — Aplikasi Ujian Berbasis Komputer" },
+      { property: "og:description", content: "CBT-Kampus — Aplikasi ujian berbasis komputer" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -97,11 +97,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="id" className="overscroll-none">
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body className="overscroll-none">
         {children}
         <Scripts />
       </body>

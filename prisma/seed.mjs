@@ -1,5 +1,6 @@
-import { PrismaClient } from "@prisma/client";
 import { webcrypto } from "node:crypto";
+import pkg from "@prisma/client";
+const { PrismaClient } = pkg;
 
 import { createSeedDataset, seedDatabase } from "../src/lib/server/db/seed-shared.mjs";
 

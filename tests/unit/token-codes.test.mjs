@@ -160,8 +160,8 @@ test("collision retry loop creates the requested count even with a duplicate-pro
 
 test("no `Math.random()` is used in the token code generation files", () => {
   const candidates = [
-    "src/lib/server/repos/functions.ts",
-    "src/lib/server/db/id.ts",
+    "src/lib/server/ujian/functions.ts",
+    "src/lib/server/db/id.server.ts",
   ];
   for (const rel of candidates) {
     const abs = resolve(process.cwd(), rel);
@@ -193,8 +193,10 @@ test("no `Math.random()` is used in the client token admin route", () => {
 });
 
 test("token generation file imports `randomBytes` from node:crypto", () => {
-  const abs = resolve(process.cwd(), "src/lib/server/repos/functions.ts");
-  const src = readFileSync(abs, "utf8");
+  const src = readFileSync(
+    resolve(process.cwd(), "src/lib/server/ujian/functions.ts"),
+    "utf8"
+  );
   assert.match(
     src,
     /from\s+["']node:crypto["']/,

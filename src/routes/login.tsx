@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { validateSessionServer } from "@/lib/server/repos/functions";
+import { validateSessionServer } from "@/lib/server/auth/functions";
 
 type SearchParams = { redirect?: string };
 
@@ -10,7 +10,7 @@ export const Route = createFileRoute("/login")({
   beforeLoad: async ({ search }) => {
     const { user } = await validateSessionServer();
     if (user) {
-      throw redirect({ to: user.role === "peserta" ? "/peserta" : "/admin" });
+      throw redirect({ to: user.role === "mahasiswa" ? "/peserta" : "/admin" });
     }
     throw redirect({
       to: "/",

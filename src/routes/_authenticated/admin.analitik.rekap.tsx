@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { sesiRepo, usersRepo, groupsRepo } from "@/lib/cbt/repos";
+import { sesiRepo, usersRepo, groupsRepo, mataKuliahRepo, semesterRepo } from "@/lib/cbt/repos";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,12 +11,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Download } from "lucide-react";
+import { Download, BookOpen, Clock, CalendarDays, BadgeCheck } from "lucide-react";
 import { exportSheet } from "@/lib/cbt/excel";
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import { visibleUjians } from "@/lib/cbt/access";
 
-export const Route = createFileRoute("/_authenticated/admin/laporan/rekap")({
+export const Route = createFileRoute("/_authenticated/admin/analitik/rekap")({
   component: RekapPage,
 });
 
@@ -45,6 +45,8 @@ function RekapPage() {
   const rows = sesi.map((s) => {
     const u = users.find((x) => x.id === s.pesertaId);
     const ex = ujians.find((x) => x.id === s.ujianId);
+    const mk = ex?.mataKuliahId ? mataKuliahRepo.byId(ex.mataKuliahId) : null;
+    const smt = ex?.semesterId ? semesterRepo.byId(ex.semesterId) : null;
     const g = groups.find((x) => x.id === u?.groupId);
     const durasi = s.mulaiAt && s.selesaiAt ? Math.round((s.selesaiAt - s.mulaiAt) / 1000) : 0;
     return {
@@ -52,6 +54,8 @@ function RekapPage() {
       username: u?.username ?? "-",
       group: g?.nama ?? "-",
       ujian: ex?.nama ?? "-",
+      mataKuliah: mk?.nama ?? "-",
+      semester: smt?.nama ?? "-",
       skor: s.skorTotal ?? 0,
       maks: s.maxSkor ?? 0,
       persen: s.maxSkor ? Math.round(((s.skorTotal ?? 0) / s.maxSkor) * 1000) / 10 : 0,
@@ -62,19 +66,20 @@ function RekapPage() {
 
   function exportExcel() {
     const aoa: (string | number)[][] = [
-      ["Nama", "Username", "Group", "Ujian", "Skor", "Maks", "Persen %", "Durasi (detik)", "Tanggal"],
-      ...rows.map((r) => [r.nama, r.username, r.group, r.ujian, r.skor, r.maks, r.persen, r.durasi, r.tanggal]),
+      ["Nama", "Username", "Group", "Ujian", "Mata Kuliah", "Semester", "Skor", "Maks", "Persentase (%)", "Durasi (detik)", "Tanggal"],
+      ...rows.map((r) => [r.nama, r.username, r.group, r.ujian, r.mataKuliah, r.semester, r.skor, r.maks, r.persen, r.durasi, r.tanggal]),
     ];
     exportSheet(`rekap-hasil-${Date.now()}.xlsx`, [{ name: "Rekap", aoa }]);
   }
 
   return (
-    <div className="space-y-4">
-      <div>
-        <Link to="/admin/laporan" className="text-sm text-muted-foreground hover:underline">
-          ← Laporan
+    <div className="space-y-6 pb-12">
+      <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6 rounded-xl border shadow-sm">
+        <Link to="/admin/analitik" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 w-fit mb-3">
+          ← Kembali ke daftar analitik
         </Link>
-        <h1 className="text-2xl font-semibold tracking-tight">Rekap Hasil Ujian</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Rekap Hasil Ujian</h1>
+        <p className="text-sm text-muted-foreground mt-1">Saring dan ekspor hasil ujian peserta ke dalam format Microsoft Excel.</p>
       </div>
 
       <Card>
@@ -87,11 +92,14 @@ function RekapPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Semua ujian</SelectItem>
-                {ujians.map((u) => (
-                  <SelectItem key={u.id} value={u.id}>
-                    {u.nama}
-                  </SelectItem>
-                ))}
+                {ujians.map((u) => {
+                  const mk = u.mataKuliahId ? mataKuliahRepo.byId(u.mataKuliahId) : null;
+                  return (
+                    <SelectItem key={u.id} value={u.id}>
+                      {u.nama} {mk ? `(${mk.nama})` : ""}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>
@@ -128,36 +136,64 @@ function RekapPage() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardContent className="p-0">
+      <Card className="shadow-sm border-0 ring-1 ring-border/50">
+        <CardContent className="p-0 overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="border-b bg-muted/40 text-left">
+            <thead className="bg-muted/50 text-left text-muted-foreground font-medium border-b">
               <tr>
-                <th className="p-3">Nama</th>
-                <th className="p-3">Group</th>
-                <th className="p-3">Ujian</th>
-                <th className="p-3">Skor</th>
-                <th className="p-3">%</th>
-                <th className="p-3">Tanggal</th>
+                <th className="p-4 font-semibold">Nama Peserta</th>
+                <th className="p-4 font-semibold">Grup / Kelas</th>
+                <th className="p-4 font-semibold">Ujian (Mata Kuliah)</th>
+                <th className="p-4 font-semibold">Skor Akhir</th>
+                <th className="p-4 font-semibold">Persentase</th>
+                <th className="p-4 font-semibold">Waktu Penyelesaian</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((r, i) => (
-                <tr key={i} className="border-b last:border-0">
-                  <td className="p-3">{r.nama}</td>
-                  <td className="p-3">{r.group}</td>
-                  <td className="p-3">{r.ujian}</td>
-                  <td className="p-3 font-medium">
-                    {r.skor} / {r.maks}
+                <tr key={i} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
+                  <td className="p-4">
+                    <div className="font-semibold">{r.nama}</div>
+                    <div className="text-xs text-muted-foreground font-mono mt-0.5">{r.username}</div>
                   </td>
-                  <td className="p-3">{r.persen}%</td>
-                  <td className="p-3 text-xs">{r.tanggal}</td>
+                  <td className="p-4">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-accent text-accent-foreground border">
+                      {r.group}
+                    </span>
+                  </td>
+                  <td className="p-4">
+                    <div className="font-medium text-foreground">{r.ujian}</div>
+                    {r.mataKuliah !== "-" && (
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
+                        <BookOpen className="h-3 w-3" />
+                        {r.mataKuliah}
+                      </div>
+                    )}
+                  </td>
+                  <td className="p-4 font-bold text-base">
+                    {r.skor} <span className="text-xs font-normal text-muted-foreground">/ {r.maks}</span>
+                  </td>
+                  <td className="p-4">
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold ${
+                      r.persen >= 75 ? 'bg-success/15 text-success' :
+                      r.persen >= 50 ? 'bg-warning/15 text-warning-foreground' :
+                      'bg-destructive/15 text-destructive'
+                    }`}>
+                      <BadgeCheck className="h-3 w-3" /> {r.persen}%
+                    </span>
+                  </td>
+                  <td className="p-4">
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <CalendarDays className="h-3.5 w-3.5" />
+                      {r.tanggal}
+                    </div>
+                  </td>
                 </tr>
               ))}
               {rows.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="p-6 text-center text-muted-foreground">
-                    Tidak ada data sesuai filter.
+                  <td colSpan={6} className="p-12 text-center text-muted-foreground border-t border-dashed bg-muted/10">
+                    Tidak ada data sesi ujian yang sesuai dengan filter.
                   </td>
                 </tr>
               )}

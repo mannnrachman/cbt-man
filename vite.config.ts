@@ -24,6 +24,13 @@ export default defineConfig({
       "@tanstack/query-core",
     ],
   },
+  optimizeDeps: {
+    exclude: [
+      "@tanstack/react-start",
+      "@tanstack/start-server-core",
+      "@tanstack/react-router"
+    ],
+  },
   server: {
     host: "::",
     port: 8080,

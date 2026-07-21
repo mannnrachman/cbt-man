@@ -8,9 +8,10 @@ datasource db {
 }
 
 enum Role {
-  admin
-  operator
-  peserta
+  super_admin
+  admin_prodi
+  evaluator
+  mahasiswa
 }
 
 enum TipeSoal {
@@ -34,46 +35,54 @@ enum StatusSesi {
 }
 
 model Group {
-  id         String @id
+  id         String        @id
   nama       String
-  keterangan String @default("")
+  keterangan String        @default("")
+  prodiId    String?
+  prodi      ProgramStudi? @relation(fields: [prodiId], references: [id])
   users      User[]
 }
 
 model User {
-  id              String      @id
-  username        String      @unique
+  id              String        @id
+  username        String        @unique
   passwordHash    String
   namaLengkap     String
   role            Role
-  allowedTopikIds String      @default("[]")
+  allowedTopikIds String        @default("[]")
   groupId         String?
+  prodiId         String?
+  mataKuliahIds   String        @default("[]")
   detail          String?
-  aktif           Boolean     @default(true)
+  aktif           Boolean       @default(true)
   createdAt       BigInt
-  group           Group?      @relation(fields: [groupId], references: [id])
-  createdUjians   Ujian[]     @relation("UjianCreator")
-  sesi            SesiUjian[] @relation("SesiPeserta")
-  sessions        Session[]   @relation("UserSessions")
+  group           Group?        @relation(fields: [groupId], references: [id])
+  prodi           ProgramStudi? @relation(fields: [prodiId], references: [id])
+  createdUjians   Ujian[]       @relation("UjianCreator")
+  sesi            SesiUjian[]   @relation("SesiPeserta")
+  sessions        Session[]     @relation("UserSessions")
 }
 
 /// Sesi login server-side. `id` = token opaque 256-bit (randomBytes hex),
 /// disimpan di cookie httpOnly. Dihapus saat logout/expiry/deaktivasi-revoke.
 model Session {
-  id        String   @id
-  userId    String
-  createdAt DateTime @default(now())
-  expiresAt DateTime
-  user      User     @relation("UserSessions", fields: [userId], references: [id], onDelete: Cascade)
+  id                String   @id
+  userId            String
+  createdAt         DateTime @default(now())
+  expiresAt         DateTime
+  userAgent         String?
+  deviceFingerprint String?
+  user              User     @relation("UserSessions", fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
 
 model Modul {
-  id    String  @id
-  nama  String
-  aktif Boolean @default(true)
-  topik Topik[]
+  id           String  @id
+  nama         String
+  aktif        Boolean @default(true)
+  mataKuliahId String?
+  topik        Topik[]
 }
 
 model Topik {
@@ -119,12 +128,15 @@ model Ujian {
   tokenAktif       Boolean      @default(false)
   ipRange          String       @default("")
   groupIds         String       @default("[]")
+  mataKuliahId     String?
+  semesterId       String?
   topicSets        String       @default("[]")
   showResult       Boolean      @default(true)
   showResultDetail Boolean      @default(false)
   fullscreenWajib  Boolean      @default(true)
   maxPindahTab     Int          @default(3)
   blokirShortcut   Boolean      @default(true)
+  mode             String       @default("online") // "online" | "offline"
   createdBy        String
   createdAt        BigInt
   creator          User         @relation("UjianCreator", fields: [createdBy], references: [id])
@@ -170,10 +182,76 @@ model SesiUjian {
 
 model AppConfig {
   id           String  @id @default("app")
-  appName      String  @default("CBT-MAN")
+  appName      String  @default("CBT-Kampus")
+  appLogo      String  @default("")
   appDeskripsi String  @default("Aplikasi ujian berbasis komputer")
   pesanLogin   String  @default("Selamat datang di aplikasi ujian online")
   mobileLock   Boolean @default(false)
   multiDevice  Boolean @default(false)
   roleAccess   String  @default("{}")
+}
+
+model AuditLog {
+  id        String   @id
+  userId    String
+  userRole  String
+  action    String
+  entity    String
+  entityId  String?
+  details   String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([entity])
+  @@index([createdAt])
+}
+
+model Fakultas {
+  id      String    @id
+  nama    String
+  jurusan Jurusan[]
+}
+
+model Jurusan {
+  id         String         @id
+  nama       String
+  fakultasId String
+  fakultas   Fakultas       @relation(fields: [fakultasId], references: [id], onDelete: Cascade)
+  prodi      ProgramStudi[]
+}
+
+model ProgramStudi {
+  id         String       @id
+  nama       String
+  jurusanId  String
+  jurusan    Jurusan      @relation(fields: [jurusanId], references: [id], onDelete: Cascade)
+  users      User[]
+  groups     Group[]
+  mataKuliah MataKuliah[]
+}
+
+model TahunAkademik {
+  id       String     @id
+  nama     String
+  aktif    Boolean    @default(false)
+  semester Semester[]
+}
+
+model Semester {
+  id              String        @id
+  nama            String
+  tahunAkademikId String
+  tahunAkademik   TahunAkademik @relation(fields: [tahunAkademikId], references: [id], onDelete: Cascade)
+  mataKuliah      MataKuliah[]
+}
+
+model MataKuliah {
+  id         String       @id
+  kode       String
+  nama       String
+  sks        Int          @default(2)
+  prodiId    String
+  prodi      ProgramStudi @relation(fields: [prodiId], references: [id], onDelete: Cascade)
+  semesterId String
+  semester   Semester     @relation(fields: [semesterId], references: [id], onDelete: Cascade)
 }

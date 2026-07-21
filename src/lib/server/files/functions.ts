@@ -1,7 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
+import { uid } from "@/lib/server/db/id.server";
 import { z } from "zod";
 
-import { uid } from "@/lib/server/db/id";
+
 import { prisma } from "@/lib/server/db/prisma";
 import { parseJson } from "@/lib/server/db/json";
 import { readSessionToken, validateSession } from "@/lib/server/db/session";
@@ -106,29 +107,31 @@ async function requireCaller() {
   return validateSession(readSessionToken());
 }
 
-async function operatorHasFilesAccess() {
+async function operatorHasFilesAccess(callerRole: string) {
   const config = await prisma.appConfig.findUnique({
     where: { id: "app" },
     select: { roleAccess: true },
   });
-  const operatorAccess = parseJson<Record<string, string[]>>(config?.roleAccess, {
-    operator: [...DEFAULT_OPERATOR_ROLE_ACCESS],
-  }).operator;
-  return new Set((operatorAccess ?? []) as NavKey[]).has("files");
+  const roleAccess = parseJson<Record<string, string[]>>(config?.roleAccess, {
+    admin_prodi: [...DEFAULT_OPERATOR_ROLE_ACCESS],
+    evaluator: ["dashboard", "hasil", "evaluasi", "laporan", "leaderboard"],
+  });
+  const access = roleAccess[callerRole] ?? [];
+  return new Set((access ?? []) as NavKey[]).has("files");
 }
 
 async function requireFileManagerAccess() {
   const caller = await requireCaller();
   if (!caller) return { ok: false as const, error: "Forbidden" };
-  if (caller.role === "admin") return { ok: true as const, caller };
-  if (caller.role === "operator" && (await operatorHasFilesAccess()))
+  if (caller.role === "super_admin") return { ok: true as const, caller };
+  if ((caller.role === "admin_prodi" || caller.role === "evaluator") && (await operatorHasFilesAccess(caller.role)))
     return { ok: true as const, caller };
   return { ok: false as const, error: "Forbidden" };
 }
 
 async function requireAdmin() {
   const caller = await requireCaller();
-  if (!caller || caller.role !== "admin") return { ok: false as const, error: "Forbidden" };
+  if (!caller || caller.role !== "super_admin") return { ok: false as const, error: "Forbidden" };
   return { ok: true as const, caller };
 }
 
@@ -265,9 +268,9 @@ export const getStoredFileUrl = createServerFn({ method: "GET" })
     // gating reads behind the "files" management nav would break those images.
     // A peserta is scoped to files referenced by exams/soal they can access;
     // everyone else is denied.
-    if (caller.role === "admin" || caller.role === "operator") {
+    if (caller.role === "super_admin" || caller.role === "admin_prodi" || caller.role === "evaluator") {
       // allowed
-    } else if (caller.role === "peserta") {
+    } else if (caller.role === "mahasiswa") {
       if (!(await pesertaCanAccessFile(caller, data.id))) throw new Error("Forbidden");
     } else {
       throw new Error("Forbidden");

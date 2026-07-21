@@ -29,8 +29,12 @@ export class PesertaNotAssignedToExamError extends Error {
 
 export function isUnrestricted(user: User | null | undefined): boolean {
   if (!user) return false;
-  if (user.role === "admin") return true;
-  if (user.role === "operator" && (user.allowedTopikIds?.length ?? 0) === 0) return true;
+  if (user.role === "super_admin") return true;
+  if (
+    (user.role === "admin_prodi" || user.role === "evaluator") &&
+    (user.allowedTopikIds?.length ?? 0) === 0
+  )
+    return true;
   return false;
 }
 
@@ -40,34 +44,45 @@ export function allowedTopikIdSet(user: User | null | undefined): Set<string> | 
 }
 
 export function isTopikAllowed(user: User | null | undefined, topikId: string): boolean {
-  const set = allowedTopikIdSet(user);
-  if (!set) return true;
-  return set.has(topikId);
+  if (isUnrestricted(user)) return true;
+  const set = new Set(user?.allowedTopikIds ?? []);
+  if (set.has(topikId)) return true;
+  
+  // Periksa apakah topik ini berada di dalam modul mata kuliah user
+  const mkSet = new Set(user?.mataKuliahIds ?? []);
+  const topik = topikRepo.byId(topikId);
+  if (!topik) return false;
+  const modul = modulRepo.byId(topik.modulId);
+  if (modul?.mataKuliahId && mkSet.has(modul.mataKuliahId)) return true;
+  
+  return false;
 }
 
 export function visibleTopiks(user: User | null | undefined) {
-  const set = allowedTopikIdSet(user);
   const all = topikRepo.all();
-  return set ? all.filter((t) => set.has(t.id)) : all;
+  return all.filter((t) => isTopikAllowed(user, t.id));
 }
 
 export function visibleSoals(user: User | null | undefined) {
-  const set = allowedTopikIdSet(user);
   const all = soalRepo.all();
-  return set ? all.filter((s) => set.has(s.topikId)) : all;
+  return all.filter((s) => isTopikAllowed(user, s.topikId));
 }
 
 export function visibleModuls(user: User | null | undefined) {
-  const set = allowedTopikIdSet(user);
+  if (isUnrestricted(user)) return modulRepo.all();
+  const topikSet = new Set(user?.allowedTopikIds ?? []);
+  const mkSet = new Set(user?.mataKuliahIds ?? []);
   const all = modulRepo.all();
-  if (!set) return all;
+  
   const allowedModulIds = new Set(
     topikRepo
       .all()
-      .filter((t) => set.has(t.id))
+      .filter((t) => topikSet.has(t.id))
       .map((t) => t.modulId),
   );
-  return all.filter((m) => allowedModulIds.has(m.id));
+  return all.filter((m) => 
+    (m.mataKuliahId && mkSet.has(m.mataKuliahId)) || allowedModulIds.has(m.id)
+  );
 }
 
 // Ujian dianggap "touchable" (editable / manageable) oleh operator jika
@@ -92,16 +107,23 @@ export function visibleModuls(user: User | null | undefined) {
 // Perilaku sebelumnya (`some`) adalah regresi defence-in-depth yang
 // ditemukan di review adversarial Issue #10.
 export function ujianTouchesAllowed(user: User | null | undefined, ujian: Ujian): boolean {
-  const set = allowedTopikIdSet(user);
-  if (!set) return true;
+  if (isUnrestricted(user)) return true;
+  const mkSet = new Set(user?.mataKuliahIds ?? []);
+  if (ujian.mataKuliahId && mkSet.has(ujian.mataKuliahId)) return true;
+  const set = new Set(user?.allowedTopikIds ?? []);
+  if (set.size === 0 && mkSet.size === 0) return true; // unrestricted (though handled above)
   return ujian.topicSets.length > 0 && ujian.topicSets.every((ts) => set.has(ts.topikId));
 }
 
 export function visibleUjians(user: User | null | undefined) {
-  const set = allowedTopikIdSet(user);
+  if (isUnrestricted(user)) return ujianRepo.all();
+  const set = new Set(user?.allowedTopikIds ?? []);
+  const mkSet = new Set(user?.mataKuliahIds ?? []);
   const all = ujianRepo.all();
-  if (!set) return all;
-  return all.filter((u) => u.topicSets.some((ts) => set.has(ts.topikId)));
+  return all.filter((u) => 
+    (u.mataKuliahId && mkSet.has(u.mataKuliahId)) || 
+    u.topicSets.some((ts) => set.has(ts.topikId))
+  );
 }
 
 // ---------------- Peserta exam-group assignment ----------------

@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { z } from "zod";
-import { modulRepo, topikRepo, soalRepo } from "@/lib/cbt/repos";
+import { modulRepo, topikRepo, soalRepo, mataKuliahRepo } from "@/lib/cbt/repos";
 import { uid } from "@/lib/cbt/storage";
 import { ModulSchema, TopikSchema, SoalSchema, type Modul } from "@/lib/cbt/types";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,8 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2, ChevronRight, Upload, FileText, Download, FileUp, Lock } from "lucide-react";
 import { toast } from "sonner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import { visibleModuls, allowedTopikIdSet, isUnrestricted } from "@/lib/cbt/access";
+import { AdminPage, AdminPageHeader, AdminPageContent } from "@/components/cbt/AdminPage";
 
 export const Route = createFileRoute("/_authenticated/admin/modul")({
   component: ModulRoute,
@@ -41,14 +43,25 @@ function ModulPage() {
   const canEdit = isUnrestricted(user);
   const [moduls, setModuls] = useState<Modul[]>(visibleModuls(user));
   const allowedSet = allowedTopikIdSet(user);
+  const mkList = mataKuliahRepo.all();
   const [nama, setNama] = useState("");
+  const [mkId, setMkId] = useState<string>("none");
+  const [query, setQuery] = useState("");
+  const [filterMk, setFilterMk] = useState("all");
   const importRef = useRef<HTMLInputElement>(null);
+
+  const shown = moduls.filter(m => {
+    if (filterMk !== "all" && m.mataKuliahId !== filterMk) return false;
+    if (query && !m.nama.toLowerCase().includes(query.toLowerCase())) return false;
+    return true;
+  });
 
   function add() {
     if (!canEdit) return;
     if (!nama.trim()) return;
-    modulRepo.upsert({ id: uid("m_"), nama: nama.trim(), aktif: true });
+    modulRepo.upsert({ id: uid("m_"), nama: nama.trim(), aktif: true, mataKuliahId: (mkId === "none" || !mkId) ? undefined : mkId });
     setNama("");
+    setMkId("none");
     setModuls(visibleModuls(user));
     toast.success("Modul ditambahkan");
   }
@@ -114,16 +127,12 @@ function ModulPage() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Bank Soal — Modul</h1>
-          <p className="text-sm text-muted-foreground">
-            Modul = mata pelajaran. Pilih untuk mengelola topik & soal.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {canEdit && (
+    <AdminPage>
+      <AdminPageHeader
+        title="Bank Soal (Modul)"
+        description="Pusat penyimpanan referensi soal-soal ujian berdasarkan mata kuliah."
+        action={
+          canEdit && (
             <>
               <input
                 ref={importRef}
@@ -136,91 +145,127 @@ function ModulPage() {
                   e.target.value = "";
                 }}
               />
-              <Button variant="outline" onClick={() => importRef.current?.click()}>
-                <FileUp className="mr-1 h-4 w-4" />
-                Import Bank JSON
+              <Button size="sm" variant="outline" onClick={() => importRef.current?.click()} className="h-9">
+                <FileUp className="mr-2 h-4 w-4" /> Import JSON
               </Button>
-              <Link to="/admin/modul/import">
-                <Button variant="outline">
-                  <Upload className="mr-1 h-4 w-4" />
-                  Import Excel
-                </Button>
-              </Link>
-              <Link to="/admin/modul/import-word">
-                <Button variant="outline">
-                  <FileText className="mr-1 h-4 w-4" />
-                  Import Word
-                </Button>
-              </Link>
+              <Button size="sm" variant="outline" className="h-9" asChild>
+                <Link to="/admin/modul/import"><Upload className="mr-2 h-4 w-4" /> Excel</Link>
+              </Button>
             </>
-          )}
+          )
+        }
+      />
+
+      {/* Toolbar & Add New */}
+      <div className="flex flex-col sm:flex-row gap-4 items-end mb-6">
+        <div className="flex-1 w-full flex flex-col sm:flex-row gap-3">
+          <Input 
+            placeholder="Cari modul..." 
+            value={query} 
+            onChange={(e) => setQuery(e.target.value)} 
+            className="max-w-xs" 
+          />
+          <Select value={filterMk} onValueChange={setFilterMk}>
+            <SelectTrigger className="w-full sm:w-56">
+              <SelectValue placeholder="Semua Mata Kuliah" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Mata Kuliah</SelectItem>
+              {mkList.map((m) => (
+                <SelectItem key={m.id} value={m.id}>{m.nama}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
+        
+        {canEdit && (
+          <form
+            onSubmit={(e) => { e.preventDefault(); add(); }}
+            className="flex gap-2 w-full sm:w-auto shrink-0"
+          >
+            <Select value={mkId} onValueChange={setMkId}>
+              <SelectTrigger className="w-32 sm:w-40">
+                <SelectValue placeholder="Mata Kuliah (Opsional)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">-- Tidak Ada --</SelectItem>
+                {mkList.map(m => (
+                  <SelectItem key={m.id} value={m.id}>{m.nama}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Input
+              value={nama}
+              onChange={(e) => setNama(e.target.value)}
+              placeholder="Nama Modul Baru"
+              className="w-full sm:w-48"
+            />
+            <Button type="submit" size="icon" disabled={!nama.trim()} className="shrink-0">
+              <Plus className="h-4 w-4" />
+            </Button>
+          </form>
+        )}
       </div>
 
-      {canEdit ? (
-        <div className="flex max-w-md gap-2">
-          <Input
-            placeholder="Nama modul baru (mis. Matematika)"
-            value={nama}
-            onChange={(e) => setNama(e.target.value)}
-          />
-          <Button onClick={add}>
-            <Plus className="mr-1 h-4 w-4" />
-            Tambah
-          </Button>
-        </div>
-      ) : (
-        <div className="flex items-center gap-2 rounded-md border bg-muted/30 p-2 text-xs text-muted-foreground">
-          <Lock className="h-3.5 w-3.5" />
-          Anda hanya bisa melihat topik yang diizinkan. Hubungi admin untuk akses lebih.
-        </div>
-      )}
+      <AdminPageContent>
+        <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800">
+          {shown.map((m) => {
+            const tAll = topikRepo.all().filter((t) => t.modulId === m.id);
+            const t = allowedSet ? tAll.filter((x) => allowedSet.has(x.id)) : tAll;
+            const tIds = new Set(t.map((x) => x.id));
+            const sCount = soalRepo.all().filter((s) => tIds.has(s.topikId)).length;
+            const mkName = m.mataKuliahId ? mkList.find((x) => x.id === m.mataKuliahId)?.nama : null;
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {moduls.map((m) => {
-          const tAll = topikRepo.all().filter((t) => t.modulId === m.id);
-          const t = allowedSet ? tAll.filter((x) => allowedSet.has(x.id)) : tAll;
-          const tIds = new Set(t.map((x) => x.id));
-          const sCount = soalRepo.all().filter((s) => tIds.has(s.topikId)).length;
-          return (
-            <Card key={m.id}>
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-medium">{m.nama}</h3>
-                    <p className="text-xs text-muted-foreground">
-                      {t.length} topik · {sCount} soal
-                    </p>
+            return (
+              <div key={m.id} className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:px-6 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors gap-4">
+                
+                <div className="flex items-center gap-4">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
+                    <FileText className="h-5 w-5" />
                   </div>
-                  <div className="flex gap-1">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      title="Export bank soal"
-                      onClick={() => exportBank(m)}
-                    >
-                      <Download className="h-4 w-4" />
-                    </Button>
-                    {canEdit && (
-                      <Button size="sm" variant="ghost" onClick={() => remove(m.id)}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    )}
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Link to="/admin/modul/$id/topik" params={{ id: m.id }} className="text-sm font-semibold text-slate-900 dark:text-slate-100 hover:text-primary transition-colors truncate">
+                        {m.nama}
+                      </Link>
+                      {mkName && (
+                        <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-semibold tracking-wide uppercase text-slate-500">
+                          {mkName}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-4 text-xs font-medium text-slate-500 mt-1">
+                      <span className="flex items-center gap-1.5"><FileText className="w-3.5 h-3.5 text-slate-400"/> {t.length} Topik</span>
+                      <span className="flex items-center gap-1.5"><ChevronRight className="w-3.5 h-3.5 text-slate-400"/> {sCount} Soal</span>
+                    </div>
                   </div>
                 </div>
-                <Link
-                  to="/admin/modul/$id/topik"
-                  params={{ id: m.id }}
-                  className="mt-3 inline-flex items-center text-sm text-primary hover:underline"
-                >
-                  Kelola topik <ChevronRight className="h-4 w-4" />
-                </Link>
-              </CardContent>
-            </Card>
-          );
-        })}
-        {moduls.length === 0 && <div className="text-muted-foreground">Belum ada modul.</div>}
-      </div>
-    </div>
+
+                <div className="flex items-center gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                  <Button size="sm" variant="outline" className="h-8 shadow-sm bg-white dark:bg-slate-900" onClick={() => exportBank(m)} title="Export JSON">
+                    <Download className="mr-2 h-3.5 w-3.5" /> Export
+                  </Button>
+                  {canEdit && (
+                    <Button size="sm" variant="ghost" className="h-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950" onClick={() => remove(m.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                  <Button size="sm" className="h-8 shadow-sm" asChild>
+                    <Link to="/admin/modul/$id/topik" params={{ id: m.id }}>
+                      Kelola Topik
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
+          {shown.length === 0 && (
+            <div className="p-8 text-center text-slate-500 text-sm">
+              Belum ada modul bank soal.
+            </div>
+          )}
+        </div>
+      </AdminPageContent>
+    </AdminPage>
   );
 }

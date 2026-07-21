@@ -1,6 +1,6 @@
-# Berkontribusi ke CBT-MAN
+# Berkontribusi ke CBT-Kampus
 
-Terima kasih atas minat Anda berkontribusi pada **CBT-MAN**.
+Terima kasih atas minat Anda berkontribusi pada **CBT-Kampus**.
 
 Proyek ini didedikasikan untuk pendidikan dan bersifat **open source (MIT)**. Kontribusi yang meningkatkan kualitas, keamanan, dan kegunaan aplikasi dipersilakan.
 

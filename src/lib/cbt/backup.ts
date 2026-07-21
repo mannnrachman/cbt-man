@@ -25,7 +25,7 @@ import {
   SesiUjianSchema,
   ConfigSchema,
 } from "./types";
-import { importBackupServer, resetAllDataServer } from "@/lib/server/repos/functions";
+import { importBackupServer, resetAllDataServer } from "@/lib/server/backup/functions";
 import { exportFilesServer, importFilesServer } from "@/lib/server/files/functions";
 
 const FileBackupSchema = z.object({

@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { useAuthStore } from "@/lib/cbt/auth-store";
-import { validateSessionServer } from "@/lib/server/repos/functions";
+import { validateSessionServer } from "@/lib/server/auth/functions";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,

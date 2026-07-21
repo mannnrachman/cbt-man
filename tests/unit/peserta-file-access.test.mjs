@@ -57,7 +57,7 @@ function pesertaCanAccessFile(caller, fileId, db) {
   return allowed.has(fileId);
 }
 
-const peserta = { id: "u_1", role: "peserta", groupId: "g_1" };
+const peserta = { id: "u_1", role: "mahasiswa", groupId: "g_1" };
 
 function baseDb() {
   return {

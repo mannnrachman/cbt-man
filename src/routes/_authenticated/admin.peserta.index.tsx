@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import * as XLSX from "xlsx";
 import { usersRepo, groupsRepo } from "@/lib/cbt/repos";
 import { hashPassword } from "@/lib/cbt/hash";
-import { upsertUserServer } from "@/lib/server/repos/functions";
+import { upsertUserServer } from "@/lib/server/users/functions";
 import { uid } from "@/lib/cbt/storage";
 import type { Group, User } from "@/lib/cbt/types";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Pencil, Trash2, Plus, Printer, Upload, Users as UsersIcon } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_authenticated/admin/peserta")({
+export const Route = createFileRoute("/_authenticated/admin/peserta/")({
   component: PesertaPage,
 });
 
@@ -23,7 +23,7 @@ type PesertaWithPwd = User & { _initialPassword?: string };
 
 function PesertaPage() {
   const [peserta, setPeserta] = useState<PesertaWithPwd[]>(
-    usersRepo.all().filter((u) => u.role === "peserta"),
+    usersRepo.all().filter((u) => u.role === "mahasiswa"),
   );
   const [groups, setGroups] = useState<Group[]>(groupsRepo.all());
   const [editing, setEditing] = useState<PesertaWithPwd | null>(null);
@@ -33,7 +33,7 @@ function PesertaPage() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   function refresh() {
-    setPeserta(usersRepo.all().filter((u) => u.role === "peserta"));
+    setPeserta(usersRepo.all().filter((u) => u.role === "mahasiswa"));
     setGroups(groupsRepo.all());
   }
 
@@ -61,8 +61,8 @@ function PesertaPage() {
         groupId = g.id;
       }
       const u: PesertaWithPwd = {
-        id: uid("u_"), username, namaLengkap: nama, role: "peserta",
-        allowedTopikIds: [], groupId, aktif: true,
+        id: uid("u_"), username, namaLengkap: nama, role: "mahasiswa",
+        allowedTopikIds: [], mataKuliahIds: [], groupId, aktif: true,
         passwordHash: await hashPassword(password), createdAt: Date.now(),
         _initialPassword: password,
       };
@@ -83,60 +83,123 @@ function PesertaPage() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Peserta</h1>
-          <p className="text-sm text-muted-foreground">Kelola siswa & cetak kartu login.</p>
+    <div className="mx-auto max-w-5xl space-y-6">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Akun Peserta</h1>
+          <p className="text-sm text-slate-500">
+            Kelola data mahasiswa, grup kelas, dan cetak kartu ujian.
+          </p>
         </div>
-        <div className="flex gap-2">
-          <input ref={fileRef} type="file" accept=".xlsx,.xls" hidden onChange={(e) => {
+        <div className="flex flex-wrap items-center gap-2">
+          <input id="file-upload" type="file" accept=".xlsx,.xls" hidden onChange={(e) => {
             const f = e.target.files?.[0]; if (f) importExcel(f); e.target.value = "";
           }} />
-          <Button variant="outline" onClick={downloadTemplate}>Template Excel</Button>
-          <Button variant="outline" onClick={() => fileRef.current?.click()}><Upload className="mr-1 h-4 w-4" />Import Excel</Button>
-          <Link to="/admin/peserta/group"><Button variant="outline"><UsersIcon className="mr-1 h-4 w-4" />Group</Button></Link>
-          <Link to="/admin/peserta/kartu"><Button variant="outline"><Printer className="mr-1 h-4 w-4" />Cetak Kartu</Button></Link>
-          <Button onClick={() => { setEditing(null); setOpen(true); }}><Plus className="mr-1 h-4 w-4" />Tambah</Button>
+          <Button variant="outline" size="sm" onClick={() => document.getElementById("file-upload")?.click()} className="h-9">
+            <Upload className="mr-2 h-4 w-4" /> Import Excel
+          </Button>
+          <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1"></div>
+          <Link to="/admin/peserta/group">
+            <Button variant="outline" size="sm" className="h-9">
+              <UsersIcon className="mr-2 h-4 w-4" /> Grup Kelas
+            </Button>
+          </Link>
+          <Link to="/admin/peserta/kartu">
+            <Button variant="outline" size="sm" className="h-9">
+              <Printer className="mr-2 h-4 w-4" /> Cetak Kartu
+            </Button>
+          </Link>
+          <Button onClick={() => { setEditing(null); setOpen(true); }} size="sm" className="h-9">
+            <Plus className="mr-2 h-4 w-4" /> Tambah Peserta
+          </Button>
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <Input placeholder="Cari nama atau username…" value={query} onChange={(e) => setQuery(e.target.value)} className="max-w-sm" />
+      {/* Toolbar */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <Input 
+          placeholder="Cari nama atau username..." 
+          value={query} 
+          onChange={(e) => setQuery(e.target.value)} 
+          className="max-w-xs" 
+        />
         <Select value={filterGroup} onValueChange={setFilterGroup}>
-          <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-56">
+            <SelectValue placeholder="Semua Grup" />
+          </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Semua group</SelectItem>
+            <SelectItem value="all">Semua Grup</SelectItem>
             {groups.map((g) => <SelectItem key={g.id} value={g.id}>{g.nama}</SelectItem>)}
           </SelectContent>
         </Select>
       </div>
 
-      <Card><CardContent className="p-0">
-        <table className="w-full text-sm">
-          <thead className="border-b bg-muted/40 text-left">
-            <tr><th className="p-3">Username</th><th className="p-3">Nama</th><th className="p-3">Group</th><th className="p-3">Aktif</th><th className="p-3 text-right">Aksi</th></tr>
-          </thead>
-          <tbody>
-            {shown.map((p) => (
-              <tr key={p.id} className="border-b last:border-0">
-                <td className="p-3 font-mono text-xs">{p.username}</td>
-                <td className="p-3">{p.namaLengkap}</td>
-                <td className="p-3">{groups.find((g) => g.id === p.groupId)?.nama ?? "-"}</td>
-                <td className="p-3">{p.aktif ? "Aktif" : "Nonaktif"}</td>
-                <td className="p-3 text-right">
-                  <Button size="sm" variant="ghost" onClick={() => { setEditing(p); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
-                  <Button size="sm" variant="ghost" onClick={() => {
+      {/* List Section */}
+      <div className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 overflow-hidden shadow-sm">
+        
+        <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800">
+          {shown.map((p) => (
+            <div key={p.id} className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:px-6 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors gap-4">
+              
+              {/* User Info */}
+              <div className="flex items-center gap-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold uppercase">
+                  {p.namaLengkap.charAt(0)}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">{p.namaLengkap}</h3>
+                    <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-semibold tracking-wide text-slate-500">
+                      Grup: {groups.find((g) => g.id === p.groupId)?.nama ?? "-"}
+                    </span>
+                    {!p.aktif && (
+                      <span className="px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-[10px] font-semibold tracking-wide uppercase text-red-600 dark:text-red-400">
+                        Nonaktif
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs font-mono text-slate-500 mt-0.5">{p.username}</p>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-8 w-8 p-0 text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                  onClick={() => {
+                    setEditing(p);
+                    setOpen(true);
+                  }}
+                  title="Edit"
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-8 w-8 p-0 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
+                  title="Hapus"
+                  onClick={() => {
                     if (!confirm("Hapus peserta ini?")) return;
-                    usersRepo.remove(p.id); refresh();
-                  }}><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                </td>
-              </tr>
-            ))}
-            {shown.length === 0 && <tr><td colSpan={5} className="p-6 text-center text-muted-foreground">Tidak ada data.</td></tr>}
-          </tbody>
-        </table>
-      </CardContent></Card>
+                    usersRepo.remove(p.id);
+                    refresh();
+                  }}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          ))}
+          {shown.length === 0 && (
+            <div className="py-12 text-center text-slate-400 text-sm">
+              Tidak ada data peserta yang sesuai.
+            </div>
+          )}
+        </div>
+      </div>
 
       <PesertaDialog open={open} onOpenChange={setOpen} editing={editing} groups={groups} onSaved={refresh} />
     </div>
@@ -186,7 +249,7 @@ function PesertaDialog({
         id: editing?.id ?? uid("u_"),
         username: form.username.trim(),
         namaLengkap: form.namaLengkap.trim(),
-        role: "peserta",
+        role: "mahasiswa",
         allowedTopikIds: editing?.allowedTopikIds ?? [],
         groupId: form.groupId || undefined,
         detail: editing?.detail,
