@@ -58,6 +58,7 @@ function OnlinePage() {
       totalPelanggaran: violations,
       avgProgress: rawSesis.length > 0 ? totalPct / rawSesis.length : 0
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tick, search]); // Re-compute on tick to keep timers smooth
 
   return (

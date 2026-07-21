@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { prisma } from "../db/prisma";
@@ -156,7 +157,7 @@ export const mutateSesiServer = createServerFn({ method: "POST" })
 						gradedBy: item.gradedBy ?? null,
 						createdAt: BigInt(item.createdAt),
 					};
-					let createData: any = { ...updateData, id: item.id };
+					const createData: any = { ...updateData, id: item.id };
 
 					if (caller.role === "mahasiswa") {
 						updateData = {

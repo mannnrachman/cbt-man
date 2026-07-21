@@ -3,7 +3,7 @@ import { parseJson } from "./json";
 import { validateSession, readSessionToken } from "./session";
 import type { NavKey, Ujian } from "@/lib/cbt/types";
 import type { UserRow } from "../repos/mappers";
-// @ts-ignore
+// @ts-expect-error -- seed helper is an untyped .mjs module
 import { createSeedDataset, seedDatabase } from "./seed-shared.mjs";
 import { hashPassword } from "@/lib/cbt/hash";
 import { stringifyJson } from "./json";

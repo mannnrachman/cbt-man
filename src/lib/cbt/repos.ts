@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getCbtSnapshot, getPublicBootConfigServer } from "@/lib/server/snapshot/functions";
 import { claimExamToken as claimExamTokenServer, saveConfigServer, mutateUjianServer, mutateTokenServer } from "@/lib/server/ujian/functions";
 import { mutateUserServer, mutateGroupServer } from "@/lib/server/users/functions";

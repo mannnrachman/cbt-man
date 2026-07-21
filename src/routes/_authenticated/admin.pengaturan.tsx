@@ -163,7 +163,7 @@ function PengaturanPage() {
             checked={cfg.mobileLock}
             onChange={(v) => setCfg({ ...cfg, mobileLock: v })}
             disabled
-            badge="Belum Tersedia"
+            badge="Belum diberlakukan"
           />
           <ToggleRow
             label="Izinkan Multi-Device"
@@ -171,7 +171,7 @@ function PengaturanPage() {
             checked={cfg.multiDevice}
             onChange={(v) => setCfg({ ...cfg, multiDevice: v })}
             disabled
-            badge="Belum Tersedia"
+            badge="Belum diberlakukan"
           />
         </div>
       </div>
