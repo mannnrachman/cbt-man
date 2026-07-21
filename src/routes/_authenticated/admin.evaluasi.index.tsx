@@ -66,26 +66,26 @@ function EvaluasiList() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-200/80 dark:border-slate-800/80">
         <div className="space-y-1.5">
           <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-zinc-100">
-            Kotak Masuk Evaluasi
+            Penilaian Essay
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            Evaluasi dan berikan nilai pada jawaban essay peserta secara manual.
+            Pilih ujian untuk mulai memeriksa dan memberikan nilai pada jawaban essay.
           </p>
         </div>
         
         {totalBelumEssay > 0 && (
           <div className="flex items-center gap-8 text-sm">
             <div className="flex flex-col items-end">
-              <span className="text-[10px] font-medium uppercase tracking-widest text-slate-400 mb-0.5">Ujian Tertunda</span>
+              <span className="text-[10px] font-medium uppercase tracking-widest text-slate-400 mb-0.5">Butuh Penilaian</span>
               <span className="text-xl font-medium text-slate-900 dark:text-white tabular-nums leading-none">
-                {items.filter(i => i.belumSesi > 0).length} <span className="text-sm text-slate-400 font-medium ml-1">Dokumen</span>
+                {items.filter(i => i.belumSesi > 0).length} <span className="text-sm text-slate-400 font-medium ml-1">Ujian</span>
               </span>
             </div>
             <div className="w-px h-8 bg-slate-200 dark:bg-slate-800" />
             <div className="flex flex-col items-end">
-              <span className="text-[10px] font-medium uppercase tracking-widest text-slate-400 mb-0.5">Antrean Essay</span>
-              <span className="text-xl font-medium text-amber-600 dark:text-amber-500 tabular-nums leading-none">
-                {totalBelumEssay} <span className="text-sm text-amber-500/70 font-medium ml-1">Jawaban</span>
+              <span className="text-[10px] font-medium uppercase tracking-widest text-slate-400 mb-0.5">Belum Dinilai</span>
+              <span className="text-xl font-medium text-accent tabular-nums leading-none">
+                {totalBelumEssay} <span className="text-sm text-accent/70 font-medium ml-1">Jawaban</span>
               </span>
             </div>
           </div>
@@ -97,17 +97,17 @@ function EvaluasiList() {
         <div className="rounded-2xl overflow-hidden bg-white dark:bg-slate-900 flex flex-col">
           {/* Table Header */}
           <div className="grid grid-cols-12 gap-4 px-6 py-3 border-b border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900/50 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-            <div className="col-span-12 sm:col-span-5">Referensi Ujian</div>
+            <div className="col-span-12 sm:col-span-5">Daftar Ujian</div>
             <div className="hidden sm:block sm:col-span-2">Mata Kuliah</div>
             <div className="hidden sm:block sm:col-span-3">Progres Penilaian</div>
-            <div className="hidden sm:block sm:col-span-2 text-right">Status</div>
+            <div className="hidden sm:block sm:col-span-2 text-right">Aksi</div>
           </div>
 
           {items.length === 0 ? (
             <div className="py-24 text-center flex flex-col items-center">
-              <CheckCircle2 className="h-10 w-10 text-emerald-500 mb-3 opacity-80" />
-              <span className="text-slate-900 dark:text-slate-100 font-bold">Kotak Masuk Bersih</span>
-              <span className="text-sm text-slate-500 dark:text-slate-400 mt-1">Semua jawaban telah selesai dinilai.</span>
+              <CheckCircle2 className="h-10 w-10 text-primary mb-3 opacity-80" />
+              <span className="text-slate-900 dark:text-slate-100 font-bold">Semua Essay Telah Dinilai</span>
+              <span className="text-sm text-slate-500 dark:text-slate-400 mt-1">Tidak ada jawaban essay yang menunggu penilaian.</span>
             </div>
           ) : (
             <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800/60">
@@ -164,7 +164,7 @@ function EvaluasiList() {
                         </div>
                         <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
                           <div 
-                            className={`h-full rounded-full transition-all duration-500 ease-out ${progressPct === 100 ? 'bg-emerald-500' : 'bg-primary'}`} 
+                            className="h-full rounded-full transition-all duration-500 ease-out bg-primary"
                             style={{ width: `${progressPct}%` }} 
                           />
                         </div>
@@ -173,16 +173,11 @@ function EvaluasiList() {
                       {/* Col 4: Status & Action */}
                       <div className="hidden sm:flex sm:col-span-2 items-center justify-end gap-4">
                         {isWarning ? (
-                          <div className="flex items-center gap-1.5 text-xs font-medium text-amber-600 dark:text-amber-500 tabular-nums">
-                            <span className="relative flex h-1.5 w-1.5">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500"></span>
-                            </span>
-                            {belumSesi} Tertunda
+                          <div className="flex items-center gap-1.5 text-xs font-semibold text-accent bg-accent/10 px-2.5 py-1 rounded-md">
+                            Perlu Dinilai
                           </div>
                         ) : (
-                          <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
-                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                          <div className="flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-md">
                             Selesai
                           </div>
                         )}
