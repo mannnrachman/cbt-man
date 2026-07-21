@@ -247,7 +247,7 @@ function EvaluasiSesi() {
                 {totalUngraded > 0 ? "Simpan Progress" : "Simpan Nilai Akhir"}
               </Button>
               {sesi.gradedAt && (
-                <p className="text-[11px] text-center text-slate-400 mt-2">
+                <p suppressHydrationWarning className="text-[11px] text-center text-slate-400 mt-2">
                   Tersimpan pada {new Date(sesi.gradedAt).toLocaleString("id-ID", { hour: '2-digit', minute:'2-digit', day:'numeric', month:'short' })}
                 </p>
               )}

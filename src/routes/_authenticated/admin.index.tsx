@@ -58,7 +58,7 @@ function CommandCenter() {
               Systems operational
             </span>
             <span className="text-slate-300 dark:text-slate-700">•</span>
-            <span>
+            <span suppressHydrationWarning>
               {new Date().toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long" })}
             </span>
           </div>
@@ -106,7 +106,7 @@ function CommandCenter() {
                       <div>
                         <h3 className="font-semibold text-slate-900 dark:text-slate-100">{exam.nama}</h3>
                         <p className="text-sm text-slate-600 dark:text-slate-400 mt-0.5">
-                          Berakhir pada <span className="font-medium text-slate-800 dark:text-slate-200">{new Date(exam.endAt!).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}</span>
+                          Berakhir pada <span suppressHydrationWarning className="font-medium text-slate-800 dark:text-slate-200">{new Date(exam.endAt!).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}</span>
                         </p>
                       </div>
                     </div>
@@ -165,7 +165,7 @@ function CommandCenter() {
                     <div>
                       <h3 className="font-medium text-slate-800 dark:text-slate-200">{exam.nama}</h3>
                     </div>
-                    <div className="ml-auto text-sm font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-md">
+                    <div suppressHydrationWarning className="ml-auto text-sm font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-md">
                       {new Date(exam.beginAt!).toLocaleDateString("id-ID", { day: "2-digit", month: "short" })}
                     </div>
                   </div>

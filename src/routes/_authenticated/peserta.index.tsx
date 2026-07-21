@@ -177,7 +177,7 @@ function PesertaDashboard() {
 															{(availability === "upcoming" || availability === "ended") && (
 																<div className="flex items-center gap-1.5 pt-0.5 text-xs font-semibold">
 																	{availability === "upcoming" ? (
-																		<span className="text-amber-600 dark:text-amber-500 flex items-center gap-1">
+																		<span suppressHydrationWarning className="text-amber-600 dark:text-amber-500 flex items-center gap-1">
 																			<CalendarClock className="h-3 w-3" />
 																			Dibuka: {u.beginAt ? new Date(Number(u.beginAt)).toLocaleString("id-ID", { dateStyle: "long", timeStyle: "short" }) : "Menunggu jadwal"}
 																		</span>
