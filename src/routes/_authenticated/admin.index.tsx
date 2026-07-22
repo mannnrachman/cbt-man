@@ -123,7 +123,7 @@ function CommandCenter() {
         />
         <StatCard 
           icon={<Zap className="h-5 w-5" />} 
-          label="Sesi Ujian Aktif" 
+          label="Total Sesi" 
           value={counts.sesi} 
         />
       </section>
@@ -188,7 +188,7 @@ function CommandCenter() {
                         <div>
                           <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-1 group-hover/card:text-emerald-700 dark:group-hover/card:text-emerald-400 transition-colors">{exam.nama}</h3>
                           <div className="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
-                            <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> Berakhir {new Date(exam.endAt!).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}</span>
+                            <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> Berakhir {new Date(exam.endAt!).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jakarta" })}</span>
                           </div>
                         </div>
                       </div>
@@ -272,7 +272,7 @@ function CommandCenter() {
                         <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 leading-none mb-2">{exam.nama}</h3>
                         <p className="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                           <Clock className="h-3.5 w-3.5" /> 
-                          {new Date(exam.beginAt!).toLocaleDateString("id-ID", { day: "numeric", month: "short" })} • {new Date(exam.beginAt!).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
+                          {new Date(exam.beginAt!).toLocaleDateString("id-ID", { day: "numeric", month: "short", timeZone: "Asia/Jakarta" })} • {new Date(exam.beginAt!).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jakarta" })}
                         </p>
                       </div>
                     </div>

@@ -157,7 +157,7 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
                         </span>
                       </td>
                       <td className="p-4 text-muted-foreground text-center border-r border-slate-200 dark:border-slate-800">
-                        {s.mulaiAt ? new Date(s.mulaiAt).toLocaleString("id-ID") : "-"}
+                        {s.mulaiAt ? new Date(s.mulaiAt).toLocaleString("id-ID", { timeZone: "Asia/Jakarta" }) : "-"}
                       </td>
                       <td className="p-4 text-center border-r border-slate-200 dark:border-slate-800">
                         {s.status === "selesai" ? (

@@ -68,7 +68,7 @@ function RekapPage() {
       maks: s.maxSkor ?? 0,
       persen: s.maxSkor ? Math.round(((s.skorTotal ?? 0) / s.maxSkor) * 1000) / 10 : 0,
       durasi,
-      tanggal: s.selesaiAt ? new Date(s.selesaiAt).toLocaleString("id-ID") : "-",
+      tanggal: s.selesaiAt ? new Date(s.selesaiAt).toLocaleString("id-ID", { timeZone: "Asia/Jakarta" }) : "-",
       mulaiAtStr: formatDateExcel(s.mulaiAt),
     };
   });

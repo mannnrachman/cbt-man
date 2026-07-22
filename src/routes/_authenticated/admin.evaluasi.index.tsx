@@ -21,7 +21,7 @@ export const Route = createFileRoute("/_authenticated/admin/evaluasi/")({
 
 function formatDate(ts?: number) {
   if (!ts) return "Belum diatur";
-  return new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(ts));
+  return new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short', year: 'numeric', timeZone: "Asia/Jakarta" }).format(new Date(ts));
 }
 
 function EvaluasiList() {
