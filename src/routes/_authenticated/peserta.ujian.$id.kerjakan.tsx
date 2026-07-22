@@ -124,7 +124,6 @@ function RouteComponent() {
       }
     }, 1000);
     return () => clearInterval(interval);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sesi, ujian, endsAt]);
 
   function updateJawaban(partial: Partial<SesiUjian["jawaban"][0]>) {
@@ -230,7 +229,7 @@ function RouteComponent() {
     fontSize === "lg" ? "text-xl sm:text-2xl prose-xl" : "text-base sm:text-lg prose-base";
 
   return (
-    <div className="flex flex-col h-[calc(100vh-64px)] overflow-hidden bg-slate-50 dark:bg-slate-950/50 font-sans">
+    <div className="flex flex-col h-[calc(100dvh-64px)] overflow-hidden bg-slate-50 dark:bg-slate-950/50 font-sans">
       <div className="flex-1 flex mx-auto w-full max-w-7xl h-full relative">
         
         {/* LEFT PANEL: MAIN EXAM AREA */}
@@ -287,7 +286,10 @@ function RouteComponent() {
             <div className="max-w-4xl mx-auto px-5 sm:px-10 py-8 sm:py-12 pb-32">
               
               {/* Question Text */}
-              <div className={cn("prose prose-slate dark:prose-invert max-w-none mb-10 text-slate-800 dark:text-slate-200 leading-loose", textSizeClass)}>
+              <div 
+                aria-live="polite"
+                className={cn("prose prose-slate dark:prose-invert max-w-none mb-10 text-slate-800 dark:text-slate-200 leading-loose", textSizeClass)}
+              >
                 <RichView html={currentSoal.detail} />
               </div>
               
@@ -331,6 +333,7 @@ function RouteComponent() {
                         key={oid}
                         className={cn(
                           "group relative flex items-start p-4 sm:p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 hover:-translate-y-0.5",
+                          "has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-primary/40 has-[:focus-visible]:border-primary", // a11y focus ring
                           isChecked 
                             ? "bg-primary/5 border-primary shadow-[0_0_0_1px_rgba(3,165,89,1)] dark:bg-primary/10 dark:shadow-[0_0_0_1px_rgba(3,165,89,0.5)]" 
                             : "bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-md"

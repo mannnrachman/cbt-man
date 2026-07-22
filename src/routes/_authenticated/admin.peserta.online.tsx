@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useMemo } from "react";
 import { sesiRepo, ujianRepo, usersRepo } from "@/lib/cbt/repos";
-import { Activity, AlertTriangle, Users, Timer, CheckCircle2, Search } from "lucide-react";
+import { Activity, AlertTriangle, Users, Timer, CheckCircle2, Search, MonitorPlay } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { AdminPage, AdminPageHeader, AdminPageContent } from "@/components/cbt/AdminPage";
 
 export const Route = createFileRoute("/_authenticated/admin/peserta/online")({
   component: OnlinePage,
@@ -20,7 +21,6 @@ function OnlinePage() {
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    // Refresh interval lowered to 1s for real-time countdown feel
     const t = window.setInterval(() => tick((x) => x + 1), 1000);
     return () => window.clearInterval(t);
   }, []);
@@ -58,147 +58,116 @@ function OnlinePage() {
       totalPelanggaran: violations,
       avgProgress: rawSesis.length > 0 ? totalPct / rawSesis.length : 0
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tick, search]); // Re-compute on tick to keep timers smooth
+  }, [tick, search]);
 
   return (
-    <div className="mx-auto max-w-6xl space-y-8 animate-in fade-in duration-500 pb-12 pt-4">
-      {/* Header Section */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-end justify-between border-b border-slate-200 dark:border-white/10 pb-6">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <div className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+    <AdminPage>
+      
+      {/* Header */}
+      <AdminPageHeader
+        title="Pantau Ujian Live"
+        description="Monitoring aktivitas peserta secara real-time."
+        action={
+          <div className="flex items-center gap-8 text-sm">
+            <div className="flex flex-col items-end">
+              <span className="text-[10px] font-medium uppercase tracking-widest text-slate-400 mb-0.5">Sesi Aktif</span>
+              <span className="text-xl font-medium text-slate-900 dark:text-white tabular-nums leading-none">{sesis.length}</span>
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Live Operations Board</h1>
+            <div className="w-px h-8 bg-slate-200 dark:bg-slate-800" />
+            <div className="flex flex-col items-end">
+              <span className="text-[10px] font-medium uppercase tracking-widest text-slate-400 mb-0.5">Pelanggaran</span>
+              <span className="text-xl font-medium text-red-600 dark:text-red-400 tabular-nums leading-none">{totalPelanggaran}</span>
+            </div>
+            <div className="w-px h-8 bg-slate-200 dark:bg-slate-800" />
+            <div className="flex flex-col items-end">
+              <span className="text-[10px] font-medium uppercase tracking-widest text-slate-400 mb-0.5">Rata-rata Progress</span>
+              <span className="text-xl font-medium text-slate-900 dark:text-white tabular-nums leading-none">{Math.round(avgProgress)}%</span>
+            </div>
           </div>
-          <p className="text-sm text-slate-600 dark:text-slate-400 pl-5">
-            Pantau jalannya ujian, waktu tersisa, dan kecurangan secara real-time.
-          </p>
-        </div>
+        }
+      />
+
+      {/* Main Content Area */}
+      {/* Search */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <Input 
+          placeholder="Cari nama atau ujian..." 
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="max-w-xs"
+        />
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
-          <div className="h-12 w-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
-            <Activity className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-          </div>
-          <div>
-            <div className="text-sm font-medium text-slate-500">Sesi Aktif</div>
-            <div className="text-2xl font-bold text-slate-900 dark:text-white">{sesis.length} <span className="text-sm font-normal text-slate-400">peserta</span></div>
-          </div>
-        </div>
-        
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
-          <div className="h-12 w-12 rounded-xl bg-red-100 dark:bg-red-900/50 flex items-center justify-center">
-            <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
-          </div>
-          <div>
-            <div className="text-sm font-medium text-slate-500">Total Pelanggaran</div>
-            <div className="text-2xl font-bold text-slate-900 dark:text-white">{totalPelanggaran} <span className="text-sm font-normal text-slate-400">insiden</span></div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
-          <div className="h-12 w-12 rounded-xl bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
-            <CheckCircle2 className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-          </div>
-          <div>
-            <div className="text-sm font-medium text-slate-500">Rata-rata Progress</div>
-            <div className="text-2xl font-bold text-slate-900 dark:text-white">{Math.round(avgProgress)}%</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Board */}
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-          <h2 className="text-lg font-semibold tracking-tight">Status Peserta</h2>
-          <div className="relative w-full sm:w-72">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-            <Input 
-              placeholder="Cari nama atau ujian..." 
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800"
-            />
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 overflow-hidden">
-          <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800/60">
+      <AdminPageContent className="p-0">
+          <div className="divide-y divide-slate-100 dark:divide-slate-800/60">
             {sesis.map(({ s, u, ex, dijawab, totalSoal, progress }) => {
               const sisaMs = s.endsAt ? Math.max(0, s.endsAt - Date.now()) : 0;
-              const isCritical = sisaMs > 0 && sisaMs < 300000; // < 5 mins
+              const isCritical = sisaMs > 0 && sisaMs < 300000;
               
               return (
-                <div key={s.id} className="group flex flex-col md:flex-row md:items-center justify-between p-4 sm:px-6 hover:bg-white dark:hover:bg-slate-800/50 transition-colors gap-6">
+                <div key={s.id} className="group p-4 flex flex-col md:flex-row md:items-center justify-between gap-6 transition-all duration-300 ease-spring hover:bg-slate-50 dark:hover:bg-slate-800/30">
                   
-                  {/* Identitas Peserta */}
-                  <div className="flex items-center gap-4 min-w-0 md:w-1/3">
-                    <div className="h-10 w-10 shrink-0 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center border border-slate-300 dark:border-slate-700">
-                      <Users className="h-5 w-5 text-slate-500" />
+                  {/* User Info */}
+                  <div className="flex items-center gap-3 min-w-0 md:w-1/3">
+                    <div className="flex h-8 w-8 shrink-0 rounded-full bg-slate-100 dark:bg-slate-800 items-center justify-center border border-slate-200 dark:border-slate-700">
+                      <Users className="h-3.5 w-3.5 text-slate-500" />
                     </div>
                     <div className="min-w-0">
-                      <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100 truncate">{u?.namaLengkap ?? "Unknown"}</h3>
-                      <div className="text-xs text-slate-500 truncate mt-0.5">{ex?.nama ?? "Unknown Exam"}</div>
+                      <h3 className="font-medium text-sm text-slate-900 dark:text-slate-100 truncate group-hover:text-primary transition-colors duration-300 ease-spring">{u?.namaLengkap ?? "Unknown"}</h3>
+                      <div className="text-xs text-slate-500 truncate">{ex?.nama ?? "Unknown Exam"}</div>
                     </div>
                   </div>
 
-                  {/* Progress Mengerjakan */}
-                  <div className="flex-1 w-full space-y-1.5 md:px-4">
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="text-slate-500">Progress</span>
-                      <span className="font-semibold text-slate-700 dark:text-slate-300">{dijawab} / {totalSoal} Soal</span>
+                  {/* Progress Bar */}
+                  <div className="flex-1 w-full max-w-xs md:max-w-sm">
+                    <div className="flex justify-between items-center text-xs text-slate-500 mb-1.5">
+                      <span>{dijawab} / {totalSoal} Soal</span>
+                      <span className="font-medium text-slate-700 dark:text-slate-300 tabular-nums">{Math.round(progress)}%</span>
                     </div>
-                    <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-2">
-                      <div className="bg-blue-500 h-2 rounded-full transition-all duration-500" style={{ width: `${progress}%` }} />
+                    <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                      <div className="bg-primary h-full rounded-full transition-all duration-500 ease-out" style={{ width: `${progress}%` }} />
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-6 shrink-0 justify-between md:justify-end">
-                    {/* Waktu */}
+                  {/* Status & Time */}
+                  <div className="flex items-center gap-6 shrink-0 md:w-1/4 justify-between md:justify-end">
                     <div className="text-right">
-                      <div className="text-[10px] uppercase font-bold tracking-wider text-slate-500 mb-0.5">Sisa Waktu</div>
-                      <div className={`font-mono text-lg font-bold flex items-center gap-1.5 ${isCritical ? 'text-red-600 dark:text-red-400 animate-pulse' : 'text-slate-700 dark:text-slate-300'}`}>
-                        <Timer className="h-4 w-4" />
+                      <div className="text-[10px] font-medium uppercase tracking-widest text-slate-400 mb-0.5">Sisa Waktu</div>
+                      <div className={`font-mono text-sm font-medium tabular-nums ${isCritical ? 'text-red-600 animate-pulse' : 'text-slate-700 dark:text-slate-300'}`}>
                         {fmtSisa(sisaMs)}
                       </div>
                     </div>
 
-                    {/* Pelanggaran */}
                     <div className="w-24 text-right">
-                      <div className="text-[10px] uppercase font-bold tracking-wider text-slate-500 mb-1">Pelanggaran</div>
+                      <div className="text-[10px] font-medium uppercase tracking-widest text-slate-400 mb-1">Status</div>
                       {s.pelanggaran > 0 ? (
-                        <div className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-400 text-sm font-bold border border-red-200 dark:border-red-800">
-                          {s.pelanggaran}x
+                        <div className="flex items-center justify-end gap-1.5 text-xs font-medium text-red-600 dark:text-red-400">
+                          <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                          </span>
+                          {s.pelanggaran} Insiden
                         </div>
                       ) : (
-                        <div className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 text-sm font-medium">
+                        <div className="flex items-center justify-end gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                           Aman
                         </div>
                       )}
                     </div>
                   </div>
-
                 </div>
               );
             })}
 
             {sesis.length === 0 && (
-              <div className="p-16 text-center">
-                <div className="mx-auto w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
-                  <Activity className="h-8 w-8 text-slate-400" />
-                </div>
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-1">Tidak ada aktivitas</h3>
-                <p className="text-sm text-slate-500">Saat ini tidak ada peserta yang sedang melangsungkan ujian.</p>
+              <div className="py-12 flex flex-col items-center justify-center text-center">
+                <MonitorPlay className="h-8 w-8 text-slate-300 dark:text-slate-700 mb-3" />
+                <p className="text-slate-500 text-sm">Belum ada peserta yang aktif.</p>
               </div>
             )}
           </div>
-        </div>
-      </div>
-    </div>
+      </AdminPageContent>
+    </AdminPage>
   );
 }

@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import React, { useState, useEffect } from "react";
 import {
   createFileRoute,
@@ -33,6 +32,7 @@ import {
   Menu,
   X,
   Sparkles,
+  BookOpenCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -50,6 +50,7 @@ const ADMIN_ROUTE_RULES = {
   leaderboard: { key: "leaderboard", adminOnly: false, paths: ["/admin/leaderboard"] },
   pengaturan: { key: "pengaturan", adminOnly: true, paths: ["/admin/pengaturan"] },
   tools: { key: "tools", adminOnly: true, paths: ["/admin/tools"] },
+  panduan: { key: "panduan", adminOnly: false, paths: ["/admin/panduan"] },
 } satisfies Record<string, { key: NavKey; adminOnly: boolean; paths: string[] }>;
 
 type AdminRouteRule = (typeof ADMIN_ROUTE_RULES)[keyof typeof ADMIN_ROUTE_RULES];
@@ -75,24 +76,24 @@ const navGroups: NavGroup[] = [
     ]
   },
   {
-    label: "Data Induk",
+    label: "Akademik & Pengguna",
     items: [
-      { to: "/admin/users", label: "Pengguna", icon: Users },
-      { to: "/admin/peserta", label: "Akun Peserta", icon: GraduationCap, exact: true },
-      { to: "/admin/akademik", label: "Akademik", icon: Landmark },
+      { to: "/admin/akademik", label: "Struktur Akademik", icon: Landmark },
+      { to: "/admin/users", label: "Pengelola Sistem", icon: Users },
+      { to: "/admin/peserta", label: "Mahasiswa / Peserta", icon: GraduationCap, exact: true },
+    ]
+  },
+  {
+    label: "Bank Soal & Berkas",
+    items: [
+      { to: "/admin/modul", label: "Bank Soal", icon: BookOpen },
       { to: "/admin/files", label: "File Manager", icon: FolderOpen },
     ]
   },
   {
-    label: "Manajemen Ujian",
+    label: "Ujian & Pelaksanaan",
     items: [
-      { to: "/admin/modul", label: "Bank Soal", icon: BookOpen },
       { to: "/admin/ujian", label: "Paket Ujian", icon: FileText },
-    ]
-  },
-  {
-    label: "Monitoring Ujian",
-    items: [
       { to: "/admin/peserta/online", label: "Pantau Ujian Live", icon: Activity },
     ]
   },
@@ -104,10 +105,11 @@ const navGroups: NavGroup[] = [
     ]
   },
   {
-    label: "Sistem",
+    label: "Sistem & Bantuan",
     items: [
       { to: "/admin/pengaturan", label: "Pengaturan", icon: Settings },
       { to: "/admin/tools", label: "Backup & Tools", icon: Wrench },
+      { to: "/admin/panduan", label: "Panduan", icon: BookOpenCheck },
     ]
   }
 ];
@@ -283,7 +285,7 @@ function AdminLayout() {
           </nav>
         </aside>
 
-        <div className="flex min-h-screen flex-1 flex-col overflow-hidden">
+        <div className="flex min-h-screen flex-1 flex-col min-w-0">
           <header className="flex h-14 items-center justify-between border-b bg-card px-4 lg:px-6 sticky top-0 z-30 shadow-sm backdrop-blur-md bg-card/80">
             <div className="flex items-center gap-4">
               <Button

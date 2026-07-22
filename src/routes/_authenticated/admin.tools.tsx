@@ -90,21 +90,21 @@ function ToolsPage() {
   }
 
   return (
-    <AdminPage className="max-w-4xl pb-20">
+    <AdminPage>
       <AdminPageHeader
         title="Alat Sistem"
         description="Fasilitas pencadangan data (backup), pemulihan (restore), dan pengaturan ulang pangkalan data."
       />
 
       {/* Section 1: Backup & Restore */}
-      <div className="space-y-4">
-        <div className="space-y-1">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Pencadangan Data</h2>
-          <p className="text-sm text-slate-500">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-12">
+        <div className="space-y-2 lg:col-span-1">
+          <h2 id="backup-heading" className="text-lg font-semibold text-slate-900 dark:text-white">Pencadangan Data</h2>
+          <p className="text-sm text-slate-500 leading-relaxed">
             Amankan data aplikasi secara berkala atau pulihkan dari cadangan sebelumnya. Cadangan mencakup seluruh pengguna, soal, ujian, dan konfigurasi.
           </p>
         </div>
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
+        <div role="region" aria-labelledby="backup-heading" className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
           
           {/* Export Backup Row */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
@@ -141,6 +141,7 @@ function ToolsPage() {
                 type="file"
                 accept="application/json,.json"
                 className="hidden"
+                aria-hidden="true"
                 onChange={handleFile}
               />
               <Button variant="outline" onClick={() => fileRef.current?.click()} className="w-full sm:w-auto bg-white dark:bg-slate-950">
@@ -152,17 +153,17 @@ function ToolsPage() {
         </div>
       </div>
 
-      <div className="h-px w-full bg-slate-200 dark:bg-slate-800/60" />
+      <div className="h-px w-full bg-slate-200 dark:bg-slate-800/60 my-10" />
 
       {/* Section 2: Pemeliharaan Pangkalan Data */}
-      <div className="space-y-4">
-        <div className="space-y-1">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Pengelolaan Lanjut</h2>
-          <p className="text-sm text-slate-500">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-12">
+        <div className="space-y-2 lg:col-span-1">
+          <h2 id="advanced-heading" className="text-lg font-semibold text-slate-900 dark:text-white">Pengelolaan Lanjut</h2>
+          <p className="text-sm text-slate-500 leading-relaxed">
             Aksi-aksi kritikal untuk memanipulasi pangkalan data sistem secara langsung.
           </p>
         </div>
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
+        <div role="region" aria-labelledby="advanced-heading" className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
           
           {/* Seed Data Row */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
@@ -195,7 +196,7 @@ function ToolsPage() {
                 </div>
                 <h3 className="text-sm font-semibold text-red-700 dark:text-red-400">Zona Berbahaya: Hapus Semua Data</h3>
               </div>
-              <p className="text-xs text-red-600/70 dark:text-red-400/70 pl-8">Tindakan ini akan mengosongkan seluruh pangkalan data. Tidak dapat dibatalkan!</p>
+              <p className="text-xs font-medium text-red-700 dark:text-red-400 pl-8">Tindakan ini akan mengosongkan seluruh pangkalan data. Tidak dapat dibatalkan!</p>
             </div>
             <div className="shrink-0">
               <Button variant="destructive" onClick={() => setConfirmReset(true)} className="w-full sm:w-auto font-semibold">

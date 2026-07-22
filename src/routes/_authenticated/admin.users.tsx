@@ -1,9 +1,9 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { revokeUserSessionsServer, upsertUserServer, mutateUserServer, getUsersList } from "@/lib/server/users/functions";
-import { getProdiList } from "@/lib/server/akademik/functions";
+import { usersRepo, unitAkademikRepo } from "@/lib/cbt/repos";
+import { revokeUserSessionsServer, upsertUserServer } from "@/lib/server/users/functions";
 import { uid } from "@/lib/cbt/storage";
-import type { Role, User, ProgramStudi } from "@/lib/cbt/types";
+import type { Role, User } from "@/lib/cbt/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,31 +27,19 @@ import { toast } from "sonner";
 import { AdminPage, AdminPageHeader, AdminPageContent } from "@/components/cbt/AdminPage";
 
 export const Route = createFileRoute("/_authenticated/admin/users")({
-  loader: async () => {
-    const [allUsers, prodiList] = await Promise.all([
-      getUsersList(),
-      getProdiList()
-    ]);
-    return { allUsers, prodiList };
-  },
   component: UsersPage,
 });
 
 function UsersPage() {
-  const router = useRouter();
-  const { allUsers, prodiList } = Route.useLoaderData();
-  
-  const initialUsers = allUsers.filter((u) => u.role !== "mahasiswa");
-  const [users, setUsers] = useState<User[]>(initialUsers);
-  
-  useEffect(() => {
-    setUsers(initialUsers);
-  }, [initialUsers]);
-
+  const [users, setUsers] = useState<User[]>(usersRepo.all().filter((u) => u.role !== "mahasiswa"));
   const [editing, setEditing] = useState<User | null>(null);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [filterRole, setFilterRole] = useState("all");
+
+  function refresh() {
+    setUsers(usersRepo.all().filter((u) => u.role !== "mahasiswa"));
+  }
 
   const shown = users.filter((u) => 
     (filterRole === "all" || u.role === filterRole) &&
@@ -62,9 +50,9 @@ function UsersPage() {
     <AdminPage>
       <AdminPageHeader
         title="Pengguna Sistem"
-        description="Kelola akses akun admin, operator prodi, dan evaluator."
+        description="Kelola akses akun admin, admin jurusan, dan evaluator."
         action={
-          <Button onClick={() => { setEditing(null); setOpen(true); }} className="h-9">
+          <Button onClick={() => { setEditing(null); setOpen(true); }} size="sm" className="h-9">
             <Plus className="mr-2 h-4 w-4" /> Tambah Akun
           </Button>
         }
@@ -85,62 +73,55 @@ function UsersPage() {
           <SelectContent>
             <SelectItem value="all">Semua Peran</SelectItem>
             <SelectItem value="super_admin">Super Admin</SelectItem>
-            <SelectItem value="admin_prodi">Admin Prodi</SelectItem>
+            <SelectItem value="admin_prodi">Admin Jurusan</SelectItem>
             <SelectItem value="evaluator">Evaluator</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       {/* List Section */}
-      <AdminPageContent className="p-0">
+            <AdminPageContent className="p-0">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-semibold">
               <tr>
-                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left border-r border-slate-200 dark:border-slate-800">Username</th>
-                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left border-r border-slate-200 dark:border-slate-800">Nama Lengkap</th>
-                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center border-r border-slate-200 dark:border-slate-800">Peran</th>
-                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center border-r border-slate-200 dark:border-slate-800">Status</th>
+                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left">Username</th>
+                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left">Nama Lengkap</th>
+                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Peran</th>
+                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Status</th>
                 <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody>
               {shown.map((u) => (
-                <tr key={u.id} className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                  <td className="p-4 font-medium text-slate-900 dark:text-slate-100 border-r border-slate-200 dark:border-slate-800 text-left">{u.username}</td>
-                  <td className="p-4 text-slate-600 dark:text-slate-400 border-r border-slate-200 dark:border-slate-800 text-left">{u.namaLengkap}</td>
-                  <td className="p-4 text-center border-r border-slate-200 dark:border-slate-800">
+                <tr key={u.id} className="transition-colors border-t border-slate-100 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                  <td className="p-4 font-medium text-slate-900 dark:text-slate-100 text-left">{u.username}</td>
+                  <td className="p-4 text-slate-600 dark:text-slate-400 text-left">{u.namaLengkap}</td>
+                  <td className="p-4 text-center">
                     <span className="px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-                      {u.role === "super_admin" ? "Super Admin" : u.role === "admin_prodi" ? "Admin Prodi" : u.role === "evaluator" ? "Evaluator" : u.role}
+                      {u.role === "super_admin" ? "Super Admin" : u.role === "admin_prodi" ? "Admin Jurusan" : u.role === "evaluator" ? "Evaluator" : u.role}
                     </span>
                   </td>
-                  <td className="p-4 text-center border-r border-slate-200 dark:border-slate-800">
+                  <td className="p-4 text-center">
                     {u.aktif ? (
-                      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-success/15 text-success">Aktif</span>
+                      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">Aktif</span>
                     ) : (
-                      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-destructive/15 text-destructive">Nonaktif</span>
+                      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400">Nonaktif</span>
                     )}
                   </td>
                   <td className="p-4 text-center space-x-2">
-                    <Button variant="outline" size="sm" onClick={() => { setEditing(u); setOpen(true); }} className="h-8" aria-label="Edit">
+                    <Button variant="outline" size="sm" onClick={() => { setEditing(u); setOpen(true); }} className="h-8">
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="sm" className="h-8 text-destructive hover:bg-destructive/10" aria-label="Hapus" onClick={async () => {
+                    <Button variant="ghost" size="sm" className="h-8 text-destructive hover:bg-destructive/10" onClick={() => {
                       if (confirm("Hapus pengguna ini?")) {
-                        // Optimistic UI
-                        setUsers((prev) => prev.filter(user => user.id !== u.id));
-                        const res = await mutateUserServer({ data: { action: "remove", payload: { id: u.id } } });
-                        if (!res.ok) {
-                          toast.error(res.error || "Gagal menghapus");
-                          await router.invalidate();
-                        } else {
-                          await router.invalidate();
-                        }
+                        usersRepo.remove(u.id);
+                        refresh();
                       }
                     }}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="sm" className="h-8 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950" aria-label="Hentikan sesi" onClick={async () => {
+                    <Button variant="ghost" size="sm" className="h-8 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950" onClick={async () => {
                       if (!confirm("Hentikan semua sesi aktif pengguna ini? (Force logout)")) return;
                       try {
                         const res = await revokeUserSessionsServer({ data: { userId: u.id } });
@@ -165,25 +146,7 @@ function UsersPage() {
         </div>
       </AdminPageContent>
 
-      <UserDialog 
-        open={open} 
-        onOpenChange={setOpen} 
-        editing={editing} 
-        prodiList={prodiList}
-        onSaved={async (user) => {
-          // Optimistic UI update
-          setUsers(prev => {
-            const idx = prev.findIndex(u => u.id === user.id);
-            if (idx >= 0) {
-              const next = [...prev];
-              next[idx] = user;
-              return next;
-            }
-            return [...prev, user];
-          });
-          await router.invalidate();
-        }} 
-      />
+      <UserDialog open={open} onOpenChange={setOpen} editing={editing} onSaved={refresh} />
     </AdminPage>
   );
 }
@@ -192,20 +155,18 @@ function UserDialog({
   open,
   onOpenChange,
   editing,
-  prodiList,
   onSaved,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   editing: User | null;
-  prodiList: ProgramStudi[];
-  onSaved: (user: User) => void;
+  onSaved: () => void;
 }) {
   const [form, setForm] = useState({
     username: "",
     namaLengkap: "",
     role: "admin_prodi" as Role,
-    prodiId: "",
+    unitId: "",
     aktif: true,
     password: "",
   });
@@ -216,7 +177,7 @@ function UserDialog({
       username: editing?.username ?? "",
       namaLengkap: editing?.namaLengkap ?? "",
       role: editing?.role ?? "admin_prodi",
-      prodiId: editing?.prodiId ?? "",
+      unitId: editing?.unitId ?? "",
       aktif: editing?.aktif ?? true,
       password: "",
     });
@@ -228,29 +189,29 @@ function UserDialog({
       return;
     }
 
-    const payload = {
-      id: editing?.id ?? uid("u_"),
-      username: form.username.trim(),
-      namaLengkap: form.namaLengkap.trim(),
-      role: form.role,
-      aktif: form.aktif,
-      allowedTopikIds: editing?.allowedTopikIds ?? [],
-      groupId: editing?.groupId,
-      prodiId: form.prodiId || undefined,
-      detail: editing?.detail,
-      createdAt: editing?.createdAt ?? Date.now(),
-      newPassword: form.password.trim() || undefined,
-    };
-
-    const res = await upsertUserServer({ data: payload });
+    const res = await upsertUserServer({
+      data: {
+        id: editing?.id ?? uid("u_"),
+        username: form.username.trim(),
+        namaLengkap: form.namaLengkap.trim(),
+        role: form.role,
+        aktif: form.aktif,
+        allowedTopikIds: editing?.allowedTopikIds ?? [],
+        unitId: form.unitId || undefined,
+        detail: editing?.detail,
+        createdAt: editing?.createdAt ?? Date.now(),
+        newPassword: form.password.trim() || undefined,
+      },
+    });
 
     if (!res.ok) {
       toast.error(res.error ?? "Gagal menyimpan pengguna");
       return;
     }
 
+    usersRepo.upsert(res.user);
     toast.success(editing ? "Pengguna diperbarui" : "Pengguna ditambahkan");
-    onSaved(res.user);
+    onSaved();
     onOpenChange(false);
   }
 
@@ -280,21 +241,21 @@ function UserDialog({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="super_admin">Super Admin</SelectItem>
-                <SelectItem value="admin_prodi">Admin Prodi</SelectItem>
+                <SelectItem value="admin_prodi">Admin Jurusan</SelectItem>
                 <SelectItem value="evaluator">Evaluator</SelectItem>
               </SelectContent>
             </Select>
           </div>
           {(form.role === "admin_prodi" || form.role === "mahasiswa") && (
-            <div className="space-y-1">
-              <Label>Program Studi</Label>
-              <Select value={form.prodiId} onValueChange={(v) => setForm({ ...form, prodiId: v })}>
+            <div>
+              <Label>Unit Akademik (Opsional)</Label>
+              <Select value={form.unitId} onValueChange={(v) => setForm({ ...form, unitId: v })}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Pilih prodi (opsional)" />
+                  <SelectValue placeholder="Pilih unit (opsional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">-- Tidak ada --</SelectItem>
-                  {prodiList.map((p) => (
+                  <SelectItem value="none">(Tidak Ada Unit)</SelectItem>
+                  {unitAkademikRepo.all().map((p) => (
                     <SelectItem key={p.id} value={p.id}>{p.nama}</SelectItem>
                   ))}
                 </SelectContent>

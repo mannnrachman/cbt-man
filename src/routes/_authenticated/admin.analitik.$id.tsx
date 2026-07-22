@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
-import { ujianRepo, sesiRepo, usersRepo, soalRepo, hydrateRepos, mataKuliahRepo, semesterRepo } from "@/lib/cbt/repos";
+import { ujianRepo, sesiRepo, usersRepo, soalRepo, hydrateRepos, mataKuliahRepo, semesterRepo, unitAkademikRepo } from "@/lib/cbt/repos";
 import { recomputeSkor } from "@/lib/cbt/exam";
+import { exportSheet, stripHtml } from "@/lib/cbt/excel";
+import { analisisButir, labelKesukaran, labelDiskriminasi } from "@/lib/cbt/analisis";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trash2, Pencil, Save, X, BookOpen, Clock, FileText, ChevronRight, CheckCircle2, BarChart, Sparkles, AlertTriangle, TrendingUp, TrendingDown, Printer } from "lucide-react";
+import { Trash2, Pencil, Save, X, BookOpen, Clock, FileText, ChevronRight, CheckCircle2, BarChart, Sparkles, AlertTriangle, TrendingUp, TrendingDown, Printer, Download } from "lucide-react";
 import { useState, useEffect } from "react";
 import { RichView } from "@/components/cbt/RichEditor";
 import { toast } from "sonner";
@@ -155,11 +157,7 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
                         </span>
                       </td>
                       <td className="p-4 text-muted-foreground text-center border-r border-slate-200 dark:border-slate-800">
-                        {s.mulaiAt ? (
-                          <span suppressHydrationWarning>
-                            {new Date(s.mulaiAt).toLocaleString("id-ID")}
-                          </span>
-                        ) : "-"}
+                        {s.mulaiAt ? new Date(s.mulaiAt).toLocaleString("id-ID") : "-"}
                       </td>
                       <td className="p-4 text-center border-r border-slate-200 dark:border-slate-800">
                         {s.status === "selesai" ? (
@@ -325,6 +323,85 @@ function ExamReportTab({ ujian, sesis }: { ujian: Ujian, sesis: SesiUjian[] }) {
     { name: "81-100", count: scores.filter(s => s > 80 && s <= 100).length },
   ];
 
+  function formatDateExcel(ms: number | undefined | null) {
+    if (!ms) return "-";
+    const d = new Date(ms);
+    const pad = (n: number) => n.toString().padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  }
+
+  function exportRekapExcel() {
+    const users = usersRepo.all();
+    const units = unitAkademikRepo.all();
+    
+    // --- SHEET 1: REKAP NILAI ---
+    const rowsRekap = completed.map(s => {
+      const u = users.find(x => x.id === s.pesertaId);
+      const g = units.find(x => x.id === u?.unitId);
+      return [
+        formatDateExcel(s.mulaiAt),
+        ujian.nama,
+        u?.username ?? "-",
+        u?.namaLengkap ?? "-",
+        g?.nama ?? "-",
+        s.skorTotal ?? 0
+      ];
+    });
+    
+    const aoaRekap = [
+      ["No", "Waktu Mulai", "Nama Tes", "Username", "Nama", "Group", "Poin"],
+      ...rowsRekap.map((r, i) => [i + 1, ...r])
+    ];
+
+    const safeName = ujian.nama.replace(/[^a-zA-Z0-9_-]/g, "_");
+    exportSheet(`Hasil_Ujian_-_${safeName}.xlsx`, [
+      { name: "Rekap Nilai", aoa: aoaRekap }
+    ]);
+  }
+
+  function exportAnalisisExcel() {
+    const users = usersRepo.all();
+    const soals = soalRepo.all();
+    const stats = analisisButir(completed, soals);
+    
+    // --- SHEET 2: GRID JAWABAN ---
+    const header1 = ["No", "Username", "Nama", "Nomor Soal"];
+    const header2 = ["", "", "", ...stats.map((_, i) => i + 1)];
+    const dataGrid = completed.map((s, i) => {
+      const u = users.find(x => x.id === s.pesertaId);
+      const grid = stats.map(st => {
+         const j = s.jawaban.find(x => x.soalId === st.soalId);
+         if (!j) return 0;
+         return (j.skor && j.skor > 0) ? 1 : 0;
+      });
+      return [i + 1, u?.username ?? "-", u?.namaLengkap ?? "-", ...grid];
+    });
+    const aoaGrid = [
+      ["ANALISIS BUTIR SOAL"],
+      [],
+      ["Grup Peserta", "", "Semua Grup"],
+      ["Nama Tes", "", ujian.nama],
+      [],
+      header1,
+      header2,
+      ...dataGrid
+    ];
+
+    const merges = [
+      { s: { r: 2, c: 0 }, e: { r: 2, c: 1 } }, // Grup Peserta (A3:B3)
+      { s: { r: 3, c: 0 }, e: { r: 3, c: 1 } }, // Nama Tes (A4:B4)
+      { s: { r: 5, c: 0 }, e: { r: 6, c: 0 } }, // No (A6:A7)
+      { s: { r: 5, c: 1 }, e: { r: 6, c: 1 } }, // Username (B6:B7)
+      { s: { r: 5, c: 2 }, e: { r: 6, c: 2 } }, // Nama (C6:C7)
+      { s: { r: 5, c: 3 }, e: { r: 5, c: Math.max(3, 3 + stats.length - 1) } } // Nomor Soal (D6:end)
+    ];
+
+    const safeName = ujian.nama.replace(/[^a-zA-Z0-9_-]/g, "_");
+    exportSheet(`Analisis_Butir_Soal_-_${safeName}.xlsx`, [
+      { name: "Grid Jawaban", aoa: aoaGrid, merges: merges as any }
+    ]);
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -332,9 +409,17 @@ function ExamReportTab({ ujian, sesis }: { ujian: Ujian, sesis: SesiUjian[] }) {
           <h2 className="text-xl font-semibold">Laporan Kelulusan</h2>
           <p className="text-sm text-muted-foreground">Ringkasan hasil ujian untuk seluruh peserta</p>
         </div>
-        <Button onClick={() => window.print()} variant="outline" className="gap-2 bg-white">
-          <Printer className="h-4 w-4" /> Cetak Laporan
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={exportRekapExcel} variant="outline" className="gap-2 bg-white">
+            <Download className="h-4 w-4" /> Download Rekap
+          </Button>
+          <Button onClick={exportAnalisisExcel} variant="outline" className="gap-2 bg-white">
+            <Download className="h-4 w-4" /> Download Analisis
+          </Button>
+          <Button onClick={() => window.print()} variant="outline" className="gap-2 bg-white">
+            <Printer className="h-4 w-4" /> Cetak Laporan
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

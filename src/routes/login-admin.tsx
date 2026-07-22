@@ -23,7 +23,7 @@ function LoginAdminPage() {
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
 	const [busy, setBusy] = useState(false);
-	const [appName, setAppName] = useState("CBT-Kampus");
+	const [appName, setAppName] = useState("CBT-MAN");
 	const [appLogo, setAppLogo] = useState("");
 	
 	const login = useAuthStore((s) => s.login);

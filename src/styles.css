@@ -59,6 +59,10 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Emil Kowalski's Spring Physics Easing */
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-bouncy: cubic-bezier(0.87, 0, 0.13, 1);
 }
 
 :root {
@@ -143,5 +147,35 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+  }
+
+  /* Jakub Krehel's Tactile Spring Feedback */
+  button:not(:disabled):active,
+  [role="button"]:not(:disabled):active,
+  a:not(:disabled):active {
+    transform: scale(0.97);
+    transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  }
+  
+  /* Optical Alignment for Icons in Buttons */
+  button:not(.icon-only) > svg,
+  [role="button"]:not(.icon-only) > svg {
+    /* Slight optical adjustment to make icons feel perfectly centered next to text */
+    transform: translateY(0.5px);
+  }
+}
+
+@layer utilities {
+  .shadow-sleek {
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.05);
+  }
+  .shadow-popover-sleek {
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.12);
+  }
+  .dark .shadow-sleek {
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.2);
+  }
+  .dark .shadow-popover-sleek {
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 4px 16px rgba(0,0,0,0.3);
   }
 }

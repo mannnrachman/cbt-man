@@ -1,18 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { getCbtSnapshot, getPublicBootConfigServer } from "@/lib/server/snapshot/functions";
 import { claimExamToken as claimExamTokenServer, saveConfigServer, mutateUjianServer, mutateTokenServer } from "@/lib/server/ujian/functions";
-import { mutateUserServer, mutateGroupServer } from "@/lib/server/users/functions";
+import { mutateUserServer } from "@/lib/server/users/functions";
 import { mutateModulServer, mutateTopikServer, mutateSoalServer } from "@/lib/server/modul/functions";
 import { mutateSesiServer } from "@/lib/server/sesi/functions";
 import { getTodaysExamsServer } from "@/lib/server/exams";
 import { 
-	mutateFakultasServer, mutateJurusanServer, mutateProdiServer, 
+	mutateUnitAkademikServer, 
 	mutateTahunAkademikServer, mutateSemesterServer, mutateMataKuliahServer 
 } from "@/lib/server/akademik/functions";
 import { toast } from "sonner";
 import type {
 	AppConfig,
-	Group,
+
 	Modul,
 	NavKey,
 	SesiUjian,
@@ -21,9 +21,7 @@ import type {
 	Topik,
 	Ujian,
 	User,
-	Fakultas,
-	Jurusan,
-	ProgramStudi,
+	UnitAkademik,
 	TahunAkademik,
 	Semester,
 	MataKuliah,
@@ -37,10 +35,8 @@ export type PublicBootConfig = Awaited<
 type MutationResult = { ok: boolean; error?: string };
 type EntityName =
 	| "users"
-	| "groups"
-	| "fakultas"
-	| "jurusan"
-	| "prodi"
+
+	| "unit_akademik"
 	| "tahunAkademik"
 	| "semester"
 	| "mataKuliah"
@@ -65,10 +61,8 @@ const DEFAULT_OPERATOR_NAV: NavKey[] = [
 
 const cache = {
 	users: [] as User[],
-	groups: [] as Group[],
-	fakultas: [] as Fakultas[],
-	jurusan: [] as Jurusan[],
-	prodi: [] as ProgramStudi[],
+
+	unitAkademik: [] as UnitAkademik[],
 	tahunAkademik: [] as TahunAkademik[],
 	semester: [] as Semester[],
 	mataKuliah: [] as MataKuliah[],
@@ -79,7 +73,7 @@ const cache = {
 	token: [] as TokenUjian[],
 	sesi: [] as SesiUjian[],
 	config: {
-		appName: "CBT-Kampus",
+		appName: "CBT-MAN",
 		appLogo: "",
 		appDeskripsi: "Aplikasi ujian berbasis komputer",
 		pesanLogin: "Selamat datang di aplikasi ujian online",
@@ -106,10 +100,8 @@ export function invalidateReposCache(): void {
 
 function applySnapshot(snapshot: Snapshot) {
 	cache.users = snapshot.users;
-	cache.groups = snapshot.groups;
-	cache.fakultas = snapshot.fakultas;
-	cache.jurusan = snapshot.jurusan;
-	cache.prodi = snapshot.prodi;
+
+	cache.unitAkademik = snapshot.unitAkademik;
 	cache.tahunAkademik = snapshot.tahunAkademik;
 	cache.semester = snapshot.semester;
 	cache.mataKuliah = snapshot.mataKuliah;
@@ -152,9 +144,6 @@ export async function getTodaysExams(): Promise<TodaysExams> {
 	return { online: result.online, offline: result.offline };
 }
 
-// Atomic single-use token claim (Issue #9). The server performs the
-// conditional update; on success we patch the local cache so a subsequent
-// `tokenRepo.byId`/`all()` read reflects the claim without a full re-hydrate.
 export async function claimExamToken(
 	ujianId: string,
 	kode: string,
@@ -190,16 +179,14 @@ function runEntityMutation(
 	
 	switch (entity) {
 		case "users": mutationPromise = mutateUserServer({ data: { action, payload } }); break;
-		case "groups": mutationPromise = mutateGroupServer({ data: { action, payload } }); break;
+
 		case "modul": mutationPromise = mutateModulServer({ data: { action, payload } }); break;
 		case "topik": mutationPromise = mutateTopikServer({ data: { action, payload } }); break;
 		case "soal": mutationPromise = mutateSoalServer({ data: { action, payload } }); break;
 		case "ujian": mutationPromise = mutateUjianServer({ data: { action, payload } }); break;
 		case "token": mutationPromise = mutateTokenServer({ data: { action, payload } }); break;
 		case "sesi": mutationPromise = mutateSesiServer({ data: { action, payload } }); break;
-		case "fakultas": mutationPromise = mutateFakultasServer({ data: { action: action as any, payload } }); break;
-		case "jurusan": mutationPromise = mutateJurusanServer({ data: { action: action as any, payload } }); break;
-		case "prodi": mutationPromise = mutateProdiServer({ data: { action: action as any, payload } }); break;
+		case "unit_akademik": mutationPromise = mutateUnitAkademikServer({ data: { action: action as any, payload } }); break;
 		case "tahunAkademik": mutationPromise = mutateTahunAkademikServer({ data: { action: action as any, payload } }); break;
 		case "semester": mutationPromise = mutateSemesterServer({ data: { action: action as any, payload } }); break;
 		case "mataKuliah": mutationPromise = mutateMataKuliahServer({ data: { action: action as any, payload } }); break;
@@ -274,35 +261,12 @@ export const usersRepo = createRepo(
 	},
 );
 
-export const groupsRepo = createRepo(
-	"groups",
-	() => cache.groups,
-	(items) => {
-		cache.groups = items;
-	},
-);
 
-export const fakultasRepo = createRepo(
-	"fakultas",
-	() => cache.fakultas,
+export const unitAkademikRepo = createRepo(
+	"unit_akademik",
+	() => cache.unitAkademik,
 	(items) => {
-		cache.fakultas = items;
-	},
-);
-
-export const jurusanRepo = createRepo(
-	"jurusan",
-	() => cache.jurusan,
-	(items) => {
-		cache.jurusan = items;
-	},
-);
-
-export const prodiRepo = createRepo(
-	"prodi",
-	() => cache.prodi,
-	(items) => {
-		cache.prodi = items;
+		cache.unitAkademik = items;
 	},
 );
 

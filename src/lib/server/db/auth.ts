@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from "./prisma";
 import { parseJson } from "./json";
 import { validateSession, readSessionToken } from "./session";
@@ -136,7 +137,7 @@ export async function pesertaCanTouchUjian(
 	const groupIds = parseJson<string[]>(ujian.groupIds, []);
 	return (
 		groupIds.length === 0 ||
-		(!!caller.groupId && groupIds.includes(caller.groupId))
+		  (!!caller.unitId && groupIds.includes(caller.unitId))
 	);
 }
 

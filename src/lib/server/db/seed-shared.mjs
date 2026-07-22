@@ -156,6 +156,28 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
     createdAt: ts,
   };
 
+  if (process.env.NODE_ENV === "production") {
+    return {
+      groups: [],
+      users: [admin],
+      modul: [],
+      topik: [],
+      soal: [],
+      ujian: [],
+      token: [],
+      sesi: [],
+      config: {
+        appName: "CBT-MAN",
+        appLogo: "",
+        appDeskripsi: "Sistem CBT Universitas",
+        pesanLogin: "Silakan login menggunakan akun Anda.",
+        mobileLock: false,
+        multiDevice: false,
+        roleAccess: DEFAULT_ROLE_ACCESS,
+      }
+    };
+  }
+
   const operator = {
     id: uid("u_"),
     username: "operator1",
@@ -226,7 +248,7 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
       createdAt: ts + users.length,
     });
   }
-  for (const [username, namaLengkap, groupId] of pesertaSeed) {
+  for (const [username, namaLengkap] of pesertaSeed) {
     users.push({
       id: uid("u_"),
       username,
@@ -234,7 +256,6 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
       namaLengkap,
       role: "mahasiswa",
       allowedTopikIds: [],
-      groupId,
       detail: `${schoolName} · Mahasiswa aktif`,
       aktif: true,
       createdAt: ts + users.length,
@@ -547,7 +568,7 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
   );
 
   const config = {
-    appName: "CBT-Kampus",
+    appName: "CBT-MAN",
     appDeskripsi: "Simulasi CBT Kampus dengan data dummy realistis untuk preview lokal.",
     pesanLogin: "Selamat datang di portal ujian Universitas Teknologi Nusantara. Gunakan akun demo sesuai peran untuk mencoba alur sistem.",
     mobileLock: false,
@@ -567,16 +588,12 @@ export async function seedDatabase({ prisma, dataset, stringifyJson }) {
   await prisma.topik.deleteMany();
   await prisma.modul.deleteMany();
   await prisma.user.deleteMany();
-  await prisma.group.deleteMany();
   await prisma.appConfig.deleteMany();
-
-  await prisma.group.createMany({ data: dataset.groups });
   // ponytail: Seed script isn't transactional because it's a one-time setup. If it fails, wipe DB and retry. Upgrade path: Use prisma.$transaction for production data migrations.
   await prisma.user.createMany({
     data: dataset.users.map((item) => ({
       ...item,
       allowedTopikIds: stringifyJson(item.allowedTopikIds),
-      groupId: item.groupId ?? null,
       detail: item.detail ?? null,
       createdAt: BigInt(item.createdAt),
     })),

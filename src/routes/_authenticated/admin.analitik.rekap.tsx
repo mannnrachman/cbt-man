@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { sesiRepo, usersRepo, groupsRepo, mataKuliahRepo, semesterRepo } from "@/lib/cbt/repos";
+import { sesiRepo, usersRepo, unitAkademikRepo, mataKuliahRepo, semesterRepo } from "@/lib/cbt/repos";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,10 +24,10 @@ function RekapPage() {
   const user = useAuthStore((s) => s.user);
   const ujians = visibleUjians(user);
   const visibleUjianIds = new Set(ujians.map((u) => u.id));
-  const groups = groupsRepo.all();
+  const units = unitAkademikRepo.all();
   const users = usersRepo.all();
   const [ujianId, setUjianId] = useState<string>("all");
-  const [groupId, setGroupId] = useState<string>("all");
+  const [unitId, setUnitId] = useState<string>("all");
   const [dari, setDari] = useState("");
   const [sampai, setSampai] = useState("");
 
@@ -36,7 +36,7 @@ function RekapPage() {
     if (!visibleUjianIds.has(s.ujianId)) return false;
     if (ujianId !== "all" && s.ujianId !== ujianId) return false;
     const u = users.find((x) => x.id === s.pesertaId);
-    if (groupId !== "all" && u?.groupId !== groupId) return false;
+    if (unitId !== "all" && u?.unitId !== unitId) return false;
     if (dari && (s.selesaiAt ?? 0) < new Date(dari).getTime()) return false;
     if (sampai && (s.selesaiAt ?? 0) > new Date(sampai).getTime() + 86_400_000) return false;
     return true;
@@ -47,12 +47,20 @@ function RekapPage() {
     const ex = ujians.find((x) => x.id === s.ujianId);
     const mk = ex?.mataKuliahId ? mataKuliahRepo.byId(ex.mataKuliahId) : null;
     const smt = ex?.semesterId ? semesterRepo.byId(ex.semesterId) : null;
-    const g = groups.find((x) => x.id === u?.groupId);
+    const g = units.find((x) => x.id === u?.unitId);
     const durasi = s.mulaiAt && s.selesaiAt ? Math.round((s.selesaiAt - s.mulaiAt) / 1000) : 0;
+    
+    function formatDateExcel(ms: number | undefined | null) {
+      if (!ms) return "-";
+      const d = new Date(ms);
+      const pad = (n: number) => n.toString().padStart(2, "0");
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    }
+
     return {
       nama: u?.namaLengkap ?? "-",
       username: u?.username ?? "-",
-      group: g?.nama ?? "-",
+      unit: g?.nama ?? "-",
       ujian: ex?.nama ?? "-",
       mataKuliah: mk?.nama ?? "-",
       semester: smt?.nama ?? "-",
@@ -61,13 +69,14 @@ function RekapPage() {
       persen: s.maxSkor ? Math.round(((s.skorTotal ?? 0) / s.maxSkor) * 1000) / 10 : 0,
       durasi,
       tanggal: s.selesaiAt ? new Date(s.selesaiAt).toLocaleString("id-ID") : "-",
+      mulaiAtStr: formatDateExcel(s.mulaiAt),
     };
   });
 
   function exportExcel() {
     const aoa: (string | number)[][] = [
-      ["Nama", "Username", "Group", "Ujian", "Mata Kuliah", "Semester", "Skor", "Maks", "Persentase (%)", "Durasi (detik)", "Tanggal"],
-      ...rows.map((r) => [r.nama, r.username, r.group, r.ujian, r.mataKuliah, r.semester, r.skor, r.maks, r.persen, r.durasi, r.tanggal]),
+      ["No", "Waktu Mulai", "Nama Tes", "Username", "Nama", "Group", "Poin"],
+      ...rows.map((r, i) => [i + 1, r.mulaiAtStr, r.ujian, r.username, r.nama, r.unit, r.skor]),
     ];
     exportSheet(`rekap-hasil-${Date.now()}.xlsx`, [{ name: "Rekap", aoa }]);
   }
@@ -104,14 +113,14 @@ function RekapPage() {
             </Select>
           </div>
           <div>
-            <label className="text-xs">Group</label>
-            <Select value={groupId} onValueChange={setGroupId}>
+            <label className="text-xs">Unit Akademik</label>
+            <Select value={unitId} onValueChange={setUnitId}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Semua group</SelectItem>
-                {groups.map((g) => (
+                <SelectItem value="all">Semua unit</SelectItem>
+                {units.map((g) => (
                   <SelectItem key={g.id} value={g.id}>
                     {g.nama}
                   </SelectItem>
@@ -142,7 +151,7 @@ function RekapPage() {
             <thead className="bg-muted/50 text-left text-muted-foreground font-medium border-b">
               <tr>
                 <th className="p-4 font-semibold">Nama Peserta</th>
-                <th className="p-4 font-semibold">Grup / Kelas</th>
+                <th className="p-4 font-semibold">Unit Akademik</th>
                 <th className="p-4 font-semibold">Ujian (Mata Kuliah)</th>
                 <th className="p-4 font-semibold">Skor Akhir</th>
                 <th className="p-4 font-semibold">Persentase</th>
@@ -158,7 +167,7 @@ function RekapPage() {
                   </td>
                   <td className="p-4">
                     <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-accent text-accent-foreground border">
-                      {r.group}
+                      {r.unit}
                     </span>
                   </td>
                   <td className="p-4">

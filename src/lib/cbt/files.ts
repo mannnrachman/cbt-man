@@ -12,15 +12,17 @@ export type FileMeta = {
   size: number;
   createdAt: number;
   extension: string;
+  jurusanId?: string;
 };
 
-export async function putFile(file: File): Promise<FileMeta> {
+export async function putFile(file: File, jurusanId?: string): Promise<FileMeta> {
   const dataBase64 = await fileToBase64(file);
   return uploadStoredFile({
     data: {
       name: file.name,
       mime: file.type || "application/octet-stream",
       dataBase64,
+      jurusanId,
     },
   });
 }

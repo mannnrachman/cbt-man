@@ -34,13 +34,15 @@ enum StatusSesi {
   kedaluwarsa
 }
 
-model Group {
-  id         String        @id
-  nama       String
-  keterangan String        @default("")
-  prodiId    String?
-  prodi      ProgramStudi? @relation(fields: [prodiId], references: [id])
-  users      User[]
+model UnitAkademik {
+  id       String         @id
+  nama     String
+  tipe     String
+  parentId String?
+  parent   UnitAkademik?  @relation("UnitToUnit", fields: [parentId], references: [id], onDelete: Cascade)
+  children UnitAkademik[] @relation("UnitToUnit")
+  users    User[]
+  mataKuliah MataKuliah[]
 }
 
 model User {
@@ -50,14 +52,12 @@ model User {
   namaLengkap     String
   role            Role
   allowedTopikIds String        @default("[]")
-  groupId         String?
-  prodiId         String?
+  unitId          String?
   mataKuliahIds   String        @default("[]")
   detail          String?
   aktif           Boolean       @default(true)
   createdAt       BigInt
-  group           Group?        @relation(fields: [groupId], references: [id])
-  prodi           ProgramStudi? @relation(fields: [prodiId], references: [id])
+  unit            UnitAkademik? @relation(fields: [unitId], references: [id])
   createdUjians   Ujian[]       @relation("UjianCreator")
   sesi            SesiUjian[]   @relation("SesiPeserta")
   sessions        Session[]     @relation("UserSessions")
@@ -206,29 +206,7 @@ model AuditLog {
   @@index([createdAt])
 }
 
-model Fakultas {
-  id      String    @id
-  nama    String
-  jurusan Jurusan[]
-}
 
-model Jurusan {
-  id         String         @id
-  nama       String
-  fakultasId String
-  fakultas   Fakultas       @relation(fields: [fakultasId], references: [id], onDelete: Cascade)
-  prodi      ProgramStudi[]
-}
-
-model ProgramStudi {
-  id         String       @id
-  nama       String
-  jurusanId  String
-  jurusan    Jurusan      @relation(fields: [jurusanId], references: [id], onDelete: Cascade)
-  users      User[]
-  groups     Group[]
-  mataKuliah MataKuliah[]
-}
 
 model TahunAkademik {
   id       String     @id
@@ -250,8 +228,8 @@ model MataKuliah {
   kode       String
   nama       String
   sks        Int          @default(2)
-  prodiId    String
-  prodi      ProgramStudi @relation(fields: [prodiId], references: [id], onDelete: Cascade)
-  semesterId String
-  semester   Semester     @relation(fields: [semesterId], references: [id], onDelete: Cascade)
+  unitId     String?
+  unit       UnitAkademik? @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  semesterId String?
+  semester   Semester?     @relation(fields: [semesterId], references: [id], onDelete: Cascade)
 }

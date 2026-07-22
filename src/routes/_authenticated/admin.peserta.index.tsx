@@ -1,10 +1,11 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import * as XLSX from "xlsx";
+import { usersRepo, unitAkademikRepo } from "@/lib/cbt/repos";
 import { hashPassword } from "@/lib/cbt/hash";
-import { upsertUserServer, mutateUserServer, mutateGroupServer, getUsersList, getGroupsList } from "@/lib/server/users/functions";
+import { upsertUserServer } from "@/lib/server/users/functions";
 import { uid } from "@/lib/cbt/storage";
-import type { Group, User } from "@/lib/cbt/types";
+import type { UnitAkademik, User } from "@/lib/cbt/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { AdminPage, AdminPageHeader, AdminPageContent } from "@/components/cbt/AdminPage";
 import { Button } from "@/components/ui/button";
@@ -16,39 +17,29 @@ import { Pencil, Trash2, Plus, Printer, Upload, Users as UsersIcon } from "lucid
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/peserta/")({
-  loader: async () => {
-    const [allUsers, groups] = await Promise.all([
-      getUsersList(),
-      getGroupsList()
-    ]);
-    return { allUsers, groups };
-  },
   component: PesertaPage,
 });
 
 type PesertaWithPwd = User & { _initialPassword?: string };
 
 function PesertaPage() {
-  const router = useRouter();
-  const { allUsers, groups: initialGroups } = Route.useLoaderData();
-  
-  const initialPeserta = allUsers.filter((u) => u.role === "mahasiswa");
-  const [peserta, setPeserta] = useState<PesertaWithPwd[]>(initialPeserta);
-  const [groups, setGroups] = useState<Group[]>(initialGroups);
-  
-  useEffect(() => {
-    setPeserta(initialPeserta);
-    setGroups(initialGroups);
-  }, [initialPeserta, initialGroups]);
-
+  const [peserta, setPeserta] = useState<PesertaWithPwd[]>(
+    usersRepo.all().filter((u) => u.role === "mahasiswa"),
+  );
+  const [units, setUnits] = useState<UnitAkademik[]>(unitAkademikRepo.all());
   const [editing, setEditing] = useState<PesertaWithPwd | null>(null);
   const [open, setOpen] = useState(false);
-  const [filterGroup, setFilterGroup] = useState<string>("all");
+  const [filterUnit, setFilterUnit] = useState<string>("all");
   const [query, setQuery] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
+  function refresh() {
+    setPeserta(usersRepo.all().filter((u) => u.role === "mahasiswa"));
+    setUnits(unitAkademikRepo.all());
+  }
+
   const shown = peserta.filter((p) =>
-    (filterGroup === "all" || p.groupId === filterGroup) &&
+    (filterUnit === "all" || p.unitId === filterUnit) &&
     (query === "" || p.namaLengkap.toLowerCase().includes(query.toLowerCase()) || p.username.toLowerCase().includes(query.toLowerCase())),
   );
 
@@ -57,50 +48,29 @@ function PesertaPage() {
     const wb = XLSX.read(buf);
     const sheet = wb.Sheets[wb.SheetNames[0]];
     const rows: Record<string, unknown>[] = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-    
-    toast.info("Memproses file Excel, mohon tunggu...");
     let added = 0;
-    
-    // We update local state first for optimistic UI, but wait, it's safer to just refresh at the end.
     for (const r of rows) {
       const username = String(r.username ?? r.Username ?? "").trim();
       const nama = String(r.nama ?? r.Nama ?? r.namaLengkap ?? "").trim();
       const password = String(r.password ?? r.Password ?? username + "123").trim();
-      const groupName = String(r.group ?? r.Group ?? r.kelas ?? "").trim();
-      
-      if (!username || !nama) continue;
-      
-      let groupId: string | undefined;
-      if (groupName) {
-        let g = groups.find((x) => x.nama.toLowerCase() === groupName.toLowerCase());
-        if (!g) { 
-          g = { id: uid("g_"), nama: groupName, keterangan: "" }; 
-          await mutateGroupServer({ data: { action: "upsert", payload: g } });
-          setGroups(prev => [...prev, g!]);
-        }
-        groupId = g.id;
+      const unitName = String(r.group ?? r.Group ?? r.kelas ?? r.unit ?? "").trim();
+      let unitId: string | undefined;
+      if (unitName) {
+        let g = unitAkademikRepo.all().find((x) => x.nama.toLowerCase() === unitName.toLowerCase());
+        if (!g) { g = { id: uid("u_"), nama: unitName, tipe: "kelas", parentId: null }; unitAkademikRepo.upsert(g); }
+        unitId = g.id;
       }
-      
-      const payload = {
-        id: uid("u_"), 
-        username, 
-        namaLengkap: nama, 
-        role: "mahasiswa" as const,
-        allowedTopikIds: [], 
-        groupId, 
-        aktif: true,
-        createdAt: Date.now(),
-        newPassword: password,
+      const u: PesertaWithPwd = {
+        id: uid("u_"), username, namaLengkap: nama, role: "mahasiswa",
+        allowedTopikIds: [], mataKuliahIds: [], unitId, aktif: true,
+        passwordHash: await hashPassword(password), createdAt: Date.now(),
+        _initialPassword: password,
       };
-      
-      const res = await upsertUserServer({ data: payload });
-      if (res.ok) {
-        added++;
-      }
+      usersRepo.upsert(u);
+      added++;
     }
-    
     toast.success(`${added} peserta diimport`);
-    await router.invalidate();
+    refresh();
   }
 
   function downloadTemplate() {
@@ -113,12 +83,12 @@ function PesertaPage() {
   }
 
   return (
-    <AdminPage>
+        <AdminPage>
       <AdminPageHeader
         title="Akun Peserta"
         description="Kelola data mahasiswa, grup kelas, dan import akun dari Excel."
         action={
-          <div className="flex flex-wrap items-center gap-2">
+          <>
             <input id="file-upload" type="file" accept=".xlsx,.xls" hidden onChange={(e) => {
               const f = e.target.files?.[0]; if (f) importExcel(f); e.target.value = "";
             }} />
@@ -126,9 +96,9 @@ function PesertaPage() {
               <Upload className="mr-2 h-4 w-4" /> Import Excel
             </Button>
             <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1"></div>
-            <Link to="/admin/peserta/group">
+            <Link to="/admin/peserta/kartu">
               <Button variant="outline" size="sm" className="h-9">
-                <UsersIcon className="mr-2 h-4 w-4" /> Grup Kelas
+                <UsersIcon className="mr-2 h-4 w-4" /> Unit Akademik
               </Button>
             </Link>
             <Link to="/admin/peserta/kartu">
@@ -137,9 +107,9 @@ function PesertaPage() {
               </Button>
             </Link>
             <Button onClick={() => { setEditing(null); setOpen(true); }} size="sm" className="h-9">
-              <Plus className="mr-2 h-4 w-4" /> Tambah Peserta
+              <Plus className="mr-2 h-4 w-4" /> Tambah Akun
             </Button>
-          </div>
+          </>
         }
       />
 
@@ -151,13 +121,13 @@ function PesertaPage() {
           onChange={(e) => setQuery(e.target.value)} 
           className="max-w-xs" 
         />
-        <Select value={filterGroup} onValueChange={setFilterGroup}>
-          <SelectTrigger className="w-full sm:w-56">
-            <SelectValue placeholder="Semua Grup" />
+        <Select value={filterUnit} onValueChange={setFilterUnit}>
+          <SelectTrigger className="w-full sm:w-48">
+            <SelectValue placeholder="Pilih Unit" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Semua Grup</SelectItem>
-            {groups.map((g) => <SelectItem key={g.id} value={g.id}>{g.nama}</SelectItem>)}
+            <SelectItem value="all">Semua Unit</SelectItem>
+            {units.map((g) => <SelectItem key={g.id} value={g.id}>{g.nama}</SelectItem>)}
           </SelectContent>
         </Select>
       </div>
@@ -168,24 +138,24 @@ function PesertaPage() {
           <table className="w-full text-sm">
             <thead className="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-semibold">
               <tr>
-                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left border-r border-slate-200 dark:border-slate-800">Username</th>
-                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left border-r border-slate-200 dark:border-slate-800">Nama Lengkap</th>
-                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center border-r border-slate-200 dark:border-slate-800">Grup / Kelas</th>
-                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center border-r border-slate-200 dark:border-slate-800">Status</th>
+                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left">Username</th>
+                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left">Nama Lengkap</th>
+                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Grup / Kelas</th>
+                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Status</th>
                 <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody>
               {shown.map((p) => (
-                <tr key={p.id} className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                  <td className="p-4 font-medium text-slate-900 dark:text-slate-100 border-r border-slate-200 dark:border-slate-800 text-left">{p.username}</td>
-                  <td className="p-4 text-slate-600 dark:text-slate-400 border-r border-slate-200 dark:border-slate-800 text-left">{p.namaLengkap}</td>
-                  <td className="p-4 text-center border-r border-slate-200 dark:border-slate-800">
+                <tr key={p.id} className="transition-colors border-t border-slate-100 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                  <td className="p-4 font-medium text-slate-900 dark:text-slate-100 text-left">{p.username}</td>
+                  <td className="p-4 text-slate-600 dark:text-slate-400 text-left">{p.namaLengkap}</td>
+                  <td className="p-4 text-center">
                     <span className="px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-                      {groups.find((g) => g.id === p.groupId)?.nama ?? "-"}
+                      {units.find((g) => g.id === p.unitId)?.nama ?? "-"}
                     </span>
                   </td>
-                  <td className="p-4 text-center border-r border-slate-200 dark:border-slate-800">
+                  <td className="p-4 text-center">
                     {p.aktif ? (
                       <span className="px-2 py-0.5 rounded text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">Aktif</span>
                     ) : (
@@ -193,20 +163,13 @@ function PesertaPage() {
                     )}
                   </td>
                   <td className="p-4 text-center space-x-2">
-                    <Button variant="outline" size="sm" onClick={() => { setEditing(p); setOpen(true); }} className="h-8" aria-label="Edit">
+                    <Button variant="outline" size="sm" onClick={() => { setEditing(p); setOpen(true); }} className="h-8">
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="sm" className="h-8 text-destructive hover:bg-destructive/10" aria-label="Hapus" onClick={async () => {
+                    <Button variant="ghost" size="sm" className="h-8 text-destructive hover:bg-destructive/10" onClick={() => {
                       if (confirm("Hapus peserta ini?")) {
-                        // Optimistic UI
-                        setPeserta((prev) => prev.filter(user => user.id !== p.id));
-                        const res = await mutateUserServer({ data: { action: "remove", payload: { id: p.id } } });
-                        if (!res.ok) {
-                          toast.error(res.error || "Gagal menghapus");
-                          await router.invalidate();
-                        } else {
-                          await router.invalidate();
-                        }
+                        usersRepo.remove(p.id);
+                        refresh();
                       }
                     }}>
                       <Trash2 className="h-4 w-4" />
@@ -223,24 +186,7 @@ function PesertaPage() {
           </table>
         </div>
       </AdminPageContent>
-      <PesertaDialog 
-        open={open} 
-        onOpenChange={setOpen} 
-        editing={editing} 
-        groups={groups} 
-        onSaved={async (user) => {
-          setPeserta(prev => {
-            const idx = prev.findIndex(u => u.id === user.id);
-            if (idx >= 0) {
-              const next = [...prev];
-              next[idx] = user;
-              return next;
-            }
-            return [...prev, user];
-          });
-          await router.invalidate();
-        }} 
-      />
+<PesertaDialog open={open} onOpenChange={setOpen} editing={editing} units={units} onSaved={refresh} />
     </AdminPage>
   );
 }
@@ -249,19 +195,19 @@ function PesertaDialog({
   open,
   onOpenChange,
   editing,
-  groups,
+  units,
   onSaved,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   editing: User | null;
-  groups: Group[];
-  onSaved: (user: User) => void;
+  units: UnitAkademik[];
+  onSaved: () => void;
 }) {
   const [form, setForm] = useState({
     username: "",
     namaLengkap: "",
-    groupId: "",
+    unitId: "",
     aktif: true,
     password: "",
   });
@@ -271,7 +217,7 @@ function PesertaDialog({
     setForm({
       username: editing?.username ?? "",
       namaLengkap: editing?.namaLengkap ?? "",
-      groupId: editing?.groupId ?? "",
+      unitId: editing?.unitId ?? "",
       aktif: editing?.aktif ?? true,
       password: "",
     });
@@ -283,28 +229,29 @@ function PesertaDialog({
       return;
     }
 
-    const payload = {
-      id: editing?.id ?? uid("u_"),
-      username: form.username.trim(),
-      namaLengkap: form.namaLengkap.trim(),
-      role: "mahasiswa" as const,
-      allowedTopikIds: editing?.allowedTopikIds ?? [],
-      groupId: form.groupId || undefined,
-      detail: editing?.detail,
-      aktif: form.aktif,
-      createdAt: editing?.createdAt ?? Date.now(),
-      newPassword: form.password.trim() || undefined,
-    };
-
-    const res = await upsertUserServer({ data: payload });
+    const res = await upsertUserServer({
+      data: {
+        id: editing?.id ?? uid("u_"),
+        username: form.username.trim(),
+        namaLengkap: form.namaLengkap.trim(),
+        role: "mahasiswa",
+        allowedTopikIds: editing?.allowedTopikIds ?? [],
+        unitId: form.unitId || undefined,
+        detail: editing?.detail,
+        aktif: form.aktif,
+        createdAt: editing?.createdAt ?? Date.now(),
+        newPassword: form.password.trim() || undefined,
+      },
+    });
 
     if (!res.ok) {
       toast.error(res.error ?? "Gagal menyimpan peserta");
       return;
     }
 
+    usersRepo.upsert(res.user);
     toast.success("Disimpan");
-    onSaved(res.user);
+    onSaved();
     onOpenChange(false);
   }
 
@@ -327,14 +274,14 @@ function PesertaDialog({
             />
           </div>
           <div>
-            <Label>Group</Label>
-            <Select value={form.groupId} onValueChange={(v) => setForm({ ...form, groupId: v })}>
+            <Label>Unit Akademik</Label>
+            <Select value={form.unitId} onValueChange={(v) => setForm({ ...form, unitId: v })}>
               <SelectTrigger>
-                <SelectValue placeholder="(tanpa group)" />
+                <SelectValue placeholder="(tanpa unit)" />
               </SelectTrigger>
               <SelectContent>
-                {groups.map((g) => (
-                  <SelectItem key={g.id} value={g.id}>
+                <SelectItem value="">-- Tidak ada --</SelectItem>
+                {units.map((g) => (<SelectItem key={g.id} value={g.id}>
                     {g.nama}
                   </SelectItem>
                 ))}

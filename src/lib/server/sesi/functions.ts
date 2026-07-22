@@ -140,6 +140,16 @@ export const mutateSesiServer = createServerFn({ method: "POST" })
 					});
 				} else {
 					const item = payload as SesiUjian;
+					
+					let sanitizedJawaban = item.jawaban;
+					if (caller.role === "mahasiswa") {
+						sanitizedJawaban = (item.jawaban || []).map((j: any) => ({
+							...j,
+							skor: undefined,
+							catatanGrader: undefined,
+						}));
+					}
+
 					let updateData: any = {
 						ujianId: item.ujianId,
 						pesertaId: item.pesertaId,
@@ -149,7 +159,7 @@ export const mutateSesiServer = createServerFn({ method: "POST" })
 						endsAt: toBigInt(item.endsAt),
 						soalIds: stringifyJson(item.soalIds),
 						jawabanOrder: stringifyJson(item.jawabanOrder),
-						jawaban: stringifyJson(item.jawaban),
+						jawaban: stringifyJson(sanitizedJawaban),
 						pelanggaran: item.pelanggaran,
 						skorTotal: item.skorTotal ?? null,
 						maxSkor: item.maxSkor ?? null,
@@ -163,7 +173,7 @@ export const mutateSesiServer = createServerFn({ method: "POST" })
 						updateData = {
 							status: item.status,
 							selesaiAt: toBigInt(item.selesaiAt),
-							jawaban: stringifyJson(item.jawaban),
+							jawaban: stringifyJson(sanitizedJawaban),
 							pelanggaran: item.pelanggaran,
 						};
 						createData.skorTotal = null;

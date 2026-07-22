@@ -148,8 +148,8 @@ export function isParticipantAssignedToExam(
   if (!user) return false;
   const groupIds = ujian.groupIds ?? [];
   if (groupIds.length === 0) return true;
-  if (!user.groupId) return false;
-  return groupIds.includes(user.groupId);
+  if (!user.unitId) return false;
+  return groupIds.includes(user.unitId);
 }
 
 /**

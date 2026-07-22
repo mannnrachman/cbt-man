@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useParams, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ujianRepo, groupsRepo, hydrateRepos, mataKuliahRepo, semesterRepo } from "@/lib/cbt/repos";
+import { ujianRepo, unitAkademikRepo, hydrateRepos, mataKuliahRepo, semesterRepo } from "@/lib/cbt/repos";
 import { uid } from "@/lib/cbt/storage";
 import type { Ujian, TopicSet } from "@/lib/cbt/types";
 import { Card, CardContent } from "@/components/ui/card";
@@ -173,7 +173,7 @@ function UjianEditor() {
   // because we are not mutating the ujian in place; the predicate is
   // checked on the read path only.)
 
-  const groups = groupsRepo.all();
+  const groups = unitAkademikRepo.all();
   const topiks = visibleTopiks(user);
   const moduls = visibleModuls(user);
   

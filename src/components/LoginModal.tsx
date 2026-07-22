@@ -24,7 +24,7 @@ export function LoginModal({ isOpen, onClose, redirectUrl }: LoginModalProps) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
-  const [appName, setAppName] = useState("CBT-Kampus");
+  const [appName, setAppName] = useState("CBT-MAN");
   const [appLogo, setAppLogo] = useState("");
   const [pesanLogin, setPesanLogin] = useState("Selamat datang di aplikasi ujian online");
   const login = useAuthStore((s) => s.login);

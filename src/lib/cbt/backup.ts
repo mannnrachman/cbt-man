@@ -3,7 +3,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import {
   usersRepo,
-  groupsRepo,
+  unitAkademikRepo,
   modulRepo,
   topikRepo,
   soalRepo,
@@ -16,7 +16,7 @@ import {
 } from "./repos";
 import {
   UserSchema,
-  GroupSchema,
+  UnitAkademikSchema,
   ModulSchema,
   TopikSchema,
   SoalSchema,
@@ -43,7 +43,7 @@ export const BackupSchema = z.object({
   version: z.literal(1),
   exportedAt: z.number(),
   users: z.array(UserSchema),
-  groups: z.array(GroupSchema),
+  unitAkademik: z.array(UnitAkademikSchema),
   modul: z.array(ModulSchema),
   topik: z.array(TopikSchema),
   soal: z.array(SoalSchema),
@@ -62,7 +62,7 @@ export async function exportBackup(): Promise<Backup> {
     version: 1,
     exportedAt: Date.now(),
     users: usersRepo.all(),
-    groups: groupsRepo.all(),
+    unitAkademik: unitAkademikRepo.all(),
     modul: modulRepo.all(),
     topik: topikRepo.all(),
     soal: soalRepo.all(),
@@ -94,7 +94,7 @@ export async function importBackup(raw: unknown): Promise<Backup> {
   await importBackupServer({
     data: {
       users: data.users,
-      groups: data.groups,
+      unitAkademik: data.unitAkademik,
       modul: data.modul,
       topik: data.topik,
       soal: data.soal,
@@ -119,7 +119,7 @@ export async function resetAllData(): Promise<void> {
 export function backupSummary(b: Backup) {
   return {
     users: b.users.length,
-    groups: b.groups.length,
+    unitAkademik: b.unitAkademik.length,
     modul: b.modul.length,
     topik: b.topik.length,
     soal: b.soal.length,

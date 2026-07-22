@@ -118,7 +118,7 @@ const getTodaysExams = createServerFn({ method: "GET" })
 export const Route = createFileRoute("/")({
 	head: () => ({
 		meta: [
-			{ title: "CBT-Kampus — Aplikasi Ujian Berbasis Komputer" },
+			{ title: "CBT-MAN — Aplikasi Ujian Berbasis Komputer" },
 			{
 				name: "description",
 				content:
@@ -155,7 +155,7 @@ function Landing() {
 	});
 
 	const [appLogo, setAppLogo] = useState("");
-	const [appName, setAppName] = useState("CBT-Kampus");
+	const [appName, setAppName] = useState("CBT-MAN");
 	
 	useEffect(() => {
 		loadPublicBootConfig().then(cfg => {
@@ -302,7 +302,7 @@ function Landing() {
 					</span>
 				</Link>
 				<div className="flex items-center gap-4">
-					<span suppressHydrationWarning className="font-mono text-sm sm:text-base font-bold text-slate-700 dark:text-slate-300 bg-slate-100/50 dark:bg-white/5 px-3 py-1.5 rounded-lg border border-slate-200/50 dark:border-white/5 backdrop-blur-sm shadow-sm">
+					<span className="font-mono text-sm sm:text-base font-bold text-slate-700 dark:text-slate-300 bg-slate-100/50 dark:bg-white/5 px-3 py-1.5 rounded-lg border border-slate-200/50 dark:border-white/5 backdrop-blur-sm shadow-sm">
 						{timeString}
 					</span>
 					<Button
@@ -474,7 +474,7 @@ function Landing() {
 												</span>
 											</TableCell>
 											<TableCell className="text-slate-600 dark:text-slate-300 font-bold text-sm py-4">
-												<span suppressHydrationWarning className="flex items-center gap-2">
+												<span className="flex items-center gap-2">
 													<Clock className="h-4 w-4 text-blue-500" />
 													{exam.beginAt
 														? new Date(Number(exam.beginAt)).toLocaleTimeString(

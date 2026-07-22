@@ -1,9 +1,10 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
-import { mutateMataKuliahServer, getMataKuliahList, getProdiList, getSemesterList, getTahunAkademikList } from "@/lib/server/akademik/functions";
+import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import { mataKuliahRepo, unitAkademikRepo, semesterRepo, tahunAkademikRepo } from "@/lib/cbt/repos";
+import { mutateMataKuliahServer } from "@/lib/server/akademik/functions";
 import { uid } from "@/lib/cbt/storage";
 import type { MataKuliah } from "@/lib/cbt/types";
-import { Card, CardContent } from "@/components/ui/card";
+import { AdminPageContent } from "@/components/cbt/AdminPage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2, Pencil } from "lucide-react";
@@ -25,62 +26,46 @@ import {
 } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/admin/akademik/mata-kuliah")({
-  loader: async () => {
-    const [items, prodiList, semesterList, taList] = await Promise.all([
-      getMataKuliahList(),
-      getProdiList(),
-      getSemesterList(),
-      getTahunAkademikList()
-    ]);
-    return { items, prodiList, semesterList, taList };
-  },
   component: MataKuliahPage,
 });
 
 function MataKuliahPage() {
-  const router = useRouter();
-  const { items: initialItems, prodiList, semesterList, taList } = Route.useLoaderData();
-  const [items, setItems] = useState<MataKuliah[]>(initialItems);
-
-  useEffect(() => {
-    setItems(initialItems);
-  }, [initialItems]);
+  const [items, setItems] = useState<MataKuliah[]>(mataKuliahRepo.all());
+  const unitList = unitAkademikRepo.all();
+  const semesterList = semesterRepo.all();
+  const taList = tahunAkademikRepo.all();
   
   const [editing, setEditing] = useState<MataKuliah | null>(null);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ id: "", kode: "", nama: "", sks: 2, prodiId: "", semesterId: "" });
+  const [form, setForm] = useState({ id: "", kode: "", nama: "", sks: 2, unitId: "", semesterId: "" });
 
   function handleAdd() {
-    setForm({ id: uid("mk_"), kode: "", nama: "", sks: 2, prodiId: "", semesterId: "" });
+    setForm({ id: uid("mk_"), kode: "", nama: "", sks: 2, unitId: "", semesterId: "" });
     setEditing(null);
     setOpen(true);
   }
 
   function handleEdit(item: MataKuliah) {
-    setForm({ id: item.id, kode: item.kode, nama: item.nama, sks: item.sks, prodiId: item.prodiId, semesterId: item.semesterId });
+    setForm({ id: item.id, kode: item.kode, nama: item.nama, sks: item.sks, unitId: item.unitId || "", semesterId: item.semesterId || "" });
     setEditing(item);
     setOpen(true);
   }
 
   async function handleRemove(id: string) {
     if (!confirm("Hapus mata kuliah ini?")) return;
-    
-    // Optimistic UI
-    setItems((prev) => prev.filter((i) => i.id !== id));
-    
     const res = await mutateMataKuliahServer({ data: { action: "remove", payload: { id } } });
     if (!res.ok) {
       toast.error(res.error || "Gagal menghapus");
-      await router.invalidate();
       return;
     }
+    mataKuliahRepo.remove(id);
+    setItems(mataKuliahRepo.all());
     toast.success("Mata Kuliah dihapus");
-    await router.invalidate();
   }
 
   async function save() {
-    if (!form.nama.trim() || !form.kode.trim() || !form.prodiId || !form.semesterId) {
-      toast.error("Kode, Nama, Prodi, dan Semester wajib diisi");
+    if (!form.nama.trim() || !form.kode.trim() || !form.unitId || !form.semesterId) {
+      toast.error("Kode, Nama, Unit, dan Semester wajib diisi");
       return;
     }
     const payload: MataKuliah = { 
@@ -88,48 +73,36 @@ function MataKuliahPage() {
       kode: form.kode.trim(), 
       nama: form.nama.trim(), 
       sks: form.sks,
-      prodiId: form.prodiId,
+      unitId: form.unitId,
       semesterId: form.semesterId 
     };
-    
-    // Optimistic UI
-    setItems((prev) => {
-      const idx = prev.findIndex((i) => i.id === payload.id);
-      if (idx >= 0) {
-        const next = [...prev];
-        next[idx] = payload;
-        return next;
-      }
-      return [...prev, payload];
-    });
-    setOpen(false);
-
     const res = await mutateMataKuliahServer({ data: { action: "upsert", payload } });
     if (!res.ok) {
       toast.error(res.error || "Gagal menyimpan");
-      await router.invalidate();
       return;
     }
+    mataKuliahRepo.upsert(payload);
+    setItems(mataKuliahRepo.all());
     toast.success("Mata Kuliah disimpan");
-    await router.invalidate();
+    setOpen(false);
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white">Daftar Mata Kuliah</h2>
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">Daftar Mata Kuliah</h2>
           <p className="text-sm text-slate-500">Kelola mata kuliah untuk penjadwalan ujian.</p>
         </div>
-        <Button onClick={handleAdd} size="sm" className="h-9 font-semibold shadow-sm">
+        <Button onClick={handleAdd} size="sm" className="h-9">
           <Plus className="mr-2 h-4 w-4" /> Tambah Mata Kuliah
         </Button>
       </div>
 
-      <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 overflow-hidden">
+      <AdminPageContent className="p-0">
         <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800/60">
           {items.map((item) => {
-            const prodi = prodiList.find((p) => p.id === item.prodiId);
+            const unit = unitList.find((p) => p.id === item.unitId);
             const semester = semesterList.find((s) => s.id === item.semesterId);
             const ta = taList.find((t) => t.id === semester?.tahunAkademikId);
             return (
@@ -145,16 +118,16 @@ function MataKuliahPage() {
                     </span>
                   </div>
                   <div className="text-xs text-slate-500 mt-1.5 flex flex-wrap items-center gap-3">
-                    <span className="flex items-center gap-1"><span className="text-slate-400">Prodi:</span> <span className="font-medium text-slate-600 dark:text-slate-300">{prodi?.nama ?? "-"}</span></span>
+                    <span className="flex items-center gap-1"><span className="text-slate-400">Unit:</span> <span className="font-medium text-slate-600 dark:text-slate-300">{unit?.nama ?? "-"}</span></span>
                     <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
                     <span className="flex items-center gap-1"><span className="text-slate-400">Semester:</span> <span className="font-medium text-slate-600 dark:text-slate-300">{semester?.nama ?? "-"} {ta ? `(${ta.nama})` : ""}</span></span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-slate-400 hover:text-slate-900 dark:hover:text-white" onClick={() => handleEdit(item)}>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" className="h-8" onClick={() => handleEdit(item)}>
                     <Pencil className="h-4 w-4" />
                   </Button>
-                  <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950" onClick={() => handleRemove(item.id)}>
+                  <Button variant="ghost" size="sm" className="h-8 text-destructive hover:bg-destructive/10" onClick={() => handleRemove(item.id)}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
@@ -165,7 +138,7 @@ function MataKuliahPage() {
             <div className="p-8 text-center text-sm text-slate-400">Belum ada data mata kuliah.</div>
           )}
         </div>
-      </div>
+      </AdminPageContent>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
@@ -202,13 +175,13 @@ function MataKuliahPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Program Studi</Label>
-              <Select value={form.prodiId} onValueChange={(v) => setForm({ ...form, prodiId: v })}>
+              <Label>Unit Akademik</Label>
+              <Select value={form.unitId} onValueChange={(v) => setForm({ ...form, unitId: v })}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Pilih Prodi" />
+                  <SelectValue placeholder="Pilih Unit Akademik" />
                 </SelectTrigger>
                 <SelectContent>
-                  {prodiList.map((p) => (
+                  {unitList.map((p) => (
                     <SelectItem key={p.id} value={p.id}>
                       {p.nama}
                     </SelectItem>

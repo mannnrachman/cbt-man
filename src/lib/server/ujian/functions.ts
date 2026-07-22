@@ -382,7 +382,7 @@ export const fetchUjianByIdServer = createServerFn({ method: "POST" })
 			const groupIds = parseJson<string[]>(row.groupIds, []);
 			if (
 				groupIds.length > 0 &&
-				(!caller.groupId || !groupIds.includes(caller.groupId))
+				(!caller.unitId || !groupIds.includes(caller.unitId))
 			) {
 				return { ok: false as const, error: "Forbidden" };
 			}

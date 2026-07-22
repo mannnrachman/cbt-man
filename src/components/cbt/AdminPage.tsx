@@ -2,7 +2,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 export function AdminPage({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("mx-auto max-w-5xl space-y-6", className)} {...props} />
+  return <div className={cn("w-full space-y-6", className)} {...props} />
 }
 
 export function AdminPageHeader({ 
@@ -15,9 +15,9 @@ export function AdminPageHeader({
   action?: React.ReactNode 
 }) {
   return (
-    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
       <div className="space-y-1">
-        <h1 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">{title}</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-zinc-100">{title}</h1>
         {description && <p className="text-sm text-slate-500">{description}</p>}
       </div>
       {action && <div className="flex flex-wrap items-center gap-2 shrink-0">{action}</div>}
