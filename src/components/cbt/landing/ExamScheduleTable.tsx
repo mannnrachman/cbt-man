@@ -8,9 +8,10 @@ import {
 } from "@/components/ui/table";
 import { CalendarDays, GraduationCap, Clock, Timer } from "lucide-react";
 import { getExamCountdown, getExamStatus } from "@/lib/cbt/time";
+import { type Ujian } from "@/lib/cbt/types";
 
 interface ExamScheduleTableProps {
-  exams: any[];
+  exams: Ujian[];
   activeTab: "online" | "offline";
   groupsMap: Record<string, string>;
   now: number;
