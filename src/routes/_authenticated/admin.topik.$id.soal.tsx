@@ -154,11 +154,11 @@ function SoalPage() {
                 </span>
               </div>
               <div className="flex items-center gap-1.5">
-                <Button size="sm" variant="ghost" className="h-8 px-3 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:hover:text-zinc-100 dark:hover:bg-zinc-800 font-medium" onClick={() => { setEditing(s); setOpen(true); }}>
+                <Button size="sm" variant="ghost" className="h-8 px-3 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:hover:text-zinc-100 dark:hover:bg-zinc-800 font-medium" aria-label="Edit" onClick={() => { setEditing(s); setOpen(true); }}>
                   <Pencil className="h-3.5 w-3.5 sm:mr-2" /> <span className="hidden sm:inline">Edit</span>
                 </Button>
                 <div className="w-px h-5 bg-slate-200 dark:bg-zinc-700 mx-1"></div>
-                <Button size="sm" variant="ghost" className="h-8 px-3 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/50 font-medium" onClick={() => remove(s.id)}>
+                <Button size="sm" variant="ghost" className="h-8 px-3 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/50 font-medium" aria-label="Hapus" onClick={() => remove(s.id)}>
                   <Trash2 className="h-3.5 w-3.5 sm:mr-2" /> <span className="hidden sm:inline">Hapus</span>
                 </Button>
               </div>

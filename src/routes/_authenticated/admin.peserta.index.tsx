@@ -164,10 +164,10 @@ function PesertaPage() {
                     )}
                   </td>
                   <td className="p-4 text-center space-x-2">
-                    <Button variant="outline" size="sm" onClick={() => { setEditing(p); setOpen(true); }} className="h-8">
+                    <Button variant="outline" size="sm" onClick={() => { setEditing(p); setOpen(true); }} className="h-8" aria-label="Edit">
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="sm" className="h-8 text-destructive hover:bg-destructive/10" onClick={() => {
+                    <Button variant="ghost" size="sm" className="h-8 text-destructive hover:bg-destructive/10" aria-label="Hapus" onClick={() => {
                       if (confirm("Hapus peserta ini?")) {
                         usersRepo.remove(p.id);
                         refresh();

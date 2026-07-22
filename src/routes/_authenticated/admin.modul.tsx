@@ -78,7 +78,10 @@ function ModulPage() {
   }
 
   function exportBank(modul: Modul) {
-    const topik = topikRepo.all().filter((t) => t.modulId === modul.id);
+    let topik = topikRepo.all().filter((t) => t.modulId === modul.id);
+    if (!canEdit && allowedSet) {
+      topik = topik.filter((t) => allowedSet.has(t.id));
+    }
     const tIds = new Set(topik.map((t) => t.id));
     const soal = soalRepo.all().filter((s) => tIds.has(s.topikId));
     const bank: Bank = { app: "cbtman-bank", version: 1, modul, topik, soal };
