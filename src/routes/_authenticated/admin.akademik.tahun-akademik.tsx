@@ -1,7 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { tahunAkademikRepo } from "@/lib/cbt/repos";
-import { mutateTahunAkademikServer } from "@/lib/server/akademik/functions";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
+import { mutateTahunAkademikServer, getTahunAkademikList } from "@/lib/server/akademik/functions";
 import { uid } from "@/lib/cbt/storage";
 import type { TahunAkademik } from "@/lib/cbt/types";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,11 +20,20 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/_authenticated/admin/akademik/tahun-akademik")({
+  loader: async () => {
+    return await getTahunAkademikList();
+  },
   component: TahunAkademikPage,
 });
 
 function TahunAkademikPage() {
-  const [items, setItems] = useState<TahunAkademik[]>(tahunAkademikRepo.all());
+  const router = useRouter();
+  const initialItems = Route.useLoaderData();
+  const [items, setItems] = useState<TahunAkademik[]>(initialItems);
+  
+  useEffect(() => {
+    setItems(initialItems);
+  }, [initialItems]);
   
   const [editing, setEditing] = useState<TahunAkademik | null>(null);
   const [open, setOpen] = useState(false);
@@ -45,14 +53,18 @@ function TahunAkademikPage() {
 
   async function handleRemove(id: string) {
     if (!confirm("Hapus tahun akademik ini?")) return;
+    
+    // Optimistic UI
+    setItems((prev) => prev.filter((i) => i.id !== id));
+    
     const res = await mutateTahunAkademikServer({ data: { action: "remove", payload: { id } } });
     if (!res.ok) {
       toast.error(res.error || "Gagal menghapus");
+      await router.invalidate();
       return;
     }
-    tahunAkademikRepo.remove(id);
-    setItems(tahunAkademikRepo.all());
     toast.success("Tahun Akademik dihapus");
+    await router.invalidate();
   }
 
   async function save() {
@@ -61,15 +73,27 @@ function TahunAkademikPage() {
       return;
     }
     const payload: TahunAkademik = { id: form.id, nama: form.nama.trim(), aktif: form.aktif };
+    
+    // Optimistic UI
+    setItems((prev) => {
+      const idx = prev.findIndex((i) => i.id === payload.id);
+      if (idx >= 0) {
+        const next = [...prev];
+        next[idx] = payload;
+        return next;
+      }
+      return [...prev, payload];
+    });
+    setOpen(false);
+
     const res = await mutateTahunAkademikServer({ data: { action: "upsert", payload } });
     if (!res.ok) {
       toast.error(res.error || "Gagal menyimpan");
+      await router.invalidate();
       return;
     }
-    tahunAkademikRepo.upsert(payload);
-    setItems(tahunAkademikRepo.all());
     toast.success("Tahun Akademik disimpan");
-    setOpen(false);
+    await router.invalidate();
   }
 
   return (

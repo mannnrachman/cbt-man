@@ -1,7 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { mataKuliahRepo, prodiRepo, semesterRepo, tahunAkademikRepo } from "@/lib/cbt/repos";
-import { mutateMataKuliahServer } from "@/lib/server/akademik/functions";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
+import { mutateMataKuliahServer, getMataKuliahList, getProdiList, getSemesterList, getTahunAkademikList } from "@/lib/server/akademik/functions";
 import { uid } from "@/lib/cbt/storage";
 import type { MataKuliah } from "@/lib/cbt/types";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,14 +25,26 @@ import {
 } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/admin/akademik/mata-kuliah")({
+  loader: async () => {
+    const [items, prodiList, semesterList, taList] = await Promise.all([
+      getMataKuliahList(),
+      getProdiList(),
+      getSemesterList(),
+      getTahunAkademikList()
+    ]);
+    return { items, prodiList, semesterList, taList };
+  },
   component: MataKuliahPage,
 });
 
 function MataKuliahPage() {
-  const [items, setItems] = useState<MataKuliah[]>(mataKuliahRepo.all());
-  const prodiList = prodiRepo.all();
-  const semesterList = semesterRepo.all();
-  const taList = tahunAkademikRepo.all();
+  const router = useRouter();
+  const { items: initialItems, prodiList, semesterList, taList } = Route.useLoaderData();
+  const [items, setItems] = useState<MataKuliah[]>(initialItems);
+
+  useEffect(() => {
+    setItems(initialItems);
+  }, [initialItems]);
   
   const [editing, setEditing] = useState<MataKuliah | null>(null);
   const [open, setOpen] = useState(false);
@@ -53,14 +64,18 @@ function MataKuliahPage() {
 
   async function handleRemove(id: string) {
     if (!confirm("Hapus mata kuliah ini?")) return;
+    
+    // Optimistic UI
+    setItems((prev) => prev.filter((i) => i.id !== id));
+    
     const res = await mutateMataKuliahServer({ data: { action: "remove", payload: { id } } });
     if (!res.ok) {
       toast.error(res.error || "Gagal menghapus");
+      await router.invalidate();
       return;
     }
-    mataKuliahRepo.remove(id);
-    setItems(mataKuliahRepo.all());
     toast.success("Mata Kuliah dihapus");
+    await router.invalidate();
   }
 
   async function save() {
@@ -76,15 +91,27 @@ function MataKuliahPage() {
       prodiId: form.prodiId,
       semesterId: form.semesterId 
     };
+    
+    // Optimistic UI
+    setItems((prev) => {
+      const idx = prev.findIndex((i) => i.id === payload.id);
+      if (idx >= 0) {
+        const next = [...prev];
+        next[idx] = payload;
+        return next;
+      }
+      return [...prev, payload];
+    });
+    setOpen(false);
+
     const res = await mutateMataKuliahServer({ data: { action: "upsert", payload } });
     if (!res.ok) {
       toast.error(res.error || "Gagal menyimpan");
+      await router.invalidate();
       return;
     }
-    mataKuliahRepo.upsert(payload);
-    setItems(mataKuliahRepo.all());
     toast.success("Mata Kuliah disimpan");
-    setOpen(false);
+    await router.invalidate();
   }
 
   return (

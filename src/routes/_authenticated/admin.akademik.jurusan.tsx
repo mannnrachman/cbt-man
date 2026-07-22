@@ -1,7 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { jurusanRepo, fakultasRepo } from "@/lib/cbt/repos";
-import { mutateJurusanServer } from "@/lib/server/akademik/functions";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
+import { mutateJurusanServer, getJurusanList, getFakultasList } from "@/lib/server/akademik/functions";
 import { uid } from "@/lib/cbt/storage";
 import type { Jurusan } from "@/lib/cbt/types";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,12 +25,24 @@ import {
 } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/admin/akademik/jurusan")({
+  loader: async () => {
+    const [items, fakultasList] = await Promise.all([
+      getJurusanList(),
+      getFakultasList()
+    ]);
+    return { items, fakultasList };
+  },
   component: JurusanPage,
 });
 
 function JurusanPage() {
-  const [items, setItems] = useState<Jurusan[]>(jurusanRepo.all());
-  const fakultasList = fakultasRepo.all();
+  const router = useRouter();
+  const { items: initialItems, fakultasList } = Route.useLoaderData();
+  const [items, setItems] = useState<Jurusan[]>(initialItems);
+  
+  useEffect(() => {
+    setItems(initialItems);
+  }, [initialItems]);
   
   const [editing, setEditing] = useState<Jurusan | null>(null);
   const [open, setOpen] = useState(false);
@@ -51,14 +62,18 @@ function JurusanPage() {
 
   async function handleRemove(id: string) {
     if (!confirm("Hapus jurusan ini?")) return;
+    
+    // Optimistic UI
+    setItems((prev) => prev.filter((i) => i.id !== id));
+    
     const res = await mutateJurusanServer({ data: { action: "remove", payload: { id } } });
     if (!res.ok) {
       toast.error(res.error || "Gagal menghapus");
+      await router.invalidate();
       return;
     }
-    jurusanRepo.remove(id);
-    setItems(jurusanRepo.all());
     toast.success("Jurusan dihapus");
+    await router.invalidate();
   }
 
   async function save() {
@@ -67,15 +82,27 @@ function JurusanPage() {
       return;
     }
     const payload: Jurusan = { id: form.id, nama: form.nama.trim(), fakultasId: form.fakultasId };
+    
+    // Optimistic UI
+    setItems((prev) => {
+      const idx = prev.findIndex((i) => i.id === payload.id);
+      if (idx >= 0) {
+        const next = [...prev];
+        next[idx] = payload;
+        return next;
+      }
+      return [...prev, payload];
+    });
+    setOpen(false);
+
     const res = await mutateJurusanServer({ data: { action: "upsert", payload } });
     if (!res.ok) {
       toast.error(res.error || "Gagal menyimpan");
+      await router.invalidate();
       return;
     }
-    jurusanRepo.upsert(payload);
-    setItems(jurusanRepo.all());
     toast.success("Jurusan disimpan");
-    setOpen(false);
+    await router.invalidate();
   }
 
   return (

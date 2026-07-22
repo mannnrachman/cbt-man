@@ -1,7 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { prodiRepo, jurusanRepo, fakultasRepo } from "@/lib/cbt/repos";
-import { mutateProdiServer } from "@/lib/server/akademik/functions";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
+import { mutateProdiServer, getProdiList, getJurusanList, getFakultasList } from "@/lib/server/akademik/functions";
 import { uid } from "@/lib/cbt/storage";
 import type { ProgramStudi } from "@/lib/cbt/types";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,13 +25,25 @@ import {
 } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/admin/akademik/prodi")({
+  loader: async () => {
+    const [items, jurusanList, fakultasList] = await Promise.all([
+      getProdiList(),
+      getJurusanList(),
+      getFakultasList()
+    ]);
+    return { items, jurusanList, fakultasList };
+  },
   component: ProdiPage,
 });
 
 function ProdiPage() {
-  const [items, setItems] = useState<ProgramStudi[]>(prodiRepo.all());
-  const jurusanList = jurusanRepo.all();
-  const fakultasList = fakultasRepo.all();
+  const router = useRouter();
+  const { items: initialItems, jurusanList, fakultasList } = Route.useLoaderData();
+  const [items, setItems] = useState<ProgramStudi[]>(initialItems);
+
+  useEffect(() => {
+    setItems(initialItems);
+  }, [initialItems]);
   
   const [editing, setEditing] = useState<ProgramStudi | null>(null);
   const [open, setOpen] = useState(false);
@@ -52,14 +63,18 @@ function ProdiPage() {
 
   async function handleRemove(id: string) {
     if (!confirm("Hapus program studi ini?")) return;
+    
+    // Optimistic UI
+    setItems((prev) => prev.filter((i) => i.id !== id));
+    
     const res = await mutateProdiServer({ data: { action: "remove", payload: { id } } });
     if (!res.ok) {
       toast.error(res.error || "Gagal menghapus");
+      await router.invalidate();
       return;
     }
-    prodiRepo.remove(id);
-    setItems(prodiRepo.all());
     toast.success("Program Studi dihapus");
+    await router.invalidate();
   }
 
   async function save() {
@@ -68,15 +83,27 @@ function ProdiPage() {
       return;
     }
     const payload: ProgramStudi = { id: form.id, nama: form.nama.trim(), jurusanId: form.jurusanId };
+    
+    // Optimistic UI
+    setItems((prev) => {
+      const idx = prev.findIndex((i) => i.id === payload.id);
+      if (idx >= 0) {
+        const next = [...prev];
+        next[idx] = payload;
+        return next;
+      }
+      return [...prev, payload];
+    });
+    setOpen(false);
+
     const res = await mutateProdiServer({ data: { action: "upsert", payload } });
     if (!res.ok) {
       toast.error(res.error || "Gagal menyimpan");
+      await router.invalidate();
       return;
     }
-    prodiRepo.upsert(payload);
-    setItems(prodiRepo.all());
     toast.success("Program Studi disimpan");
-    setOpen(false);
+    await router.invalidate();
   }
 
   return (

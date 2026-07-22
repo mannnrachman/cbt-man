@@ -1,7 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { fakultasRepo } from "@/lib/cbt/repos";
-import { mutateFakultasServer } from "@/lib/server/akademik/functions";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
+import { mutateFakultasServer, getFakultasList } from "@/lib/server/akademik/functions";
 import { uid } from "@/lib/cbt/storage";
 import type { Fakultas } from "@/lib/cbt/types";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,11 +18,21 @@ import {
 import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/_authenticated/admin/akademik/fakultas")({
+  loader: async () => {
+    return await getFakultasList();
+  },
   component: FakultasPage,
 });
 
 function FakultasPage() {
-  const [items, setItems] = useState<Fakultas[]>(fakultasRepo.all());
+  const router = useRouter();
+  const initialItems = Route.useLoaderData();
+  const [items, setItems] = useState<Fakultas[]>(initialItems);
+  
+  useEffect(() => {
+    setItems(initialItems);
+  }, [initialItems]);
+
   const [editing, setEditing] = useState<Fakultas | null>(null);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ id: "", nama: "" });
@@ -42,14 +51,18 @@ function FakultasPage() {
 
   async function handleRemove(id: string) {
     if (!confirm("Hapus fakultas ini?")) return;
+    
+    // Optimistic UI
+    setItems((prev) => prev.filter((i) => i.id !== id));
+    
     const res = await mutateFakultasServer({ data: { action: "remove", payload: { id } } });
     if (!res.ok) {
       toast.error(res.error || "Gagal menghapus");
+      await router.invalidate(); // Rollback
       return;
     }
-    fakultasRepo.remove(id);
-    setItems(fakultasRepo.all());
     toast.success("Fakultas dihapus");
+    await router.invalidate();
   }
 
   async function save() {
@@ -58,15 +71,27 @@ function FakultasPage() {
       return;
     }
     const payload: Fakultas = { id: form.id, nama: form.nama.trim() };
+    
+    // Optimistic UI
+    setItems((prev) => {
+      const idx = prev.findIndex((i) => i.id === payload.id);
+      if (idx >= 0) {
+        const next = [...prev];
+        next[idx] = payload;
+        return next;
+      }
+      return [...prev, payload];
+    });
+    setOpen(false);
+
     const res = await mutateFakultasServer({ data: { action: "upsert", payload } });
     if (!res.ok) {
       toast.error(res.error || "Gagal menyimpan");
+      await router.invalidate(); // Rollback
       return;
     }
-    fakultasRepo.upsert(payload);
-    setItems(fakultasRepo.all());
     toast.success("Fakultas disimpan");
-    setOpen(false);
+    await router.invalidate();
   }
 
   return (
@@ -132,3 +157,4 @@ function FakultasPage() {
     </div>
   );
 }
+

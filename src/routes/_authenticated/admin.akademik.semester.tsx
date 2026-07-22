@@ -1,7 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { semesterRepo, tahunAkademikRepo } from "@/lib/cbt/repos";
-import { mutateSemesterServer } from "@/lib/server/akademik/functions";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
+import { mutateSemesterServer, getSemesterList, getTahunAkademikList } from "@/lib/server/akademik/functions";
 import { uid } from "@/lib/cbt/storage";
 import type { Semester } from "@/lib/cbt/types";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,12 +25,24 @@ import {
 } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/admin/akademik/semester")({
+  loader: async () => {
+    const [items, taList] = await Promise.all([
+      getSemesterList(),
+      getTahunAkademikList()
+    ]);
+    return { items, taList };
+  },
   component: SemesterPage,
 });
 
 function SemesterPage() {
-  const [items, setItems] = useState<Semester[]>(semesterRepo.all());
-  const taList = tahunAkademikRepo.all();
+  const router = useRouter();
+  const { items: initialItems, taList } = Route.useLoaderData();
+  const [items, setItems] = useState<Semester[]>(initialItems);
+
+  useEffect(() => {
+    setItems(initialItems);
+  }, [initialItems]);
   
   const [editing, setEditing] = useState<Semester | null>(null);
   const [open, setOpen] = useState(false);
@@ -52,14 +63,18 @@ function SemesterPage() {
 
   async function handleRemove(id: string) {
     if (!confirm("Hapus semester ini?")) return;
+    
+    // Optimistic UI
+    setItems((prev) => prev.filter((i) => i.id !== id));
+    
     const res = await mutateSemesterServer({ data: { action: "remove", payload: { id } } });
     if (!res.ok) {
       toast.error(res.error || "Gagal menghapus");
+      await router.invalidate();
       return;
     }
-    semesterRepo.remove(id);
-    setItems(semesterRepo.all());
     toast.success("Semester dihapus");
+    await router.invalidate();
   }
 
   async function save() {
@@ -68,15 +83,27 @@ function SemesterPage() {
       return;
     }
     const payload: Semester = { id: form.id, nama: form.nama.trim(), tahunAkademikId: form.tahunAkademikId };
+    
+    // Optimistic UI
+    setItems((prev) => {
+      const idx = prev.findIndex((i) => i.id === payload.id);
+      if (idx >= 0) {
+        const next = [...prev];
+        next[idx] = payload;
+        return next;
+      }
+      return [...prev, payload];
+    });
+    setOpen(false);
+
     const res = await mutateSemesterServer({ data: { action: "upsert", payload } });
     if (!res.ok) {
       toast.error(res.error || "Gagal menyimpan");
+      await router.invalidate();
       return;
     }
-    semesterRepo.upsert(payload);
-    setItems(semesterRepo.all());
     toast.success("Semester disimpan");
-    setOpen(false);
+    await router.invalidate();
   }
 
   return (

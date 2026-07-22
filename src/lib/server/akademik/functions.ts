@@ -30,6 +30,42 @@ async function requireSuperAdmin() {
 	return caller;
 }
 
+export const getFakultasList = createServerFn({ method: "GET" }).handler(async () => {
+	const caller = await requireSuperAdmin();
+	if (!caller) throw new Error("Forbidden");
+	return await prisma.fakultas.findMany({ orderBy: { nama: "asc" } });
+});
+
+export const getJurusanList = createServerFn({ method: "GET" }).handler(async () => {
+	const caller = await requireSuperAdmin();
+	if (!caller) throw new Error("Forbidden");
+	return await prisma.jurusan.findMany({ orderBy: { nama: "asc" } });
+});
+
+export const getProdiList = createServerFn({ method: "GET" }).handler(async () => {
+	const caller = await requireSuperAdmin();
+	if (!caller) throw new Error("Forbidden");
+	return await prisma.programStudi.findMany({ orderBy: { nama: "asc" } });
+});
+
+export const getTahunAkademikList = createServerFn({ method: "GET" }).handler(async () => {
+	const caller = await requireSuperAdmin();
+	if (!caller) throw new Error("Forbidden");
+	return await prisma.tahunAkademik.findMany({ orderBy: { nama: "asc" } });
+});
+
+export const getSemesterList = createServerFn({ method: "GET" }).handler(async () => {
+	const caller = await requireSuperAdmin();
+	if (!caller) throw new Error("Forbidden");
+	return await prisma.semester.findMany({ orderBy: { nama: "asc" } });
+});
+
+export const getMataKuliahList = createServerFn({ method: "GET" }).handler(async () => {
+	const caller = await requireSuperAdmin();
+	if (!caller) throw new Error("Forbidden");
+	return await prisma.mataKuliah.findMany({ orderBy: { nama: "asc" } });
+});
+
 export const mutateFakultasServer = createServerFn({ method: "POST" })
 	.validator(z.object({ action: z.enum(["upsert", "remove"]), payload: z.any() }))
 	.handler(async ({ data }) => {
