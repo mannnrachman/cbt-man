@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState, useMemo } from "react";
-import { sesiRepo, ujianRepo, usersRepo } from "@/lib/cbt/repos";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useEffect, useState, useMemo, useRef } from "react";
+import { getLiveOnlineSesis } from "@/lib/server/sesi/functions";
 import { Activity, AlertTriangle, Users, Timer, CheckCircle2, Search, MonitorPlay } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { AdminPage, AdminPageHeader, AdminPageContent } from "@/components/cbt/AdminPage";
@@ -8,6 +8,10 @@ import { AdminPage, AdminPageHeader, AdminPageContent } from "@/components/cbt/A
 
 export const Route = createFileRoute("/_authenticated/admin/peserta/online")({
   component: OnlinePage,
+  loader: async () => {
+    const rawSesis = await getLiveOnlineSesis();
+    return { rawSesis };
+  }
 });
 
 function fmtSisa(ms: number): string {
@@ -17,49 +21,52 @@ function fmtSisa(ms: number): string {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
+  type LiveSession = Awaited<ReturnType<typeof getLiveOnlineSesis>>[number];
+
 function OnlinePage() {
+  const { rawSesis } = Route.useLoaderData();
+  const router = useRouter();
+
+  const tickRef = useRef(0);
   const [tick, setTick] = useState(0);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    const t = window.setInterval(() => setTick((x) => x + 1), 1000);
+    const t = window.setInterval(() => {
+      tickRef.current += 1;
+      setTick(tickRef.current);
+      // Poll every 5 seconds
+      if (tickRef.current % 5 === 0) {
+        router.invalidate();
+      }
+    }, 1000);
     return () => window.clearInterval(t);
-  }, []);
+  }, [router]);
 
-  const { sesis, ujians, users, totalPelanggaran, avgProgress } = useMemo(() => {
-    const rawSesis = sesiRepo.all().filter((s) => s.status === "sedang");
-    const ujians = ujianRepo.all();
-    const users = usersRepo.all();
-
+  const { sesis, totalPelanggaran, avgProgress } = useMemo(() => {
     let violations = 0;
     let totalPct = 0;
 
-    const enriched = rawSesis.map((s) => {
-      const u = users.find((x) => x.id === s.pesertaId);
-      const ex = ujians.find((x) => x.id === s.ujianId);
-      const dijawab = s.jawaban.filter((j) => j.jawabanIds.length > 0 || j.jawabanEssay.length > 0).length;
-      const totalSoal = s.soalIds.length || 1;
-      const progress = (dijawab / totalSoal) * 100;
+    const enriched = rawSesis.map((s: LiveSession) => {
+      const progress = (s.dijawab / s.totalSoal) * 100;
       
       violations += s.pelanggaran;
       totalPct += progress;
 
-      return { s, u, ex, dijawab, totalSoal, progress };
+      return { s, u: s.user, ex: s.ujian, dijawab: s.dijawab, totalSoal: s.totalSoal, progress };
     });
 
-    const filtered = enriched.filter(({ u, ex }) => 
+    const filtered = enriched.filter(({ u, ex }: { u: LiveSession['user'], ex: LiveSession['ujian'] }) => 
       (u?.namaLengkap || "").toLowerCase().includes(search.toLowerCase()) ||
       (ex?.nama || "").toLowerCase().includes(search.toLowerCase())
     );
 
     return {
       sesis: filtered,
-      ujians,
-      users,
       totalPelanggaran: violations,
       avgProgress: rawSesis.length > 0 ? totalPct / rawSesis.length : 0
     };
-  }, [search]);
+  }, [search, rawSesis]);
 
   return (
     <AdminPage>

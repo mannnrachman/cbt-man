@@ -1,9 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import * as XLSX from "xlsx";
-import { usersRepo, unitAkademikRepo } from "@/lib/cbt/repos";
+import { upsertUserServer, getUsersList, mutateUserServer } from "@/lib/server/users/functions";
+import { getUnitAkademikList, mutateUnitAkademikServer } from "@/lib/server/akademik/functions";
 import { hashPassword } from "@/lib/cbt/hash";
-import { upsertUserServer } from "@/lib/server/users/functions";
 import { uid } from "@/lib/cbt/storage";
 import type { UnitAkademik, User } from "@/lib/cbt/types";
 
@@ -18,17 +18,25 @@ import { Pencil, Trash2, Plus, Printer, Upload, Users as UsersIcon } from "lucid
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/peserta/")({
-
   component: PesertaPage,
+  loader: async () => {
+    const [allUsers, allUnits] = await Promise.all([
+      getUsersList(),
+      getUnitAkademikList(),
+    ]);
+    return { allUsers, allUnits };
+  }
 });
 
 type PesertaWithPwd = User & { _initialPassword?: string };
 
 function PesertaPage() {
-  const [peserta, setPeserta] = useState<PesertaWithPwd[]>(
-    usersRepo.all().filter((u) => u.role === "mahasiswa"),
-  );
-  const [units, setUnits] = useState<UnitAkademik[]>(unitAkademikRepo.all());
+  const { allUsers, allUnits } = Route.useLoaderData();
+  const router = useRouter();
+  
+  const peserta = allUsers.filter((u: User) => u.role === "mahasiswa");
+  const units = allUnits;
+
   const [editing, setEditing] = useState<PesertaWithPwd | null>(null);
   const [open, setOpen] = useState(false);
   const [filterUnit, setFilterUnit] = useState<string>("all");
@@ -36,8 +44,7 @@ function PesertaPage() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   function refresh() {
-    setPeserta(usersRepo.all().filter((u) => u.role === "mahasiswa"));
-    setUnits(unitAkademikRepo.all());
+    router.invalidate();
   }
 
   const shown = peserta.filter((p) =>
@@ -60,17 +67,21 @@ function PesertaPage() {
       const unitName = String(r.group ?? r.Group ?? r.kelas ?? r.unit ?? "").trim();
       let unitId: string | undefined;
       if (unitName) {
-        let g = unitAkademikRepo.all().find((x) => x.nama.toLowerCase() === unitName.toLowerCase());
-        if (!g) { g = { id: uid("u_"), nama: unitName, tipe: "kelas", parentId: null }; unitAkademikRepo.upsert(g); }
+        let g = units.find((x: UnitAkademik) => x.nama.toLowerCase() === unitName.toLowerCase());
+        if (!g) { 
+          g = { id: uid("u_"), nama: unitName, tipe: "kelas", parentId: null } as UnitAkademik; 
+          await mutateUnitAkademikServer({ data: { action: "upsert", payload: g } });
+        }
         unitId = g.id;
       }
-      const u: PesertaWithPwd = {
-        id: uid("u_"), username, namaLengkap: nama, role: "mahasiswa",
-        allowedTopikIds: [], mataKuliahIds: [], unitId, aktif: true,
-        passwordHash: await hashPassword(password), createdAt: Date.now(),
-        _initialPassword: password,
-      };
-      usersRepo.upsert(u);
+
+      await upsertUserServer({
+        data: {
+          id: uid("u_"), username, namaLengkap: nama, role: "mahasiswa",
+          allowedTopikIds: [], unitId: unitId, aktif: true,
+          createdAt: Date.now(), newPassword: password,
+        }
+      });
       added++;
     }
     toast.success(`${added} peserta diimport`);
@@ -178,9 +189,9 @@ function PesertaPage() {
                     <Button variant="outline" size="sm" onClick={() => { setEditing(p); setOpen(true); }} className="h-8">
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="sm" className="h-8 text-destructive hover:bg-destructive/10" onClick={() => {
+                    <Button variant="ghost" size="sm" className="h-8 text-destructive hover:bg-destructive/10" onClick={async () => {
                       if (confirm("Hapus peserta ini?")) {
-                        usersRepo.remove(p.id);
+                        await mutateUserServer({ data: { action: "remove", payload: { id: p.id } } });
                         refresh();
 
                       }
@@ -268,7 +279,6 @@ function PesertaDialog({
       return;
     }
 
-    usersRepo.upsert(res.user);
     toast.success("Disimpan");
     onSaved();
 

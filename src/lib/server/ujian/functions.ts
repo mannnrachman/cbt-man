@@ -393,6 +393,30 @@ export const fetchUjianByIdServer = createServerFn({ method: "POST" })
 		return { ok: true as const, ujian: mapUjian(row) };
 	});
 
+export const getFullConfigServer = createServerFn({ method: "GET" }).handler(
+	async () => {
+		const caller = await requireCaller();
+		if (!caller || caller.role !== "super_admin") return null;
+		const row = await prisma.appConfig.findUnique({ where: { id: "app" } });
+		if (!row) return null;
+		return {
+			appName: row.appName,
+			appLogo: row.appLogo,
+			appDeskripsi: row.appDeskripsi,
+			pesanLogin: row.pesanLogin,
+			mobileLock: row.mobileLock,
+			multiDevice: row.multiDevice,
+			roleAccess: typeof row.roleAccess === "string" ? JSON.parse(row.roleAccess) : row.roleAccess || {},
+		};
+	}
+);export const getUjiansList = createServerFn({ method: "GET" }).handler(
+	async () => {
+		const caller = await requireCaller();
+		if (!caller) return [];
+		const rows = await prisma.ujian.findMany();
+		return rows.map(mapUjian);
+	}
+);
 export const saveConfigServer = createServerFn({ method: "POST" })
 	.validator(
 		z.object({

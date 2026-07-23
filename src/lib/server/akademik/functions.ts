@@ -119,3 +119,10 @@ export const mutateMataKuliahServer = createServerFn({ method: "POST" })
 			return { ok: false as const, error: e.message };
 		}
 	});
+export const getUnitAkademikList = createServerFn({ method: "GET" }).handler(
+	async (): Promise<UnitAkademik[]> => {
+		const caller = await requireCaller();
+		if (!caller) return [];
+		return (await prisma.unitAkademik.findMany()) as unknown as UnitAkademik[];
+	}
+);
