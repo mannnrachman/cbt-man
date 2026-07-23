@@ -69,7 +69,7 @@ function PesertaPage() {
       if (unitName) {
         let g = units.find((x: UnitAkademik) => x.nama.toLowerCase() === unitName.toLowerCase());
         if (!g) { 
-          g = { id: uid("u_"), nama: unitName, tipe: "kelas", parentId: null } as any; 
+          g = { id: uid("u_"), nama: unitName, tipe: "kelas", parentId: null } as UnitAkademik; 
           await mutateUnitAkademikServer({ data: { action: "upsert", payload: g } });
         }
         unitId = g.id;

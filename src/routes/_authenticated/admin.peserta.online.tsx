@@ -1,5 +1,5 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { getLiveOnlineSesis } from "@/lib/server/sesi/functions";
 import { Activity, AlertTriangle, Users, Timer, CheckCircle2, Search, MonitorPlay } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -21,29 +21,33 @@ function fmtSisa(ms: number): string {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
+  type LiveSession = Awaited<ReturnType<typeof getLiveOnlineSesis>>[number];
+
 function OnlinePage() {
   const { rawSesis } = Route.useLoaderData();
   const router = useRouter();
 
+  const tickRef = useRef(0);
   const [tick, setTick] = useState(0);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
     const t = window.setInterval(() => {
-      setTick((x) => x + 1);
+      tickRef.current += 1;
+      setTick(tickRef.current);
       // Poll every 5 seconds
-      if (tick % 5 === 0) {
+      if (tickRef.current % 5 === 0) {
         router.invalidate();
       }
     }, 1000);
     return () => window.clearInterval(t);
-  }, [router, tick]);
+  }, [router]);
 
   const { sesis, totalPelanggaran, avgProgress } = useMemo(() => {
     let violations = 0;
     let totalPct = 0;
 
-    const enriched = rawSesis.map((s: any) => {
+    const enriched = rawSesis.map((s: LiveSession) => {
       const progress = (s.dijawab / s.totalSoal) * 100;
       
       violations += s.pelanggaran;
@@ -52,7 +56,7 @@ function OnlinePage() {
       return { s, u: s.user, ex: s.ujian, dijawab: s.dijawab, totalSoal: s.totalSoal, progress };
     });
 
-    const filtered = enriched.filter(({ u, ex }: any) => 
+    const filtered = enriched.filter(({ u, ex }: { u: LiveSession['user'], ex: LiveSession['ujian'] }) => 
       (u?.namaLengkap || "").toLowerCase().includes(search.toLowerCase()) ||
       (ex?.nama || "").toLowerCase().includes(search.toLowerCase())
     );

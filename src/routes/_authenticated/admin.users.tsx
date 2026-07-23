@@ -4,7 +4,7 @@ import { revokeUserSessionsServer, upsertUserServer, getUsersList, mutateUserSer
 import { getUnitAkademikList } from "@/lib/server/akademik/functions";
 
 import { uid } from "@/lib/cbt/storage";
-import type { Role, User } from "@/lib/cbt/types";
+import type { Role, User, UnitAkademik } from "@/lib/cbt/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -182,7 +182,7 @@ function UserDialog({
   onOpenChange: (v: boolean) => void;
   editing: User | null;
   onSaved: (user: User) => void;
-  units: any[];
+  units: UnitAkademik[];
 }) {
   const [form, setForm] = useState({
     username: "",
