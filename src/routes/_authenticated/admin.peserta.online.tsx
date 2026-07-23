@@ -59,7 +59,7 @@ function OnlinePage() {
       totalPelanggaran: violations,
       avgProgress: rawSesis.length > 0 ? totalPct / rawSesis.length : 0
     };
-  }, [tick, search]);
+  }, [search]);
 
   return (
     <AdminPage>

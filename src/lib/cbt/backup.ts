@@ -90,9 +90,11 @@ export async function downloadBackup(): Promise<void> {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function importBackup(raw: any): Promise<Backup> {
   if (raw && typeof raw === "object") {
     if ("groups" in raw && Array.isArray(raw.groups)) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       raw.unitAkademik = raw.groups.map((g: any) => ({
         id: g.id,
         nama: g.nama,
@@ -102,6 +104,7 @@ export async function importBackup(raw: any): Promise<Backup> {
       delete raw.groups;
     }
     if ("users" in raw && Array.isArray(raw.users)) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       raw.users = raw.users.map((u: any) => ({
         ...u,
         unitId: u.unitId ?? u.groupId ?? u.prodiId ?? null,

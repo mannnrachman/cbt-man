@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from "./prisma";
 import { parseJson } from "./json";
 import { validateSession, readSessionToken } from "./session";
