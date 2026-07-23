@@ -48,6 +48,11 @@ export async function createSession(
 	userAgent?: string,
 	deviceFingerprint?: string,
 ): Promise<string> {
+	const config = await prisma.appConfig.findUnique({ where: { id: "app" } });
+	if (config && !config.multiDevice) {
+		await prisma.session.deleteMany({ where: { userId } });
+	}
+
 	const token = generateSessionToken();
 	await prisma.session.create({
 		data: {

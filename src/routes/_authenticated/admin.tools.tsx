@@ -91,6 +91,7 @@ function ToolsPage() {
 
   return (
     <AdminPage>
+
       <AdminPageHeader
         title="Alat Sistem"
         description="Fasilitas pencadangan data (backup), pemulihan (restore), dan pengaturan ulang pangkalan data."
@@ -105,6 +106,7 @@ function ToolsPage() {
           </p>
         </div>
         <div role="region" aria-labelledby="backup-heading" className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
+
           
           {/* Export Backup Row */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
@@ -142,6 +144,7 @@ function ToolsPage() {
                 accept="application/json,.json"
                 className="hidden"
                 aria-hidden="true"
+
                 onChange={handleFile}
               />
               <Button variant="outline" onClick={() => fileRef.current?.click()} className="w-full sm:w-auto bg-white dark:bg-slate-950">
@@ -164,6 +167,7 @@ function ToolsPage() {
           </p>
         </div>
         <div role="region" aria-labelledby="advanced-heading" className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
+
           
           {/* Seed Data Row */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
@@ -197,6 +201,7 @@ function ToolsPage() {
                 <h3 className="text-sm font-semibold text-red-700 dark:text-red-400">Zona Berbahaya: Hapus Semua Data</h3>
               </div>
               <p className="text-xs font-medium text-red-700 dark:text-red-400 pl-8">Tindakan ini akan mengosongkan seluruh pangkalan data. Tidak dapat dibatalkan!</p>
+
             </div>
             <div className="shrink-0">
               <Button variant="destructive" onClick={() => setConfirmReset(true)} className="w-full sm:w-auto font-semibold">

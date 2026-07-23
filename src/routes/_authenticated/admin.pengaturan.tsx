@@ -12,6 +12,7 @@ import { Settings, Upload, Image as ImageIcon, Save } from "lucide-react";
 import { toast } from "sonner";
 import { AdminPage, AdminPageHeader } from "@/components/cbt/AdminPage";
 
+
 export const Route = createFileRoute("/_authenticated/admin/pengaturan")({
   loader: async () => {
     try {
@@ -158,6 +159,7 @@ function PengaturanPage() {
           </p>
         </div>
         <div role="region" aria-labelledby="kebijakan-heading" className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
+
           <ToggleRow
             label="Kunci akses dari perangkat Mobile"
             desc="Mencegah peserta mengakses aplikasi ujian melalui smartphone atau tablet."

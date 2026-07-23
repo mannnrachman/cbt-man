@@ -7,6 +7,7 @@ import { hashPassword } from "@/lib/cbt/hash";
 import { stringifyJson } from "../db/json";
 import { publicUser, upsertUserSchema } from "../repos/mappers";
 import type { User } from "@/lib/cbt/types";
+
 import { writeAuditLog } from "../db/audit";
 
 export const revokeUserSessionsServer = createServerFn({ method: "POST" })
@@ -51,6 +52,7 @@ export const upsertUserServer = createServerFn({ method: "POST" })
 					role: data.role,
 					allowedTopikIds: stringifyJson(data.allowedTopikIds),
 					unitId: data.unitId ?? null,
+
 					mataKuliahIds: stringifyJson(data.mataKuliahIds),
 					detail: data.detail ?? null,
 					aktif: data.aktif,
@@ -63,6 +65,7 @@ export const upsertUserServer = createServerFn({ method: "POST" })
 					role: data.role,
 					allowedTopikIds: stringifyJson(data.allowedTopikIds),
 					unitId: data.unitId ?? null,
+
 					mataKuliahIds: stringifyJson(data.mataKuliahIds),
 					detail: data.detail ?? null,
 					aktif: data.aktif,
@@ -122,6 +125,7 @@ export const mutateUserServer = createServerFn({ method: "POST" })
 								...item,
 								allowedTopikIds: stringifyJson(item.allowedTopikIds),
 								unitId: item.unitId ?? null,
+
 								mataKuliahIds: stringifyJson(item.mataKuliahIds),
 								detail: item.detail ?? null,
 								createdAt: BigInt(item.createdAt),
@@ -147,6 +151,7 @@ export const mutateUserServer = createServerFn({ method: "POST" })
 							role: item.role,
 							allowedTopikIds: stringifyJson(item.allowedTopikIds),
 							unitId: item.unitId ?? null,
+
 							mataKuliahIds: stringifyJson(item.mataKuliahIds),
 							detail: item.detail ?? null,
 							aktif: item.aktif,
@@ -159,6 +164,7 @@ export const mutateUserServer = createServerFn({ method: "POST" })
 							role: item.role,
 							allowedTopikIds: stringifyJson(item.allowedTopikIds),
 							unitId: item.unitId ?? null,
+
 							mataKuliahIds: stringifyJson(item.mataKuliahIds),
 							detail: item.detail ?? null,
 							aktif: item.aktif,
@@ -178,3 +184,4 @@ export const mutateUserServer = createServerFn({ method: "POST" })
 			};
 		}
 	});
+

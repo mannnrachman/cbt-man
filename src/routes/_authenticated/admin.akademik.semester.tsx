@@ -5,6 +5,7 @@ import { mutateSemesterServer } from "@/lib/server/akademik/functions";
 import { uid } from "@/lib/cbt/storage";
 import type { Semester } from "@/lib/cbt/types";
 import { AdminPageContent } from "@/components/cbt/AdminPage";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2, Pencil } from "lucide-react";
@@ -26,12 +27,14 @@ import {
 } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/admin/akademik/semester")({
+
   component: SemesterPage,
 });
 
 function SemesterPage() {
   const [items, setItems] = useState<Semester[]>(semesterRepo.all());
   const taList = tahunAkademikRepo.all();
+
   
   const [editing, setEditing] = useState<Semester | null>(null);
   const [open, setOpen] = useState(false);
@@ -60,6 +63,7 @@ function SemesterPage() {
     semesterRepo.remove(id);
     setItems(semesterRepo.all());
     toast.success("Semester dihapus");
+
   }
 
   async function save() {
@@ -87,11 +91,13 @@ function SemesterPage() {
           <p className="text-sm text-slate-500">Kelola semester berjalan di dalam tahun akademik.</p>
         </div>
         <Button onClick={handleAdd} size="sm" className="h-9">
+
           <Plus className="mr-2 h-4 w-4" /> Tambah Semester
         </Button>
       </div>
 
       <AdminPageContent className="p-0">
+
         <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800/60">
           {items.map((item) => {
             const ta = taList.find((t) => t.id === item.tahunAkademikId);
@@ -108,6 +114,7 @@ function SemesterPage() {
                     <Pencil className="h-4 w-4" />
                   </Button>
                   <Button variant="ghost" size="sm" className="h-8 text-destructive hover:bg-destructive/10" onClick={() => handleRemove(item.id)}>
+
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
@@ -119,6 +126,7 @@ function SemesterPage() {
           )}
         </div>
       </AdminPageContent>
+
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>

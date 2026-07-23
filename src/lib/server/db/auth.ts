@@ -5,6 +5,7 @@ import { validateSession, readSessionToken } from "./session";
 import type { NavKey, Ujian } from "@/lib/cbt/types";
 import type { UserRow } from "../repos/mappers";
 // @ts-expect-error -- seed helper is an untyped .mjs module
+
 import { createSeedDataset, seedDatabase } from "./seed-shared.mjs";
 import { hashPassword } from "@/lib/cbt/hash";
 import { stringifyJson } from "./json";
@@ -138,6 +139,7 @@ export async function pesertaCanTouchUjian(
 	return (
 		groupIds.length === 0 ||
 		  (!!caller.unitId && groupIds.includes(caller.unitId))
+
 	);
 }
 

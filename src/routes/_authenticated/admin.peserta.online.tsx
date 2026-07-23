@@ -5,6 +5,7 @@ import { Activity, AlertTriangle, Users, Timer, CheckCircle2, Search, MonitorPla
 import { Input } from "@/components/ui/input";
 import { AdminPage, AdminPageHeader, AdminPageContent } from "@/components/cbt/AdminPage";
 
+
 export const Route = createFileRoute("/_authenticated/admin/peserta/online")({
   component: OnlinePage,
 });
@@ -17,11 +18,11 @@ function fmtSisa(ms: number): string {
 }
 
 function OnlinePage() {
-  const [, tick] = useState(0);
+  const [tick, setTick] = useState(0);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    const t = window.setInterval(() => tick((x) => x + 1), 1000);
+    const t = window.setInterval(() => setTick((x) => x + 1), 1000);
     return () => window.clearInterval(t);
   }, []);
 
@@ -134,6 +135,7 @@ function OnlinePage() {
                     <div className="text-right">
                       <div className="text-[10px] font-medium uppercase tracking-widest text-slate-400 mb-0.5">Sisa Waktu</div>
                       <div className={`font-mono text-sm font-medium tabular-nums ${isCritical ? 'text-red-600 animate-pulse' : 'text-slate-700 dark:text-slate-300'}`}>
+
                         {fmtSisa(sisaMs)}
                       </div>
                     </div>
@@ -151,11 +153,13 @@ function OnlinePage() {
                       ) : (
                         <div className="flex items-center justify-end gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
                           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+
                           Aman
                         </div>
                       )}
                     </div>
                   </div>
+
                 </div>
               );
             })}
@@ -169,5 +173,6 @@ function OnlinePage() {
           </div>
       </AdminPageContent>
     </AdminPage>
+
   );
 }

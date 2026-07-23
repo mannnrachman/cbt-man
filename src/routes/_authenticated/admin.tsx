@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import {
   createFileRoute,
@@ -33,6 +34,7 @@ import {
   X,
   Sparkles,
   BookOpenCheck,
+
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -87,6 +89,7 @@ const navGroups: NavGroup[] = [
     label: "Bank Soal & Berkas",
     items: [
       { to: "/admin/modul", label: "Bank Soal", icon: BookOpen },
+
       { to: "/admin/files", label: "File Manager", icon: FolderOpen },
     ]
   },
@@ -94,6 +97,7 @@ const navGroups: NavGroup[] = [
     label: "Ujian & Pelaksanaan",
     items: [
       { to: "/admin/ujian", label: "Paket Ujian", icon: FileText },
+
       { to: "/admin/peserta/online", label: "Pantau Ujian Live", icon: Activity },
     ]
   },
@@ -110,6 +114,7 @@ const navGroups: NavGroup[] = [
       { to: "/admin/pengaturan", label: "Pengaturan", icon: Settings },
       { to: "/admin/tools", label: "Backup & Tools", icon: Wrench },
       { to: "/admin/panduan", label: "Panduan", icon: BookOpenCheck },
+
     ]
   }
 ];
@@ -286,6 +291,7 @@ function AdminLayout() {
         </aside>
 
         <div className="flex min-h-screen flex-1 flex-col min-w-0">
+
           <header className="flex h-14 items-center justify-between border-b bg-card px-4 lg:px-6 sticky top-0 z-30 shadow-sm backdrop-blur-md bg-card/80">
             <div className="flex items-center gap-4">
               <Button

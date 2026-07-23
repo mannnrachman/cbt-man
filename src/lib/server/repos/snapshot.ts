@@ -21,6 +21,7 @@ export async function loadSnapshotRows(): Promise<SnapshotRows> {
 		] = await Promise.all([
 			prisma.user.findMany({ include: { createdUjians: false } }),
 			prisma.unitAkademik.findMany({ orderBy: { nama: "asc" } }),
+
 			prisma.tahunAkademik.findMany({ orderBy: { nama: "asc" } }),
 			prisma.semester.findMany({ orderBy: { nama: "asc" } }),
 			prisma.mataKuliah.findMany({ orderBy: { nama: "asc" } }),
@@ -41,6 +42,7 @@ export async function loadSnapshotRows(): Promise<SnapshotRows> {
 		unitAkademik: unitAkademik as any,
 		tahunAkademik, semester, 
 		mataKuliah: mataKuliah.map(m => ({ ...m, unitId: m.unitId ?? undefined, semesterId: m.semesterId ?? undefined })),
+
 		modul: modul.map(m => ({ ...m, mataKuliahId: m.mataKuliahId ?? undefined })), 
 		topik, soal, ujian, token, sesi, config 
 	};
@@ -50,6 +52,7 @@ export function adminSnapshot(rows: SnapshotRows): Snapshot {
 	return {
 		users: rows.users.map(publicUser),
 		unitAkademik: rows.unitAkademik as any,
+
 		tahunAkademik: rows.tahunAkademik,
 		semester: rows.semester,
 		mataKuliah: rows.mataKuliah,
@@ -64,10 +67,9 @@ export function adminSnapshot(rows: SnapshotRows): Snapshot {
 }
 
 export function operatorSnapshot(rows: SnapshotRows, caller: UserRow): Snapshot {
-	const unrestricted = (caller.allowedTopikIds?.length ?? 0) === 0;
-	const allowedTopikIds = unrestricted
-		? null
-		: new Set(parseJson<string[]>(caller.allowedTopikIds, []));
+	const parsedAllowedTopikIds = parseJson<string[]>(caller.allowedTopikIds, []);
+	const unrestricted = parsedAllowedTopikIds.length === 0;
+	const allowedTopikIds = unrestricted ? null : new Set(parsedAllowedTopikIds);
 	const topik = allowedTopikIds
 		? rows.topik.filter((item) => allowedTopikIds.has(item.id))
 		: rows.topik;
@@ -90,6 +92,7 @@ export function operatorSnapshot(rows: SnapshotRows, caller: UserRow): Snapshot 
 	const sesi = rows.sesi.filter((item) => ujianIds.has(item.ujianId));
 	const token = rows.token.filter((item) => ujianIds.has(item.ujianId));
 	const visibleUnitIds = new Set(
+
 		ujian.flatMap((item) => parseJson<string[]>(item.groupIds, [])),
 	);
 	const visiblePesertaIds = new Set(sesi.map((item) => item.pesertaId));
@@ -102,11 +105,13 @@ export function operatorSnapshot(rows: SnapshotRows, caller: UserRow): Snapshot 
 		if (includeAllPeserta) return true;
 		if (visiblePesertaIds.has(item.id)) return true;
 		return item.unitId ? visibleUnitIds.has(item.unitId) : false;
+
 	});
 
 	return {
 		users: users.map(publicUser),
 		unitAkademik: rows.unitAkademik as any,
+
 		tahunAkademik: rows.tahunAkademik,
 		semester: rows.semester,
 		mataKuliah: rows.mataKuliah,
@@ -126,6 +131,7 @@ export function pesertaSnapshot(rows: SnapshotRows, caller: UserRow): Snapshot {
 		return (
 			groupIds.length === 0 ||
 			(!!caller.unitId && groupIds.includes(caller.unitId))
+
 		);
 	});
 	const ujianIds = new Set(ujian.map((item) => item.id));
@@ -141,6 +147,7 @@ export function pesertaSnapshot(rows: SnapshotRows, caller: UserRow): Snapshot {
 	return {
 		users: [publicUser(caller)],
 		unitAkademik: rows.unitAkademik as any,
+
 		tahunAkademik: [],
 		semester: [],
 		mataKuliah: [],

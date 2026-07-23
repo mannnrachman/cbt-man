@@ -26,6 +26,7 @@ import {
   Zap,
   CheckCircle2
 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
@@ -188,7 +189,7 @@ function CommandCenter() {
                         <div>
                           <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-1 group-hover/card:text-emerald-700 dark:group-hover/card:text-emerald-400 transition-colors">{exam.nama}</h3>
                           <div className="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
-                            <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> Berakhir {new Date(exam.endAt!).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jakarta" })}</span>
+                            <span suppressHydrationWarning className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> Berakhir {new Date(exam.endAt!).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jakarta" })}</span>
                           </div>
                         </div>
                       </div>
@@ -243,6 +244,7 @@ function CommandCenter() {
                       Selesaikan sekarang <ArrowRight className="ml-1 h-3 w-3 group-hover:translate-x-1 transition-transform" />
                     </p>
                   </Link>
+
                 ))}
               </div>
             )}
@@ -272,12 +274,13 @@ function CommandCenter() {
                         <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 leading-none mb-2">{exam.nama}</h3>
                         <p className="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                           <Clock className="h-3.5 w-3.5" /> 
-                          {new Date(exam.beginAt!).toLocaleDateString("id-ID", { day: "numeric", month: "short", timeZone: "Asia/Jakarta" })} • {new Date(exam.beginAt!).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jakarta" })}
+                          <span suppressHydrationWarning>{new Date(exam.beginAt!).toLocaleDateString("id-ID", { day: "numeric", month: "short", timeZone: "Asia/Jakarta" })} • {new Date(exam.beginAt!).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jakarta" })}</span>
                         </p>
                       </div>
                     </div>
                   ))}
                 </div>
+
               </div>
             </section>
           )}
@@ -286,6 +289,7 @@ function CommandCenter() {
           <section className="bg-slate-50 dark:bg-slate-900/30 rounded-3xl border border-slate-200/60 dark:border-slate-800/60 p-6 sm:p-8">
             <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">
               Informasi Sistem
+
             </h2>
             <div className="space-y-3 text-sm">
               <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-2">
@@ -293,6 +297,7 @@ function CommandCenter() {
                 <span className="font-semibold text-slate-900 dark:text-slate-300 flex items-center gap-1.5">
                   <div className="h-1.5 w-1.5 rounded-full bg-emerald-500"></div> SQLite Local
                 </span>
+
               </div>
               <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-2">
                 <span className="text-slate-600 dark:text-slate-400 font-medium">Engine</span>
@@ -329,6 +334,7 @@ function StatCard({ icon, label, value, trend }: { icon: React.ReactNode, label:
               {trend}
             </span>
           )}
+
         </div>
       </div>
     </div>

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "../db/prisma";
 import { requireAdminResult } from "../db/auth";
 import type { User, UnitAkademik, Modul, Topik, Soal, Ujian, TokenUjian, SesiUjian, AppConfig } from "@/lib/cbt/types";
+
 import { stringifyJson, toBigInt } from "../db/json";
 
 export const importBackupServer = createServerFn({ method: "POST" })
@@ -10,6 +11,7 @@ export const importBackupServer = createServerFn({ method: "POST" })
 		z.object({
 			users: z.array(z.any()),
 			unitAkademik: z.array(z.any()),
+
 			modul: z.array(z.any()),
 			topik: z.array(z.any()),
 			soal: z.array(z.any()),
@@ -36,6 +38,7 @@ export const importBackupServer = createServerFn({ method: "POST" })
 
 			if (data.unitAkademik.length)
 				await tx.unitAkademik.createMany({ data: data.unitAkademik as UnitAkademik[] });
+
 			if (data.modul.length)
 				await tx.modul.createMany({ data: data.modul as Modul[] });
 			if (data.topik.length)
@@ -46,6 +49,7 @@ export const importBackupServer = createServerFn({ method: "POST" })
 						...item,
 						allowedTopikIds: stringifyJson(item.allowedTopikIds),
 						unitId: item.unitId ?? null,
+
 						mataKuliahIds: stringifyJson(item.mataKuliahIds),
 						detail: item.detail ?? null,
 						createdAt: BigInt(item.createdAt),
@@ -151,6 +155,7 @@ export const resetAllDataServer = createServerFn({ method: "POST" }).handler(
 			await tx.modul.deleteMany();
 			await tx.user.deleteMany();
 			await tx.unitAkademik.deleteMany();
+
 			await tx.appConfig.deleteMany();
 		});
 

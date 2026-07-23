@@ -35,10 +35,11 @@ export const loginServer = createServerFn({ method: "POST" })
 		const user = await prisma.user.findUnique({
 			where: { username: data.username },
 		});
-		if (!user) return { ok: false as const, error: "Username tidak ditemukan" };
+		const invalidCreds = { ok: false as const, error: "Username atau password salah" };
+		if (!user) return invalidCreds;
 		if (!user.aktif) return { ok: false as const, error: "Akun dinonaktifkan" };
 		const ok = await verifyPassword(data.password, user.passwordHash);
-		if (!ok) return { ok: false as const, error: "Password salah" };
+		if (!ok) return invalidCreds;
 		
 		clearRateLimit(ip, "login:ip");
 		clearRateLimit(data.username.toLowerCase(), "login:user");

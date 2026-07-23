@@ -46,13 +46,21 @@ function FilesPage() {
     if (!fileList || fileList.length === 0) return;
     const targetJurusan = selectedFolder !== "all" && selectedFolder !== "global" ? selectedFolder : undefined;
     
+    let successCount = 0;
     for (const f of Array.from(fileList)) {
-      await putFile(f, targetJurusan);
+      try {
+        await putFile(f, targetJurusan);
+        successCount++;
+      } catch (e) {
+        toast.error(`Gagal upload ${f.name}: ${e instanceof Error ? e.message : String(e)}`);
+      }
     }
     
-    const folderName = targetJurusan ? jurusans.find((j) => j.id === targetJurusan)?.nama : "Global";
-    toast.success(`${fileList.length} file berhasil di-upload ke folder ${folderName}`);
-    refresh();
+    if (successCount > 0) {
+      const folderName = targetJurusan ? jurusans.find((j) => j.id === targetJurusan)?.nama : "Global";
+      toast.success(`${successCount} file berhasil di-upload ke folder ${folderName}`);
+      refresh();
+    }
   }
   
   const filteredFiles = files.filter(f => {
@@ -165,8 +173,13 @@ function FilesPage() {
                     className="h-9 w-9 rounded-full shadow-sm scale-75 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-300 ease-spring delay-75 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30"
                     onClick={async () => {
                       if (!confirm(`Hapus file ${f.name} secara permanen?`)) return;
-                      await deleteFile(f.id);
-                      refresh();
+                      try {
+                        await deleteFile(f.id);
+                        toast.success("File berhasil dihapus");
+                        refresh();
+                      } catch (e) {
+                        toast.error(`Gagal menghapus file: ${e instanceof Error ? e.message : String(e)}`);
+                      }
                     }}
                     title="Hapus"
                   >

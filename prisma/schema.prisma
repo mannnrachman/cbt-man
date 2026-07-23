@@ -129,7 +129,9 @@ model Ujian {
   ipRange          String       @default("")
   groupIds         String       @default("[]")
   mataKuliahId     String?
+  mataKuliah       MataKuliah?  @relation(fields: [mataKuliahId], references: [id], onDelete: SetNull)
   semesterId       String?
+  semester         Semester?    @relation(fields: [semesterId], references: [id], onDelete: SetNull)
   topicSets        String       @default("[]")
   showResult       Boolean      @default(true)
   showResultDetail Boolean      @default(false)
@@ -207,7 +209,6 @@ model AuditLog {
 }
 
 
-
 model TahunAkademik {
   id       String     @id
   nama     String
@@ -221,6 +222,7 @@ model Semester {
   tahunAkademikId String
   tahunAkademik   TahunAkademik @relation(fields: [tahunAkademikId], references: [id], onDelete: Cascade)
   mataKuliah      MataKuliah[]
+  ujians          Ujian[]
 }
 
 model MataKuliah {
@@ -232,4 +234,5 @@ model MataKuliah {
   unit       UnitAkademik? @relation(fields: [unitId], references: [id], onDelete: Cascade)
   semesterId String?
   semester   Semester?     @relation(fields: [semesterId], references: [id], onDelete: Cascade)
+  ujians     Ujian[]
 }

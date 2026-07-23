@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { prisma } from "../db/prisma";
@@ -150,6 +151,7 @@ export const mutateSesiServer = createServerFn({ method: "POST" })
 						}));
 					}
 
+
 					let updateData: any = {
 						ujianId: item.ujianId,
 						pesertaId: item.pesertaId,
@@ -160,6 +162,7 @@ export const mutateSesiServer = createServerFn({ method: "POST" })
 						soalIds: stringifyJson(item.soalIds),
 						jawabanOrder: stringifyJson(item.jawabanOrder),
 						jawaban: stringifyJson(sanitizedJawaban),
+
 						pelanggaran: item.pelanggaran,
 						skorTotal: item.skorTotal ?? null,
 						maxSkor: item.maxSkor ?? null,
@@ -169,11 +172,13 @@ export const mutateSesiServer = createServerFn({ method: "POST" })
 					};
 					const createData: any = { ...updateData, id: item.id };
 
+
 					if (caller.role === "mahasiswa") {
 						updateData = {
 							status: item.status,
 							selesaiAt: toBigInt(item.selesaiAt),
 							jawaban: stringifyJson(sanitizedJawaban),
+
 							pelanggaran: item.pelanggaran,
 						};
 						createData.skorTotal = null;

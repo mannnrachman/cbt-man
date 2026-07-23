@@ -24,6 +24,7 @@ const LABEL: Record<NavKey, string> = {
   pengaturan: "Pengaturan Sistem",
   tools: "Backup & Restore",
   panduan: "Panduan Pengguna",
+
 };
 
 export const Route = createFileRoute("/_authenticated/admin/users/roles")({
@@ -78,6 +79,7 @@ function RolesPage() {
         <Link to="/admin/users" className="text-sm text-slate-500 hover:underline">
           ← Pengguna
         </Link>
+
       </div>
       <AdminPageHeader
         title="Hak Akses Role"
@@ -87,6 +89,7 @@ function RolesPage() {
       <Card>
         <CardContent className="space-y-3 p-6">
           <h3 className="font-medium">Menu yang bisa diakses Admin Jurusan</h3>
+
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {NAV_KEYS.filter((k) => k !== "users" && k !== "pengaturan" && k !== "tools").map(
               (k) => (
@@ -94,6 +97,7 @@ function RolesPage() {
                   <Checkbox
                     checked={adminProdiAccess.includes(k)}
                     onCheckedChange={() => toggleNav("admin_prodi", k)}
+
                   />
                   {LABEL[k]}
                 </label>
@@ -127,6 +131,7 @@ function RolesPage() {
           <h3 className="font-medium">Topik yang boleh dikelola Admin Jurusan & Evaluator</h3>
           {managers.length === 0 && (
             <p className="text-sm text-slate-500">Belum ada Admin Jurusan atau Evaluator.</p>
+
           )}
           {managers.map((u) => (
             <div key={u.id} className="rounded border p-3">
@@ -134,6 +139,7 @@ function RolesPage() {
                 {u.namaLengkap}{" "}
                 <span className="text-xs text-slate-500">
                   ({u.role === "admin_prodi" ? "Admin Jurusan" : "Evaluator"})
+
                 </span>
               </div>
               <div className="space-y-2">

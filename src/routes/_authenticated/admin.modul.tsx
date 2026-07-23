@@ -78,7 +78,10 @@ function ModulPage() {
   }
 
   function exportBank(modul: Modul) {
-    const topik = topikRepo.all().filter((t) => t.modulId === modul.id);
+    let topik = topikRepo.all().filter((t) => t.modulId === modul.id);
+    if (!canEdit && allowedSet) {
+      topik = topik.filter((t) => allowedSet.has(t.id));
+    }
     const tIds = new Set(topik.map((t) => t.id));
     const soal = soalRepo.all().filter((s) => tIds.has(s.topikId));
     const bank: Bank = { app: "cbtman-bank", version: 1, modul, topik, soal };
@@ -208,6 +211,7 @@ function ModulPage() {
       </div>
 
       <AdminPageContent className="bg-transparent border-0 p-0 shadow-none">
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {shown.map((m) => {
             const tAll = topikRepo.all().filter((t) => t.modulId === m.id);
@@ -224,11 +228,13 @@ function ModulPage() {
                   </div>
                   <div className="flex-1 min-w-0 space-y-1.5 pt-1">
                     <Link to="/admin/modul/$id/topik" params={{ id: m.id }} className="text-base font-semibold text-slate-900 dark:text-slate-100 hover:text-primary dark:hover:text-primary transition-colors duration-300 ease-spring line-clamp-2 after:absolute after:inset-0">
+
                       {m.nama}
                     </Link>
                     {mkName && (
                       <div className="relative z-10">
                         <span className="px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-[10px] font-bold tracking-widest uppercase text-slate-500">
+
                           {mkName}
                         </span>
                       </div>
@@ -248,6 +254,7 @@ function ModulPage() {
                     </Button>
                     {canEdit && (
                       <Button size="icon" variant="ghost" className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 dark:hover:text-red-400 transition-colors duration-300" onClick={() => remove(m.id)} title="Hapus">
+
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     )}
@@ -258,6 +265,7 @@ function ModulPage() {
           })}
           {shown.length === 0 && (
             <div className="col-span-full p-12 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[20px]">
+
               <div className="flex flex-col items-center justify-center gap-2 text-slate-500">
                 <FileText className="h-8 w-8 text-slate-300" />
                 <p className="text-sm font-medium">Belum ada modul bank soal.</p>

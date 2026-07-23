@@ -13,6 +13,7 @@ export const Route = createFileRoute("/_authenticated/admin/evaluasi/ujian/$id")
       console.error(e);
     }
   },
+
   component: EvaluasiUjianList,
 });
 
@@ -28,6 +29,7 @@ function EvaluasiUjianList() {
 
   const ujian = ujianRepo.byId(id);
   if (!ujian) return <div className="py-20 text-center text-sm font-medium text-slate-500">Ujian tidak ditemukan.</div>;
+
 
   const sesis = sesiRepo.all().filter((s) => s.status === "selesai" && s.ujianId === id);
   const users = usersRepo.all();
@@ -68,6 +70,7 @@ function EvaluasiUjianList() {
         {items.length === 0 ? (
           <div className="py-20 text-center text-sm font-medium text-slate-400 dark:text-slate-500">
             Tidak ada jawaban essay yang perlu dinilai.
+
           </div>
         ) : (
           <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800/60">
@@ -87,6 +90,7 @@ function EvaluasiUjianList() {
                       {u?.namaLengkap || "Peserta Anonim"}
                     </span>
                     <span className="text-xs text-slate-500 mt-0.5 font-mono">
+
                       {u?.username}
                     </span>
                   </div>
@@ -104,6 +108,7 @@ function EvaluasiUjianList() {
                         Selesai
                       </div>
                     )}
+
                   </div>
                 </Link>
               );

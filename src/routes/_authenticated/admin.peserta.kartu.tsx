@@ -15,6 +15,7 @@ function KartuPage() {
   const [unitId, setUnitId] = useState<string>("all");
   const units = unitAkademikRepo.all();
   const peserta = usersRepo.all().filter((u) => u.role === "mahasiswa" && (unitId === "all" || u.unitId === unitId));
+
   const appName = configRepo.get().appName;
 
   return (

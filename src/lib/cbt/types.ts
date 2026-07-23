@@ -30,6 +30,7 @@ export const UnitAkademikSchema = z.object({
 });
 export type UnitAkademik = z.infer<typeof UnitAkademikSchema>;
 
+
 export const TahunAkademikSchema = z.object({
 	id: z.string(),
 	nama: z.string(),
@@ -51,6 +52,7 @@ export const MataKuliahSchema = z.object({
 	sks: z.number().int().default(2),
 	unitId: z.string().optional(),
 	semesterId: z.string().optional(),
+
 });
 export type MataKuliah = z.infer<typeof MataKuliahSchema>;
 
@@ -63,12 +65,14 @@ export const UserSchema = z.object({
 	role: RoleEnum,
 	allowedTopikIds: z.array(z.string()).default([]),
 	unitId: z.string().optional(),
+
 	mataKuliahIds: z.array(z.string()).default([]),
 	detail: z.string().optional(),
 	aktif: z.boolean().default(true),
 	createdAt: z.number(),
 });
 export type User = z.infer<typeof UserSchema>;
+
 
 // ---------------- Bank Soal ----------------
 export const ModulSchema = z.object({
@@ -206,6 +210,7 @@ export const NAV_KEYS = [
 	"pengaturan",
 	"tools",
 	"panduan",
+
 ] as const;
 export type NavKey = (typeof NAV_KEYS)[number];
 

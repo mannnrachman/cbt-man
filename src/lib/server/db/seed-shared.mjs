@@ -132,16 +132,16 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
   const ts = now ?? Date.now();
   const schoolName = "Universitas Teknologi Nusantara";
 
-  const groups = [
-    { id: uid("g_"), nama: "Teknik Informatika", keterangan: `${schoolName} · Program Studi Teknik Informatika` },
-    { id: uid("g_"), nama: "Sistem Informasi", keterangan: `${schoolName} · Program Studi Sistem Informasi` },
-    { id: uid("g_"), nama: "Ilmu Komputer", keterangan: `${schoolName} · Program Studi Ilmu Komputer` },
-    { id: uid("g_"), nama: "Bisnis Digital", keterangan: `${schoolName} · Program Studi Bisnis Digital` },
+  const unitAkademik = [
+    { id: uid("u_"), nama: "Teknik Informatika", tipe: "prodi", parentId: null },
+    { id: uid("u_"), nama: "Sistem Informasi", tipe: "prodi", parentId: null },
+    { id: uid("u_"), nama: "Ilmu Komputer", tipe: "prodi", parentId: null },
+    { id: uid("u_"), nama: "Bisnis Digital", tipe: "prodi", parentId: null },
   ];
 
   const adminPassword = process.env.ADMIN_PASSWORD || (process.env.NODE_ENV === "production" ? crypto.randomBytes(8).toString("hex") : "admin123");
   if (process.env.NODE_ENV === "production" && !process.env.ADMIN_PASSWORD) {
-    console.warn(`[WARNING] No ADMIN_PASSWORD provided in production! Generated random password for super_admin: ${adminPassword}`);
+    console.warn(`[WARNING] No ADMIN_PASSWORD provided in production! A random password was generated.`);
   }
 
   const admin = {
@@ -158,7 +158,7 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
 
   if (process.env.NODE_ENV === "production") {
     return {
-      groups: [],
+      unitAkademik: [],
       users: [admin],
       modul: [],
       topik: [],
@@ -209,14 +209,14 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
   ];
 
   const pesertaSeed = [
-    ["alif.mahendra", "Alif Mahendra Putra", groups[0].id],
-    ["nayla.putri", "Nayla Putri Anindya", groups[0].id],
-    ["fajar.ramadhan", "Fajar Ramadhan", groups[1].id],
-    ["salma.azzahra", "Salma Azzahra", groups[1].id],
-    ["rizky.pratama", "Rizky Pratama", groups[2].id],
-    ["intan.permata", "Intan Permata Sari", groups[2].id],
-    ["bagas.saputra", "Bagas Saputra", groups[3].id],
-    ["citra.lestari", "Citra Lestari", groups[3].id],
+    ["alif.mahendra", "Alif Mahendra Putra", unitAkademik[0].id],
+    ["nayla.putri", "Nayla Putri Anindya", unitAkademik[0].id],
+    ["fajar.ramadhan", "Fajar Ramadhan", unitAkademik[1].id],
+    ["salma.azzahra", "Salma Azzahra", unitAkademik[1].id],
+    ["rizky.pratama", "Rizky Pratama", unitAkademik[2].id],
+    ["intan.permata", "Intan Permata Sari", unitAkademik[2].id],
+    ["bagas.saputra", "Bagas Saputra", unitAkademik[3].id],
+    ["citra.lestari", "Citra Lestari", unitAkademik[3].id],
   ];
 
   const modul = [
@@ -248,7 +248,7 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
       createdAt: ts + users.length,
     });
   }
-  for (const [username, namaLengkap] of pesertaSeed) {
+  for (const [username, namaLengkap, unitId] of pesertaSeed) {
     users.push({
       id: uid("u_"),
       username,
@@ -256,6 +256,7 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
       namaLengkap,
       role: "mahasiswa",
       allowedTopikIds: [],
+      unitId,
       detail: `${schoolName} · Mahasiswa aktif`,
       aktif: true,
       createdAt: ts + users.length,
@@ -323,7 +324,7 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
       endAt: ts + parseDurationMinutes(720),
       tokenAktif: true,
       ipRange: "",
-      groupIds: [groups[0].id, groups[1].id],
+      groupIds: [unitAkademik[0].id, unitAkademik[1].id],
       topicSets: [
         { id: uid("ts_"), topikId: topik[0].id, jumlah: 3, jumlahOpsi: 4, acakSoal: true, acakJawaban: true },
         { id: uid("ts_"), topikId: topik[1].id, jumlah: 3, jumlahOpsi: 4, acakSoal: true, acakJawaban: true },
@@ -348,7 +349,7 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
       endAt: ts + parseDurationMinutes(1440),
       tokenAktif: false,
       ipRange: "",
-      groupIds: [groups[1].id, groups[2].id],
+      groupIds: [unitAkademik[1].id, unitAkademik[2].id],
       topicSets: [
         { id: uid("ts_"), topikId: topik[2].id, jumlah: 3, jumlahOpsi: 4, acakSoal: true, acakJawaban: true },
         { id: uid("ts_"), topikId: topik[3].id, jumlah: 2, jumlahOpsi: 4, acakSoal: true, acakJawaban: true },
@@ -373,7 +374,7 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
       endAt: ts + parseDurationMinutes(360),
       tokenAktif: true,
       ipRange: "",
-      groupIds: [groups[2].id, groups[3].id],
+      groupIds: [unitAkademik[2].id, unitAkademik[3].id],
       topicSets: [
         { id: uid("ts_"), topikId: topik[4].id, jumlah: 2, jumlahOpsi: 4, acakSoal: true, acakJawaban: true },
         { id: uid("ts_"), topikId: topik[5].id, jumlah: 2, jumlahOpsi: 4, acakSoal: true, acakJawaban: true },
@@ -401,7 +402,7 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
       endAt: ts + parseDurationMinutes(1440 + (i * 10)),
       tokenAktif: true,
       ipRange: "",
-      groupIds: [groups[0].id, groups[1].id, groups[2].id, groups[3].id],
+      groupIds: [unitAkademik[0].id, unitAkademik[1].id, unitAkademik[2].id, unitAkademik[3].id],
       topicSets: [
         { id: uid("ts_"), topikId: topik[0].id, jumlah: 1, jumlahOpsi: 4, acakSoal: true, acakJawaban: true },
       ],
@@ -576,7 +577,7 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
     roleAccess: DEFAULT_ROLE_ACCESS,
   };
 
-  return { groups, users, modul, topik, soal, ujian, token, sesi, config };
+  return { unitAkademik, users, modul, topik, soal, ujian, token, sesi, config };
 }
 
 export async function seedDatabase({ prisma, dataset, stringifyJson }) {
@@ -589,6 +590,8 @@ export async function seedDatabase({ prisma, dataset, stringifyJson }) {
   await prisma.modul.deleteMany();
   await prisma.user.deleteMany();
   await prisma.appConfig.deleteMany();
+  await prisma.unitAkademik.deleteMany();
+  await prisma.unitAkademik.createMany({ data: dataset.unitAkademik });
   // ponytail: Seed script isn't transactional because it's a one-time setup. If it fails, wipe DB and retry. Upgrade path: Use prisma.$transaction for production data migrations.
   await prisma.user.createMany({
     data: dataset.users.map((item) => ({

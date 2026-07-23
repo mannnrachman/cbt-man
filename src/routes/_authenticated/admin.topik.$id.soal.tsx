@@ -159,6 +159,7 @@ function SoalPage() {
                 </Button>
                 <div className="w-px h-5 bg-slate-200 dark:bg-zinc-700 mx-1"></div>
                 <Button size="sm" variant="ghost" className="h-8 px-3 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/50 font-medium" onClick={() => remove(s.id)}>
+
                   <Trash2 className="h-3.5 w-3.5 sm:mr-2" /> <span className="hidden sm:inline">Hapus</span>
                 </Button>
               </div>

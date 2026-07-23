@@ -63,6 +63,8 @@ function UnitAkademikExplorer() {
   const remove = async (id: string) => {
     if (confirm("Hapus unit ini? Unit di bawahnya mungkin akan kehilangan induk.")) {
       await unitAkademikRepo.remove(id);
+      setSearch((prev) => prev); // Hack to force re-render if search doesn't change, but wait... better to use a dedicated tick
+      setExpanded(new Set(expanded)); // This creates a new Set instance, forcing a re-render
     }
   };
 
@@ -230,3 +232,4 @@ function UnitAkademikExplorer() {
     </div>
   );
 }
+

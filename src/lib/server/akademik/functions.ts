@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { prisma } from "../db/prisma";
 import { requireCaller, seedIfNeeded } from "../db/auth";
 import { writeAuditLog } from "../db/audit";
 import type { UnitAkademik, TahunAkademik, Semester, MataKuliah } from "@/lib/cbt/types";
+
 
 function audit(caller: any, entity: string, action: string, payload: any) {
 	if (caller) {
@@ -45,6 +47,7 @@ export const mutateUnitAkademikServer = createServerFn({ method: "POST" })
 				await prisma.unitAkademik.delete({ where: { id } });
 			}
 			audit(caller, "unitAkademik", action, payload);
+
 			return { ok: true as const };
 		} catch (e: any) {
 			return { ok: false as const, error: e.message };

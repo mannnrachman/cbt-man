@@ -164,15 +164,17 @@ export function LoginModal({ isOpen, onClose, redirectUrl }: LoginModalProps) {
               )}
             </Button>
             
-            <div className="mt-4 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 p-4 text-xs text-slate-500 dark:text-slate-400">
-              <p className="font-bold text-slate-700 dark:text-slate-300 mb-1.5">Akses Demo:</p>
-              <ul className="space-y-1.5 font-medium">
-                <li className="flex justify-between items-center bg-white dark:bg-black/20 px-2 py-1.5 rounded-md border border-slate-100 dark:border-white/5">
-                  <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Peserta (Demo)</span>
-                  <code className="font-mono text-[11px] bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-green-700 dark:text-green-300">alif.mahendra / peserta123</code>
-                </li>
-              </ul>
-            </div>
+            {import.meta.env.DEV && (
+              <div className="mt-4 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 p-4 text-xs text-slate-500 dark:text-slate-400">
+                <p className="font-bold text-slate-700 dark:text-slate-300 mb-1.5">Akses Demo:</p>
+                <ul className="space-y-1.5 font-medium">
+                  <li className="flex justify-between items-center bg-white dark:bg-black/20 px-2 py-1.5 rounded-md border border-slate-100 dark:border-white/5">
+                    <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Peserta (Demo)</span>
+                    <code className="font-mono text-[11px] bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-green-700 dark:text-green-300">alif.mahendra / peserta123</code>
+                  </li>
+                </ul>
+              </div>
+            )}
           </form>
         </div>
       </DialogContent>

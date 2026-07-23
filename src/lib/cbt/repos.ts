@@ -35,8 +35,7 @@ export type PublicBootConfig = Awaited<
 type MutationResult = { ok: boolean; error?: string };
 type EntityName =
 	| "users"
-
-	| "unit_akademik"
+	| "unitAkademik"
 	| "tahunAkademik"
 	| "semester"
 	| "mataKuliah"
@@ -61,7 +60,6 @@ const DEFAULT_OPERATOR_NAV: NavKey[] = [
 
 const cache = {
 	users: [] as User[],
-
 	unitAkademik: [] as UnitAkademik[],
 	tahunAkademik: [] as TahunAkademik[],
 	semester: [] as Semester[],
@@ -100,7 +98,6 @@ export function invalidateReposCache(): void {
 
 function applySnapshot(snapshot: Snapshot) {
 	cache.users = snapshot.users;
-
 	cache.unitAkademik = snapshot.unitAkademik;
 	cache.tahunAkademik = snapshot.tahunAkademik;
 	cache.semester = snapshot.semester;
@@ -186,7 +183,7 @@ function runEntityMutation(
 		case "ujian": mutationPromise = mutateUjianServer({ data: { action, payload } }); break;
 		case "token": mutationPromise = mutateTokenServer({ data: { action, payload } }); break;
 		case "sesi": mutationPromise = mutateSesiServer({ data: { action, payload } }); break;
-		case "unit_akademik": mutationPromise = mutateUnitAkademikServer({ data: { action: action as any, payload } }); break;
+		case "unitAkademik": mutationPromise = mutateUnitAkademikServer({ data: { action: action as any, payload } }); break;
 		case "tahunAkademik": mutationPromise = mutateTahunAkademikServer({ data: { action: action as any, payload } }); break;
 		case "semester": mutationPromise = mutateSemesterServer({ data: { action: action as any, payload } }); break;
 		case "mataKuliah": mutationPromise = mutateMataKuliahServer({ data: { action: action as any, payload } }); break;
@@ -261,9 +258,8 @@ export const usersRepo = createRepo(
 	},
 );
 
-
 export const unitAkademikRepo = createRepo(
-	"unit_akademik",
+	"unitAkademik",
 	() => cache.unitAkademik,
 	(items) => {
 		cache.unitAkademik = items;

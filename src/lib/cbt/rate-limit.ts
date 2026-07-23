@@ -7,18 +7,35 @@ import { getRequestHeaders } from "@tanstack/start-server-core";
 
 const MAX_ATTEMPTS = 15;
 const WINDOW_MS = 10 * 60 * 1000; // 10 minutes
+const MAX_KEYS = 5000; // Cap map size to prevent memory leaks
 
-type Bucket = { count: number; resetAt: number };
+type Bucket = number[]; // Array of timestamps
 
 const buckets = new Map<string, Bucket>();
 
-function getBucket(key: string): Bucket {
-	const now = Date.now();
+function getWindow(key: string, now: number): Bucket {
 	let bucket = buckets.get(key);
-	if (!bucket || bucket.resetAt < now) {
-		bucket = { count: 0, resetAt: now + WINDOW_MS };
-		buckets.set(key, bucket);
+	if (bucket) {
+		// LRU behavior: remove and re-add to push to end of map iteration order
+		buckets.delete(key);
+	} else {
+		bucket = [];
 	}
+	
+	// Remove old timestamps outside the sliding window
+	const cutoff = now - WINDOW_MS;
+	bucket = bucket.filter((t) => t > cutoff);
+	
+	buckets.set(key, bucket);
+	
+	// Enforce max size (remove oldest / least recently used)
+	if (buckets.size > MAX_KEYS) {
+		const firstKey = buckets.keys().next().value;
+		if (firstKey !== undefined) {
+			buckets.delete(firstKey);
+		}
+	}
+	
 	return bucket;
 }
 
@@ -31,11 +48,12 @@ export function checkRateLimit(
 	retryAfter?: number;
 } {
 	const key = `${prefix}:${identifier}`;
-	const bucket = getBucket(key);
 	const now = Date.now();
+	const bucket = getWindow(key, now);
 
-	if (bucket.count >= MAX_ATTEMPTS) {
-		const retryAfter = Math.ceil((bucket.resetAt - now) / 1000);
+	if (bucket.length >= MAX_ATTEMPTS) {
+		const oldest = bucket[0];
+		const retryAfter = Math.max(1, Math.ceil((oldest + WINDOW_MS - now) / 1000));
 		return {
 			ok: false,
 			error: `Terlalu banyak percobaan. Coba lagi dalam ${retryAfter} detik.`,
@@ -43,7 +61,7 @@ export function checkRateLimit(
 		};
 	}
 
-	bucket.count++;
+	bucket.push(now);
 	return { ok: true };
 }
 
@@ -58,17 +76,22 @@ export function getRateLimitStatus(
 ): { count: number; resetAt: number } | null {
 	const key = `${prefix}:${identifier}`;
 	const bucket = buckets.get(key);
-	if (!bucket) return null;
-	return { count: bucket.count, resetAt: bucket.resetAt };
+	if (!bucket || bucket.length === 0) return null;
+	const oldest = bucket[0];
+	return { count: bucket.length, resetAt: oldest + WINDOW_MS };
 }
 
 // Cleanup old buckets periodically
 setInterval(
 	() => {
 		const now = Date.now();
+		const cutoff = now - WINDOW_MS;
 		for (const [key, bucket] of buckets.entries()) {
-			if (bucket.resetAt < now) {
+			const valid = bucket.filter((t) => t > cutoff);
+			if (valid.length === 0) {
 				buckets.delete(key);
+			} else {
+				buckets.set(key, valid);
 			}
 		}
 	},

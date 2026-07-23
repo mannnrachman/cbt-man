@@ -13,10 +13,11 @@ import { Plus, Users, BarChart3, KeyRound, PlayCircle, Clock, CheckCircle2, Sett
 import { toast } from "sonner";
 import { visibleUjians } from "@/lib/cbt/access";
 import { Button } from "@/components/ui/button";
+
 import { AdminPage, AdminPageHeader } from "@/components/cbt/AdminPage";
 
 export const Route = createFileRoute("/_authenticated/admin/ujian")({
-  component: UjianRoute,
+	component: UjianRoute,
 });
 
 function UjianRoute() {
@@ -214,6 +215,7 @@ function UjianList() {
           </div>
         )}
       </div>
+
 
     </AdminPage>
   );

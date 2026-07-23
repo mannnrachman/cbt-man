@@ -82,6 +82,14 @@ export const DEFAULT_OPERATOR_ROLE_ACCESS = [
 	"leaderboard",
 ] as const;
 
+export const DEFAULT_EVALUATOR_ROLE_ACCESS = [
+	"dashboard",
+	"hasil",
+	"evaluasi",
+	"laporan",
+	"leaderboard",
+] as const;
+
 export function mapUser(row: UserRow): User {
 	return {
 		id: row.id,
@@ -195,7 +203,8 @@ export function buildConfig(config: SnapshotRows["config"]): AppConfig {
 		mobileLock: config?.mobileLock ?? false,
 		multiDevice: config?.multiDevice ?? false,
 		roleAccess: parseJson(config?.roleAccess, {
-			operator: [...DEFAULT_OPERATOR_ROLE_ACCESS],
+			admin_prodi: [...DEFAULT_OPERATOR_ROLE_ACCESS],
+			evaluator: [...DEFAULT_EVALUATOR_ROLE_ACCESS],
 		}),
 	};
 }

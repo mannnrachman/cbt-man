@@ -17,6 +17,7 @@ import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { RichView } from "@/components/cbt/RichEditor";
 
+
 export const Route = createFileRoute("/_authenticated/peserta/")({
 	component: PesertaDashboard,
 });
@@ -175,11 +176,13 @@ function PesertaDashboard() {
 														<div>
 															<p className="font-bold text-slate-800 dark:text-slate-100">{u.nama}</p>
 												{u.deskripsi ? <RichView html={u.deskripsi} className="text-xs text-slate-500" /> : null}
+
 															{/* Timestamps */}
 															{(availability === "upcoming" || availability === "ended") && (
 																<div className="flex items-center gap-1.5 pt-0.5 text-xs font-semibold">
 																	{availability === "upcoming" ? (
-																		<span className="text-amber-600 dark:text-amber-500 flex items-center gap-1">
+																		<span suppressHydrationWarning className="text-amber-600 dark:text-amber-500 flex items-center gap-1">
+
 																			<CalendarClock className="h-3 w-3" />
 																			Dibuka: {u.beginAt ? new Date(Number(u.beginAt)).toLocaleString("id-ID", { dateStyle: "long", timeStyle: "short" }) : "Menunggu jadwal"}
 																		</span>

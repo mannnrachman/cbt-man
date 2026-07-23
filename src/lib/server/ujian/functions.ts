@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { prisma } from "../db/prisma";
@@ -383,6 +384,7 @@ export const fetchUjianByIdServer = createServerFn({ method: "POST" })
 			if (
 				groupIds.length > 0 &&
 				(!caller.unitId || !groupIds.includes(caller.unitId))
+
 			) {
 				return { ok: false as const, error: "Forbidden" };
 			}

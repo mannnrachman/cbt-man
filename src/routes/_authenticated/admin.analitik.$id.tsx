@@ -157,7 +157,11 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
                         </span>
                       </td>
                       <td className="p-4 text-muted-foreground text-center border-r border-slate-200 dark:border-slate-800">
-                        {s.mulaiAt ? new Date(s.mulaiAt).toLocaleString("id-ID", { timeZone: "Asia/Jakarta" }) : "-"}
+                        {s.mulaiAt ? (
+                          <span suppressHydrationWarning>
+                            {new Date(s.mulaiAt).toLocaleString("id-ID", { timeZone: "Asia/Jakarta" })}
+                          </span>
+                        ) : "-"}
                       </td>
                       <td className="p-4 text-center border-r border-slate-200 dark:border-slate-800">
                         {s.status === "selesai" ? (
@@ -401,7 +405,6 @@ function ExamReportTab({ ujian, sesis }: { ujian: Ujian, sesis: SesiUjian[] }) {
       { name: "Grid Jawaban", aoa: aoaGrid, merges: merges as any }
     ]);
   }
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">

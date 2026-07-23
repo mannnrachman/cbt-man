@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { Building2, GraduationCap, Network, Calendar, Clock, BookOpen, ChevronRight } from "lucide-react";
 import { AdminPageHeader } from "@/components/cbt/AdminPage";
 
+
 export const Route = createFileRoute("/_authenticated/admin/akademik")({
   component: AkademikLayout,
 });
@@ -12,6 +13,7 @@ const TREE_MENU = [
     section: "Struktur Institusi",
     items: [
       { label: "Fakultas & Jurusan", to: "/admin/akademik", icon: Network, indent: 0 },
+
     ]
   },
   {
@@ -103,6 +105,7 @@ function AkademikLayout() {
             <Outlet />
           </div>
         </main>
+
       </div>
     </div>
   );

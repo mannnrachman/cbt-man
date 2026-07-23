@@ -6,6 +6,7 @@ import { hashPassword } from "@/lib/cbt/hash";
 import { upsertUserServer } from "@/lib/server/users/functions";
 import { uid } from "@/lib/cbt/storage";
 import type { UnitAkademik, User } from "@/lib/cbt/types";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { AdminPage, AdminPageHeader, AdminPageContent } from "@/components/cbt/AdminPage";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ import { Pencil, Trash2, Plus, Printer, Upload, Users as UsersIcon } from "lucid
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/peserta/")({
+
   component: PesertaPage,
 });
 
@@ -40,6 +42,7 @@ function PesertaPage() {
 
   const shown = peserta.filter((p) =>
     (filterUnit === "all" || p.unitId === filterUnit) &&
+
     (query === "" || p.namaLengkap.toLowerCase().includes(query.toLowerCase()) || p.username.toLowerCase().includes(query.toLowerCase())),
   );
 
@@ -49,6 +52,7 @@ function PesertaPage() {
     const sheet = wb.Sheets[wb.SheetNames[0]];
     const rows: Record<string, unknown>[] = XLSX.utils.sheet_to_json(sheet, { defval: "" });
     let added = 0;
+
     for (const r of rows) {
       const username = String(r.username ?? r.Username ?? "").trim();
       const nama = String(r.nama ?? r.Nama ?? r.namaLengkap ?? "").trim();
@@ -71,6 +75,7 @@ function PesertaPage() {
     }
     toast.success(`${added} peserta diimport`);
     refresh();
+
   }
 
   function downloadTemplate() {
@@ -84,11 +89,13 @@ function PesertaPage() {
 
   return (
         <AdminPage>
+
       <AdminPageHeader
         title="Akun Peserta"
         description="Kelola data mahasiswa, grup kelas, dan import akun dari Excel."
         action={
           <>
+
             <input id="file-upload" type="file" accept=".xlsx,.xls" hidden onChange={(e) => {
               const f = e.target.files?.[0]; if (f) importExcel(f); e.target.value = "";
             }} />
@@ -99,6 +106,7 @@ function PesertaPage() {
             <Link to="/admin/peserta/kartu">
               <Button variant="outline" size="sm" className="h-9">
                 <UsersIcon className="mr-2 h-4 w-4" /> Unit Akademik
+
               </Button>
             </Link>
             <Link to="/admin/peserta/kartu">
@@ -110,6 +118,7 @@ function PesertaPage() {
               <Plus className="mr-2 h-4 w-4" /> Tambah Akun
             </Button>
           </>
+
         }
       />
 
@@ -128,6 +137,7 @@ function PesertaPage() {
           <SelectContent>
             <SelectItem value="all">Semua Unit</SelectItem>
             {units.map((g) => <SelectItem key={g.id} value={g.id}>{g.nama}</SelectItem>)}
+
           </SelectContent>
         </Select>
       </div>
@@ -142,6 +152,7 @@ function PesertaPage() {
                 <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left">Nama Lengkap</th>
                 <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Grup / Kelas</th>
                 <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Status</th>
+
                 <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Aksi</th>
               </tr>
             </thead>
@@ -156,6 +167,7 @@ function PesertaPage() {
                     </span>
                   </td>
                   <td className="p-4 text-center">
+
                     {p.aktif ? (
                       <span className="px-2 py-0.5 rounded text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">Aktif</span>
                     ) : (
@@ -170,6 +182,7 @@ function PesertaPage() {
                       if (confirm("Hapus peserta ini?")) {
                         usersRepo.remove(p.id);
                         refresh();
+
                       }
                     }}>
                       <Trash2 className="h-4 w-4" />
@@ -187,6 +200,7 @@ function PesertaPage() {
         </div>
       </AdminPageContent>
 <PesertaDialog open={open} onOpenChange={setOpen} editing={editing} units={units} onSaved={refresh} />
+
     </AdminPage>
   );
 }
@@ -196,6 +210,7 @@ function PesertaDialog({
   onOpenChange,
   editing,
   units,
+
   onSaved,
 }: {
   open: boolean;
@@ -203,11 +218,13 @@ function PesertaDialog({
   editing: User | null;
   units: UnitAkademik[];
   onSaved: () => void;
+
 }) {
   const [form, setForm] = useState({
     username: "",
     namaLengkap: "",
     unitId: "",
+
     aktif: true,
     password: "",
   });
@@ -218,6 +235,7 @@ function PesertaDialog({
       username: editing?.username ?? "",
       namaLengkap: editing?.namaLengkap ?? "",
       unitId: editing?.unitId ?? "",
+
       aktif: editing?.aktif ?? true,
       password: "",
     });
@@ -244,6 +262,7 @@ function PesertaDialog({
       },
     });
 
+
     if (!res.ok) {
       toast.error(res.error ?? "Gagal menyimpan peserta");
       return;
@@ -252,6 +271,7 @@ function PesertaDialog({
     usersRepo.upsert(res.user);
     toast.success("Disimpan");
     onSaved();
+
     onOpenChange(false);
   }
 
@@ -282,6 +302,7 @@ function PesertaDialog({
               <SelectContent>
                 <SelectItem value="">-- Tidak ada --</SelectItem>
                 {units.map((g) => (<SelectItem key={g.id} value={g.id}>
+
                     {g.nama}
                   </SelectItem>
                 ))}

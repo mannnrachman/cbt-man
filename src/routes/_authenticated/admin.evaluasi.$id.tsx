@@ -7,12 +7,14 @@ import { RichView } from "@/components/cbt/RichEditor";
 import { toast } from "sonner";
 import { CheckCircle2, AlertTriangle, Save } from "lucide-react";
 
+
 export const Route = createFileRoute("/_authenticated/admin/evaluasi/$id")({
   loader: async () => {
     try {
       await hydrateRepos();
     } catch {
       // Fallback
+
     }
   },
   component: EvaluasiSesi,
@@ -30,6 +32,7 @@ function EvaluasiSesi() {
   if (!ujian) return <div className="py-20 text-center text-sm font-bold text-slate-500">Ujian tidak ditemukan</div>;
   
   const peserta = usersRepo.byId(sesi.pesertaId);
+
   const items = sesi.jawaban
     .map((j, idx) => ({ j, idx, soal: soalRepo.byId(j.soalId) }))
     .filter((x) => x.soal?.tipe === "essay" || x.j.jawabanEssay.trim().length > 0);
@@ -195,6 +198,7 @@ function EvaluasiSesi() {
             Simpan Nilai
           </button>
         </div>
+
       </div>
     </div>
   );

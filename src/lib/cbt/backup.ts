@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Backup / restore snapshot CBT berbasis database server.
 import { z } from "zod";
 import { toast } from "sonner";
@@ -89,7 +90,25 @@ export async function downloadBackup(): Promise<void> {
   }
 }
 
-export async function importBackup(raw: unknown): Promise<Backup> {
+export async function importBackup(raw: any): Promise<Backup> {
+  if (raw && typeof raw === "object") {
+    if ("groups" in raw && Array.isArray(raw.groups)) {
+      raw.unitAkademik = raw.groups.map((g: any) => ({
+        id: g.id,
+        nama: g.nama,
+        tipe: "prodi",
+        parentId: null,
+      }));
+      delete raw.groups;
+    }
+    if ("users" in raw && Array.isArray(raw.users)) {
+      raw.users = raw.users.map((u: any) => ({
+        ...u,
+        unitId: u.unitId ?? u.groupId ?? u.prodiId ?? null,
+      }));
+    }
+  }
+
   const data = BackupSchema.parse(raw);
   await importBackupServer({
     data: {

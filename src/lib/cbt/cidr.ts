@@ -17,8 +17,8 @@ export function cidrToRange(
 	cidr: string,
 ): { start: number; end: number } | null {
 	const [ip, prefixStr] = cidr.split("/");
-	if (!ip || !prefixStr) return null;
-	const prefix = parseInt(prefixStr, 10);
+	if (!ip) return null;
+	const prefix = prefixStr ? parseInt(prefixStr, 10) : 32;
 	if (isNaN(prefix) || prefix < 0 || prefix > 32) return null;
 	const base = ipToNumber(ip);
 	if (isNaN(base)) return null;

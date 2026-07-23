@@ -43,6 +43,7 @@ export const getTodaysExamsServer = createServerFn({ method: "GET" }).handler(
 		
 		const groupNames = await prisma.unitAkademik.findMany({ select: { id: true, nama: true } });
 		const groupsMap = Object.fromEntries(groupNames.map((g: any) => [g.id, g.nama]));
+
 		
 		const serverTime = Date.now();
 

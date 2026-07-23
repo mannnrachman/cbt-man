@@ -1,3 +1,4 @@
+
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { sesiRepo, mataKuliahRepo, semesterRepo, usersRepo, ujianRepo } from "@/lib/cbt/repos";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,9 +7,11 @@ import { AdminPage, AdminPageHeader } from "@/components/cbt/AdminPage";
 import { visibleUjians } from "@/lib/cbt/access";
 import { BookOpen, BarChart3, ChevronRight, Activity } from "lucide-react";
 
+
 export const Route = createFileRoute("/_authenticated/admin/analitik/")({
   component: AnalitikIndex,
 });
+
 
 export function AnalitikIndex() {
   const user = useAuthStore((s) => s.user);
@@ -69,6 +72,7 @@ export function AnalitikIndex() {
           </div>
         ) : (
           <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800/60">
+
             {ujians.map((u) => {
               const sesiLengkap = semuaSesi.filter((s) => s.ujianId === u.id && s.status === "selesai").length;
               const mk = u.mataKuliahId ? mataKuliahRepo.byId(u.mataKuliahId) : null;
@@ -142,6 +146,7 @@ export function AnalitikIndex() {
             })}
           </div>
         )}
+
       </div>
     </AdminPage>
   );

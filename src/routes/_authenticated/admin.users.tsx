@@ -1,7 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { usersRepo, unitAkademikRepo } from "@/lib/cbt/repos";
 import { revokeUserSessionsServer, upsertUserServer } from "@/lib/server/users/functions";
+
 import { uid } from "@/lib/cbt/storage";
 import type { Role, User } from "@/lib/cbt/types";
 import { Card, CardContent } from "@/components/ui/card";
@@ -32,6 +33,7 @@ export const Route = createFileRoute("/_authenticated/admin/users")({
 
 function UsersPage() {
   const [users, setUsers] = useState<User[]>(usersRepo.all().filter((u) => u.role !== "mahasiswa"));
+
   const [editing, setEditing] = useState<User | null>(null);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -40,6 +42,7 @@ function UsersPage() {
   function refresh() {
     setUsers(usersRepo.all().filter((u) => u.role !== "mahasiswa"));
   }
+
 
   const shown = users.filter((u) => 
     (filterRole === "all" || u.role === filterRole) &&
@@ -53,6 +56,7 @@ function UsersPage() {
         description="Kelola akses akun admin, admin jurusan, dan evaluator."
         action={
           <Button onClick={() => { setEditing(null); setOpen(true); }} size="sm" className="h-9">
+
             <Plus className="mr-2 h-4 w-4" /> Tambah Akun
           </Button>
         }
@@ -74,6 +78,7 @@ function UsersPage() {
             <SelectItem value="all">Semua Peran</SelectItem>
             <SelectItem value="super_admin">Super Admin</SelectItem>
             <SelectItem value="admin_prodi">Admin Jurusan</SelectItem>
+
             <SelectItem value="evaluator">Evaluator</SelectItem>
           </SelectContent>
         </Select>
@@ -81,6 +86,7 @@ function UsersPage() {
 
       {/* List Section */}
             <AdminPageContent className="p-0">
+
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-semibold">
@@ -89,6 +95,7 @@ function UsersPage() {
                 <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left">Nama Lengkap</th>
                 <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Peran</th>
                 <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Status</th>
+
                 <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Aksi</th>
               </tr>
             </thead>
@@ -117,11 +124,13 @@ function UsersPage() {
                       if (confirm("Hapus pengguna ini?")) {
                         usersRepo.remove(u.id);
                         refresh();
+
                       }
                     }}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                     <Button variant="ghost" size="sm" className="h-8 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950" onClick={async () => {
+
                       if (!confirm("Hentikan semua sesi aktif pengguna ini? (Force logout)")) return;
                       try {
                         const res = await revokeUserSessionsServer({ data: { userId: u.id } });
@@ -147,6 +156,7 @@ function UsersPage() {
       </AdminPageContent>
 
       <UserDialog open={open} onOpenChange={setOpen} editing={editing} onSaved={refresh} />
+
     </AdminPage>
   );
 }
@@ -160,13 +170,14 @@ function UserDialog({
   open: boolean;
   onOpenChange: (v: boolean) => void;
   editing: User | null;
-  onSaved: () => void;
+  onSaved: (user: User) => void;
 }) {
   const [form, setForm] = useState({
     username: "",
     namaLengkap: "",
     role: "admin_prodi" as Role,
     unitId: "",
+
     aktif: true,
     password: "",
   });
@@ -177,7 +188,8 @@ function UserDialog({
       username: editing?.username ?? "",
       namaLengkap: editing?.namaLengkap ?? "",
       role: editing?.role ?? "admin_prodi",
-      unitId: editing?.unitId ?? "",
+      unitId: editing?.unitId ?? "none",
+
       aktif: editing?.aktif ?? true,
       password: "",
     });
@@ -197,21 +209,21 @@ function UserDialog({
         role: form.role,
         aktif: form.aktif,
         allowedTopikIds: editing?.allowedTopikIds ?? [],
-        unitId: form.unitId || undefined,
+        unitId: form.unitId === "none" || !form.unitId ? undefined : form.unitId,
         detail: editing?.detail,
         createdAt: editing?.createdAt ?? Date.now(),
         newPassword: form.password.trim() || undefined,
       },
     });
 
+
     if (!res.ok) {
       toast.error(res.error ?? "Gagal menyimpan pengguna");
       return;
     }
 
-    usersRepo.upsert(res.user);
     toast.success(editing ? "Pengguna diperbarui" : "Pengguna ditambahkan");
-    onSaved();
+    onSaved(res.user);
     onOpenChange(false);
   }
 
@@ -242,6 +254,7 @@ function UserDialog({
               <SelectContent>
                 <SelectItem value="super_admin">Super Admin</SelectItem>
                 <SelectItem value="admin_prodi">Admin Jurusan</SelectItem>
+
                 <SelectItem value="evaluator">Evaluator</SelectItem>
               </SelectContent>
             </Select>
@@ -256,6 +269,7 @@ function UserDialog({
                 <SelectContent>
                   <SelectItem value="none">(Tidak Ada Unit)</SelectItem>
                   {unitAkademikRepo.all().map((p) => (
+
                     <SelectItem key={p.id} value={p.id}>{p.nama}</SelectItem>
                   ))}
                 </SelectContent>
