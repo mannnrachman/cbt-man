@@ -6,6 +6,7 @@ export function ipToNumber(ip: string): number {
 	if (parts.length !== 4) return NaN;
 	let num = 0;
 	for (let i = 0; i < 4; i++) {
+		if (!/^\d+$/.test(parts[i])) return NaN;
 		const octet = parseInt(parts[i], 10);
 		if (isNaN(octet) || octet < 0 || octet > 255) return NaN;
 		num = (num << 8) + octet;
@@ -16,9 +17,16 @@ export function ipToNumber(ip: string): number {
 export function cidrToRange(
 	cidr: string,
 ): { start: number; end: number } | null {
-	const [ip, prefixStr] = cidr.split("/");
+	const parts = cidr.split("/");
+	if (parts.length > 2) return null;
+	const ip = parts[0];
+	const prefixStr = parts[1];
+	
 	if (!ip) return null;
-	const prefix = prefixStr ? parseInt(prefixStr, 10) : 32;
+	if (prefixStr === "") return null;
+	
+	if (prefixStr !== undefined && !/^\d+$/.test(prefixStr)) return null;
+	const prefix = prefixStr !== undefined ? parseInt(prefixStr, 10) : 32;
 	if (isNaN(prefix) || prefix < 0 || prefix > 32) return null;
 	const base = ipToNumber(ip);
 	if (isNaN(base)) return null;

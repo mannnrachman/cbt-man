@@ -67,9 +67,19 @@ export function adminSnapshot(rows: SnapshotRows): Snapshot {
 }
 
 export function operatorSnapshot(rows: SnapshotRows, caller: UserRow): Snapshot {
-	const parsedAllowedTopikIds = parseJson<string[]>(caller.allowedTopikIds, []);
-	const unrestricted = parsedAllowedTopikIds.length === 0;
-	const allowedTopikIds = unrestricted ? null : new Set(parsedAllowedTopikIds);
+	let parsedAllowedTopikIds: string[] | null = null;
+	try {
+		const parsed = JSON.parse(caller.allowedTopikIds || "[]");
+		if (Array.isArray(parsed) && parsed.every((item) => typeof item === "string")) {
+			parsedAllowedTopikIds = parsed;
+		}
+	} catch {
+		// malformed JSON -> fail closed
+	}
+	const unrestricted = parsedAllowedTopikIds !== null && parsedAllowedTopikIds.length === 0;
+	const allowedTopikIds = unrestricted
+		? null
+		: new Set(parsedAllowedTopikIds || []);
 	const topik = allowedTopikIds
 		? rows.topik.filter((item) => allowedTopikIds.has(item.id))
 		: rows.topik;

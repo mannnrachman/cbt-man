@@ -59,7 +59,11 @@ function FilesPage() {
     if (successCount > 0) {
       const folderName = targetJurusan ? jurusans.find((j) => j.id === targetJurusan)?.nama : "Global";
       toast.success(`${successCount} file berhasil di-upload ke folder ${folderName}`);
-      refresh();
+      try {
+        await refresh();
+      } catch (e) {
+        toast.error(`Gagal memuat ulang daftar file: ${e instanceof Error ? e.message : String(e)}`);
+      }
     }
   }
   
@@ -176,7 +180,11 @@ function FilesPage() {
                       try {
                         await deleteFile(f.id);
                         toast.success("File berhasil dihapus");
-                        refresh();
+                        try {
+                          await refresh();
+                        } catch (e) {
+                          toast.error(`Gagal memuat ulang daftar file: ${e instanceof Error ? e.message : String(e)}`);
+                        }
                       } catch (e) {
                         toast.error(`Gagal menghapus file: ${e instanceof Error ? e.message : String(e)}`);
                       }
