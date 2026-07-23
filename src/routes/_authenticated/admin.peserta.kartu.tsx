@@ -1,22 +1,33 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { usersRepo, unitAkademikRepo, configRepo } from "@/lib/cbt/repos";
+import { getUsersList } from "@/lib/server/users/functions";
+import { getUnitAkademikList } from "@/lib/server/akademik/functions";
+import { getPublicBootConfigServer } from "@/lib/server/snapshot/functions";
 import { Card } from "@/components/ui/card";
 import { AdminPage, AdminPageHeader } from "@/components/cbt/AdminPage";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Printer } from "lucide-react";
+import type { User, UnitAkademik } from "@/lib/cbt/types";
 
 export const Route = createFileRoute("/_authenticated/admin/peserta/kartu")({
   component: KartuPage,
+  loader: async () => {
+    const [allUsers, units, config] = await Promise.all([
+      getUsersList(),
+      getUnitAkademikList(),
+      getPublicBootConfigServer(),
+    ]);
+    return { allUsers, units, config };
+  }
 });
 
 function KartuPage() {
+  const { allUsers, units, config } = Route.useLoaderData();
   const [unitId, setUnitId] = useState<string>("all");
-  const units = unitAkademikRepo.all();
-  const peserta = usersRepo.all().filter((u) => u.role === "mahasiswa" && (unitId === "all" || u.unitId === unitId));
+  const peserta = allUsers.filter((u: User) => u.role === "mahasiswa" && (unitId === "all" || u.unitId === unitId));
 
-  const appName = configRepo.get().appName;
+  const appName = config?.appName || "CBT-MAN";
 
   return (
     <AdminPage>

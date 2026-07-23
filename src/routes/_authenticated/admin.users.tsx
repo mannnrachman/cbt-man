@@ -1,7 +1,7 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { usersRepo, unitAkademikRepo } from "@/lib/cbt/repos";
-import { revokeUserSessionsServer, upsertUserServer } from "@/lib/server/users/functions";
+import { revokeUserSessionsServer, upsertUserServer, getUsersList, mutateUserServer } from "@/lib/server/users/functions";
+import { getUnitAkademikList } from "@/lib/server/akademik/functions";
 
 import { uid } from "@/lib/cbt/storage";
 import type { Role, User } from "@/lib/cbt/types";
@@ -29,10 +29,20 @@ import { AdminPage, AdminPageHeader, AdminPageContent } from "@/components/cbt/A
 
 export const Route = createFileRoute("/_authenticated/admin/users")({
   component: UsersPage,
+  loader: async () => {
+    const [allUsers, units] = await Promise.all([
+      getUsersList(),
+      getUnitAkademikList()
+    ]);
+    return { allUsers, units };
+  }
 });
 
 function UsersPage() {
-  const [users, setUsers] = useState<User[]>(usersRepo.all().filter((u) => u.role !== "mahasiswa"));
+  const { allUsers, units } = Route.useLoaderData();
+  const router = useRouter();
+  
+  const users = allUsers.filter((u: User) => u.role !== "mahasiswa");
 
   const [editing, setEditing] = useState<User | null>(null);
   const [open, setOpen] = useState(false);
@@ -40,7 +50,7 @@ function UsersPage() {
   const [filterRole, setFilterRole] = useState("all");
 
   function refresh() {
-    setUsers(usersRepo.all().filter((u) => u.role !== "mahasiswa"));
+    router.invalidate();
   }
 
 
@@ -120,9 +130,9 @@ function UsersPage() {
                     <Button variant="outline" size="sm" onClick={() => { setEditing(u); setOpen(true); }} className="h-8">
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="sm" className="h-8 text-destructive hover:bg-destructive/10" onClick={() => {
+                    <Button variant="ghost" size="sm" className="h-8 text-destructive hover:bg-destructive/10" onClick={async () => {
                       if (confirm("Hapus pengguna ini?")) {
-                        usersRepo.remove(u.id);
+                        await mutateUserServer({ data: { action: "remove", payload: { id: u.id } } });
                         refresh();
 
                       }
@@ -155,7 +165,7 @@ function UsersPage() {
         </div>
       </AdminPageContent>
 
-      <UserDialog open={open} onOpenChange={setOpen} editing={editing} onSaved={refresh} />
+      <UserDialog open={open} onOpenChange={setOpen} editing={editing} onSaved={refresh} units={units} />
 
     </AdminPage>
   );
@@ -166,11 +176,13 @@ function UserDialog({
   onOpenChange,
   editing,
   onSaved,
+  units,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   editing: User | null;
   onSaved: (user: User) => void;
+  units: any[];
 }) {
   const [form, setForm] = useState({
     username: "",
@@ -268,7 +280,7 @@ function UserDialog({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">(Tidak Ada Unit)</SelectItem>
-                  {unitAkademikRepo.all().map((p) => (
+                  {units.map((p) => (
 
                     <SelectItem key={p.id} value={p.id}>{p.nama}</SelectItem>
                   ))}

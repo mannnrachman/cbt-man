@@ -228,3 +228,19 @@ export const mutateSoalServer = createServerFn({ method: "POST" })
 			};
 		}
 	});
+
+export const getModulsList = createServerFn({ method: "GET" }).handler(
+	async () => {
+		const caller = await requireCaller();
+		if (!caller) return [];
+		return prisma.modul.findMany();
+	}
+);
+
+export const getTopiksList = createServerFn({ method: "GET" }).handler(
+	async () => {
+		const caller = await requireCaller();
+		if (!caller) return [];
+		return prisma.topik.findMany();
+	}
+);

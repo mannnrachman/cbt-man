@@ -202,3 +202,33 @@ export const mutateSesiServer = createServerFn({ method: "POST" })
 			};
 		}
 	});
+
+export const getLiveOnlineSesis = createServerFn({ method: "GET" }).handler(
+	async () => {
+		const caller = await requireCaller();
+		if (!caller) return [];
+		const rows = await prisma.sesiUjian.findMany({
+			where: { status: "sedang" },
+			include: { peserta: true, ujian: true }
+		});
+		return rows.map((r: any) => {
+			const soalIds = typeof r.soalIds === "string" ? JSON.parse(r.soalIds) : r.soalIds || [];
+			const jawaban = typeof r.jawaban === "string" ? JSON.parse(r.jawaban) : r.jawaban || [];
+			const dijawab = jawaban.filter((j: any) => (j.jawabanIds && j.jawabanIds.length > 0) || (j.jawabanEssay && j.jawabanEssay.length > 0)).length;
+			const totalSoal = soalIds.length || 1;
+			return {
+				id: r.id,
+				ujianId: r.ujianId,
+				pesertaId: r.pesertaId,
+				status: r.status,
+				mulaiAt: Number(r.mulaiAt),
+				endsAt: Number(r.endsAt),
+				pelanggaran: r.pelanggaran,
+				user: r.peserta ? { namaLengkap: r.peserta.namaLengkap, username: r.peserta.username } : undefined,
+				ujian: r.ujian ? { nama: r.ujian.nama } : undefined,
+				dijawab,
+				totalSoal,
+			};
+		});
+	}
+);

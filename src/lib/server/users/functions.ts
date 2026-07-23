@@ -185,3 +185,20 @@ export const mutateUserServer = createServerFn({ method: "POST" })
 		}
 	});
 
+export const getUsersList = createServerFn({ method: "GET" }).handler(
+	async () => {
+		const caller = await requireCaller();
+		if (!caller) return [];
+		const users = await prisma.user.findMany();
+		return users.map(u => ({
+			id: u.id,
+			username: u.username,
+			namaLengkap: u.namaLengkap,
+			role: u.role,
+			aktif: u.aktif,
+			unitId: u.unitId ?? undefined,
+			allowedTopikIds: typeof u.allowedTopikIds === "string" ? JSON.parse(u.allowedTopikIds) : u.allowedTopikIds,
+			createdAt: Number(u.createdAt)
+		}));
+	}
+);
