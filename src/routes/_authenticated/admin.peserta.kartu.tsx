@@ -8,7 +8,7 @@ import { AdminPage, AdminPageHeader } from "@/components/cbt/AdminPage";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Printer } from "lucide-react";
-import type { User, UnitAkademik } from "@/lib/cbt/types";
+import type { User, PublicUser, UnitAkademik } from "@/lib/cbt/types";
 
 export const Route = createFileRoute("/_authenticated/admin/peserta/kartu")({
   component: KartuPage,
@@ -25,7 +25,7 @@ export const Route = createFileRoute("/_authenticated/admin/peserta/kartu")({
 function KartuPage() {
   const { allUsers, units, config } = Route.useLoaderData();
   const [unitId, setUnitId] = useState<string>("all");
-  const peserta = allUsers.filter((u: User) => u.role === "mahasiswa" && (unitId === "all" || u.unitId === unitId));
+  const peserta = allUsers.filter((u: PublicUser) => u.role === "mahasiswa" && (unitId === "all" || u.unitId === unitId));
 
   const appName = config?.appName || "CBT-MAN";
 

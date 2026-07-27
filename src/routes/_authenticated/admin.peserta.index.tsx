@@ -5,7 +5,7 @@ import { upsertUserServer, getUsersList, mutateUserServer } from "@/lib/server/u
 import { getUnitAkademikList, mutateUnitAkademikServer } from "@/lib/server/akademik/functions";
 import { hashPassword } from "@/lib/cbt/hash";
 import { uid } from "@/lib/cbt/storage";
-import type { UnitAkademik, User } from "@/lib/cbt/types";
+import type { UnitAkademik, User, PublicUser } from "@/lib/cbt/types";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { AdminPage, AdminPageHeader, AdminPageContent } from "@/components/cbt/AdminPage";
@@ -28,13 +28,13 @@ export const Route = createFileRoute("/_authenticated/admin/peserta/")({
   }
 });
 
-type PesertaWithPwd = User & { _initialPassword?: string };
+type PesertaWithPwd = PublicUser & { _initialPassword?: string };
 
 function PesertaPage() {
   const { allUsers, allUnits } = Route.useLoaderData();
   const router = useRouter();
   
-  const peserta = allUsers.filter((u: User) => u.role === "mahasiswa");
+  const peserta = allUsers.filter((u: PublicUser) => u.role === "mahasiswa");
   const units = allUnits;
 
   const [editing, setEditing] = useState<PesertaWithPwd | null>(null);
@@ -226,7 +226,7 @@ function PesertaDialog({
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  editing: User | null;
+  editing: PublicUser | null;
   units: UnitAkademik[];
   onSaved: () => void;
 

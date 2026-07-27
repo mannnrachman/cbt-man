@@ -123,6 +123,15 @@ export const getUnitAkademikList = createServerFn({ method: "GET" }).handler(
 	async (): Promise<UnitAkademik[]> => {
 		const caller = await requireCaller();
 		if (!caller) return [];
-		return (await prisma.unitAkademik.findMany()) as unknown as UnitAkademik[];
+		const units = await prisma.unitAkademik.findMany();
+		const validTypes = new Set<UnitAkademik["tipe"]>([
+			"fakultas", "jurusan", "prodi", "semester", "kelas", "kategori_bebas"
+		]);
+		return units.map(u => ({
+			id: u.id,
+			nama: u.nama,
+			tipe: validTypes.has(u.tipe as UnitAkademik["tipe"]) ? (u.tipe as UnitAkademik["tipe"]) : "kelas",
+			parentId: u.parentId,
+		}));
 	}
 );

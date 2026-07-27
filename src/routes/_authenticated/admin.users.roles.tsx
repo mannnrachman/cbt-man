@@ -3,7 +3,7 @@ import { useState } from "react";
 import { getUsersList, upsertUserServer } from "@/lib/server/users/functions";
 import { getModulsList, getTopiksList } from "@/lib/server/modul/functions";
 import { getFullConfigServer, saveConfigServer } from "@/lib/server/ujian/functions";
-import { NAV_KEYS, type NavKey, type User } from "@/lib/cbt/types";
+import { NAV_KEYS, type NavKey, type User, type PublicUser } from "@/lib/cbt/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { AdminPage, AdminPageHeader } from "@/components/cbt/AdminPage";
 import { Button } from "@/components/ui/button";
@@ -49,7 +49,7 @@ function RolesPage() {
   const [cfg, setCfg] = useState(config);
   const adminProdiAccess = (cfg.roleAccess.admin_prodi ?? []) as NavKey[];
   const evaluatorAccess = (cfg.roleAccess.evaluator ?? []) as NavKey[];
-  const managers = allUsers.filter((u: User) => u.role === "admin_prodi" || u.role === "evaluator");
+  const managers = allUsers.filter((u: PublicUser) => u.role === "admin_prodi" || u.role === "evaluator");
 
   async function toggleNav(role: "admin_prodi" | "evaluator", key: NavKey) {
     const list = (cfg.roleAccess[role] ?? []) as NavKey[];
@@ -68,7 +68,7 @@ function RolesPage() {
     }
   }
 
-  async function toggleTopik(u: User, topikId: string) {
+  async function toggleTopik(u: PublicUser, topikId: string) {
     const has = u.allowedTopikIds.includes(topikId);
     const res = await upsertUserServer({
       data: {

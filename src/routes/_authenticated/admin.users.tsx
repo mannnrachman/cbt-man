@@ -4,7 +4,7 @@ import { revokeUserSessionsServer, upsertUserServer, getUsersList, mutateUserSer
 import { getUnitAkademikList } from "@/lib/server/akademik/functions";
 
 import { uid } from "@/lib/cbt/storage";
-import type { Role, User, UnitAkademik } from "@/lib/cbt/types";
+import type { Role, User, PublicUser, UnitAkademik } from "@/lib/cbt/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,9 +42,9 @@ function UsersPage() {
   const { allUsers, units } = Route.useLoaderData();
   const router = useRouter();
   
-  const users = allUsers.filter((u: User) => u.role !== "mahasiswa");
+  const users = allUsers.filter((u: PublicUser) => u.role !== "mahasiswa");
 
-  const [editing, setEditing] = useState<User | null>(null);
+  const [editing, setEditing] = useState<PublicUser | null>(null);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [filterRole, setFilterRole] = useState("all");
@@ -180,8 +180,8 @@ function UserDialog({
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  editing: User | null;
-  onSaved: (user: User) => void;
+  editing: PublicUser | null;
+  onSaved: (user: PublicUser) => void;
   units: UnitAkademik[];
 }) {
   const [form, setForm] = useState({
