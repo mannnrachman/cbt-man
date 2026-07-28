@@ -6,6 +6,7 @@ import { prisma } from "../db/prisma";
 import { requireCaller, seedIfNeeded } from "../db/auth";
 import { writeAuditLog } from "../db/audit";
 import type { UnitAkademik, TahunAkademik, Semester, MataKuliah } from "@/lib/cbt/types";
+import { UnitAkademikSchema } from "@/lib/cbt/types";
 
 
 function audit(caller: any, entity: string, action: string, payload: any) {
@@ -119,3 +120,16 @@ export const mutateMataKuliahServer = createServerFn({ method: "POST" })
 			return { ok: false as const, error: e.message };
 		}
 	});
+export const getUnitAkademikList = createServerFn({ method: "GET" }).handler(
+	async (): Promise<UnitAkademik[]> => {
+		const caller = await requireCaller();
+		if (!caller || caller.role !== "super_admin") return [];
+		const records = await prisma.unitAkademik.findMany();
+		const results: UnitAkademik[] = [];
+		for (const rec of records) {
+			const parsed = UnitAkademikSchema.safeParse(rec);
+			if (parsed.success) results.push(parsed.data);
+		}
+		return results;
+	}
+);

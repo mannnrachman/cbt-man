@@ -4,9 +4,9 @@ import { prisma } from "../db/prisma";
 import { deleteSessionsForUser } from "../db/session";
 import { requireCaller, requireAdminResult, seedIfNeeded } from "../db/auth";
 import { hashPassword } from "@/lib/cbt/hash";
-import { stringifyJson } from "../db/json";
+import { stringifyJson, parseJson } from "../db/json";
 import { publicUser, upsertUserSchema } from "../repos/mappers";
-import type { User } from "@/lib/cbt/types";
+import type { User, PublicUser } from "@/lib/cbt/types";
 
 import { writeAuditLog } from "../db/audit";
 
@@ -185,3 +185,22 @@ export const mutateUserServer = createServerFn({ method: "POST" })
 		}
 	});
 
+export const getUsersList = createServerFn({ method: "GET" }).handler(
+	async (): Promise<PublicUser[]> => {
+		const caller = await requireCaller();
+		if (!caller || caller.role !== "super_admin") return [];
+		const users = await prisma.user.findMany();
+		return users.map(u => ({
+			id: u.id,
+			username: u.username,
+			namaLengkap: u.namaLengkap,
+			role: u.role,
+			aktif: u.aktif,
+			unitId: u.unitId ?? undefined,
+			allowedTopikIds: parseJson<string[]>(u.allowedTopikIds, []),
+			mataKuliahIds: parseJson<string[]>(u.mataKuliahIds, []),
+			detail: u.detail ?? undefined,
+			createdAt: Number(u.createdAt)
+		}));
+	}
+);
