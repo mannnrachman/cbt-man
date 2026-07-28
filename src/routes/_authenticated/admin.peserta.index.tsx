@@ -163,13 +163,20 @@ function PesertaPage() {
           className="max-w-xs" 
         />
         <Select value={filterUnit} onValueChange={setFilterUnit}>
-          <SelectTrigger className="w-full sm:w-48">
+          <SelectTrigger className="w-full sm:w-56">
             <SelectValue placeholder="Pilih Unit" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Semua Unit</SelectItem>
-            {units.map((g) => <SelectItem key={g.id} value={g.id}>{g.nama}</SelectItem>)}
-
+            {units.map((g) => {
+              const parent = g.parentId ? units.find((u) => u.id === g.parentId) : undefined;
+              const tipeLabel = g.tipe === "prodi" ? "Prodi" : g.tipe === "fakultas" ? "Fakultas" : "Kelas";
+              return (
+                <SelectItem key={g.id} value={g.id}>
+                  [{tipeLabel}] {g.nama} {parent ? `(${parent.nama})` : ""}
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
       </div>
@@ -182,22 +189,31 @@ function PesertaPage() {
               <tr>
                 <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left">Username</th>
                 <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left">Nama Lengkap</th>
-                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Grup / Kelas</th>
+                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left">Grup / Kelas</th>
                 <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Status</th>
-
                 <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody>
-              {shown.map((p) => (
-                <tr key={p.id} className="transition-colors border-t border-slate-100 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                  <td className="p-4 font-medium text-slate-900 dark:text-slate-100 text-left">{p.username}</td>
-                  <td className="p-4 text-slate-600 dark:text-slate-400 text-left">{p.namaLengkap}</td>
-                  <td className="p-4 text-center">
-                    <span className="px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-                      {units.find((g) => g.id === p.unitId)?.nama ?? "-"}
-                    </span>
-                  </td>
+              {shown.map((p) => {
+                const assignedUnit = units.find((g) => g.id === p.unitId);
+                const parentUnit = assignedUnit?.parentId ? units.find((u) => u.id === assignedUnit.parentId) : undefined;
+                return (
+                  <tr key={p.id} className="transition-colors border-t border-slate-100 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                    <td className="p-4 font-medium text-slate-900 dark:text-slate-100 text-left">{p.username}</td>
+                    <td className="p-4 text-slate-600 dark:text-slate-400 text-left">{p.namaLengkap}</td>
+                    <td className="p-4 text-left">
+                      {assignedUnit ? (
+                        <div className="flex flex-col text-xs">
+                          <span className="font-medium text-slate-800 dark:text-slate-200">
+                            [{assignedUnit.tipe === "prodi" ? "Prodi" : assignedUnit.tipe === "fakultas" ? "Fakultas" : "Kelas"}] {assignedUnit.nama}
+                          </span>
+                          {parentUnit && <span className="text-[11px] text-muted-foreground">{parentUnit.nama}</span>}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground italic">(Tanpa Unit)</span>
+                      )}
+                    </td>
                   <td className="p-4 text-center">
 
                     {p.aktif ? (
@@ -224,7 +240,8 @@ function PesertaPage() {
                     </Button>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
               {shown.length === 0 && (
                 <tr>
                   <td colSpan={5} className="p-8 text-center text-slate-500">Tidak ada data peserta yang sesuai.</td>
@@ -289,7 +306,7 @@ function PesertaDialog({
         namaLengkap: form.namaLengkap.trim(),
         role: "mahasiswa",
         allowedTopikIds: editing?.allowedTopikIds ?? [],
-        unitId: form.unitId || undefined,
+        unitId: form.unitId === "none" || !form.unitId ? undefined : form.unitId,
         detail: editing?.detail,
         aktif: form.aktif,
         createdAt: editing?.createdAt ?? Date.now(),
@@ -334,12 +351,16 @@ function PesertaDialog({
                 <SelectValue placeholder="(tanpa unit)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">-- Tidak ada --</SelectItem>
-                {units.map((g) => (<SelectItem key={g.id} value={g.id}>
-
-                    {g.nama}
-                  </SelectItem>
-                ))}
+                <SelectItem value="none">-- Tidak ada --</SelectItem>
+                {units.map((g) => {
+                  const parent = g.parentId ? units.find((u) => u.id === g.parentId) : undefined;
+                  const tipeLabel = g.tipe === "prodi" ? "Prodi" : g.tipe === "fakultas" ? "Fakultas" : "Kelas";
+                  return (
+                    <SelectItem key={g.id} value={g.id}>
+                      [{tipeLabel}] {g.nama} {parent ? `(${parent.nama})` : ""}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>
