@@ -89,7 +89,7 @@ export const upsertUserServer = createServerFn({ method: "POST" })
 export const mutateUserServer = createServerFn({ method: "POST" })
 	.validator(
 		z.object({
-			action: z.enum(["upsert", "remove", "bulkSet"]),
+			action: z.enum(["upsert", "remove", "bulkSet", "bulkRemove"]),
 			payload: z.any(),
 		}),
 	)
@@ -117,6 +117,11 @@ export const mutateUserServer = createServerFn({ method: "POST" })
 			await prisma.$transaction(async (tx) => {
 				if (action === "remove")
 					await tx.user.delete({ where: { id: String(payload.id) } });
+				else if (action === "bulkRemove") {
+					if (Array.isArray(payload.ids) && payload.ids.length > 0) {
+						await tx.user.deleteMany({ where: { id: { in: payload.ids } } });
+					}
+				}
 				else if (action === "bulkSet") {
 					await tx.user.deleteMany();
 					for (const item of payload as User[]) {

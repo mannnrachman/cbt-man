@@ -12,6 +12,7 @@ import { AdminPage, AdminPageHeader, AdminPageContent } from "@/components/cbt/A
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Pencil, Trash2, Plus, Printer, Upload, Users as UsersIcon } from "lucide-react";
@@ -42,9 +43,22 @@ function PesertaPage() {
   const [filterUnit, setFilterUnit] = useState<string>("all");
   const [query, setQuery] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   function refresh() {
     router.invalidate();
+    setSelectedIds([]);
+  }
+
+  async function handleBulkDelete() {
+    if (!confirm(`Hapus ${selectedIds.length} peserta terpilih secara permanen?`)) return;
+    const res = await mutateUserServer({ data: { action: "bulkRemove", payload: { ids: selectedIds } } });
+    if (res.ok) {
+      toast.success(`${selectedIds.length} peserta berhasil dihapus`);
+      refresh();
+    } else {
+      toast.error(res.error ?? "Gagal menghapus peserta");
+    }
   }
 
   const shown = peserta.filter((p) =>
@@ -61,28 +75,31 @@ function PesertaPage() {
     let added = 0;
     let failed = 0;
     const localUnits = [...units];
+    const missingUnits = new Set<string>();
+
     for (const r of rows) {
       const username = String(r.username ?? r.Username ?? "").trim();
       const nama = String(r.nama ?? r.Nama ?? r.namaLengkap ?? "").trim();
-      const password = String(r.password ?? r.Password ?? username + "123").trim();
+      if (!username || !nama) {
+        failed++;
+        continue;
+      }
+
+      // Generate a secure 6-character random password if not provided
+      const defaultPassword = Math.random().toString(36).substring(2, 8).toUpperCase();
+      const password = String(r.password ?? r.Password ?? defaultPassword).trim();
+      
       const unitName = String(r.group ?? r.Group ?? r.kelas ?? r.unit ?? "").trim();
       let unitId: string | undefined;
+      
       if (unitName) {
-        let g = localUnits.find((x: UnitAkademik) => x.nama.toLowerCase() === unitName.toLowerCase());
+        const g = localUnits.find((x: UnitAkademik) => x.nama.toLowerCase() === unitName.toLowerCase());
         if (!g) { 
-          g = { id: uid("u_"), nama: unitName, tipe: "kelas", parentId: null }; 
-          const resUnit = await mutateUnitAkademikServer({ data: { action: "upsert", payload: g } });
-          if (resUnit.ok) {
-            localUnits.push(g);
-          } else {
-            g = undefined;
-          }
+          // DO NOT create new unit to prevent breaking hierarchy. Just track the missing unit.
+          missingUnits.add(unitName);
+        } else {
+          unitId = g.id;
         }
-        if (!g) {
-          failed++;
-          continue;
-        }
-        unitId = g.id;
       }
 
       const existingUser = (allUsers as User[]).find((u: User) => u.username === username);
@@ -101,13 +118,14 @@ function PesertaPage() {
         failed++;
       }
     }
-    if (failed > 0) {
-      toast.warning(`${added} peserta diimport, ${failed} gagal diimport`);
+    
+    if (failed > 0 || missingUnits.size > 0) {
+      const missingMsg = missingUnits.size > 0 ? ` | Unit tidak ditemukan (diabaikan): ${Array.from(missingUnits).join(", ")}` : "";
+      toast.warning(`${added} sukses, ${failed} gagal${missingMsg}`, { duration: 6000 });
     } else {
       toast.success(`${added} peserta berhasil diimport`);
     }
     refresh();
-
   }
 
   function downloadTemplate() {
@@ -155,7 +173,7 @@ function PesertaPage() {
       />
 
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col sm:flex-row gap-3 items-center">
         <Input 
           placeholder="Cari nama atau username..." 
           value={query} 
@@ -179,6 +197,11 @@ function PesertaPage() {
             })}
           </SelectContent>
         </Select>
+        {selectedIds.length > 0 && (
+          <Button variant="destructive" size="sm" onClick={handleBulkDelete} className="ml-auto">
+            <Trash2 className="mr-2 h-4 w-4" /> Hapus Terpilih ({selectedIds.length})
+          </Button>
+        )}
       </div>
 
       {/* List Section */}
@@ -187,7 +210,16 @@ function PesertaPage() {
           <table className="w-full text-sm">
             <thead className="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-semibold">
               <tr>
-                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left">Username</th>
+                <th className="p-4 w-12 text-center border-b border-slate-100 dark:border-slate-800">
+                  <Checkbox 
+                    checked={shown.length > 0 && selectedIds.length === shown.length}
+                    onCheckedChange={(c) => {
+                      if (c) setSelectedIds(shown.map(p => p.id));
+                      else setSelectedIds([]);
+                    }}
+                  />
+                </th>
+                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left border-b border-slate-100 dark:border-slate-800">Username</th>
                 <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left">Nama Lengkap</th>
                 <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left">Grup / Kelas</th>
                 <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Status</th>
@@ -200,6 +232,15 @@ function PesertaPage() {
                 const parentUnit = assignedUnit?.parentId ? units.find((u) => u.id === assignedUnit.parentId) : undefined;
                 return (
                   <tr key={p.id} className="transition-colors border-t border-slate-100 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                    <td className="p-4 text-center align-middle">
+                      <Checkbox 
+                        checked={selectedIds.includes(p.id)}
+                        onCheckedChange={(c) => {
+                          if (c) setSelectedIds([...selectedIds, p.id]);
+                          else setSelectedIds(selectedIds.filter(id => id !== p.id));
+                        }}
+                      />
+                    </td>
                     <td className="p-4 font-medium text-slate-900 dark:text-slate-100 text-left">{p.username}</td>
                     <td className="p-4 text-slate-600 dark:text-slate-400 text-left">{p.namaLengkap}</td>
                     <td className="p-4 text-left">

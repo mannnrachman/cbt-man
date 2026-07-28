@@ -238,3 +238,53 @@ export const getLiveOnlineSesis = createServerFn({ method: "GET" }).handler(
 		});
 	}
 );
+
+export const actionSesiServer = createServerFn({ method: "POST" })
+	.validator(
+		z.object({
+			action: z.enum(["forceSubmit", "reset"]),
+			sesiId: z.string(),
+		})
+	)
+	.handler(async ({ data }) => {
+		try {
+			await seedIfNeeded();
+			const caller = await requireCaller();
+			if (!caller || caller.role === "mahasiswa") return { ok: false as const, error: "Forbidden" };
+
+			const sesi = await prisma.sesiUjian.findUnique({
+				where: { id: data.sesiId },
+				select: { ujianId: true }
+			});
+			if (!sesi) return { ok: false as const, error: "Sesi tidak ditemukan" };
+
+			if (caller.role !== "super_admin") {
+				if (!(await operatorCanTouchUjian(caller, sesi.ujianId))) {
+					return { ok: false as const, error: "Forbidden" };
+				}
+			}
+
+			await writeAuditLog(caller.username, `Melakukan aksi ${data.action} pada sesi ${data.sesiId}`);
+
+			if (data.action === "forceSubmit") {
+				await prisma.sesiUjian.update({
+					where: { id: data.sesiId },
+					data: {
+						status: "selesai",
+						selesaiAt: Date.now(),
+					}
+				});
+			} else if (data.action === "reset") {
+				await prisma.sesiUjian.delete({
+					where: { id: data.sesiId }
+				});
+			}
+
+			return { ok: true as const };
+		} catch (err) {
+			return {
+				ok: false as const,
+				error: err instanceof Error ? err.message : String(err),
+			};
+		}
+	});
