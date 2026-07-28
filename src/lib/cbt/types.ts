@@ -72,6 +72,7 @@ export const UserSchema = z.object({
 	createdAt: z.number(),
 });
 export type User = z.infer<typeof UserSchema>;
+export type PublicUser = Omit<User, "passwordHash">;
 
 
 // ---------------- Bank Soal ----------------

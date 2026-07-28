@@ -1,7 +1,8 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
-import { configRepo, usersRepo, topikRepo, modulRepo } from "@/lib/cbt/repos";
-import { upsertUserServer } from "@/lib/server/users/functions";
+import { getUsersList, upsertUserServer } from "@/lib/server/users/functions";
+import { getModulsList, getTopiksList } from "@/lib/server/modul/functions";
+import { getFullConfigServer, saveConfigServer } from "@/lib/server/ujian/functions";
 import { NAV_KEYS, type NavKey, type User } from "@/lib/cbt/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { AdminPage, AdminPageHeader } from "@/components/cbt/AdminPage";
@@ -29,23 +30,43 @@ const LABEL: Record<NavKey, string> = {
 
 export const Route = createFileRoute("/_authenticated/admin/users/roles")({
   component: RolesPage,
+  loader: async () => {
+    const [allUsers, moduls, topiks, config] = await Promise.all([
+      getUsersList(),
+      getModulsList(),
+      getTopiksList(),
+      getFullConfigServer(),
+    ]);
+    if (!config) throw new Error("Config not found");
+    return { allUsers, moduls, topiks, config };
+  }
 });
 
 function RolesPage() {
-  const [cfg, setCfg] = useState(configRepo.get());
+  const { allUsers, moduls, topiks, config } = Route.useLoaderData();
+  const router = useRouter();
+
+  const [cfg, setCfg] = useState(config);
   const adminProdiAccess = (cfg.roleAccess.admin_prodi ?? []) as NavKey[];
   const evaluatorAccess = (cfg.roleAccess.evaluator ?? []) as NavKey[];
-  const managers = usersRepo.all().filter((u) => u.role === "admin_prodi" || u.role === "evaluator");
-  const moduls = modulRepo.all();
-  const topiks = topikRepo.all();
+  const managers = (allUsers as User[]).filter((u: User) => u.role === "admin_prodi" || u.role === "evaluator");
 
-  function toggleNav(role: "admin_prodi" | "evaluator", key: NavKey) {
+  async function toggleNav(role: "admin_prodi" | "evaluator", key: NavKey) {
     const list = (cfg.roleAccess[role] ?? []) as NavKey[];
     const has = list.includes(key);
     const next = has ? list.filter((x) => x !== key) : [...list, key];
-    const c = { ...cfg, roleAccess: { ...cfg.roleAccess, [role]: next } };
-    configRepo.set(c);
-    setCfg(c);
+    
+    const prevConfig = cfg;
+    const newConfig = { ...cfg, roleAccess: { ...cfg.roleAccess, [role]: next } };
+    setCfg(newConfig);
+
+    const res = await saveConfigServer({ data: newConfig });
+    if (!res.ok) {
+      toast.error(res.error || "Gagal menyimpan konfigurasi hak akses");
+      setCfg(prevConfig);
+    } else {
+      await router.invalidate();
+    }
   }
 
   async function toggleTopik(u: User, topikId: string) {
@@ -57,7 +78,7 @@ function RolesPage() {
         namaLengkap: u.namaLengkap,
         role: u.role,
         allowedTopikIds: has
-          ? u.allowedTopikIds.filter((x) => x !== topikId)
+          ? u.allowedTopikIds.filter((x: string) => x !== topikId)
           : [...u.allowedTopikIds, topikId],
         unitId: u.unitId,
         detail: u.detail,
@@ -69,8 +90,8 @@ function RolesPage() {
       toast.error(res.error ?? "Gagal menyimpan hak akses topik");
       return;
     }
-    usersRepo.upsert(res.user);
     toast.success("Hak akses topik disimpan");
+    await router.invalidate();
   }
 
   return (
