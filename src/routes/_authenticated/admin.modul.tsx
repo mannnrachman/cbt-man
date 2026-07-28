@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { z } from "zod";
 import { modulRepo, topikRepo, soalRepo, mataKuliahRepo } from "@/lib/cbt/repos";
 import { uid } from "@/lib/cbt/storage";
@@ -7,9 +7,11 @@ import { ModulSchema, TopikSchema, SoalSchema, type Modul } from "@/lib/cbt/type
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash2, ChevronRight, Upload, FileText, Download, FileUp, Lock } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Plus, Trash2, ChevronRight, Upload, FileText, Download, FileUp, Lock, Pencil, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import { visibleModuls, allowedTopikIdSet, isUnrestricted } from "@/lib/cbt/access";
 import { AdminPage, AdminPageHeader, AdminPageContent } from "@/components/cbt/AdminPage";
@@ -48,23 +50,40 @@ function ModulPage() {
   const [mkId, setMkId] = useState<string>("none");
   const [query, setQuery] = useState("");
   const [filterMk, setFilterMk] = useState("all");
+  const [editingModul, setEditingModul] = useState<Modul | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const importRef = useRef<HTMLInputElement>(null);
 
   const shown = moduls.filter(m => {
+    const isQueryMatch = !query || m.nama.toLowerCase().includes(query.toLowerCase());
+    if (!isQueryMatch) return false;
+
+    // A module is orphaned if it has no mataKuliahId or if the referenced mataKuliah no longer exists.
+    const isOrphan = !m.mataKuliahId || !mkList.some(mk => mk.id === m.mataKuliahId);
+
+    if (filterMk === "orphan") return isOrphan;
     if (filterMk !== "all" && m.mataKuliahId !== filterMk) return false;
-    if (query && !m.nama.toLowerCase().includes(query.toLowerCase())) return false;
+    
     return true;
   });
 
   function add() {
     if (!canEdit) return;
-    if (!nama.trim()) return;
-    modulRepo.upsert({ id: uid("m_"), nama: nama.trim(), aktif: true, mataKuliahId: (mkId === "none" || !mkId) ? undefined : mkId });
+    if (!nama.trim()) {
+      toast.error("Nama modul wajib diisi");
+      return;
+    }
+    if (mkId === "none" || !mkId) {
+      toast.error("Wajib memilih Mata Kuliah untuk modul baru!");
+      return;
+    }
+    modulRepo.upsert({ id: uid("m_"), nama: nama.trim(), aktif: true, mataKuliahId: mkId });
     setNama("");
     setMkId("none");
     setModuls(visibleModuls(user));
     toast.success("Modul ditambahkan");
   }
+
   function remove(id: string) {
     if (!canEdit) return;
     const topiks = topikRepo.all().filter((t) => t.modulId === id);
@@ -72,9 +91,10 @@ function ModulPage() {
       toast.error("Hapus topik di dalam modul ini dulu");
       return;
     }
-    if (!confirm("Hapus modul?")) return;
+    if (!confirm("Hapus modul ini?")) return;
     modulRepo.remove(id);
     setModuls(visibleModuls(user));
+    toast.success("Modul dihapus");
   }
 
   function exportBank(modul: Modul) {
@@ -102,7 +122,13 @@ function ModulPage() {
     try {
       const raw = JSON.parse(await file.text());
       const bank = BankSchema.parse(raw);
-      // Re-id supaya tidak bentrok
+      
+      const validMkId = bank.modul.mataKuliahId;
+      if (!validMkId || !mkList.some(mk => mk.id === validMkId)) {
+        toast.error("Mata Kuliah pada file import tidak valid atau sudah dihapus. Import dibatalkan.");
+        return;
+      }
+
       const newModul = { ...bank.modul, id: uid("m_"), nama: bank.modul.nama + " (import)" };
       const idMap: Record<string, string> = {};
       const newTopik = bank.topik.map((t) => {
@@ -174,6 +200,7 @@ function ModulPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Semua Mata Kuliah</SelectItem>
+              <SelectItem value="orphan">⚠️ Tanpa Mata Kuliah</SelectItem>
               {mkList.map((m) => (
                 <SelectItem key={m.id} value={m.id}>{m.nama}</SelectItem>
               ))}
@@ -184,14 +211,14 @@ function ModulPage() {
         {canEdit && (
           <form
             onSubmit={(e) => { e.preventDefault(); add(); }}
-            className="flex gap-2 w-full sm:w-auto shrink-0"
+            className="flex gap-2 w-full sm:w-auto shrink-0 items-center"
           >
             <Select value={mkId} onValueChange={setMkId}>
-              <SelectTrigger className="w-32 sm:w-40">
-                <SelectValue placeholder="Mata Kuliah (Opsional)" />
+              <SelectTrigger className="w-36 sm:w-44">
+                <SelectValue placeholder="Pilih Mata Kuliah *" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">-- Tidak Ada --</SelectItem>
+                <SelectItem value="none" disabled>Pilih Mata Kuliah *</SelectItem>
                 {mkList.map(m => (
                   <SelectItem key={m.id} value={m.id}>{m.nama}</SelectItem>
                 ))}
@@ -203,7 +230,7 @@ function ModulPage() {
               placeholder="Nama Modul Baru"
               className="w-full sm:w-48"
             />
-            <Button type="submit" size="icon" disabled={!nama.trim()} className="shrink-0">
+            <Button type="submit" size="icon" disabled={!nama.trim() || mkId === "none"} className="shrink-0">
               <Plus className="h-4 w-4" />
             </Button>
           </form>
@@ -211,7 +238,6 @@ function ModulPage() {
       </div>
 
       <AdminPageContent className="bg-transparent border-0 p-0 shadow-none">
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {shown.map((m) => {
             const tAll = topikRepo.all().filter((t) => t.modulId === m.id);
@@ -228,14 +254,18 @@ function ModulPage() {
                   </div>
                   <div className="flex-1 min-w-0 space-y-1.5 pt-1">
                     <Link to="/admin/modul/$id/topik" params={{ id: m.id }} className="text-base font-semibold text-slate-900 dark:text-slate-100 hover:text-primary dark:hover:text-primary transition-colors duration-300 ease-spring line-clamp-2 after:absolute after:inset-0">
-
                       {m.nama}
                     </Link>
-                    {mkName && (
+                    {mkName ? (
                       <div className="relative z-10">
                         <span className="px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-[10px] font-bold tracking-widest uppercase text-slate-500">
-
                           {mkName}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="relative z-10">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-950/40 text-[10px] font-bold tracking-wider uppercase text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900/50">
+                          <AlertTriangle className="h-3 w-3" /> Tanpa Mata Kuliah
                         </span>
                       </div>
                     )}
@@ -249,12 +279,16 @@ function ModulPage() {
                   </div>
 
                   <div className="flex items-center gap-1 relative z-10">
+                    {canEdit && (
+                      <Button size="icon" variant="ghost" className="h-8 w-8 text-slate-400 hover:text-primary hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors duration-300" onClick={() => { setEditingModul(m); setEditDialogOpen(true); }} title="Edit Modul">
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    )}
                     <Button size="icon" variant="ghost" className="h-8 w-8 text-slate-400 hover:text-primary hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors duration-300" onClick={() => exportBank(m)} title="Export JSON">
                       <Download className="h-4 w-4" />
                     </Button>
                     {canEdit && (
                       <Button size="icon" variant="ghost" className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 dark:hover:text-red-400 transition-colors duration-300" onClick={() => remove(m.id)} title="Hapus">
-
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     )}
@@ -265,7 +299,6 @@ function ModulPage() {
           })}
           {shown.length === 0 && (
             <div className="col-span-full p-12 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[20px]">
-
               <div className="flex flex-col items-center justify-center gap-2 text-slate-500">
                 <FileText className="h-8 w-8 text-slate-300" />
                 <p className="text-sm font-medium">Belum ada modul bank soal.</p>
@@ -274,6 +307,101 @@ function ModulPage() {
           )}
         </div>
       </AdminPageContent>
+
+      <EditModulDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        modul={editingModul}
+        mkList={mkList}
+        onSaved={() => setModuls(visibleModuls(user))}
+      />
     </AdminPage>
+  );
+}
+
+function EditModulDialog({
+  open,
+  onOpenChange,
+  modul,
+  mkList,
+  onSaved,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  modul: Modul | null;
+  mkList: ReturnType<typeof mataKuliahRepo.all>;
+  onSaved: () => void;
+}) {
+  const [nama, setNama] = useState(modul?.nama ?? "");
+  const [mkId, setMkId] = useState(modul?.mataKuliahId ?? "none");
+
+  // Sync state on open
+  useEffect(() => {
+    if (open && modul) {
+      setNama(modul.nama);
+      setMkId(modul.mataKuliahId ?? "none");
+    }
+  }, [open, modul]);
+
+  function save() {
+    if (!modul) return;
+    if (!nama.trim()) {
+      toast.error("Nama modul tidak boleh kosong");
+      return;
+    }
+    if (mkId === "none" || !mkId) {
+      toast.error("Pilih Mata Kuliah yang valid");
+      return;
+    }
+    modulRepo.upsert({
+      ...modul,
+      nama: nama.trim(),
+      mataKuliahId: mkId,
+    });
+    toast.success("Modul berhasil diperbarui");
+    onSaved();
+    onOpenChange(false);
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit Modul Bank Soal</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-2">
+          <div className="space-y-2">
+            <Label>Nama Modul</Label>
+            <Input
+              value={nama}
+              onChange={(e) => setNama(e.target.value)}
+              placeholder="Contoh: Modul Pemrograman Dasar"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Mata Kuliah *</Label>
+            <Select value={mkId} onValueChange={setMkId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Pilih Mata Kuliah" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none" disabled>Pilih Mata Kuliah</SelectItem>
+                {mkList.map((m) => (
+                  <SelectItem key={m.id} value={m.id}>
+                    {m.nama}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Batal
+          </Button>
+          <Button onClick={save}>Simpan Perubahan</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

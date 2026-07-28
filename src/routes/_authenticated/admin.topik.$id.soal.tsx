@@ -36,6 +36,7 @@ function SoalPage() {
   const [kes, setKes] = useState<string>("all");
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Soal | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   if (!topik || !modul) return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -51,10 +52,24 @@ function SoalPage() {
     </div>
   );
 
-  function refresh() { setSoals(soalRepo.all().filter((s) => s.topikId === topikId)); }
+  function refresh() { 
+    setSoals(soalRepo.all().filter((s) => s.topikId === topikId)); 
+    setSelectedIds([]);
+  }
   function remove(id: string) {
     if (!confirm("Hapus soal?")) return;
     soalRepo.remove(id); refresh();
+  }
+  async function handleBulkDelete() {
+    if (!confirm(`Hapus ${selectedIds.length} soal terpilih secara permanen?`)) return;
+    selectedIds.forEach((id) => soalRepo.remove(id));
+    const res = await soalRepo.flush();
+    if (res.ok) {
+      toast.success(`${selectedIds.length} soal berhasil dihapus`);
+    } else {
+      toast.error(`Gagal menghapus soal: ${res.error}`);
+    }
+    refresh();
   }
 
   const shown = soals.filter((s) =>
@@ -132,6 +147,47 @@ function SoalPage() {
         </div>
       </div>
 
+      {/* Floating Bulk Action Bar */}
+      {selectedIds.length > 0 && (
+        <div className="flex items-center justify-between p-3.5 px-6 bg-slate-900 dark:bg-indigo-950 text-white rounded-2xl shadow-xl border border-slate-800 dark:border-indigo-800/50 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="flex items-center gap-3 text-sm font-semibold">
+            <Checkbox
+              checked={shown.length > 0 && shown.every((s) => selectedIds.includes(s.id))}
+              onCheckedChange={(c) => {
+                if (c) {
+                  const newSelected = new Set([...selectedIds, ...shown.map(s => s.id)]);
+                  setSelectedIds(Array.from(newSelected));
+                } else {
+                  const shownIds = new Set(shown.map(s => s.id));
+                  setSelectedIds(selectedIds.filter(id => !shownIds.has(id)));
+                }
+              }}
+              aria-label="Pilih semua soal yang ditampilkan"
+              className="border-slate-400 data-[state=checked]:bg-indigo-500 data-[state=checked]:border-indigo-500"
+            />
+            <span>{selectedIds.length} Soal Terpilih</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setSelectedIds([])}
+              className="h-8 text-xs font-semibold border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-slate-200"
+            >
+              Batal
+            </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={handleBulkDelete}
+              className="h-8 text-xs font-semibold bg-rose-600 hover:bg-rose-700"
+            >
+              <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Hapus Terpilih ({selectedIds.length})
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Studio-Tier Cards Section */}
       <div className="space-y-8">
         {shown.map((s, i) => (
@@ -139,6 +195,15 @@ function SoalPage() {
             {/* Header */}
             <div className="flex flex-wrap items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-zinc-800/80 bg-slate-50/40 dark:bg-zinc-950/40 gap-3">
               <div className="flex items-center gap-4 flex-wrap">
+                <Checkbox
+                  checked={selectedIds.includes(s.id)}
+                  onCheckedChange={(c) => {
+                    if (c) setSelectedIds([...selectedIds, s.id]);
+                    else setSelectedIds(selectedIds.filter((id) => id !== s.id));
+                  }}
+                  aria-label={`Pilih soal ${i + 1}`}
+                  className="mr-1"
+                />
                 <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-900 dark:bg-zinc-100 font-mono text-xs font-black text-white dark:text-zinc-900 shadow-sm">
                   {i + 1}
                 </span>
