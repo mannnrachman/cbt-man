@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useParams, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ujianRepo, unitAkademikRepo, hydrateRepos, mataKuliahRepo, semesterRepo } from "@/lib/cbt/repos";
+import { ujianRepo, unitAkademikRepo, hydrateRepos, mataKuliahRepo, semesterRepo, tahunAkademikRepo } from "@/lib/cbt/repos";
+import { mutateUjianServer } from "@/lib/server/ujian/functions";
 
 import { uid } from "@/lib/cbt/storage";
 import type { Ujian, TopicSet } from "@/lib/cbt/types";
@@ -209,14 +210,11 @@ function UjianEditor() {
     set("topicSets", [...u!.topicSets, ts]);
   }
 
-  function save() {
+  async function save() {
     if (!u!.nama.trim()) {
       toast.error("Nama wajib");
       return;
     }
-    // Validasi server-side: pastikan semua topicSet masih dalam scope.
-    // Client-side guard di sini hanya untuk UX; authorizeMutation di server
-    // adalah pagar terakhir (lihat operatorCanTouchTopicSets).
     if (allowedSet) {
       const outOfScope = u!.topicSets.filter((ts) => !allowedSet.has(ts.topikId));
       if (outOfScope.length > 0) {
@@ -224,10 +222,17 @@ function UjianEditor() {
         return;
       }
     }
+    const res = await mutateUjianServer({ data: { action: "upsert", payload: u! } });
+    if (!res.ok) {
+      toast.error(res.error || "Gagal menyimpan ujian ke server");
+      return;
+    }
     ujianRepo.upsert(u!);
-    toast.success("Disimpan");
+    toast.success("Ujian berhasil disimpan");
     navigate({ to: "/admin/ujian" });
   }
+
+  const taList = tahunAkademikRepo.all();
 
   return (
     <div className="space-y-4 max-w-4xl neo-ready">
@@ -274,9 +279,14 @@ function UjianEditor() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">(Tanpa Mata Kuliah)</SelectItem>
-                  {mkList.map((mk) => (
-                    <SelectItem key={mk.id} value={mk.id}>{mk.nama}</SelectItem>
-                  ))}
+                  {mkList.map((mk) => {
+                    const uInfo = groups.find((g) => g.id === mk.unitId);
+                    return (
+                      <SelectItem key={mk.id} value={mk.id}>
+                        [{mk.kode}] {mk.nama} {uInfo ? `(${uInfo.nama})` : ""} - {mk.sks} SKS
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             </div>
@@ -288,9 +298,14 @@ function UjianEditor() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">(Tanpa Semester)</SelectItem>
-                  {smtList.map((smt) => (
-                    <SelectItem key={smt.id} value={smt.id}>{smt.nama}</SelectItem>
-                  ))}
+                  {smtList.map((smt) => {
+                    const ta = taList.find((t) => t.id === smt.tahunAkademikId);
+                    return (
+                      <SelectItem key={smt.id} value={smt.id}>
+                        {smt.nama} {ta ? `- ${ta.nama}` : ""} {ta?.aktif ? "(Aktif)" : ""}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             </div>
@@ -454,20 +469,30 @@ function UjianEditor() {
           <div className="space-y-1">
             <Label className="text-xs">Group yang boleh ikut (kosong = semua)</Label>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {groups.map((g) => (
-                <label key={g.id} className="flex items-center gap-2 rounded border p-2 text-sm">
-                  <Checkbox
-                    checked={u.groupIds.includes(g.id)}
-                    onCheckedChange={(v) =>
-                      set(
-                        "groupIds",
-                        v ? [...u.groupIds, g.id] : u.groupIds.filter((x) => x !== g.id),
-                      )
-                    }
-                  />
-                  {g.nama}
-                </label>
-              ))}
+              {groups.map((g) => {
+                const parentG = groups.find((p) => p.id === g.parentId);
+                const tipeLabel = g.tipe === "prodi" ? "Prodi" : g.tipe === "fakultas" ? "Fakultas" : "Kelas";
+                return (
+                  <label key={g.id} className="flex items-start gap-2 rounded border p-2 text-sm hover:bg-accent/50 cursor-pointer">
+                    <Checkbox
+                      className="mt-0.5"
+                      checked={u.groupIds.includes(g.id)}
+                      onCheckedChange={(v) =>
+                        set(
+                          "groupIds",
+                          v ? [...u.groupIds, g.id] : u.groupIds.filter((x) => x !== g.id),
+                        )
+                      }
+                    />
+                    <div className="flex flex-col min-w-0">
+                      <span className="font-medium text-xs truncate">{g.nama}</span>
+                      <span className="text-[10px] text-muted-foreground truncate">
+                        [{tipeLabel}]{parentG ? ` • ${parentG.nama}` : ""}
+                      </span>
+                    </div>
+                  </label>
+                );
+              })}
             </div>
           </div>
           <div className="flex items-center justify-between rounded border p-2">

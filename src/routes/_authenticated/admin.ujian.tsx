@@ -15,6 +15,7 @@ import { visibleUjians } from "@/lib/cbt/access";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useThemeStore } from "@/lib/cbt/theme-store";
+import { mutateUjianServer } from "@/lib/server/ujian/functions";
 import { AdminPage, AdminPageHeader } from "@/components/cbt/AdminPage";
 
 export const Route = createFileRoute("/_authenticated/admin/ujian")({
@@ -37,7 +38,7 @@ function UjianList() {
   const [activeTab, setActiveTab] = useState<"semua" | "persiapan" | "berlangsung" | "selesai">("semua");
   const [search, setSearch] = useState("");
 
-  function add() {
+  async function add() {
     const u: Ujian = {
       id: uid("ex_"),
       nama: "Ujian Baru",
@@ -59,6 +60,11 @@ function UjianList() {
       createdBy: user.id,
       createdAt: Date.now(),
     };
+    const res = await mutateUjianServer({ data: { action: "upsert", payload: u } });
+    if (!res.ok) {
+      toast.error(res.error || "Gagal membuat ujian di server");
+      return;
+    }
     ujianRepo.upsert(u);
     setList(visibleUjians(user));
     toast.success("Ujian baru dibuat — silakan edit");
