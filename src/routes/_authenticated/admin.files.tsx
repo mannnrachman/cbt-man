@@ -77,7 +77,7 @@ function FilesPage() {
   });
 
   return (
-    <AdminPage>
+    <AdminPage className="neo-ready">
       
       <AdminPageHeader
         title="Drive Penyimpanan"
