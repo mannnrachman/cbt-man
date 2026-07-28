@@ -13,7 +13,7 @@ function LeaderboardIndex() {
   const sesi = sesiRepo.all();
 
   return (
-    <AdminPage>
+    <AdminPage className="neo-ready">
       <div className="max-w-4xl pb-20 w-full">
       <AdminPageHeader
         title="Leaderboard"

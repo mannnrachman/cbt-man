@@ -24,7 +24,7 @@ export function AnalitikIndex() {
   const totalSelesai = semuaSesi.filter((s) => s.status === "selesai").length;
 
   return (
-    <AdminPage>
+    <AdminPage className="neo-ready">
       <AdminPageHeader
         title="Analisis & Hasil"
         description="Ringkasan aktivitas ujian, laporan hasil, dan peringkat kelas."
