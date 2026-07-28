@@ -70,7 +70,14 @@ function MataKuliahPage() {
   async function save() {
     if (!form.nama.trim() || !form.kode.trim() || !form.unitId || !form.semesterId) {
       toast.error("Kode, Nama, Unit, dan Semester wajib diisi");
-
+      return;
+    }
+    const targetKode = form.kode.trim().toUpperCase();
+    const isDuplicateKode = items.some(
+      (item) => item.kode.trim().toUpperCase() === targetKode && item.id !== form.id
+    );
+    if (isDuplicateKode) {
+      toast.error(`Kode Mata Kuliah "${targetKode}" sudah digunakan!`);
       return;
     }
     const payload: MataKuliah = { 
