@@ -12,6 +12,8 @@ import type { Ujian } from "@/lib/cbt/types";
 import { Plus, Users, BarChart3, KeyRound, PlayCircle, Clock, CheckCircle2, Settings2, FileSignature, FileText, Search, Filter } from "lucide-react";
 import { toast } from "sonner";
 import { visibleUjians } from "@/lib/cbt/access";
+import { cn } from "@/lib/utils";
+import { useThemeStore } from "@/lib/cbt/theme-store";
 import { Button } from "@/components/ui/button";
 
 import { AdminPage, AdminPageHeader } from "@/components/cbt/AdminPage";
@@ -31,6 +33,7 @@ function UjianRoute() {
 
 function UjianList() {
   const user = useAuthStore((s) => s.user)!;
+  const { theme } = useThemeStore();
   const [list, setList] = useState<Ujian[]>(visibleUjians(user));
   const [activeTab, setActiveTab] = useState<"semua" | "persiapan" | "berlangsung" | "selesai">("semua");
   const [search, setSearch] = useState("");
@@ -78,7 +81,12 @@ function UjianList() {
     const mk = u.mataKuliahId ? mataKuliahRepo.byId(u.mataKuliahId) : null;
 
     return (
-      <div key={u.id} className="group flex items-center justify-between p-3 sm:p-4 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
+      <div key={u.id} className={cn(
+        "group flex items-center justify-between p-3 sm:p-4 transition-colors",
+        theme === "neobrutalism"
+          ? "bg-[color:var(--neo-hover)] hover:bg-white border-b-[3px] border-black last:border-b-0"
+          : "bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900/50"
+      )}>
         <div className="flex items-center gap-4 flex-1 min-w-0">
           <div className="hidden sm:flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
             {type === "persiapan" && <Clock className="h-5 w-5 text-slate-400" />}
@@ -152,7 +160,7 @@ function UjianList() {
     activeTab === "selesai" ? selesai : filteredList;
 
   return (
-    <AdminPage>
+    <AdminPage className="neo-ready">
       
       <AdminPageHeader
         title="Manajemen Paket Ujian"
@@ -178,8 +186,12 @@ function UjianList() {
               }`}
             >
               {tab.label}
-              <span className={`px-1.5 py-0.5 rounded text-[10px] ${activeTab === tab.id ? "bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300" : "bg-slate-100 dark:bg-slate-800 text-slate-500"}`}>
-                {tab.count}
+              <span className={cn(
+                "px-1.5 py-0.5 text-[10px]",
+                theme === "neobrutalism"
+                  ? "rounded-none border-[2px] border-black font-black text-black bg-[color:var(--neo-bg)]"
+                  : cn("rounded", activeTab === tab.id ? "bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300" : "bg-slate-100 dark:bg-slate-800 text-slate-500")
+              )}>  {tab.count}
               </span>
             </button>
           ))}
@@ -192,18 +204,28 @@ function UjianList() {
             placeholder="Cari ujian..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-1.5 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500 transition-colors"
+            className={cn(
+              "w-full pl-9 pr-4 py-1.5 text-sm transition-colors focus:outline-none",
+              theme === "neobrutalism"
+                ? "bg-white text-black border-[3px] border-black rounded-none shadow-[2px_2px_0_0_#000] font-bold focus:shadow-[4px_4px_0_0_#000] focus:translate-x-[-2px] focus:translate-y-[-2px]"
+                : "bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500"
+            )}
           />
         </div>
       </div>
 
       {/* Data List (Compact Table/Row Style) */}
-      <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm overflow-hidden">
+      <div className={cn(
+        "overflow-hidden",
+        theme === "neobrutalism"
+          ? "bg-[color:var(--neo-bg)] border-[3px] border-black shadow-[4px_4px_0_0_#000] rounded-none"
+          : "bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm"
+      )}>
         {currentList.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-            <FileText className="h-10 w-10 text-slate-300 dark:text-slate-700 mb-3" />
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Data Kosong</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Tidak ada paket ujian yang ditemukan di kategori ini.</p>
+            <FileText className={cn("h-10 w-10 mb-3", theme === "neobrutalism" ? "text-black" : "text-slate-300 dark:text-slate-700")} />
+            <h3 className={cn("text-sm", theme === "neobrutalism" ? "font-black uppercase tracking-wider text-black" : "font-semibold text-slate-900 dark:text-slate-100")}>Data Kosong</h3>
+            <p className={cn("text-sm mt-1", theme === "neobrutalism" ? "font-bold text-black" : "text-slate-500 dark:text-slate-400")}>Tidak ada paket ujian yang ditemukan di kategori ini.</p>
           </div>
         ) : (
           <div className="flex flex-col">

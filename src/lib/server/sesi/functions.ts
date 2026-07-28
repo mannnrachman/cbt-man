@@ -12,7 +12,7 @@ import {
 } from "../db/auth";
 import type { SesiUjian, NavKey } from "@/lib/cbt/types";
 import { writeAuditLog } from "../db/audit";
-import { stringifyJson, toBigInt, toNumber } from "../db/json";
+import { stringifyJson, toBigInt, toNumber, parseJson } from "../db/json";
 import { getRequestIP } from "@tanstack/start-server-core";
 import { ipInRanges } from "@/lib/cbt/cidr";
 
@@ -202,3 +202,39 @@ export const mutateSesiServer = createServerFn({ method: "POST" })
 			};
 		}
 	});
+
+export const getLiveOnlineSesis = createServerFn({ method: "GET" }).handler(
+	async () => {
+		const caller = await requireCaller();
+		if (!caller || caller.role === "mahasiswa") return [];
+		const rows = await prisma.sesiUjian.findMany({
+			where: { status: "sedang" },
+			include: { peserta: true, ujian: true }
+		});
+		// ponytail: super_admin sees all live sessions; operators only see ujian they can touch.
+		// If operator-all-read is intended by design, drop this filter.
+		const scoped: typeof rows = [];
+		for (const r of rows) {
+			if (caller.role === "super_admin" || await operatorCanTouchUjian(caller, r.ujianId)) scoped.push(r);
+		}
+		return scoped.map((r: any) => {
+			const soalIds = parseJson<string[]>(r.soalIds, []);
+			const jawaban = parseJson<any[]>(r.jawaban, []);
+			const dijawab = jawaban.filter((j: any) => (j.jawabanIds && j.jawabanIds.length > 0) || (j.jawabanEssay && j.jawabanEssay.length > 0)).length;
+			const totalSoal = soalIds.length || 1;
+			return {
+				id: r.id,
+				ujianId: r.ujianId,
+				pesertaId: r.pesertaId,
+				status: r.status,
+				mulaiAt: Number(r.mulaiAt),
+				endsAt: Number(r.endsAt),
+				pelanggaran: r.pelanggaran,
+				user: r.peserta ? { namaLengkap: r.peserta.namaLengkap, username: r.peserta.username } : undefined,
+				ujian: r.ujian ? { nama: r.ujian.nama } : undefined,
+				dijawab,
+				totalSoal,
+			};
+		});
+	}
+);
