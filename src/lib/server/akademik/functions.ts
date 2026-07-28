@@ -45,6 +45,10 @@ export const mutateUnitAkademikServer = createServerFn({ method: "POST" })
 				await prisma.unitAkademik.upsert({ where: { id: item.id }, update: item, create: item });
 			} else if (action === "remove") {
 				const id = (payload as { id: string }).id;
+				const childCount = await prisma.unitAkademik.count({ where: { parentId: id } });
+				if (childCount > 0) {
+					return { ok: false as const, error: `Tidak dapat menghapus: Unit ini masih memiliki ${childCount} sub-unit.` };
+				}
 				await prisma.unitAkademik.delete({ where: { id } });
 			}
 			audit(caller, "unitAkademik", action, payload);
@@ -65,10 +69,20 @@ export const mutateTahunAkademikServer = createServerFn({ method: "POST" })
 			
 			if (action === "upsert") {
 				const item = payload as TahunAkademik;
+				if (item.aktif) {
+					await prisma.tahunAkademik.updateMany({
+						where: { id: { not: item.id } },
+						data: { aktif: false },
+					});
+				}
 				await prisma.tahunAkademik.upsert({ where: { id: item.id }, update: item, create: item });
 			} else if (action === "remove") {
 				const id = String((payload as { id?: string }).id ?? "");
-				await prisma.tahunAkademik.delete({ where: { id } }).catch(() => {});
+				const semCount = await prisma.semester.count({ where: { tahunAkademikId: id } });
+				if (semCount > 0) {
+					return { ok: false as const, error: `Tidak dapat menghapus: Masih ada ${semCount} semester terikat pada tahun akademik ini.` };
+				}
+				await prisma.tahunAkademik.delete({ where: { id } });
 			}
 			audit(caller, "tahunAkademik", action, payload);
 			return { ok: true as const };
@@ -90,7 +104,11 @@ export const mutateSemesterServer = createServerFn({ method: "POST" })
 				await prisma.semester.upsert({ where: { id: item.id }, update: item, create: item });
 			} else if (action === "remove") {
 				const id = String((payload as { id?: string }).id ?? "");
-				await prisma.semester.delete({ where: { id } }).catch(() => {});
+				const mkCount = await prisma.mataKuliah.count({ where: { semesterId: id } });
+				if (mkCount > 0) {
+					return { ok: false as const, error: `Tidak dapat menghapus: Masih ada ${mkCount} mata kuliah terikat pada semester ini.` };
+				}
+				await prisma.semester.delete({ where: { id } });
 			}
 			audit(caller, "semester", action, payload);
 			return { ok: true as const };
@@ -112,7 +130,11 @@ export const mutateMataKuliahServer = createServerFn({ method: "POST" })
 				await prisma.mataKuliah.upsert({ where: { id: item.id }, update: item, create: item });
 			} else if (action === "remove") {
 				const id = String((payload as { id?: string }).id ?? "");
-				await prisma.mataKuliah.delete({ where: { id } }).catch(() => {});
+				const modulCount = await prisma.modul.count({ where: { mataKuliahId: id } });
+				if (modulCount > 0) {
+					return { ok: false as const, error: `Tidak dapat menghapus: Masih ada ${modulCount} modul/bank soal terikat pada mata kuliah ini.` };
+				}
+				await prisma.mataKuliah.delete({ where: { id } });
 			}
 			audit(caller, "mataKuliah", action, payload);
 			return { ok: true as const };

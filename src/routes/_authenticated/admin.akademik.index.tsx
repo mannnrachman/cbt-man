@@ -2,28 +2,42 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { unitAkademikRepo } from "@/lib/cbt/repos";
+import { mutateUnitAkademikServer } from "@/lib/server/akademik/functions";
 import type { UnitAkademik } from "@/lib/cbt/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Edit2, Trash2, ChevronRight, ChevronDown, Folder, Building2, Library, Users, Search } from "lucide-react";
+import { Plus, Edit2, Trash2, ChevronRight, ChevronDown, Folder, Building2, Library, Users } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/akademik/")({
   component: UnitAkademikExplorer,
 });
 
+function getDescendantIds(targetId: string, units: UnitAkademik[]): Set<string> {
+  const set = new Set<string>();
+  const addChildren = (parentId: string) => {
+    for (const u of units) {
+      if (u.parentId === parentId && !set.has(u.id)) {
+        set.add(u.id);
+        addChildren(u.id);
+      }
+    }
+  };
+  addChildren(targetId);
+  return set;
+}
+
 function UnitAkademikExplorer() {
-  const units = unitAkademikRepo.all();
+  const [units, setUnits] = useState<UnitAkademik[]>(unitAkademikRepo.all());
   const [search, setSearch] = useState("");
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   // Form State
   const [editing, setEditing] = useState<UnitAkademik | null>(null);
   const [form, setForm] = useState({ nama: "", tipe: "fakultas", parentId: "none" });
-
-  const rootUnits = units.filter((u: UnitAkademik) => !u.parentId);
 
   const toggleExpand = (id: string) => {
     const next = new Set(expanded);
@@ -49,23 +63,52 @@ function UnitAkademikExplorer() {
   };
 
   const save = async () => {
-    if (!form.nama) return alert("Nama wajib diisi!");
+    if (!form.nama.trim()) {
+      toast.error("Nama unit wajib diisi!");
+      return;
+    }
     const id = editing ? editing.id : `u_${Date.now()}`;
-    await unitAkademikRepo.upsert({
+    const payload: UnitAkademik = {
       id,
-      nama: form.nama,
+      nama: form.nama.trim(),
       tipe: form.tipe as any,
       parentId: form.parentId === "none" ? null : form.parentId,
-    });
+    };
+
+    const res = await mutateUnitAkademikServer({ data: { action: "upsert", payload } });
+    if (!res.ok) {
+      toast.error(res.error || "Gagal menyimpan unit ke server");
+      return;
+    }
+
+    unitAkademikRepo.upsert(payload);
+    setUnits([...unitAkademikRepo.all()]);
+    toast.success(editing ? "Unit Akademik diperbarui" : "Unit Akademik ditambahkan");
     resetForm();
   };
 
   const remove = async (id: string) => {
-    if (confirm("Hapus unit ini? Unit di bawahnya mungkin akan kehilangan induk.")) {
-      await unitAkademikRepo.remove(id);
-      setExpanded(new Set(expanded)); // This creates a new Set instance, forcing a re-render
+    const hasChildren = units.some((u: UnitAkademik) => u.parentId === id);
+    if (hasChildren) {
+      toast.error("Tidak dapat menghapus unit ini karena masih memiliki sub-unit di bawahnya.");
+      return;
     }
+
+    if (!confirm("Hapus unit akademik ini?")) return;
+
+    const res = await mutateUnitAkademikServer({ data: { action: "remove", payload: { id } } });
+    if (!res.ok) {
+      toast.error(res.error || "Gagal menghapus unit");
+      return;
+    }
+
+    unitAkademikRepo.remove(id);
+    setUnits([...unitAkademikRepo.all()]);
+    toast.success("Unit Akademik dihapus");
   };
+
+  const invalidParentIds = editing ? getDescendantIds(editing.id, units).add(editing.id) : new Set<string>();
+  const allowedParentUnits = units.filter((u: UnitAkademik) => !invalidParentIds.has(u.id));
 
   const renderTree = (parentIds: string[] | null, level: number = 0) => {
     const children = units
@@ -199,10 +242,8 @@ function UnitAkademikExplorer() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="fakultas">Fakultas</SelectItem>
-                  <SelectItem value="jurusan">Jurusan</SelectItem>
-                  <SelectItem value="semester">Semester</SelectItem>
-                  <SelectItem value="kelas">Kelas / Group</SelectItem>
-                  <SelectItem value="kategori_bebas">Kategori Bebas</SelectItem>
+                  <SelectItem value="prodi">Program Studi / Jurusan</SelectItem>
+                  <SelectItem value="kelas">Kelas / Paralel (A, B, C)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -214,7 +255,7 @@ function UnitAkademikExplorer() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">-- Sebagai Induk (Root) --</SelectItem>
-                  {units.map((u: UnitAkademik) => (
+                  {allowedParentUnits.map((u: UnitAkademik) => (
                     <SelectItem key={u.id} value={u.id}>{u.nama} ({u.tipe})</SelectItem>
                   ))}
                 </SelectContent>

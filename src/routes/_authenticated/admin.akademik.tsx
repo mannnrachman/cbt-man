@@ -12,7 +12,7 @@ const TREE_MENU = [
   {
     section: "Struktur Institusi",
     items: [
-      { label: "Fakultas & Jurusan", to: "/admin/akademik", icon: Network, indent: 0 },
+      { label: "Fakultas, Prodi & Kelas", to: "/admin/akademik", icon: Network, indent: 0 },
 
     ]
   },
