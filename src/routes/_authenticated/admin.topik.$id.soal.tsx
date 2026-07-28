@@ -9,11 +9,11 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Pencil, Trash2, Search, BookOpen, Layers, CheckCircle2, ListChecks } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, BookOpen, Layers, CheckCircle2, ListChecks, FolderOutput } from "lucide-react";
 import { toast } from "sonner";
 import { RichEditor, RichView } from "@/components/cbt/RichEditor";
 import { useAuthStore } from "@/lib/cbt/auth-store";
-import { isTopikAllowed } from "@/lib/cbt/access";
+import { isTopikAllowed, visibleTopiks } from "@/lib/cbt/access";
 
 export const Route = createFileRoute("/_authenticated/admin/topik/$id/soal")({
   component: SoalPage,
@@ -37,6 +37,8 @@ function SoalPage() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Soal | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [moveDialogOpen, setMoveDialogOpen] = useState(false);
+  const [targetTopikId, setTargetTopikId] = useState<string>("");
 
   if (!topik || !modul) return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -70,6 +72,32 @@ function SoalPage() {
       toast.error(`Gagal menghapus soal: ${res.error}`);
     }
     refresh();
+  }
+
+  async function handleBulkMove() {
+    if (!targetTopikId) {
+      toast.error("Pilih topik tujuan terlebih dahulu");
+      return;
+    }
+    const targetTopik = topikRepo.byId(targetTopikId);
+    if (!targetTopik) return;
+
+    selectedIds.forEach((id) => {
+      const s = soalRepo.byId(id);
+      if (s) {
+        soalRepo.upsert({ ...s, topikId: targetTopikId });
+      }
+    });
+
+    const res = await soalRepo.flush();
+    if (res.ok) {
+      toast.success(`${selectedIds.length} soal berhasil dipindahkan ke ${targetTopik.nama}`);
+      setMoveDialogOpen(false);
+      setTargetTopikId("");
+      refresh();
+    } else {
+      toast.error(`Gagal memindahkan soal: ${res.error}`);
+    }
   }
 
   const shown = soals.filter((s) =>
@@ -178,11 +206,19 @@ function SoalPage() {
             </Button>
             <Button
               size="sm"
+              variant="outline"
+              onClick={() => setMoveDialogOpen(true)}
+              className="h-8 text-xs font-semibold border-indigo-700/80 bg-indigo-900/40 hover:bg-indigo-800/60 text-indigo-200"
+            >
+              <FolderOutput className="mr-1.5 h-3.5 w-3.5" /> Pindah Terpilih ({selectedIds.length})
+            </Button>
+            <Button
+              size="sm"
               variant="destructive"
               onClick={handleBulkDelete}
               className="h-8 text-xs font-semibold bg-rose-600 hover:bg-rose-700"
             >
-              <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Hapus Terpilih ({selectedIds.length})
+              <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Hapus ({selectedIds.length})
             </Button>
           </div>
         </div>
@@ -279,6 +315,48 @@ function SoalPage() {
       </div>
 
       <SoalDialog open={open} onOpenChange={setOpen} editing={editing} topikId={topikId} onSaved={refresh} />
+      
+      {/* Move Selected Questions Dialog */}
+      <Dialog open={moveDialogOpen} onOpenChange={setMoveDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Pindahkan Soal Terpilih</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <p className="text-sm text-slate-500">
+              Pindahkan <strong>{selectedIds.length} soal</strong> ke topik lain dalam bank soal Anda.
+            </p>
+            <div className="space-y-2">
+              <Label>Topik Tujuan *</Label>
+              <Select value={targetTopikId} onValueChange={setTargetTopikId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Pilih topik tujuan" />
+                </SelectTrigger>
+                <SelectContent>
+                  {visibleTopiks(user)
+                    .filter((t) => t.id !== topikId)
+                    .map((t) => {
+                      const m = modulRepo.byId(t.modulId);
+                      return (
+                        <SelectItem key={t.id} value={t.id}>
+                          {m ? `${m.nama} → ` : ""}{t.nama}
+                        </SelectItem>
+                      );
+                    })}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setMoveDialogOpen(false)}>
+              Batal
+            </Button>
+            <Button onClick={handleBulkMove} disabled={!targetTopikId}>
+              Pindahkan Sekarang
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       </div>
     </div>
   );
