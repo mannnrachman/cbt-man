@@ -200,14 +200,62 @@
 }
 
 [data-theme='neobrutalism'] {
+  /* Ubah variabel Shadcn inti (TAPI biarkan background tetap putih agar rapi seperti dashboard) */
+  --radius: 0px;
+  --primary: #a3e635; /* Lime green untuk tombol utama */
+  --primary-foreground: #000000;
+  --accent: #facc15; /* Yellow untuk highlight */
+  --accent-foreground: #000000;
+  --border: #000000;
+  --ring: #000000;
+  
+  /* Variabel mundur (backward compatibility) untuk dashboard lama */
   --neo-shadow: 4px 4px 0 0 rgba(0,0,0,1);
-  --neo-border-width: 4px;
+  --neo-border-width: 3px;
   --neo-border-color: #000000;
-  --neo-bg: #facc15; /* yellow-400 */
-  --neo-accent: #a3e635; /* lime-400 */
+  --neo-bg: #facc15;
+  --neo-accent: #a3e635;
   --neo-text: #000000;
   --neo-radius: 0px;
   --neo-hover: #ffffff;
+}
+
+/* Membajak semua kelas utilitas Tailwind secara global saat Neobrutalism aktif */
+[data-theme='neobrutalism'] .neo-ready * {
+  border-color: #000000 !important;
+}
+
+[data-theme='neobrutalism'] .neo-ready .border { border-width: 3px !important; }
+[data-theme='neobrutalism'] .neo-ready .border-t { border-top-width: 3px !important; }
+[data-theme='neobrutalism'] .neo-ready .border-b { border-bottom-width: 3px !important; }
+[data-theme='neobrutalism'] .neo-ready .border-l { border-left-width: 3px !important; }
+[data-theme='neobrutalism'] .neo-ready .border-r { border-right-width: 3px !important; }
+
+[data-theme='neobrutalism'] .neo-ready .shadow,
+[data-theme='neobrutalism'] .neo-ready .shadow-sm,
+[data-theme='neobrutalism'] .neo-ready .shadow-md,
+[data-theme='neobrutalism'] .neo-ready .shadow-lg,
+[data-theme='neobrutalism'] .neo-ready .shadow-xl {
+  box-shadow: 4px 4px 0px 0px rgba(0,0,0,1) !important;
+}
+
+/* Tipografi Khas Neobrutalism (Font tebal & uppercase untuk tabel/badge) */
+[data-theme='neobrutalism'] .neo-ready th {
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+  color: #000000 !important;
+  letter-spacing: 0.05em;
+}
+
+[data-theme='neobrutalism'] .neo-ready td {
+  font-weight: 600 !important;
+  color: #000000 !important;
+}
+
+[data-theme='neobrutalism'] .neo-ready button {
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.025em;
 }
 
 
