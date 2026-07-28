@@ -74,56 +74,61 @@ function CommandCenter() {
   return (
     <div className="w-full space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
       
-      {/* 1. HERO SECTION (Native Style) */}
-      <section className="relative overflow-hidden rounded-[22px] bg-white dark:bg-slate-900 p-8 sm:p-10 border border-slate-200 dark:border-slate-800 shadow-sleek">
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
-          <div className="space-y-4 max-w-2xl">
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
-              Selamat datang kembali, <br className="hidden sm:block" />
-              <span>{user.namaLengkap}</span>
-            </h1>
-            <p className="text-slate-500 dark:text-slate-400 text-base max-w-xl leading-relaxed">
-              Pusat kendali ujian interaktif Anda. Pantau ujian secara real-time, kelola bank soal, dan hasilkan laporan performa dengan satu klik.
-            </p>
-          </div>
+      {/* 1. HERO SECTION (Neobrutalism Style) */}
+      <section className="relative overflow-hidden bg-[color:var(--neo-bg)] rounded-[2rem] p-8 sm:p-12 text-[color:var(--neo-text)]">
+        {/* Background Sparkles / Stars (Matching Coursue Design) */}
+        <div className="absolute top-0 right-0 bottom-0 w-1/2 overflow-hidden pointer-events-none hidden md:block">
+          {/* Large Star */}
+          <svg className="absolute top-8 right-16 w-[280px] h-[280px] text-[color:var(--neo-text)]/5" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C12 0 12 10 24 12C24 12 12 14 12 24C12 24 12 14 0 12C0 12 12 10 12 0Z" />
+          </svg>
+          {/* Small Star */}
+          <svg className="absolute bottom-16 right-[30%] w-24 h-24 text-[color:var(--neo-text)]/5" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C12 0 12 10 24 12C24 12 12 14 12 24C12 24 12 14 0 12C0 12 12 10 12 0Z" />
+          </svg>
+        </div>
+
+        <div className="relative z-10 max-w-2xl">
+          <p className="text-[color:var(--neo-text)]/60 uppercase tracking-widest text-xs font-bold mb-3">
+            DASHBOARD ADMINISTRASI
+          </p>
+          <h1 className="text-3xl md:text-5xl lg:text-[54px] font-medium leading-[1.1] mb-10 text-[color:var(--neo-text)]">
+            Kelola Ujian Kampus Anda Secara Profesional
+          </h1>
           
-          <div className="flex flex-col sm:flex-row gap-3 shrink-0">
-            <Button size="lg" className="font-semibold rounded-xl h-11 px-6 shadow-sleek" asChild>
-              <Link to="/admin/ujian">
-                <Plus className="mr-2 h-4 w-4" /> Jadwalkan Ujian
-              </Link>
-            </Button>
-            <Button size="lg" variant="outline" className="font-semibold rounded-xl h-11 px-6 shadow-sleek" asChild>
-              <Link to="/admin/modul">
-                <BookOpen className="mr-2 h-4 w-4" /> Bank Soal
-              </Link>
-            </Button>
-          </div>
+          <Button size="lg" className="rounded-full bg-black text-white hover:bg-gray-800 pl-8 pr-2 py-2 h-14 text-base font-medium flex items-center gap-4 border-0 w-fit" asChild>
+            <Link to="/admin/ujian">
+              Jadwalkan Ujian
+              <div className="bg-white text-[color:var(--neo-text)] rounded-full w-10 h-10 flex items-center justify-center shrink-0">
+                <ArrowRight className="w-5 h-5 stroke-[3]" />
+              </div>
+            </Link>
+          </Button>
         </div>
       </section>
 
-      {/* 2. STATS GRID (Premium Glass Cards) */}
-      <section className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+      {/* 2. STATS GRID (Neobrutalism Cards) */}
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
         <StatCard 
-          icon={<Users className="h-5 w-5" />} 
+          icon={<Users className="h-6 w-6 stroke-[3]" />} 
           label="Total Peserta" 
           value={counts.peserta} 
           trend={newPeserta > 0 ? `+${newPeserta} baru` : null}
         />
         <StatCard 
-          icon={<FileText className="h-5 w-5" />} 
+          icon={<FileText className="h-6 w-6 stroke-[3]" />} 
           label="Total Ujian" 
           value={counts.ujian} 
           trend={newUjian > 0 ? `+${newUjian} ujian` : null}
         />
         <StatCard 
-          icon={<BookOpen className="h-5 w-5" />} 
+          icon={<BookOpen className="h-6 w-6 stroke-[3]" />} 
           label="Bank Soal" 
           value={counts.soal} 
           trend={newSoal > 0 ? `+${newSoal} soal` : null}
         />
         <StatCard 
-          icon={<Zap className="h-5 w-5" />} 
+          icon={<Zap className="h-6 w-6 stroke-[3]" />} 
           label="Total Sesi" 
           value={counts.sesi} 
         />
@@ -135,74 +140,65 @@ function CommandCenter() {
         <div className="lg:col-span-8 space-y-8">
           
           {/* Live Exams Dashboard */}
-          <section className="group relative bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/60 dark:border-slate-800/60 shadow-xl shadow-slate-200/50 dark:shadow-black/20 p-1 overflow-hidden transition-all hover:shadow-2xl hover:shadow-slate-200/60 dark:hover:shadow-black/40">
-            {activeExams.length > 0 && (
-              <div className="absolute -top-40 -right-40 w-96 h-96 bg-emerald-500/20 dark:bg-emerald-500/10 blur-[100px] rounded-full pointer-events-none group-hover:bg-emerald-500/30 transition-colors duration-700" />
-            )}
-            
-            <div className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl rounded-[22px] p-6 sm:p-8 h-full relative z-10">
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-2xl bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 shadow-inner">
-                    <MonitorPlay className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Live Monitoring</h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Pantau ujian yang sedang berlangsung secara real-time</p>
-                  </div>
+          <section className="bg-white border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] shadow-[var(--neo-shadow)] p-6 sm:p-8">
+            <div className="flex items-center justify-between mb-8 pb-4 border-b-[length:var(--neo-border-width)] border-b-[color:var(--neo-border-color)]">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-[color:var(--neo-accent)] border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] shadow-[var(--neo-shadow)]">
+                  <MonitorPlay className="h-8 w-8 stroke-[3]" />
                 </div>
-                {activeExams.length > 0 && (
-                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-200/50 dark:border-emerald-500/20">
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                    </span>
-                    {activeExams.length} Aktif
-                  </div>
-                )}
+                <div>
+                  <h2 className="text-2xl font-black uppercase text-[color:var(--neo-text)] tracking-tight">Live Monitoring</h2>
+                  <p className="text-sm font-bold text-[color:var(--neo-text)] mt-1">Pantau ujian yang sedang berlangsung secara real-time</p>
+                </div>
               </div>
-
-              {activeExams.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl bg-slate-50/50 dark:bg-slate-800/20">
-                  <div className="h-16 w-16 rounded-3xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mb-4 shadow-inner">
-                    <PlayCircle className="h-8 w-8 opacity-50" />
-                  </div>
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2">Sistem Siaga</h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mb-6">
-                    Belum ada ujian yang berjalan saat ini. Anda dapat bersantai atau mulai menjadwalkan ujian berikutnya.
-                  </p>
-                  <Button className="rounded-xl shadow-lg hover:scale-105 transition-transform" asChild>
-                    <Link to="/admin/ujian">Buat Ujian Baru</Link>
-                  </Button>
-                </div>
-              ) : (
-                <div className="grid gap-4">
-                  {activeExams.map((exam) => (
-                    <div key={exam.id} className="group/card flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sleek hover:shadow-md hover:border-emerald-300 dark:hover:border-emerald-700/50 transition-all duration-300 cursor-pointer">
-                      <div className="flex items-center gap-4 mb-4 sm:mb-0">
-                        <div className="relative">
-                          <div className="absolute inset-0 bg-emerald-400 blur-md opacity-20 rounded-full group-hover/card:opacity-40 transition-opacity"></div>
-                          <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900">
-                            <Activity className="h-6 w-6" />
-                          </div>
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-1 group-hover/card:text-emerald-700 dark:group-hover/card:text-emerald-400 transition-colors">{exam.nama}</h3>
-                          <div className="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
-                            <span suppressHydrationWarning className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> Berakhir {new Date(exam.endAt!).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jakarta" })}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <Button className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 rounded-xl shadow-md group-hover/card:scale-105 transition-transform" asChild>
-                        <Link to="/admin/peserta/online">
-                          Pantau Peserta <ArrowRight className="ml-2 h-4 w-4" />
-                        </Link>
-                      </Button>
-                    </div>
-                  ))}
+              {activeExams.length > 0 && (
+                <div className="flex items-center gap-2 text-sm font-black uppercase tracking-wider text-[color:var(--neo-text)] bg-[color:var(--neo-bg)] px-4 py-2 border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] shadow-[var(--neo-shadow)]">
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full bg-black opacity-75"></span>
+                    <span className="relative inline-flex h-3 w-3 bg-black"></span>
+                  </span>
+                  {activeExams.length} Aktif
                 </div>
               )}
             </div>
+
+            {activeExams.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center border-4 border-dashed border-black bg-[color:var(--neo-bg)]">
+                <div className="h-16 w-16 bg-white border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] flex items-center justify-center text-[color:var(--neo-text)] mb-6 shadow-[var(--neo-shadow)]">
+                  <PlayCircle className="h-8 w-8 stroke-[3]" />
+                </div>
+                <h3 className="text-xl font-black uppercase text-[color:var(--neo-text)] mb-3 bg-white px-4 py-1 border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] shadow-[var(--neo-shadow)]">Sistem Siaga</h3>
+                <p className="text-sm font-bold text-[color:var(--neo-text)] max-w-sm mb-8 bg-white/70 p-3 border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] shadow-[var(--neo-shadow)]">
+                  Belum ada ujian yang berjalan saat ini. Anda dapat bersantai atau mulai menjadwalkan ujian berikutnya.
+                </p>
+                <Button className="font-black uppercase rounded-[var(--neo-radius)] border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] bg-[color:var(--neo-accent)] text-[color:var(--neo-text)] shadow-[var(--neo-shadow)] hover:bg-white hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[var(--neo-shadow)] px-8 h-12" asChild>
+                  <Link to="/admin/ujian">Buat Ujian Baru</Link>
+                </Button>
+              </div>
+            ) : (
+              <div className="grid gap-6">
+                {activeExams.map((exam) => (
+                  <div key={exam.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-white border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] shadow-[var(--neo-shadow)] hover:bg-[color:var(--neo-bg)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[var(--neo-shadow)] transition-all duration-100">
+                    <div className="flex items-center gap-5 mb-4 sm:mb-0">
+                      <div className="flex h-14 w-14 items-center justify-center bg-[color:var(--neo-accent)] border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] shadow-[var(--neo-shadow)]">
+                        <Activity className="h-7 w-7 stroke-[3]" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-black uppercase text-[color:var(--neo-text)] mb-2">{exam.nama}</h3>
+                        <div className="flex items-center gap-3 text-sm font-bold text-[color:var(--neo-text)] bg-white px-3 py-1.5 border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] inline-flex shadow-[var(--neo-shadow)]">
+                          <Clock className="h-5 w-5 stroke-[3]" /> Berakhir {new Date(exam.endAt!).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jakarta" })}
+                        </div>
+                      </div>
+                    </div>
+                    <Button className="w-full sm:w-auto font-black uppercase bg-black text-white rounded-[var(--neo-radius)] border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] shadow-[var(--neo-shadow)] hover:bg-white hover:text-[color:var(--neo-text)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[var(--neo-shadow)] transition-all h-12 px-6" asChild>
+                      <Link to="/admin/peserta/online">
+                        Pantau Peserta <ArrowRight className="ml-3 h-5 w-5 stroke-[3]" />
+                      </Link>
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
 
         </div>
@@ -211,40 +207,41 @@ function CommandCenter() {
         <div className="lg:col-span-4 space-y-8">
           
           {/* Action Required */}
-          <section className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/60 dark:border-slate-800/60 shadow-xl shadow-slate-200/50 dark:shadow-black/20 p-6 sm:p-8 relative overflow-hidden">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 rounded-xl bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400">
-                <AlertCircle className="h-5 w-5" />
+          <section className="bg-white border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] shadow-[var(--neo-shadow)] p-6 sm:p-8">
+            <div className="flex items-center gap-4 mb-6 pb-4 border-b-[length:var(--neo-border-width)] border-b-[color:var(--neo-border-color)]">
+              <div className="p-2 bg-[color:var(--neo-bg)] border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] shadow-[var(--neo-shadow)]">
+                <AlertCircle className="h-6 w-6 stroke-[3]" />
               </div>
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">Perlu Perhatian</h2>
+              <h2 className="text-xl font-black uppercase text-[color:var(--neo-text)] tracking-tight">Perlu Perhatian</h2>
             </div>
 
             {pendingTasks.length === 0 ? (
-              <div className="flex items-start gap-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
-                <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
+              <div className="flex items-start gap-4 p-5 bg-[color:var(--neo-accent)] border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] shadow-[var(--neo-shadow)]">
+                <div className="bg-white border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] p-2 shadow-[var(--neo-shadow)]">
+                  <CheckCircle2 className="h-6 w-6 stroke-[3] text-[color:var(--neo-text)]" />
+                </div>
                 <div>
-                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100">Semua Terkendali</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Tidak ada tugas yang tertunda.</p>
+                  <p className="text-lg font-black uppercase text-[color:var(--neo-text)]">Semua Terkendali</p>
+                  <p className="text-sm font-bold text-[color:var(--neo-text)] mt-1">Tidak ada tugas yang tertunda.</p>
                 </div>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-6">
                 {pendingTasks.map((task) => (
-                  <Link key={task.id} to={task.route} className="flex flex-col p-4 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200/50 dark:border-amber-800/50 hover:shadow-md hover:border-amber-300 dark:hover:border-amber-700 transition-all group">
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="text-amber-600 dark:text-amber-500 bg-amber-100 dark:bg-amber-900/50 p-2 rounded-xl">
+                  <Link key={task.id} to={task.route} className="flex flex-col p-5 bg-[color:var(--neo-bg)] border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] shadow-[var(--neo-shadow)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[var(--neo-shadow)] transition-all group">
+                    <div className="flex justify-between items-start mb-5">
+                      <div className="bg-white border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] p-2 shadow-[var(--neo-shadow)] text-[color:var(--neo-text)]">
                         {task.icon}
                       </div>
-                      <div className="bg-white dark:bg-slate-900 text-amber-700 dark:text-amber-400 text-xs font-bold px-2.5 py-1 rounded-full shadow-sleek">
+                      <div className="bg-black text-white text-xs font-black uppercase tracking-wider px-3 py-1.5 shadow-[var(--neo-shadow)] border-2 border-white">
                         {task.count} antrean
                       </div>
                     </div>
-                    <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-1 group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors">{task.title}</h3>
-                    <p className="text-xs text-slate-600 dark:text-slate-400 flex items-center mt-1 font-medium">
-                      Selesaikan sekarang <ArrowRight className="ml-1 h-3 w-3 group-hover:translate-x-1 transition-transform" />
+                    <h3 className="font-black uppercase text-[color:var(--neo-text)] text-xl mb-3">{task.title}</h3>
+                    <p className="text-sm font-bold text-[color:var(--neo-text)] flex items-center bg-white px-3 py-1.5 border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] inline-flex shadow-[var(--neo-shadow)] w-fit group-hover:bg-[color:var(--neo-accent)]">
+                      Selesaikan sekarang <ArrowRight className="ml-2 h-5 w-5 stroke-[3]" />
                     </p>
                   </Link>
-
                 ))}
               </div>
             )}
@@ -252,60 +249,57 @@ function CommandCenter() {
 
           {/* Upcoming Schedule */}
           {upcomingExams.length > 0 && (
-            <section className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/60 dark:border-slate-800/60 shadow-xl shadow-slate-200/50 dark:shadow-black/20 p-6 sm:p-8">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 rounded-xl bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400">
-                  <CalendarClock className="h-5 w-5" />
+            <section className="bg-white border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] shadow-[var(--neo-shadow)] p-6 sm:p-8">
+              <div className="flex items-center gap-4 mb-6 pb-4 border-b-[length:var(--neo-border-width)] border-b-[color:var(--neo-border-color)]">
+                <div className="p-2 bg-[color:var(--neo-bg)] border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] shadow-[var(--neo-shadow)]">
+                  <CalendarClock className="h-6 w-6 stroke-[3]" />
                 </div>
-                <h2 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">Ujian Mendatang</h2>
+                <h2 className="text-xl font-black uppercase text-[color:var(--neo-text)] tracking-tight">Ujian Mendatang</h2>
               </div>
               
               <div className="relative">
                 {/* Timeline line */}
-                <div className="absolute left-[19px] top-4 bottom-4 w-px bg-slate-200 dark:bg-slate-800"></div>
+                <div className="absolute left-[24px] top-4 bottom-4 w-1.5 bg-black"></div>
                 
-                <div className="space-y-6 relative">
+                <div className="space-y-8 relative">
                   {upcomingExams.map((exam) => (
-                    <div key={exam.id} className="flex gap-4 group cursor-default">
-                      <div className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white dark:bg-slate-900 border-4 border-white dark:border-slate-900 shadow-sleek">
-                        <div className="h-3 w-3 rounded-full bg-blue-500 group-hover:scale-150 transition-transform duration-300"></div>
+                    <div key={exam.id} className="flex gap-6 group cursor-default">
+                      <div className="relative z-10 flex h-14 w-14 shrink-0 items-center justify-center bg-[color:var(--neo-accent)] border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] shadow-[var(--neo-shadow)]">
+                        <div className="h-4 w-4 bg-black group-hover:scale-150 transition-transform duration-300"></div>
                       </div>
-                      <div className="pt-2 pb-2">
-                        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 leading-none mb-2">{exam.nama}</h3>
-                        <p className="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                          <Clock className="h-3.5 w-3.5" /> 
+                      <div className="pt-1 pb-2">
+                        <h3 className="text-base font-black uppercase text-[color:var(--neo-text)] leading-none mb-3 bg-white px-2 py-1 border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] shadow-[var(--neo-shadow)] inline-block">{exam.nama}</h3>
+                        <p className="text-xs font-bold text-[color:var(--neo-text)] bg-[color:var(--neo-bg)] px-3 py-1.5 border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] shadow-[var(--neo-shadow)] flex items-center gap-2 w-fit">
+                          <Clock className="h-4 w-4 stroke-[3]" /> 
                           <span suppressHydrationWarning>{new Date(exam.beginAt!).toLocaleDateString("id-ID", { day: "numeric", month: "short", timeZone: "Asia/Jakarta" })} • {new Date(exam.beginAt!).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jakarta" })}</span>
                         </p>
                       </div>
                     </div>
                   ))}
                 </div>
-
               </div>
             </section>
           )}
 
           {/* System Info */}
-          <section className="bg-slate-50 dark:bg-slate-900/30 rounded-3xl border border-slate-200/60 dark:border-slate-800/60 p-6 sm:p-8">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">
+          <section className="bg-[color:var(--neo-bg)] border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] shadow-[var(--neo-shadow)] p-6 sm:p-8">
+            <h2 className="text-lg font-black uppercase tracking-wider text-[color:var(--neo-text)] mb-6 border-b-[length:var(--neo-border-width)] border-b-[color:var(--neo-border-color)] pb-3">
               Informasi Sistem
-
             </h2>
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-2">
-                <span className="text-slate-600 dark:text-slate-400 font-medium">Database</span>
-                <span className="font-semibold text-slate-900 dark:text-slate-300 flex items-center gap-1.5">
-                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-500"></div> SQLite Local
+            <div className="space-y-5 text-sm font-bold">
+              <div className="flex justify-between items-center border-b-[length:var(--neo-border-width)] border-b-[color:var(--neo-border-color)] pb-4 border-dashed">
+                <span className="text-[color:var(--neo-text)] uppercase">Database</span>
+                <span className="text-[color:var(--neo-text)] bg-white px-3 py-1 border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] shadow-[var(--neo-shadow)] flex items-center gap-2">
+                  <div className="h-3 w-3 bg-[color:var(--neo-accent)] border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)]"></div> SQLite Local
                 </span>
-
               </div>
-              <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-2">
-                <span className="text-slate-600 dark:text-slate-400 font-medium">Engine</span>
-                <span className="font-semibold text-slate-900 dark:text-slate-300">Prisma ORM</span>
+              <div className="flex justify-between items-center border-b-[length:var(--neo-border-width)] border-b-[color:var(--neo-border-color)] pb-4 border-dashed">
+                <span className="text-[color:var(--neo-text)] uppercase">Engine</span>
+                <span className="text-[color:var(--neo-text)] bg-white px-3 py-1 border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] shadow-[var(--neo-shadow)]">Prisma ORM</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-slate-600 dark:text-slate-400 font-medium">Version</span>
-                <span className="font-semibold text-slate-900 dark:text-slate-300">v1.2.0</span>
+                <span className="text-[color:var(--neo-text)] uppercase">Version</span>
+                <span className="text-[color:var(--neo-text)] bg-white px-3 py-1 border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] shadow-[var(--neo-shadow)]">v1.2.0</span>
               </div>
             </div>
           </section>
@@ -316,27 +310,27 @@ function CommandCenter() {
   );
 }
 
-// Reusable Stat Card Component
+// Reusable Stat Card Component (Neobrutalism)
 function StatCard({ icon, label, value, trend }: { icon: React.ReactNode, label: string, value: number, trend?: string | null }) {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-[22px] p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
-      <div className="flex items-start justify-between mb-4">
-        <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400">{label}</h3>
-        <div className="text-slate-400 dark:text-slate-500">
+    <div className="bg-white p-5 sm:p-6 border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] shadow-[var(--neo-shadow)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[var(--neo-shadow)] transition-all duration-100 flex flex-col justify-between h-full">
+      <div className="flex items-start justify-between mb-6">
+        <h3 className="text-xs font-black uppercase tracking-wider text-[color:var(--neo-text)] bg-[color:var(--neo-bg)] px-3 py-1.5 border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] shadow-[var(--neo-shadow)] text-center">{label}</h3>
+        <div className="text-[color:var(--neo-text)] bg-[color:var(--neo-accent)] p-2 border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] shadow-[var(--neo-shadow)]">
           {icon}
         </div>
       </div>
       <div>
-        <div className="flex items-end gap-2">
-          <span className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">{value}</span>
+        <div className="flex items-end gap-3 mt-4">
+          <span className="text-4xl md:text-5xl font-black text-[color:var(--neo-text)] tracking-tight">{value}</span>
           {trend && (
-            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full mb-1.5">
+            <span className="text-xs font-black text-[color:var(--neo-text)] bg-[color:var(--neo-accent)] px-2 py-1 border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] shadow-[var(--neo-shadow)] mb-2 inline-block">
               {trend}
             </span>
           )}
-
         </div>
       </div>
     </div>
   );
 }
+

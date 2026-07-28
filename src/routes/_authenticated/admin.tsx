@@ -230,27 +230,27 @@ function AdminLayout() {
 
         {/* Sidebar */}
         <aside className={cn(
-          "w-64 shrink-0 border-r bg-sidebar text-sidebar-foreground lg:block transition-transform duration-300 z-50 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto scrollbar-thin",
-          mobileMenuOpen ? "fixed inset-y-0 left-0 h-screen overflow-y-auto shadow-2xl" : "hidden"
+          "w-72 shrink-0 border-r-[length:var(--neo-border-width)] border-r-[color:var(--neo-border-color)] bg-white text-[color:var(--neo-text)] lg:block transition-transform duration-300 z-50 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto scrollbar-thin",
+          mobileMenuOpen ? "fixed inset-y-0 left-0 h-screen overflow-y-auto shadow-[var(--neo-shadow)]" : "hidden"
         )}>
-          <div className="flex h-14 items-center justify-between border-b px-4 font-semibold">
-            <div className="flex items-center gap-2">
+          <div className="flex h-16 items-center justify-between border-b-[length:var(--neo-border-width)] border-b-[color:var(--neo-border-color)] px-5 font-black uppercase tracking-wider text-xl bg-white">
+            <div className="flex items-center gap-3">
               {cfg.appLogo ? (
-                <img src={cfg.appLogo} alt="Logo" className="h-7 w-auto object-contain" />
+                <img src={cfg.appLogo} alt="Logo" className="h-8 w-auto object-contain" />
               ) : (
-                <span className="grid h-7 w-7 place-items-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
+                <span className="grid h-9 w-9 place-items-center bg-[color:var(--neo-accent)] border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] shadow-[var(--neo-shadow)] text-[color:var(--neo-text)] text-lg">
                   Z
                 </span>
               )}
               <span className="truncate">{appName}</span>
             </div>
             {mobileMenuOpen && (
-              <Button variant="ghost" size="icon" className="lg:hidden h-8 w-8" onClick={() => setMobileMenuOpen(false)}>
-                <X className="h-5 w-5" />
+              <Button variant="ghost" size="icon" title="Tutup menu navigasi" aria-label="Tutup menu navigasi" className="lg:hidden h-8 w-8 border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] hover:bg-[color:var(--neo-bg)] bg-white shadow-[var(--neo-shadow)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none rounded-[var(--neo-radius)]" onClick={() => setMobileMenuOpen(false)}>
+                <X className="h-5 w-5 stroke-[3]" />
               </Button>
             )}
           </div>
-          <nav className="space-y-6 p-4">
+          <nav className="flex flex-col gap-8 p-6">
             {navGroups.map((group) => {
               const visibleItems = group.items.filter((item) =>
                 canAccessAdminPath(user, item.to, cfg)
@@ -259,27 +259,28 @@ function AdminLayout() {
               if (visibleItems.length === 0) return null;
 
               return (
-                <div key={group.label} className="space-y-2">
-                  <h3 className="px-2 text-xs font-bold uppercase tracking-wider text-muted-foreground/70">
+                <div key={group.label} className="flex flex-col gap-4">
+                  <h3 className="w-full text-center px-3 py-2 text-xs font-black uppercase tracking-wider text-[color:var(--neo-text)] bg-[color:var(--neo-bg)] border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] shadow-[var(--neo-shadow)]">
                     {group.label}
                   </h3>
-                  <div className="space-y-1">
+                  <div className="flex flex-col gap-3">
                     {visibleItems.map((n) => {
-                      const active = n.exact ? pathname === n.to : pathname.startsWith(n.to);
                       const Icon = n.icon;
                       return (
                         <Link
                           key={n.to}
                           to={n.to as never}
-                          className={cn(
-                            "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
-                            active
-                              ? "bg-primary/10 text-primary shadow-sm"
-                              : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                          )}
+                          activeOptions={{ exact: n.exact }}
+                          activeProps={{
+                            className: "bg-[color:var(--neo-accent)] text-[color:var(--neo-text)] translate-x-[4px] translate-y-[4px] shadow-[var(--neo-shadow)]"
+                          }}
+                          inactiveProps={{
+                            className: "bg-white text-[color:var(--neo-text)] shadow-[var(--neo-shadow)] hover:bg-[color:var(--neo-bg)] hover:text-[color:var(--neo-text)] hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-[var(--neo-shadow)]"
+                          }}
+                          className="flex items-center gap-3 border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] px-4 py-3 text-xs md:text-sm font-black uppercase tracking-wider transition-all duration-100 ease-in-out rounded-[var(--neo-radius)]"
                         >
-                          <Icon className={cn("h-4 w-4", active ? "text-primary" : "text-muted-foreground")} />
-                          {n.label}
+                          <Icon className="h-5 w-5 stroke-[2.5] shrink-0" />
+                          <span className="leading-snug">{n.label}</span>
                         </Link>
                       );
                     })}
@@ -292,41 +293,47 @@ function AdminLayout() {
 
         <div className="flex min-h-screen flex-1 flex-col min-w-0">
 
-          <header className="flex h-14 items-center justify-between border-b bg-card px-4 lg:px-6 sticky top-0 z-30 shadow-sm backdrop-blur-md bg-card/80">
+          <header className="flex h-16 items-center justify-between border-b-[length:var(--neo-border-width)] border-b-[color:var(--neo-border-color)] bg-white px-4 lg:px-6 sticky top-0 z-30">
             <div className="flex items-center gap-4">
               <Button
                 variant="ghost"
                 size="icon"
-                className="lg:hidden"
+                title="Buka menu navigasi"
+                aria-label="Buka menu navigasi"
+                className="lg:hidden h-10 w-10 border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] bg-[color:var(--neo-bg)] hover:bg-[color:var(--neo-accent)] shadow-[var(--neo-shadow)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[var(--neo-shadow)] rounded-[var(--neo-radius)]"
                 onClick={() => setMobileMenuOpen(true)}
               >
-                <Menu className="h-5 w-5" />
+                <Menu className="h-6 w-6 stroke-[3] text-[color:var(--neo-text)]" />
               </Button>
-              <div className="text-sm text-muted-foreground hidden sm:block">
-                <span className="font-medium text-foreground">{user.namaLengkap}</span>
-                <span className="ml-2 rounded bg-accent px-1.5 py-0.5 text-xs font-medium text-accent-foreground">
+              <div className="text-sm hidden sm:flex items-center gap-4">
+                <span className="font-black uppercase text-[color:var(--neo-text)] text-base">{user.namaLengkap}</span>
+                <span className="border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] bg-[color:var(--neo-accent)] px-2 py-0.5 text-xs font-black uppercase text-[color:var(--neo-text)] shadow-[var(--neo-shadow)]">
                   {user.role}
                 </span>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-5">
               <Button
                 variant="ghost"
                 size="icon"
+                className="h-10 w-10 rounded-[var(--neo-radius)] border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] bg-white shadow-[var(--neo-shadow)] hover:bg-[color:var(--neo-bg)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[var(--neo-shadow)]"
                 onClick={toggleTheme}
-                title="Ganti Tema"
+                title="Ganti tema"
+                aria-label="Ganti tema"
               >
-                {theme === "dark" ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4 text-primary" />}
+                {theme === "dark" ? <Sun className="h-5 w-5 stroke-[3] text-[color:var(--neo-text)]" /> : <Moon className="h-5 w-5 stroke-[3] text-[color:var(--neo-text)]" />}
               </Button>
               <Button
                 variant="outline"
-                size="sm"
+                title="Keluar"
+                aria-label="Keluar"
+                className="h-10 rounded-[var(--neo-radius)] border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] bg-white font-black uppercase text-[color:var(--neo-text)] shadow-[var(--neo-shadow)] hover:bg-red-400 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[var(--neo-shadow)]"
                 onClick={async () => {
                   await logout();
                   navigate({ to: "/login" });
                 }}
               >
-                <LogOut className="mr-1.5 h-4 w-4" /> <span className="hidden sm:inline">Keluar</span>
+                <LogOut className="mr-2 h-5 w-5 stroke-[3]" /> <span className="hidden sm:inline">Keluar</span>
               </Button>
             </div>
           </header>
