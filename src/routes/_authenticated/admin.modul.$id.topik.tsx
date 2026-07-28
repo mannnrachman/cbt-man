@@ -46,7 +46,7 @@ function TopikPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-8 animate-in fade-in duration-500 pb-12 pt-4">
+    <div className="max-w-6xl mx-auto space-y-10 animate-in fade-in duration-500 pb-12 pt-4 neo-ready">
       {/* Header Section */}
       <div className="flex flex-col gap-4 md:flex-row md:items-end justify-between border-b border-slate-200 dark:border-white/10 pb-6">
         <div className="space-y-1">
