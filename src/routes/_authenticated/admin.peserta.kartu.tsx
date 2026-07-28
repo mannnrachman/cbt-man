@@ -30,7 +30,7 @@ function KartuPage() {
   const appName = config?.appName || "CBT-MAN";
 
   return (
-    <AdminPage>
+    <AdminPage className="neo-ready">
       <div className="flex items-center justify-between gap-2 print:hidden">
         <AdminPageHeader
           title="Cetak Kartu Peserta"
