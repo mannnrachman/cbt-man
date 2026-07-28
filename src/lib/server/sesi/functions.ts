@@ -12,7 +12,7 @@ import {
 } from "../db/auth";
 import type { SesiUjian, NavKey } from "@/lib/cbt/types";
 import { writeAuditLog } from "../db/audit";
-import { stringifyJson, toBigInt, toNumber } from "../db/json";
+import { stringifyJson, toBigInt, toNumber, parseJson } from "../db/json";
 import { getRequestIP } from "@tanstack/start-server-core";
 import { ipInRanges } from "@/lib/cbt/cidr";
 
@@ -211,9 +211,15 @@ export const getLiveOnlineSesis = createServerFn({ method: "GET" }).handler(
 			where: { status: "sedang" },
 			include: { peserta: true, ujian: true }
 		});
-		return rows.map((r: any) => {
-			const soalIds = typeof r.soalIds === "string" ? JSON.parse(r.soalIds) : r.soalIds || [];
-			const jawaban = typeof r.jawaban === "string" ? JSON.parse(r.jawaban) : r.jawaban || [];
+		// ponytail: super_admin sees all live sessions; operators only see ujian they can touch.
+		// If operator-all-read is intended by design, drop this filter.
+		const scoped: typeof rows = [];
+		for (const r of rows) {
+			if (caller.role === "super_admin" || await operatorCanTouchUjian(caller, r.ujianId)) scoped.push(r);
+		}
+		return scoped.map((r: any) => {
+			const soalIds = parseJson<string[]>(r.soalIds, []);
+			const jawaban = parseJson<any[]>(r.jawaban, []);
 			const dijawab = jawaban.filter((j: any) => (j.jawabanIds && j.jawabanIds.length > 0) || (j.jawabanEssay && j.jawabanEssay.length > 0)).length;
 			const totalSoal = soalIds.length || 1;
 			return {

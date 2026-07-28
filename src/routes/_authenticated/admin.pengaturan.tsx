@@ -198,6 +198,7 @@ function PengaturanPage() {
             {/* Theme: Modern (Default) */}
             <button 
               onClick={() => setTheme("default")}
+              aria-pressed={theme === "default"}
               className={`text-left p-4 rounded-xl border-2 transition-all ${theme === "default" ? "border-primary ring-2 ring-primary/20 bg-primary/5" : "border-slate-200 dark:border-slate-800 hover:border-primary/50 bg-white dark:bg-slate-900"}`}
             >
               <div className="flex justify-between items-start mb-4">
@@ -214,6 +215,7 @@ function PengaturanPage() {
             {/* Theme: Neobrutalism */}
             <button 
               onClick={() => setTheme("neobrutalism")}
+              aria-pressed={theme === "neobrutalism"}
               className={`text-left p-4 rounded-none border-4 transition-all ${theme === "neobrutalism" ? "border-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] bg-yellow-400/10" : "border-slate-200 dark:border-slate-800 hover:border-black bg-white dark:bg-slate-900"}`}
             >
               <div className="flex justify-between items-start mb-4">
