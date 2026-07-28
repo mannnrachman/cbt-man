@@ -48,14 +48,17 @@ function UsersPage() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [filterRole, setFilterRole] = useState("all");
+  const [filterUnit, setFilterUnit] = useState("all");
 
   function refresh() {
     router.invalidate();
   }
 
+  const unitMap = new Map((units as UnitAkademik[]).map((u) => [u.id, u]));
 
   const shown = users.filter((u) => 
     (filterRole === "all" || u.role === filterRole) &&
+    (filterUnit === "all" || u.unitId === filterUnit) &&
     (query === "" || u.namaLengkap.toLowerCase().includes(query.toLowerCase()) || u.username.toLowerCase().includes(query.toLowerCase()))
   );
 
@@ -66,7 +69,6 @@ function UsersPage() {
         description="Kelola akses akun admin, admin jurusan, dan evaluator."
         action={
           <Button onClick={() => { setEditing(null); setOpen(true); }} size="sm" className="h-9">
-
             <Plus className="mr-2 h-4 w-4" /> Tambah Akun
           </Button>
         }
@@ -88,15 +90,30 @@ function UsersPage() {
             <SelectItem value="all">Semua Peran</SelectItem>
             <SelectItem value="super_admin">Super Admin</SelectItem>
             <SelectItem value="admin_prodi">Admin Jurusan</SelectItem>
-
             <SelectItem value="evaluator">Evaluator</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={filterUnit} onValueChange={setFilterUnit}>
+          <SelectTrigger className="w-full sm:w-48">
+            <SelectValue placeholder="Semua Unit" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Semua Unit</SelectItem>
+            {(units as UnitAkademik[]).map((u) => {
+              const parent = u.parentId ? unitMap.get(u.parentId) : undefined;
+              const tipeLabel = u.tipe === "prodi" ? "Prodi" : u.tipe === "fakultas" ? "Fakultas" : "Kelas";
+              return (
+                <SelectItem key={u.id} value={u.id}>
+                  [{tipeLabel}] {u.nama} {parent ? `(${parent.nama})` : ""}
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
       </div>
 
       {/* List Section */}
-            <AdminPageContent className="p-0">
-
+      <AdminPageContent className="p-0">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-semibold">
@@ -104,63 +121,78 @@ function UsersPage() {
                 <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left">Username</th>
                 <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left">Nama Lengkap</th>
                 <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Peran</th>
+                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left">Unit / Prodi</th>
                 <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Status</th>
-
                 <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody>
-              {shown.map((u) => (
-                <tr key={u.id} className="transition-colors border-t border-slate-100 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                  <td className="p-4 font-medium text-slate-900 dark:text-slate-100 text-left">{u.username}</td>
-                  <td className="p-4 text-slate-600 dark:text-slate-400 text-left">{u.namaLengkap}</td>
-                  <td className="p-4 text-center">
-                    <span className="px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-                      {u.role === "super_admin" ? "Super Admin" : u.role === "admin_prodi" ? "Admin Jurusan" : u.role === "evaluator" ? "Evaluator" : u.role}
-                    </span>
-                  </td>
-                  <td className="p-4 text-center">
-                    {u.aktif ? (
-                      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">Aktif</span>
-                    ) : (
-                      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400">Nonaktif</span>
-                    )}
-                  </td>
-                  <td className="p-4 text-center space-x-2">
-                    <Button variant="outline" size="sm" onClick={() => { setEditing(u); setOpen(true); }} className="h-8">
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm" className="h-8 text-destructive hover:bg-destructive/10" onClick={async () => {
-                      if (confirm("Hapus pengguna ini?")) {
-                        const res = await mutateUserServer({ data: { action: "remove", payload: { id: u.id } } });
-                        if (res.ok) {
-                          refresh();
-                        } else {
-                          toast.error(res.error ?? "Gagal menghapus pengguna");
+              {shown.map((u) => {
+                const assignedUnit = u.unitId ? unitMap.get(u.unitId) : undefined;
+                const parentUnit = assignedUnit?.parentId ? unitMap.get(assignedUnit.parentId) : undefined;
+                return (
+                  <tr key={u.id} className="transition-colors border-t border-slate-100 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                    <td className="p-4 font-medium text-slate-900 dark:text-slate-100 text-left">{u.username}</td>
+                    <td className="p-4 text-slate-600 dark:text-slate-400 text-left">{u.namaLengkap}</td>
+                    <td className="p-4 text-center">
+                      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                        {u.role === "super_admin" ? "Super Admin" : u.role === "admin_prodi" ? "Admin Jurusan" : u.role === "evaluator" ? "Evaluator" : u.role}
+                      </span>
+                    </td>
+                    <td className="p-4 text-left">
+                      {assignedUnit ? (
+                        <div className="flex flex-col text-xs">
+                          <span className="font-medium text-slate-800 dark:slate-200">
+                            [{assignedUnit.tipe === "prodi" ? "Prodi" : assignedUnit.tipe === "fakultas" ? "Fakultas" : "Kelas"}] {assignedUnit.nama}
+                          </span>
+                          {parentUnit && <span className="text-[11px] text-muted-foreground">{parentUnit.nama}</span>}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground italic">(Tanpa Unit)</span>
+                      )}
+                    </td>
+                    <td className="p-4 text-center">
+                      {u.aktif ? (
+                        <span className="px-2 py-0.5 rounded text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">Aktif</span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400">Nonaktif</span>
+                      )}
+                    </td>
+                    <td className="p-4 text-center space-x-2">
+                      <Button variant="outline" size="sm" onClick={() => { setEditing(u); setOpen(true); }} className="h-8">
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm" className="h-8 text-destructive hover:bg-destructive/10" onClick={async () => {
+                        if (confirm("Hapus pengguna ini?")) {
+                          const res = await mutateUserServer({ data: { action: "remove", payload: { id: u.id } } });
+                          if (res.ok) {
+                            refresh();
+                          } else {
+                            toast.error(res.error ?? "Gagal menghapus pengguna");
+                          }
                         }
-                      }
-                    }}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm" className="h-8 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950" onClick={async () => {
-
-                      if (!confirm("Hentikan semua sesi aktif pengguna ini? (Force logout)")) return;
-                      try {
-                        const res = await revokeUserSessionsServer({ data: { userId: u.id } });
-                        if (res.ok) toast.success("Sesi berhasil dihentikan. Pengguna akan ter-logout.");
-                        else toast.error(res.error ?? "Gagal menghentikan sesi");
-                      } catch {
-                        toast.error("Gagal menghentikan sesi");
-                      }
-                    }}>
-                      <LogOut className="h-4 w-4" />
-                    </Button>
-                  </td>
-                </tr>
-              ))}
+                      }}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm" className="h-8 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950" onClick={async () => {
+                        if (!confirm("Hentikan semua sesi aktif pengguna ini? (Force logout)")) return;
+                        try {
+                          const res = await revokeUserSessionsServer({ data: { userId: u.id } });
+                          if (res.ok) toast.success("Sesi berhasil dihentikan. Pengguna akan ter-logout.");
+                          else toast.error(res.error ?? "Gagal menghentikan sesi");
+                        } catch {
+                          toast.error("Gagal menghentikan sesi");
+                        }
+                      }}>
+                        <LogOut className="h-4 w-4" />
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              })}
               {shown.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-slate-500">Tidak ada data pengguna.</td>
+                  <td colSpan={6} className="p-8 text-center text-slate-500">Tidak ada data pengguna.</td>
                 </tr>
               )}
             </tbody>
@@ -283,10 +315,15 @@ function UserDialog({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">(Tidak Ada Unit)</SelectItem>
-                  {units.map((p) => (
-
-                    <SelectItem key={p.id} value={p.id}>{p.nama}</SelectItem>
-                  ))}
+                  {units.map((p) => {
+                    const parent = p.parentId ? units.find((u) => u.id === p.parentId) : undefined;
+                    const tipeLabel = p.tipe === "prodi" ? "Prodi" : p.tipe === "fakultas" ? "Fakultas" : "Kelas";
+                    return (
+                      <SelectItem key={p.id} value={p.id}>
+                        [{tipeLabel}] {p.nama} {parent ? `(${parent.nama})` : ""}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             </div>
