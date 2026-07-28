@@ -406,7 +406,7 @@ export const getFullConfigServer = createServerFn({ method: "GET" }).handler(
 			pesanLogin: row.pesanLogin,
 			mobileLock: row.mobileLock,
 			multiDevice: row.multiDevice,
-			roleAccess: typeof row.roleAccess === "string" ? JSON.parse(row.roleAccess) : row.roleAccess || {},
+			roleAccess: parseJson<Record<string, string[]>>(row.roleAccess, {}),
 		};
 	}
 );export const getUjiansList = createServerFn({ method: "GET" }).handler(

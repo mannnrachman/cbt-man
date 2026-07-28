@@ -4,9 +4,9 @@ import { prisma } from "../db/prisma";
 import { deleteSessionsForUser } from "../db/session";
 import { requireCaller, requireAdminResult, seedIfNeeded } from "../db/auth";
 import { hashPassword } from "@/lib/cbt/hash";
-import { stringifyJson } from "../db/json";
+import { stringifyJson, parseJson } from "../db/json";
 import { publicUser, upsertUserSchema } from "../repos/mappers";
-import type { User } from "@/lib/cbt/types";
+import type { User, PublicUser } from "@/lib/cbt/types";
 
 import { writeAuditLog } from "../db/audit";
 
@@ -186,7 +186,7 @@ export const mutateUserServer = createServerFn({ method: "POST" })
 	});
 
 export const getUsersList = createServerFn({ method: "GET" }).handler(
-	async () => {
+	async (): Promise<PublicUser[]> => {
 		const caller = await requireCaller();
 		if (!caller || caller.role !== "super_admin") return [];
 		const users = await prisma.user.findMany();
@@ -197,9 +197,8 @@ export const getUsersList = createServerFn({ method: "GET" }).handler(
 			role: u.role,
 			aktif: u.aktif,
 			unitId: u.unitId ?? undefined,
-			allowedTopikIds: typeof u.allowedTopikIds === "string" ? JSON.parse(u.allowedTopikIds) : u.allowedTopikIds || [],
-			mataKuliahIds: typeof u.mataKuliahIds === "string" ? JSON.parse(u.mataKuliahIds) : u.mataKuliahIds || [],
-			passwordHash: "",
+			allowedTopikIds: parseJson<string[]>(u.allowedTopikIds, []),
+			mataKuliahIds: parseJson<string[]>(u.mataKuliahIds, []),
 			detail: u.detail ?? undefined,
 			createdAt: Number(u.createdAt)
 		}));
