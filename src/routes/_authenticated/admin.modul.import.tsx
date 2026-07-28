@@ -164,6 +164,12 @@ function ImportPage() {
           tipe = "essay";
         } else if (correctLetters.length > 1) {
           tipe = "multi";
+        } else if (
+          optionEntries.length === 2 &&
+          optionEntries.some((o) => /^(benar|true|b)$/i.test(o.text.trim())) &&
+          optionEntries.some((o) => /^(salah|false|s)$/i.test(o.text.trim()))
+        ) {
+          tipe = "bs";
         } else {
           tipe = "pg";
         }
@@ -207,7 +213,16 @@ function ImportPage() {
           currentSoal.tipe = "essay";
         } else {
           const correctCount = currentSoal.jawaban.filter((j) => j.benar).length;
-          currentSoal.tipe = correctCount > 1 ? "multi" : "pg";
+          const isBs = currentSoal.jawaban.length === 2 &&
+            currentSoal.jawaban.some((j) => /^(benar|true|b)$/i.test(j.detail.trim())) &&
+            currentSoal.jawaban.some((j) => /^(salah|false|s)$/i.test(j.detail.trim()));
+
+          if (isBs) {
+            currentSoal.tipe = "bs";
+          } else {
+            currentSoal.tipe = correctCount > 1 ? "multi" : "pg";
+          }
+
           if (currentSoal.jawaban.length < 2) {
             currentError = "Soal pilihan ganda minimal 2 opsi jawaban";
           }
