@@ -1,9 +1,11 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useEffect, useState, useMemo, useRef } from "react";
-import { getLiveOnlineSesis } from "@/lib/server/sesi/functions";
-import { Activity, AlertTriangle, Users, Timer, CheckCircle2, Search, MonitorPlay } from "lucide-react";
+import { getLiveOnlineSesis, actionSesiServer } from "@/lib/server/sesi/functions";
+import { Activity, AlertTriangle, Users, Timer, CheckCircle2, Search, MonitorPlay, RefreshCw, PowerOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { AdminPage, AdminPageHeader, AdminPageContent } from "@/components/cbt/AdminPage";
+import { toast } from "sonner";
 
 
 export const Route = createFileRoute("/_authenticated/admin/peserta/online")({
@@ -67,6 +69,19 @@ function OnlinePage() {
       avgProgress: rawSesis.length > 0 ? totalPct / rawSesis.length : 0
     };
   }, [search, rawSesis]);
+
+  async function handleAction(sesiId: string, action: "forceSubmit" | "reset") {
+    const actName = action === "forceSubmit" ? "Force Submit" : "Reset Sesi";
+    if (!confirm(`Apakah Anda yakin ingin melakukan ${actName} pada sesi ini?`)) return;
+    
+    const res = await actionSesiServer({ data: { action, sesiId } });
+    if (res.ok) {
+      toast.success(`${actName} berhasil`);
+      router.invalidate();
+    } else {
+      toast.error(`Gagal: ${res.error}`);
+    }
+  }
 
   return (
     <AdminPage className="neo-ready">
@@ -167,6 +182,27 @@ function OnlinePage() {
                     </div>
                   </div>
 
+                  {/* Actions */}
+                  <div className="flex items-center gap-2 mt-4 md:mt-0 justify-end md:w-auto shrink-0 border-t md:border-none border-slate-100 dark:border-slate-800 pt-3 md:pt-0">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-8 text-xs font-medium text-amber-600 dark:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10"
+                      onClick={() => handleAction(s.id, "reset")}
+                    >
+                      <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
+                      Reset Sesi
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-8 text-xs font-medium text-emerald-600 dark:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10"
+                      onClick={() => handleAction(s.id, "forceSubmit")}
+                    >
+                      <PowerOff className="mr-1.5 h-3.5 w-3.5" />
+                      Selesai
+                    </Button>
+                  </div>
                 </div>
               );
             })}
