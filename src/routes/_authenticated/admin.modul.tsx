@@ -130,7 +130,7 @@ function ModulPage() {
   }
 
   return (
-    <AdminPage>
+    <AdminPage className="neo-ready">
       <AdminPageHeader
         title="Bank Soal (Modul)"
         description="Pusat penyimpanan referensi soal-soal ujian berdasarkan mata kuliah."
