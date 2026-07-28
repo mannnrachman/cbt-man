@@ -3,6 +3,7 @@ import { useState, useRef } from "react";
 import * as XLSX from "xlsx";
 import { soalRepo } from "@/lib/cbt/repos";
 import { uid } from "@/lib/cbt/storage";
+import { putFile } from "@/lib/cbt/files";
 import type { Soal, Jawaban, TipeSoal, Kesulitan } from "@/lib/cbt/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Upload, Check, Lock, AlertTriangle, Download, Info } from "lucide-react";
+import { Upload, Check, Lock, AlertTriangle, Download, Info, ImagePlus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import { isTopikAllowed, visibleModuls, visibleTopiks } from "@/lib/cbt/access";
@@ -31,7 +32,10 @@ function ImportPage() {
   const topiks = visibleTopiks(user).filter((t) => t.modulId === modulId);
   const [topikId, setTopikId] = useState<string>(topiks[0]?.id ?? "");
   const [preview, setPreview] = useState<PreviewRow[]>([]);
+  const [imageMap, setImageMap] = useState<Record<string, string>>({});
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const imageRef = useRef<HTMLInputElement>(null);
 
   if (moduls.length === 0 || topiks.length === 0) {
     return (
@@ -105,6 +109,28 @@ function ImportPage() {
     XLSX.writeFile(wb, "template-soal-standar.xlsx");
   }
 
+  async function handleImageUpload(files: FileList) {
+    setIsUploadingImages(true);
+    let success = 0;
+    const newMap = { ...imageMap };
+    
+    toast.info(`Mengunggah ${files.length} gambar lampiran...`);
+    
+    for (const f of Array.from(files)) {
+      try {
+        const meta = await putFile(f);
+        newMap[f.name.toLowerCase()] = `file://${meta.id}`;
+        success++;
+      } catch (err) {
+        toast.error(`Gagal mengunggah ${f.name}`);
+      }
+    }
+    
+    setImageMap(newMap);
+    setIsUploadingImages(false);
+    toast.success(`${success} gambar berhasil diunggah. Tulis nama file (contoh: ${files[0]?.name ?? 'gambar.jpg'}) di kolom 'Gambar' Excel Anda.`);
+  }
+
   async function loadFile(file: File) {
     if (!topikId) {
       toast.error("Pilih topik tujuan terlebih dahulu");
@@ -132,15 +158,19 @@ function ImportPage() {
       // Parse Standard Horizontal Format (1 row = 1 question)
       for (const r of rows) {
         const isiRaw = String(r.Soal ?? r.Pertanyaan ?? r.isi ?? r.Isi ?? "").trim();
-        const gambar = String(r.Gambar ?? r.gambar ?? "").trim();
+        let gambarSrc = String(r.Gambar ?? r.gambar ?? "").trim();
         const kunciRaw = String(r["Kunci Jawaban"] ?? r.Kunci ?? r.kunci ?? r.Jawaban ?? "").toUpperCase().trim();
         const tingkatRaw = String(r["Tingkat Kesulitan"] ?? r["Tingkat Kesulitan Soal"] ?? r.Kesulitan ?? "2").trim();
 
-        if (!isiRaw && !gambar) continue; // Skip empty row
+        if (gambarSrc && imageMap[gambarSrc.toLowerCase()]) {
+          gambarSrc = imageMap[gambarSrc.toLowerCase()];
+        }
+
+        if (!isiRaw && !gambarSrc) continue; // Skip empty row
 
         let isi = isiRaw;
-        if (gambar) {
-          isi = `<div class="mb-4"><img src="${gambar}" alt="Gambar Soal" class="max-w-full h-auto rounded-md shadow-sm border border-slate-200 dark:border-slate-800" /></div>${isi}`;
+        if (gambarSrc) {
+          isi = `<div class="mb-4"><img src="${gambarSrc}" alt="Gambar Soal" class="max-w-full h-auto rounded-md shadow-sm border border-slate-200 dark:border-slate-800" /></div>${isi}`;
         }
 
         let kesulitan: Kesulitan = "sedang";
@@ -239,12 +269,16 @@ function ImportPage() {
         if (jenis === "SOAL" || kode === "Q") {
           commitCurrentSoal();
           let isi = String(r.Isi ?? "").trim();
-          const gambar = String(r.Gambar ?? "").trim();
+          let gambarSrc = String(r.Gambar ?? "").trim();
           const tingkat = String(r["Tingkat kesulitan Soal"] ?? "2").trim();
 
-          if (!isi && !gambar) currentError = "Isi pertanyaan kosong";
-          if (gambar) {
-            isi = `<div class="mb-4"><img src="${gambar}" alt="Gambar Soal" class="max-w-full h-auto rounded-md shadow-sm border border-slate-200 dark:border-slate-800" /></div>${isi}`;
+          if (gambarSrc && imageMap[gambarSrc.toLowerCase()]) {
+            gambarSrc = imageMap[gambarSrc.toLowerCase()];
+          }
+
+          if (!isi && !gambarSrc) currentError = "Isi pertanyaan kosong";
+          if (gambarSrc) {
+            isi = `<div class="mb-4"><img src="${gambarSrc}" alt="Gambar Soal" class="max-w-full h-auto rounded-md shadow-sm border border-slate-200 dark:border-slate-800" /></div>${isi}`;
           }
 
           let kesulitan: Kesulitan = "sedang";
@@ -265,12 +299,16 @@ function ImportPage() {
         } else if (jenis === "JAWABAN" || kode === "A") {
           if (!currentSoal) continue;
           let isi = String(r.Isi ?? "").trim();
-          const gambar = String(r.Gambar ?? "").trim();
+          let gambarSrc = String(r.Gambar ?? "").trim();
           const statusStr = String(r["Status Jawaban"] ?? "0").trim();
           const status = statusStr === "1" || statusStr.toLowerCase() === "benar" || statusStr.toLowerCase() === "true";
 
-          if (gambar) {
-            isi = `<div class="mb-2"><img src="${gambar}" alt="Gambar Opsi" class="max-w-xs h-auto rounded shadow-sm border border-slate-200 dark:border-slate-800" /></div>${isi}`;
+          if (gambarSrc && imageMap[gambarSrc.toLowerCase()]) {
+            gambarSrc = imageMap[gambarSrc.toLowerCase()];
+          }
+
+          if (gambarSrc) {
+            isi = `<div class="mb-2"><img src="${gambarSrc}" alt="Gambar Opsi" class="max-w-xs h-auto rounded shadow-sm border border-slate-200 dark:border-slate-800" /></div>${isi}`;
           }
 
           currentSoal.jawaban.push({
@@ -360,6 +398,30 @@ function ImportPage() {
             <Button variant="outline" onClick={downloadTemplate} className="h-10 font-semibold border-indigo-200 dark:border-indigo-900/50 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300">
               <Download className="mr-2 h-4 w-4" /> Download Template Standar (.xlsx)
             </Button>
+            
+            <div className="h-10 w-px bg-slate-200 dark:bg-slate-800 mx-1 hidden sm:block"></div>
+
+            <input
+              ref={imageRef}
+              type="file"
+              multiple
+              accept="image/*"
+              hidden
+              onChange={(e) => {
+                if (e.target.files) handleImageUpload(e.target.files);
+                e.target.value = "";
+              }}
+            />
+            <Button 
+              variant="outline" 
+              onClick={() => imageRef.current?.click()} 
+              disabled={isUploadingImages}
+              className="h-10 font-semibold border-amber-200 dark:border-amber-900/50 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-700 dark:text-amber-400"
+            >
+              {isUploadingImages ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ImagePlus className="mr-2 h-4 w-4" />}
+              {Object.keys(imageMap).length > 0 ? `${Object.keys(imageMap).length} Gambar Tersimpan` : "Upload Gambar (Opsional)"}
+            </Button>
+
             <input
               ref={fileRef}
               type="file"
@@ -395,12 +457,13 @@ function ImportPage() {
 
         <div className="rounded-2xl border border-amber-200/60 dark:border-amber-900/50 bg-amber-50/40 dark:bg-amber-950/20 p-5 space-y-3">
           <div className="flex items-center gap-2 font-bold text-sm text-amber-900 dark:text-amber-300">
-            <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-            Catatan Penting Penggunaan Gambar
+            <ImagePlus className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+            Cara Mudah Memasukkan Gambar
           </div>
           <p className="text-xs text-amber-950/80 dark:text-amber-200/80 leading-relaxed">
-            Gambar yang di-<em>copy-paste</em> langsung ke dalam sel Excel <strong>TIDAK DAPAT DIBACA</strong> oleh sistem web. 
-            Gunakan URL gambar yang valid atau masukkan <strong>ID File</strong> dari menu File Manager (contoh: <code>f_9x2ab1</code>).
+            Gambar yang di-<em>copy-paste</em> langsung ke dalam sel Excel <strong>TIDAK DAPAT DIBACA</strong> oleh sistem. 
+            <strong>Solusi Praktis:</strong> 
+            Klik tombol <strong className="text-amber-700 dark:text-amber-400">Upload Gambar</strong> di atas, lalu pilih gambar-gambar dari komputer Anda. Setelah itu, cukup ketikkan <strong>nama file</strong> (contoh: <code>gambar1.jpg</code>) di kolom <strong>Gambar</strong> pada Excel. Sistem akan otomatis menyambungkannya!
           </p>
         </div>
       </div>
