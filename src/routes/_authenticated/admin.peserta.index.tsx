@@ -12,9 +12,10 @@ import { AdminPage, AdminPageHeader, AdminPageContent } from "@/components/cbt/A
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Pencil, Trash2, Plus, Printer, Upload, Users as UsersIcon } from "lucide-react";
+import { Pencil, Trash2, Plus, Printer, Upload, Users as UsersIcon, Activity } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/peserta/")({
@@ -42,9 +43,22 @@ function PesertaPage() {
   const [filterUnit, setFilterUnit] = useState<string>("all");
   const [query, setQuery] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   function refresh() {
     router.invalidate();
+    setSelectedIds([]);
+  }
+
+  async function handleBulkDelete() {
+    if (!confirm(`Hapus ${selectedIds.length} peserta terpilih secara permanen?`)) return;
+    const res = await mutateUserServer({ data: { action: "bulkRemove", payload: { ids: selectedIds } } });
+    if (res.ok) {
+      toast.success(`${selectedIds.length} peserta berhasil dihapus`);
+      refresh();
+    } else {
+      toast.error(res.error ?? "Gagal menghapus peserta");
+    }
   }
 
   const shown = peserta.filter((p) =>
@@ -61,28 +75,33 @@ function PesertaPage() {
     let added = 0;
     let failed = 0;
     const localUnits = [...units];
+    const missingUnits = new Set<string>();
+
     for (const r of rows) {
       const username = String(r.username ?? r.Username ?? "").trim();
       const nama = String(r.nama ?? r.Nama ?? r.namaLengkap ?? "").trim();
-      const password = String(r.password ?? r.Password ?? username + "123").trim();
+      if (!username || !nama) {
+        failed++;
+        continue;
+      }
+
+      const password = String(r.password ?? r.Password ?? "").trim();
+      if (!password) {
+        failed++;
+        continue;
+      }
+      
       const unitName = String(r.group ?? r.Group ?? r.kelas ?? r.unit ?? "").trim();
       let unitId: string | undefined;
+      
       if (unitName) {
-        let g = localUnits.find((x: UnitAkademik) => x.nama.toLowerCase() === unitName.toLowerCase());
+        const g = localUnits.find((x: UnitAkademik) => x.nama.toLowerCase() === unitName.toLowerCase());
         if (!g) { 
-          g = { id: uid("u_"), nama: unitName, tipe: "kelas", parentId: null }; 
-          const resUnit = await mutateUnitAkademikServer({ data: { action: "upsert", payload: g } });
-          if (resUnit.ok) {
-            localUnits.push(g);
-          } else {
-            g = undefined;
-          }
+          // DO NOT create new unit to prevent breaking hierarchy. Just track the missing unit.
+          missingUnits.add(unitName);
+        } else {
+          unitId = g.id;
         }
-        if (!g) {
-          failed++;
-          continue;
-        }
-        unitId = g.id;
       }
 
       const existingUser = (allUsers as User[]).find((u: User) => u.username === username);
@@ -101,13 +120,14 @@ function PesertaPage() {
         failed++;
       }
     }
-    if (failed > 0) {
-      toast.warning(`${added} peserta diimport, ${failed} gagal diimport`);
+    
+    if (failed > 0 || missingUnits.size > 0) {
+      const missingMsg = missingUnits.size > 0 ? ` | Unit tidak ditemukan (diabaikan): ${Array.from(missingUnits).join(", ")}` : "";
+      toast.warning(`${added} sukses, ${failed} gagal${missingMsg}`, { duration: 6000 });
     } else {
       toast.success(`${added} peserta berhasil diimport`);
     }
     refresh();
-
   }
 
   function downloadTemplate() {
@@ -134,11 +154,15 @@ function PesertaPage() {
             <Button variant="outline" size="sm" onClick={() => document.getElementById("file-upload")?.click()} className="h-9">
               <Upload className="mr-2 h-4 w-4" /> Import Excel
             </Button>
+            <Link to="/admin/peserta/online">
+              <Button variant="outline" size="sm" className="h-9 border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary">
+                <Activity className="mr-2 h-4 w-4" /> Live Ujian
+              </Button>
+            </Link>
             <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1"></div>
-            <Link to="/admin/peserta/kartu">
+            <Link to="/admin/akademik">
               <Button variant="outline" size="sm" className="h-9">
                 <UsersIcon className="mr-2 h-4 w-4" /> Unit Akademik
-
               </Button>
             </Link>
             <Link to="/admin/peserta/kartu">
@@ -155,7 +179,7 @@ function PesertaPage() {
       />
 
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col sm:flex-row gap-3 items-center">
         <Input 
           placeholder="Cari nama atau username..." 
           value={query} 
@@ -163,15 +187,27 @@ function PesertaPage() {
           className="max-w-xs" 
         />
         <Select value={filterUnit} onValueChange={setFilterUnit}>
-          <SelectTrigger className="w-full sm:w-48">
+          <SelectTrigger className="w-full sm:w-56">
             <SelectValue placeholder="Pilih Unit" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Semua Unit</SelectItem>
-            {units.map((g) => <SelectItem key={g.id} value={g.id}>{g.nama}</SelectItem>)}
-
+            {units.map((g) => {
+              const parent = g.parentId ? units.find((u) => u.id === g.parentId) : undefined;
+              const tipeLabel = g.tipe === "prodi" ? "Prodi" : g.tipe === "fakultas" ? "Fakultas" : "Kelas";
+              return (
+                <SelectItem key={g.id} value={g.id}>
+                  [{tipeLabel}] {g.nama} {parent ? `(${parent.nama})` : ""}
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
+        {selectedIds.length > 0 && (
+          <Button variant="destructive" size="sm" onClick={handleBulkDelete} className="ml-auto">
+            <Trash2 className="mr-2 h-4 w-4" /> Hapus Terpilih ({selectedIds.length})
+          </Button>
+        )}
       </div>
 
       {/* List Section */}
@@ -180,24 +216,51 @@ function PesertaPage() {
           <table className="w-full text-sm">
             <thead className="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-semibold">
               <tr>
-                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left">Username</th>
+                <th className="p-4 w-12 text-center border-b border-slate-100 dark:border-slate-800">
+                  <Checkbox 
+                    checked={shown.length > 0 && selectedIds.length === shown.length}
+                    onCheckedChange={(c) => {
+                      if (c) setSelectedIds(shown.map(p => p.id));
+                      else setSelectedIds([]);
+                    }}
+                  />
+                </th>
+                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left border-b border-slate-100 dark:border-slate-800">Username</th>
                 <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left">Nama Lengkap</th>
-                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Grup / Kelas</th>
+                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left">Grup / Kelas</th>
                 <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Status</th>
-
                 <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody>
-              {shown.map((p) => (
-                <tr key={p.id} className="transition-colors border-t border-slate-100 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                  <td className="p-4 font-medium text-slate-900 dark:text-slate-100 text-left">{p.username}</td>
-                  <td className="p-4 text-slate-600 dark:text-slate-400 text-left">{p.namaLengkap}</td>
-                  <td className="p-4 text-center">
-                    <span className="px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-                      {units.find((g) => g.id === p.unitId)?.nama ?? "-"}
-                    </span>
-                  </td>
+              {shown.map((p) => {
+                const assignedUnit = units.find((g) => g.id === p.unitId);
+                const parentUnit = assignedUnit?.parentId ? units.find((u) => u.id === assignedUnit.parentId) : undefined;
+                return (
+                  <tr key={p.id} className="transition-colors border-t border-slate-100 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                    <td className="p-4 text-center align-middle">
+                      <Checkbox 
+                        checked={selectedIds.includes(p.id)}
+                        onCheckedChange={(c) => {
+                          if (c) setSelectedIds([...selectedIds, p.id]);
+                          else setSelectedIds(selectedIds.filter(id => id !== p.id));
+                        }}
+                      />
+                    </td>
+                    <td className="p-4 font-medium text-slate-900 dark:text-slate-100 text-left">{p.username}</td>
+                    <td className="p-4 text-slate-600 dark:text-slate-400 text-left">{p.namaLengkap}</td>
+                    <td className="p-4 text-left">
+                      {assignedUnit ? (
+                        <div className="flex flex-col text-xs">
+                          <span className="font-medium text-slate-800 dark:text-slate-200">
+                            [{assignedUnit.tipe === "prodi" ? "Prodi" : assignedUnit.tipe === "fakultas" ? "Fakultas" : "Kelas"}] {assignedUnit.nama}
+                          </span>
+                          {parentUnit && <span className="text-[11px] text-muted-foreground">{parentUnit.nama}</span>}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground italic">(Tanpa Unit)</span>
+                      )}
+                    </td>
                   <td className="p-4 text-center">
 
                     {p.aktif ? (
@@ -224,10 +287,11 @@ function PesertaPage() {
                     </Button>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
               {shown.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-slate-500">Tidak ada data peserta yang sesuai.</td>
+                  <td colSpan={6} className="p-8 text-center text-slate-500">Tidak ada data peserta yang sesuai.</td>
                 </tr>
               )}
             </tbody>
@@ -289,7 +353,7 @@ function PesertaDialog({
         namaLengkap: form.namaLengkap.trim(),
         role: "mahasiswa",
         allowedTopikIds: editing?.allowedTopikIds ?? [],
-        unitId: form.unitId || undefined,
+        unitId: form.unitId === "none" || !form.unitId ? undefined : form.unitId,
         detail: editing?.detail,
         aktif: form.aktif,
         createdAt: editing?.createdAt ?? Date.now(),
@@ -334,12 +398,16 @@ function PesertaDialog({
                 <SelectValue placeholder="(tanpa unit)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">-- Tidak ada --</SelectItem>
-                {units.map((g) => (<SelectItem key={g.id} value={g.id}>
-
-                    {g.nama}
-                  </SelectItem>
-                ))}
+                <SelectItem value="none">-- Tidak ada --</SelectItem>
+                {units.map((g) => {
+                  const parent = g.parentId ? units.find((u) => u.id === g.parentId) : undefined;
+                  const tipeLabel = g.tipe === "prodi" ? "Prodi" : g.tipe === "fakultas" ? "Fakultas" : "Kelas";
+                  return (
+                    <SelectItem key={g.id} value={g.id}>
+                      [{tipeLabel}] {g.nama} {parent ? `(${parent.nama})` : ""}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>
