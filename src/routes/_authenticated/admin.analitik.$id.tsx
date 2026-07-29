@@ -110,19 +110,26 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
   const [openId, setOpenId] = useState<string | null>(null);
   const [editIdx, setEditIdx] = useState<number | null>(null);
   const [editSkor, setEditSkor] = useState<string>("");
+  const [savingKey, setSavingKey] = useState<string | null>(null);
 
   async function saveEdit(sesiId: string, idx: number) {
     const s = sesiRepo.byId(sesiId);
     if (!s) return;
+    const key = `${sesiId}:${idx}`;
     const v = editSkor === "" ? undefined : Number(editSkor);
     const next = { ...s, jawaban: s.jawaban.map((j, i) => (i === idx ? { ...j, skor: v } : j)) };
-    const recalc = recomputeSkor(next, ujian);
-    sesiRepo.upsert(recalc);
-    await sesiRepo.flush();
-    setEditIdx(null);
-    setEditSkor("");
-    refresh();
-    toast.success("Nilai diperbarui");
+    sesiRepo.upsert(recomputeSkor(next, ujian));
+    setSavingKey(key);
+    try {
+      const result = await sesiRepo.flush();
+      if (!result.ok) return;
+      setEditIdx(null);
+      setEditSkor("");
+      refresh();
+      toast.success("Nilai diperbarui");
+    } finally {
+      setSavingKey(null);
+    }
   }
 
   return (
@@ -179,15 +186,14 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
                         )}
                       </td>
                       <td className="p-4 text-center space-x-2">
-                        <Button size="sm" variant={isOpen ? "default" : "outline"} onClick={() => { setOpenId(isOpen ? null : s.id); setEditIdx(null); }}>
+                        <Button size="sm" variant={isOpen ? "default" : "outline"} disabled={savingKey !== null} onClick={() => { setOpenId(isOpen ? null : s.id); setEditIdx(null); }}>
                           {isOpen ? "Tutup Lembar" : "Koreksi Lembar"}
                         </Button>
-                        <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10" onClick={async () => {
-                          if (confirm("Hapus sesi ujian ini secara permanen?")) {
-                            sesiRepo.remove(s.id);
-                            await sesiRepo.flush();
-                            refresh();
-                          }
+                        <Button size="sm" variant="ghost" disabled={savingKey !== null} className="text-destructive hover:bg-destructive/10" onClick={async () => {
+                          if (!confirm("Hapus sesi ujian ini secara permanen?")) return;
+                          sesiRepo.remove(s.id);
+                          const result = await sesiRepo.flush();
+                          if (result.ok) refresh();
                         }}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -252,11 +258,11 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
                             {editIdx === i ? (
                               <div className="flex items-center gap-1">
                                 <Input type="number" className="h-8 w-24 text-center font-bold" value={editSkor} onChange={(e) => setEditSkor(e.target.value)} autoFocus />
-                                <Button size="sm" onClick={() => saveEdit(s.id, i)} className="h-8 px-3">Simpan</Button>
-                                <Button size="sm" variant="ghost" onClick={() => setEditIdx(null)} className="h-8 px-2 text-destructive">Batal</Button>
+                                <Button size="sm" disabled={savingKey !== null} onClick={() => saveEdit(s.id, i)} className="h-8 px-3">Simpan</Button>
+                                <Button size="sm" variant="ghost" disabled={savingKey !== null} onClick={() => setEditIdx(null)} className="h-8 px-2 text-destructive">Batal</Button>
                               </div>
                             ) : isEssay ? (
-                              <Button size="sm" variant={needsGrading ? "default" : "secondary"} className={`h-8 text-xs ${needsGrading ? 'animate-pulse' : ''}`} onClick={() => { setEditIdx(i); setEditSkor(String(j.skor ?? "")); }}>
+                              <Button size="sm" disabled={savingKey !== null} variant={needsGrading ? "default" : "secondary"} className={`h-8 text-xs ${needsGrading ? 'animate-pulse' : ''}`} onClick={() => { setEditIdx(i); setEditSkor(String(j.skor ?? "")); }}>
                                 <Pencil className="h-3.5 w-3.5 mr-1.5" /> {needsGrading ? "Beri Nilai" : "Ubah Nilai"}
                               </Button>
                             ) : null}
