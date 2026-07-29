@@ -1,4 +1,4 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { revokeUserSessionsServer, upsertUserServer, getUsersList, mutateUserServer } from "@/lib/server/users/functions";
 import { getUnitAkademikList } from "@/lib/server/akademik/functions";
@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { AdminPage, AdminPageHeader, AdminPageContent } from "@/components/cbt/AdminPage";
-import { Pencil, Trash2, Plus, LogOut, Search, FileX, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Pencil, Trash2, Plus, LogOut, Search, FileX, Loader2, ChevronLeft, ChevronRight, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/users")({
@@ -64,6 +64,10 @@ function UsersPage() {
     setCurrentPage(1);
   }, [query, filterRole]);
 
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(Math.max(1, totalPages));
+  }, [currentPage, totalPages]);
+
   async function confirmDelete() {
     if (!deleteId) return;
     const res = await mutateUserServer({ data: { action: "remove", payload: { id: deleteId } } });
@@ -98,9 +102,16 @@ function UsersPage() {
         title="Pengguna Sistem"
         description="Kelola akses akun admin, admin jurusan, dan evaluator."
         action={
-          <Button onClick={() => { setEditing(null); setOpen(true); }} size="sm" className="h-9">
-            <Plus className="mr-2 h-4 w-4" /> Tambah Akun
-          </Button>
+          <div className="flex gap-2">
+            <Button asChild variant="outline" size="sm" className="h-9">
+              <Link to="/admin/users/roles">
+                <ShieldCheck className="mr-2 h-4 w-4" /> Hak Akses Role
+              </Link>
+            </Button>
+            <Button onClick={() => { setEditing(null); setOpen(true); }} size="sm" className="h-9">
+              <Plus className="mr-2 h-4 w-4" /> Tambah Akun
+            </Button>
+          </div>
         }
       />
 
@@ -136,6 +147,7 @@ function UsersPage() {
                   <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Username</TableHead>
                   <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Nama Lengkap</TableHead>
                   <TableHead className="font-semibold text-slate-700 dark:text-slate-300 text-center">Peran</TableHead>
+                  <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Unit / Jurusan</TableHead>
                   <TableHead className="font-semibold text-slate-700 dark:text-slate-300 text-center">Status</TableHead>
                   <TableHead className="font-semibold text-slate-700 dark:text-slate-300 text-center">Aksi</TableHead>
                 </TableRow>
@@ -149,6 +161,9 @@ function UsersPage() {
                       <Badge variant="outline" className="bg-slate-50 dark:bg-slate-900 font-medium">
                         {u.role === "super_admin" ? "Super Admin" : u.role === "admin_prodi" ? "Admin Jurusan" : u.role === "evaluator" ? "Evaluator" : u.role}
                       </Badge>
+                    </TableCell>
+                    <TableCell className="text-sm text-slate-600 dark:text-slate-400">
+                      {u.role === "super_admin" ? "Semua Unit (Global)" : units.find((unit) => unit.id === u.unitId)?.nama ?? "Tanpa Unit"}
                     </TableCell>
                     <TableCell className="text-center">
                       {u.aktif ? (
@@ -180,7 +195,7 @@ function UsersPage() {
                 ))}
                 {shown.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={5} className="h-48 text-center">
+                    <TableCell colSpan={6} className="h-48 text-center">
                       <div className="flex flex-col items-center justify-center text-slate-500">
                         <FileX className="h-10 w-10 text-slate-300 dark:text-slate-600 mb-3" />
                         <p>Tidak ada data pengguna yang sesuai.</p>
