@@ -86,6 +86,50 @@ export const upsertUserServer = createServerFn({ method: "POST" })
 		}
 	});
 
+export const patchUserTopikAccessServer = createServerFn({ method: "POST" })
+	.validator(
+		z.object({
+			userId: z.string().min(1),
+			topikIds: z.array(z.string().min(1)).min(1),
+			mode: z.enum(["add", "remove"]),
+		}),
+	)
+	.handler(async ({ data }) => {
+		try {
+			const caller = await requireCaller();
+			if (!caller || caller.role !== "super_admin") {
+				return { ok: false as const, error: "Forbidden" };
+			}
+
+			await prisma.$transaction(async (tx) => {
+				const user = await tx.user.findUnique({
+					where: { id: data.userId },
+					select: { allowedTopikIds: true },
+				});
+				if (!user) throw new Error("Pengguna tidak ditemukan");
+
+				const allIds = (await tx.topik.findMany({ select: { id: true } })).map((topik) => topik.id);
+				const allowed = new Set(parseJson<string[]>(user.allowedTopikIds, []));
+				const next = user.allowedTopikIds === "[]" ? new Set(allIds) : allowed;
+				for (const id of data.topikIds) {
+					if (data.mode === "add") next.add(id);
+					else next.delete(id);
+				}
+
+				if (next.size === 0) {
+					throw new Error("Akses tidak boleh kosong; hapus pengguna atau nonaktifkan akun bila perlu");
+				}
+				await tx.user.update({
+					where: { id: data.userId },
+					data: { allowedTopikIds: stringifyJson(next.size === allIds.length ? [] : [...next]) },
+				});
+			});
+			return { ok: true as const };
+		} catch (err) {
+			return { ok: false as const, error: err instanceof Error ? err.message : String(err) };
+		}
+	});
+
 export const mutateUserServer = createServerFn({ method: "POST" })
 	.validator(
 		z.object({

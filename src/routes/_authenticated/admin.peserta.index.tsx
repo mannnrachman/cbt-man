@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Pencil, Trash2, Plus, Printer, Upload, Users as UsersIcon } from "lucide-react";
+import { Pencil, Trash2, Plus, Printer, Upload, Users as UsersIcon, Activity } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/peserta/")({
@@ -134,11 +134,15 @@ function PesertaPage() {
             <Button variant="outline" size="sm" onClick={() => document.getElementById("file-upload")?.click()} className="h-9">
               <Upload className="mr-2 h-4 w-4" /> Import Excel
             </Button>
+            <Link to="/admin/peserta/online">
+              <Button variant="outline" size="sm" className="h-9 border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary">
+                <Activity className="mr-2 h-4 w-4" /> Live Ujian
+              </Button>
+            </Link>
             <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1"></div>
-            <Link to="/admin/peserta/kartu">
+            <Link to="/admin/akademik">
               <Button variant="outline" size="sm" className="h-9">
                 <UsersIcon className="mr-2 h-4 w-4" /> Unit Akademik
-
               </Button>
             </Link>
             <Link to="/admin/peserta/kartu">
