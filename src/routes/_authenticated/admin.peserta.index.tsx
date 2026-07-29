@@ -81,6 +81,10 @@ function PesertaPage() {
     setCurrentPage(1);
   }, [query, filterUnit]);
 
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(Math.max(1, totalPages));
+  }, [currentPage, totalPages]);
+
   async function importExcel(file: File) {
     setIsImporting(true);
     try {
@@ -224,7 +228,11 @@ function PesertaPage() {
                   <TableHead className="w-12 text-center">
                     <Checkbox
                       checked={shown.length > 0 && shown.every((p) => selectedIds.includes(p.id))}
-                      onCheckedChange={(checked) => setSelectedIds(checked ? shown.map((p) => p.id) : [])}
+                      onCheckedChange={(checked) => setSelectedIds((ids) => {
+                        const pageIds = shown.map((p) => p.id);
+                        const rest = ids.filter((id) => !pageIds.includes(id));
+                        return checked ? [...rest, ...pageIds] : rest;
+                      })}
                       aria-label="Pilih semua peserta pada halaman ini"
                     />
                   </TableHead>
