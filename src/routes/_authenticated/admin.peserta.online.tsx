@@ -1,8 +1,10 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useEffect, useState, useMemo, useRef } from "react";
-import { getLiveOnlineSesis } from "@/lib/server/sesi/functions";
-import { Activity, AlertTriangle, Users, Timer, CheckCircle2, Search, MonitorPlay } from "lucide-react";
+import { getLiveOnlineSesis, mutateSesiServer } from "@/lib/server/sesi/functions";
+import { Activity, AlertTriangle, Users, Timer, CheckCircle2, Search, MonitorPlay, StopCircle, RefreshCcw } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { AdminPage, AdminPageHeader, AdminPageContent } from "@/components/cbt/AdminPage";
 
 
@@ -42,6 +44,53 @@ function OnlinePage() {
     }, 1000);
     return () => window.clearInterval(t);
   }, [router]);
+
+  async function handleForceSubmit(session: LiveSession) {
+    if (!confirm(`Paksa kumpulkan ujian untuk ${session.user?.namaLengkap ?? "Peserta"}? Sesi ini akan ditutup secara permanen.`)) return;
+    try {
+      const res = await mutateSesiServer({
+        data: {
+          action: "upsert",
+          payload: {
+            ...session,
+            status: "selesai",
+            selesaiAt: Date.now(),
+          }
+        }
+      });
+      if (res.ok) {
+        toast.success("Sesi berhasil dihentikan paksa");
+        router.invalidate();
+      } else {
+        toast.error(res.error ?? "Gagal menghentikan sesi");
+      }
+    } catch (e) {
+      toast.error("Terjadi kesalahan jaringan");
+    }
+  }
+
+  async function handleResetPelanggaran(session: LiveSession) {
+    if (!confirm(`Reset jumlah pelanggaran untuk ${session.user?.namaLengkap ?? "Peserta"} menjadi 0?`)) return;
+    try {
+      const res = await mutateSesiServer({
+        data: {
+          action: "upsert",
+          payload: {
+            ...session,
+            pelanggaran: 0,
+          }
+        }
+      });
+      if (res.ok) {
+        toast.success("Pelanggaran berhasil di-reset");
+        router.invalidate();
+      } else {
+        toast.error(res.error ?? "Gagal mereset pelanggaran");
+      }
+    } catch (e) {
+      toast.error("Terjadi kesalahan jaringan");
+    }
+  }
 
   const { sesis, totalPelanggaran, avgProgress } = useMemo(() => {
     let violations = 0;
@@ -163,6 +212,18 @@ function OnlinePage() {
 
                           Aman
                         </div>
+                      )}
+                    </div>
+
+                    {/* Action Menu */}
+                    <div className="flex items-center pl-4 border-l border-slate-200 dark:border-slate-700 md:ml-2 gap-2 flex-col sm:flex-row">
+                      <Button onClick={() => handleForceSubmit(s)} variant="outline" size="sm" className="h-8 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 border-red-200 dark:border-red-900/50">
+                        <StopCircle className="mr-1.5 h-3.5 w-3.5" /> Paksa Selesai
+                      </Button>
+                      {s.pelanggaran > 0 && (
+                        <Button onClick={() => handleResetPelanggaran(s)} variant="outline" size="sm" className="h-8 text-xs">
+                          <RefreshCcw className="mr-1.5 h-3.5 w-3.5" /> Reset Pelanggaran
+                        </Button>
                       )}
                     </div>
                   </div>
