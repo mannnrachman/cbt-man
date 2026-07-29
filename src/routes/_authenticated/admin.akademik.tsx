@@ -64,7 +64,9 @@ function AkademikLayout() {
               </h4>
               <nav className="flex flex-col space-y-1">
                 {group.items.map((item) => {
-                  const active = pathname.startsWith(item.to);
+                  const active = item.to === "/admin/akademik"
+                    ? (pathname === "/admin/akademik" || pathname === "/admin/akademik/")
+                    : pathname.startsWith(item.to);
                   const Icon = item.icon;
                   return (
                     <Link
