@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
-import { getUsersList, upsertUserServer } from "@/lib/server/users/functions";
+import { getUsersList, patchUserTopikAccessServer } from "@/lib/server/users/functions";
 import { getModulsList, getTopiksList } from "@/lib/server/modul/functions";
 import { getFullConfigServer, saveConfigServer } from "@/lib/server/ujian/functions";
 import { NAV_KEYS, type NavKey, type User } from "@/lib/cbt/types";
@@ -69,52 +69,9 @@ function RolesPage() {
     }
   }
 
-  async function toggleTopik(u: User, topikId: string) {
-    const has = u.allowedTopikIds.includes(topikId);
-    const res = await upsertUserServer({
-      data: {
-        id: u.id,
-        username: u.username,
-        namaLengkap: u.namaLengkap,
-        role: u.role,
-        allowedTopikIds: has
-          ? u.allowedTopikIds.filter((x: string) => x !== topikId)
-          : [...u.allowedTopikIds, topikId],
-        unitId: u.unitId,
-        detail: u.detail,
-        aktif: u.aktif,
-        createdAt: u.createdAt,
-      },
-    });
-    if (!res.ok) {
-      toast.error(res.error ?? "Gagal menyimpan hak akses topik");
-      return;
-    }
-    toast.success("Hak akses topik disimpan");
-    await router.invalidate();
-  }
-
-  async function setBulkTopik(u: User, topikIdsToToggle: string[], shouldAdd: boolean) {
-    let nextTopikIds = [...u.allowedTopikIds];
-    if (shouldAdd) {
-      const set = new Set(nextTopikIds);
-      topikIdsToToggle.forEach((id) => set.add(id));
-      nextTopikIds = Array.from(set);
-    } else {
-      nextTopikIds = nextTopikIds.filter((id) => !topikIdsToToggle.includes(id));
-    }
-    const res = await upsertUserServer({
-      data: {
-        id: u.id,
-        username: u.username,
-        namaLengkap: u.namaLengkap,
-        role: u.role,
-        allowedTopikIds: nextTopikIds,
-        unitId: u.unitId,
-        detail: u.detail,
-        aktif: u.aktif,
-        createdAt: u.createdAt,
-      },
+  async function patchTopik(u: User, topikIds: string[], mode: "add" | "remove") {
+    const res = await patchUserTopikAccessServer({
+      data: { userId: u.id, topikIds, mode },
     });
     if (!res.ok) {
       toast.error(res.error ?? "Gagal menyimpan hak akses topik");
@@ -195,7 +152,7 @@ function RolesPage() {
                 {moduls.map((m) => {
                   const ts = topiks.filter((t) => t.modulId === m.id);
                   if (ts.length === 0) return null;
-                  const allSelected = ts.every((t) => u.allowedTopikIds.includes(t.id));
+                  const allSelected = u.allowedTopikIds.length === 0 || ts.every((t) => u.allowedTopikIds.includes(t.id));
                   return (
                     <div key={m.id} className="border-t border-slate-100 dark:border-slate-800/80 pt-2 first:border-t-0 first:pt-0">
                       <div className="flex items-center justify-between mb-1">
@@ -203,7 +160,7 @@ function RolesPage() {
                         <div className="flex items-center gap-2 text-[11px]">
                           <button
                             type="button"
-                            onClick={() => setBulkTopik(u, ts.map((t) => t.id), !allSelected)}
+                            onClick={() => patchTopik(u, ts.map((t) => t.id), allSelected ? "remove" : "add")}
                             className="text-primary hover:underline font-medium"
                           >
                             {allSelected ? "Kosongkan Modul Ini" : "Pilih Semua Topik Modul Ini"}
@@ -217,8 +174,8 @@ function RolesPage() {
                             className="flex items-center gap-1.5 rounded border px-2 py-1 text-xs hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
                           >
                             <Checkbox
-                              checked={u.allowedTopikIds.includes(t.id)}
-                              onCheckedChange={() => toggleTopik(u, t.id)}
+                              checked={u.allowedTopikIds.length === 0 || u.allowedTopikIds.includes(t.id)}
+                              onCheckedChange={() => patchTopik(u, [t.id], (u.allowedTopikIds.length === 0 || u.allowedTopikIds.includes(t.id)) ? "remove" : "add")}
                             />
                             {t.nama}
                           </label>
