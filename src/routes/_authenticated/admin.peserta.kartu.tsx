@@ -38,10 +38,18 @@ function KartuPage() {
           action={
             <div className="flex gap-2">
               <Select value={unitId} onValueChange={setUnitId}>
-                <SelectTrigger className="w-full sm:w-48"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="w-full sm:w-56"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Semua unit</SelectItem>
-                  {units.map((u) => <SelectItem key={u.id} value={u.id}>{u.nama}</SelectItem>)}
+                  {units.map((u) => {
+                    const parent = u.parentId ? units.find((x) => x.id === u.parentId) : undefined;
+                    const tipeLabel = u.tipe === "prodi" ? "Prodi" : u.tipe === "fakultas" ? "Fakultas" : "Kelas";
+                    return (
+                      <SelectItem key={u.id} value={u.id}>
+                        [{tipeLabel}] {u.nama} {parent ? `(${parent.nama})` : ""}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
               <Button onClick={() => window.print()} size="sm" className="h-9"><Printer className="mr-1 h-4 w-4" />Cetak</Button>
@@ -53,6 +61,7 @@ function KartuPage() {
       <div className="grid grid-cols-2 gap-3 print:grid-cols-2 md:grid-cols-3">
         {peserta.map((p) => {
           const u = units.find((x) => x.id === p.unitId);
+          const parentU = u?.parentId ? units.find((x) => x.id === u.parentId) : undefined;
           return (
             <Card key={p.id} className="p-4 break-inside-avoid">
               <div className="mb-2 flex items-center gap-2 border-b pb-2 text-sm font-semibold">
@@ -63,7 +72,17 @@ function KartuPage() {
                 <div><span className="text-slate-500">Nama:</span> <strong>{p.namaLengkap}</strong></div>
                 <div><span className="text-slate-500">Username:</span> <code>{p.username}</code></div>
                 <div><span className="text-slate-500">Password awal:</span> <code>{p.username}123</code></div>
-                <div><span className="text-slate-500">Unit:</span> {u?.nama ?? "-"}</div>
+                <div>
+                  <span className="text-slate-500">Unit:</span>{" "}
+                  {u ? (
+                    <span className="font-medium">
+                      [{u.tipe === "prodi" ? "Prodi" : u.tipe === "fakultas" ? "Fakultas" : "Kelas"}] {u.nama}
+                      {parentU ? ` (${parentU.nama})` : ""}
+                    </span>
+                  ) : (
+                    "-"
+                  )}
+                </div>
               </div>
             </Card>
           );
