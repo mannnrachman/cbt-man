@@ -65,7 +65,7 @@ function UjianList() {
     };
     ujianRepo.upsert(u);
     await ujianRepo.flush();
-    setList(visibleUjians(user));
+    setList((current) => [...current, u]);
     toast.success("Ujian baru dibuat — silakan edit");
     setIsAdding(false);
   }
