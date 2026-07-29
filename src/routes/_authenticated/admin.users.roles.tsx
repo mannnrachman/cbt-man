@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
-import { getUsersList, upsertUserServer } from "@/lib/server/users/functions";
+import { getUsersList, patchUserTopikAccessServer } from "@/lib/server/users/functions";
 import { getModulsList, getTopiksList } from "@/lib/server/modul/functions";
 import { getFullConfigServer, saveConfigServer } from "@/lib/server/ujian/functions";
 import { NAV_KEYS, type NavKey, type User } from "@/lib/cbt/types";
@@ -69,28 +69,15 @@ function RolesPage() {
     }
   }
 
-  async function toggleTopik(u: User, topikId: string) {
-    const has = u.allowedTopikIds.includes(topikId);
-    const res = await upsertUserServer({
-      data: {
-        id: u.id,
-        username: u.username,
-        namaLengkap: u.namaLengkap,
-        role: u.role,
-        allowedTopikIds: has
-          ? u.allowedTopikIds.filter((x: string) => x !== topikId)
-          : [...u.allowedTopikIds, topikId],
-        unitId: u.unitId,
-        detail: u.detail,
-        aktif: u.aktif,
-        createdAt: u.createdAt,
-      },
+  async function patchTopik(u: User, topikIds: string[], mode: "add" | "remove") {
+    const res = await patchUserTopikAccessServer({
+      data: { userId: u.id, topikIds, mode },
     });
     if (!res.ok) {
       toast.error(res.error ?? "Gagal menyimpan hak akses topik");
       return;
     }
-    toast.success("Hak akses topik disimpan");
+    toast.success("Hak akses topik diperbarui");
     await router.invalidate();
   }
 
@@ -100,7 +87,6 @@ function RolesPage() {
         <Link to="/admin/users" className="text-sm text-slate-500 hover:underline">
           ← Pengguna
         </Link>
-
       </div>
       <AdminPageHeader
         title="Hak Akses Role"
@@ -118,7 +104,6 @@ function RolesPage() {
                   <Checkbox
                     checked={adminProdiAccess.includes(k)}
                     onCheckedChange={() => toggleNav("admin_prodi", k)}
-
                   />
                   {LABEL[k]}
                 </label>
@@ -152,33 +137,45 @@ function RolesPage() {
           <h3 className="font-medium">Topik yang boleh dikelola Admin Jurusan & Evaluator</h3>
           {managers.length === 0 && (
             <p className="text-sm text-slate-500">Belum ada Admin Jurusan atau Evaluator.</p>
-
           )}
           {managers.map((u) => (
             <div key={u.id} className="rounded border p-3">
-              <div className="mb-2 font-medium">
-                {u.namaLengkap}{" "}
-                <span className="text-xs text-slate-500">
-                  ({u.role === "admin_prodi" ? "Admin Jurusan" : "Evaluator"})
-
-                </span>
+              <div className="mb-2 font-medium flex items-center justify-between">
+                <div>
+                  {u.namaLengkap}{" "}
+                  <span className="text-xs text-slate-500">
+                    ({u.role === "admin_prodi" ? "Admin Jurusan" : "Evaluator"})
+                  </span>
+                </div>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {moduls.map((m) => {
                   const ts = topiks.filter((t) => t.modulId === m.id);
                   if (ts.length === 0) return null;
+                  const allSelected = u.allowedTopikIds.length === 0 || ts.every((t) => u.allowedTopikIds.includes(t.id));
                   return (
-                    <div key={m.id}>
-                      <div className="text-xs font-medium text-slate-500">{m.nama}</div>
+                    <div key={m.id} className="border-t border-slate-100 dark:border-slate-800/80 pt-2 first:border-t-0 first:pt-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{m.nama}</span>
+                        <div className="flex items-center gap-2 text-[11px]">
+                          <button
+                            type="button"
+                            onClick={() => patchTopik(u, ts.map((t) => t.id), allSelected ? "remove" : "add")}
+                            className="text-primary hover:underline font-medium"
+                          >
+                            {allSelected ? "Kosongkan Modul Ini" : "Pilih Semua Topik Modul Ini"}
+                          </button>
+                        </div>
+                      </div>
                       <div className="flex flex-wrap gap-2 pt-1">
                         {ts.map((t) => (
                           <label
                             key={t.id}
-                            className="flex items-center gap-1.5 rounded border px-2 py-1 text-xs"
+                            className="flex items-center gap-1.5 rounded border px-2 py-1 text-xs hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
                           >
                             <Checkbox
-                              checked={u.allowedTopikIds.includes(t.id)}
-                              onCheckedChange={() => toggleTopik(u, t.id)}
+                              checked={u.allowedTopikIds.length === 0 || u.allowedTopikIds.includes(t.id)}
+                              onCheckedChange={() => patchTopik(u, [t.id], (u.allowedTopikIds.length === 0 || u.allowedTopikIds.includes(t.id)) ? "remove" : "add")}
                             />
                             {t.nama}
                           </label>
