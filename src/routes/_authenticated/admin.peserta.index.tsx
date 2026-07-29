@@ -85,9 +85,11 @@ function PesertaPage() {
         continue;
       }
 
-      // Generate a secure 6-character random password if not provided
-      const defaultPassword = Math.random().toString(36).substring(2, 8).toUpperCase();
-      const password = String(r.password ?? r.Password ?? defaultPassword).trim();
+      const password = String(r.password ?? r.Password ?? "").trim();
+      if (!password) {
+        failed++;
+        continue;
+      }
       
       const unitName = String(r.group ?? r.Group ?? r.kelas ?? r.unit ?? "").trim();
       let unitId: string | undefined;
@@ -285,7 +287,7 @@ function PesertaPage() {
               })}
               {shown.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-slate-500">Tidak ada data peserta yang sesuai.</td>
+                  <td colSpan={6} className="p-8 text-center text-slate-500">Tidak ada data peserta yang sesuai.</td>
                 </tr>
               )}
             </tbody>
