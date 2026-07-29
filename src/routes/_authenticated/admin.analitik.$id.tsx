@@ -7,6 +7,15 @@ import { analisisButir, labelKesukaran, labelDiskriminasi } from "@/lib/cbt/anal
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Trash2, Pencil, Save, X, BookOpen, Clock, FileText, ChevronRight, CheckCircle2, BarChart, Sparkles, AlertTriangle, TrendingUp, TrendingDown, Printer, Download } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -43,8 +52,8 @@ function HasilUjian() {
   const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
   const initialTab = searchParams?.get("tab") || "peserta";
 
-  if (!ujian) return <div>Tidak ditemukan</div>;
-  
+  if (!ujian) return <div className="p-8 text-center text-muted-foreground">Tidak ditemukan</div>;
+
   const mk = ujian.mataKuliahId ? mataKuliahRepo.byId(ujian.mataKuliahId) : null;
   const smt = ujian.semesterId ? semesterRepo.byId(ujian.semesterId) : null;
 
@@ -54,8 +63,8 @@ function HasilUjian() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 animate-in fade-in duration-500 pb-12 pt-4">
-      <div className="bg-white dark:bg-slate-950 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-        <Link to="/admin/analitik" className="text-sm font-medium text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 transition-colors flex items-center gap-1 w-fit mb-4">
+      <div className="bg-card p-6 rounded-xl border border-border shadow-sm">
+        <Link to="/admin/analitik" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 w-fit mb-4">
           ← Kembali ke Pilihan Ujian
         </Link>
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
@@ -126,86 +135,87 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
 
   return (
     <>
-      <Card className="shadow-sm overflow-hidden">
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-semibold">
-                <tr>
-                  <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center border-r border-slate-200 dark:border-slate-800">Peserta</th>
-                  <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center border-r border-slate-200 dark:border-slate-800">Status</th>
-                  <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center border-r border-slate-200 dark:border-slate-800">Mulai</th>
-                  <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center border-r border-slate-200 dark:border-slate-800">Skor</th>
-                  <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center border-r border-slate-200 dark:border-slate-800">Pelanggaran</th>
-                  <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sesis.map((s) => {
-                  const u = users.find((x) => x.id === s.pesertaId);
-                  const isOpen = openId === s.id;
-                  return (
-                    <tr key={s.id} className={`transition-colors ${isOpen ? 'bg-primary/5' : 'hover:bg-muted/30'}`}>
-                      <td className="p-4 font-medium text-center border-r border-slate-200 dark:border-slate-800">{u?.namaLengkap ?? s.pesertaId}</td>
-                      <td className="p-4 text-center border-r border-slate-200 dark:border-slate-800">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${
-                          s.status === 'selesai' ? 'bg-success/15 text-success' :
-                          s.status === 'sedang' ? 'bg-primary/15 text-primary' :
-                          'bg-accent text-accent-foreground'
-                        }`}>
-                          {s.status}
-                        </span>
-                      </td>
-                      <td className="p-4 text-muted-foreground text-center border-r border-slate-200 dark:border-slate-800">
-                        {s.mulaiAt ? (
-                          <span suppressHydrationWarning>
-                            {new Date(s.mulaiAt).toLocaleString("id-ID", { timeZone: "Asia/Jakarta" })}
-                          </span>
-                        ) : "-"}
-                      </td>
-                      <td className="p-4 text-center border-r border-slate-200 dark:border-slate-800">
-                        {s.status === "selesai" ? (
-                          <span className="font-bold text-base">{s.skorTotal ?? 0} <span className="text-xs text-muted-foreground font-normal">/ {s.maxSkor ?? 0}</span></span>
-                        ) : "-"}
-                      </td>
-                      <td className="p-4 text-center border-r border-slate-200 dark:border-slate-800">
-                        {s.pelanggaran > 0 ? (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-destructive/15 text-destructive">
-                            {s.pelanggaran} peringatan
-                          </span>
-                        ) : (
-                          <span className="text-muted-foreground">-</span>
-                        )}
-                      </td>
-                      <td className="p-4 text-center space-x-2">
-                        <Button size="sm" variant={isOpen ? "default" : "outline"} onClick={() => { setOpenId(isOpen ? null : s.id); setEditIdx(null); }}>
-                          {isOpen ? "Tutup Lembar" : "Koreksi Lembar"}
-                        </Button>
-                        <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10" onClick={() => {
-                          if (confirm("Hapus sesi ujian ini secara permanen?")) {
-                            sesiRepo.remove(s.id);
-                            refresh();
-                          }
-                        }}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </td>
-                    </tr>
-                  );
-                })}
-                {sesis.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="p-6 text-center text-muted-foreground">
-                      Belum ada sesi.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
+      <Card className="shadow-sm border ring-1 ring-border/50 overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/50 hover:bg-muted/50">
+              <TableHead className="py-3 font-semibold text-xs text-muted-foreground uppercase tracking-wider text-center">Peserta</TableHead>
+              <TableHead className="py-3 font-semibold text-xs text-muted-foreground uppercase tracking-wider text-center">Status</TableHead>
+              <TableHead className="py-3 font-semibold text-xs text-muted-foreground uppercase tracking-wider text-center">Mulai</TableHead>
+              <TableHead className="py-3 font-semibold text-xs text-muted-foreground uppercase tracking-wider text-center">Skor</TableHead>
+              <TableHead className="py-3 font-semibold text-xs text-muted-foreground uppercase tracking-wider text-center">Pelanggaran</TableHead>
+              <TableHead className="py-3 font-semibold text-xs text-muted-foreground uppercase tracking-wider text-center">Aksi</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sesis.map((s) => {
+              const u = users.find((x) => x.id === s.pesertaId);
+              const isOpen = openId === s.id;
+              return (
+                <TableRow key={s.id} className={`transition-colors ${isOpen ? 'bg-primary/5 hover:bg-primary/10' : 'hover:bg-muted/30'}`}>
+                  <TableCell className="p-4 font-medium text-center border-r border-border">{u?.namaLengkap ?? s.pesertaId}</TableCell>
+                  <TableCell className="p-4 text-center border-r border-border">
+                    <Badge
+                      variant={s.status === 'selesai' ? 'default' : s.status === 'sedang' ? 'secondary' : 'outline'}
+                      className="capitalize"
+                    >
+                      {s.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="p-4 text-muted-foreground text-center border-r border-border">
+                    {s.mulaiAt ? (
+                      <span suppressHydrationWarning>
+                        {new Date(s.mulaiAt).toLocaleString("id-ID", { timeZone: "Asia/Jakarta" })}
+                      </span>
+                    ) : "-"}
+                  </TableCell>
+                  <TableCell className="p-4 text-center border-r border-border">
+                    {s.status === "selesai" ? (
+                      <span className="font-bold text-base">{s.skorTotal ?? 0} <span className="text-xs text-muted-foreground font-normal">/ {s.maxSkor ?? 0}</span></span>
+                    ) : "-"}
+                  </TableCell>
+                  <TableCell className="p-4 text-center border-r border-border">
+                    {s.pelanggaran > 0 ? (
+                      <Badge variant="destructive" className="font-medium">
+                        {s.pelanggaran} peringatan
+                      </Badge>
+                    ) : (
+                      <span className="text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="p-4 text-center space-x-2">
+                    <Button size="sm" variant={isOpen ? "default" : "outline"} onClick={() => { setOpenId(isOpen ? null : s.id); setEditIdx(null); }}>
+                      {isOpen ? "Tutup Lembar" : "Koreksi Lembar"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-destructive hover:bg-destructive/10"
+                      aria-label="Hapus sesi ujian"
+                      onClick={() => {
+                        if (confirm("Hapus sesi ujian ini secara permanen?")) {
+                          sesiRepo.remove(s.id);
+                          refresh();
+                        }
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+            {sesis.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={6} className="p-8 text-center text-muted-foreground">
+                  Belum ada sesi.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </Card>
-      
+
       {openId &&
         (() => {
           const s = sesis.find((x) => x.id === openId);
@@ -232,17 +242,17 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
                       <div key={i} className={`space-y-3 rounded-xl border p-4 text-sm bg-background transition-all ${needsGrading ? 'ring-2 ring-warning/50 border-warning/50 shadow-sm' : ''}`}>
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-3">
                           <div className="flex flex-wrap items-center gap-2 text-xs font-medium">
-                            <span className="bg-primary/10 text-primary px-2.5 py-1 rounded-full text-xs">Soal #{i + 1}</span>
-                            <span className="bg-muted px-2.5 py-1 rounded text-muted-foreground capitalize">{soal.tipe}</span>
+                            <Badge variant="default">Soal #{i + 1}</Badge>
+                            <Badge variant="outline" className="capitalize">{soal.tipe}</Badge>
                             {s.status === "selesai" && (
                               isEssay ? (
-                                <span className={needsGrading ? "text-warning bg-warning/10 px-2.5 py-1 rounded-md" : "text-primary bg-primary/10 px-2.5 py-1 rounded-md"}>
+                                <Badge variant={needsGrading ? "secondary" : "default"}>
                                   {j.skor !== undefined ? `Skor: ${j.skor}` : "Menunggu Dinilai"}
-                               </span>
+                                </Badge>
                               ) : isCorrect ? (
-                                <span className="text-success bg-success/15 px-2.5 py-1 rounded-md flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5" />Benar</span>
+                                <Badge variant="default" className="bg-emerald-600 gap-1"><CheckCircle2 className="h-3.5 w-3.5" />Benar</Badge>
                               ) : (
-                                <span className="text-destructive bg-destructive/15 px-2.5 py-1 rounded-md flex items-center gap-1"><X className="h-3.5 w-3.5" />Salah</span>
+                                <Badge variant="destructive" className="gap-1"><X className="h-3.5 w-3.5" />Salah</Badge>
                               )
                             )}
                           </div>
@@ -274,16 +284,16 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
                               const isBenar = opt.benar;
                               let bgStyle = "bg-background border";
                               let textStyle = "text-foreground";
-                              if (isBenar && isSelected) { bgStyle = "bg-success/10 border-success/30"; textStyle = "text-success-foreground font-medium"; }
-                              else if (isBenar && !isSelected) { bgStyle = "bg-success/5 border-success/30"; textStyle = "text-success-foreground font-medium"; }
-                              else if (!isBenar && isSelected) { bgStyle = "bg-destructive/10 border-destructive/30"; textStyle = "text-destructive-foreground font-medium"; }
+                              if (isBenar && isSelected) { bgStyle = "bg-emerald-500/10 border-emerald-500/30"; textStyle = "text-emerald-700 dark:text-emerald-400 font-medium"; }
+                              else if (isBenar && !isSelected) { bgStyle = "bg-emerald-500/5 border-emerald-500/30"; textStyle = "text-emerald-700 dark:text-emerald-400 font-medium"; }
+                              else if (!isBenar && isSelected) { bgStyle = "bg-destructive/10 border-destructive/30"; textStyle = "text-destructive font-medium"; }
                               return (
                                 <div key={opt.id} className={`flex items-start gap-2.5 p-2.5 rounded-lg ${bgStyle} ${textStyle}`}>
                                   <div className="mt-0.5 shrink-0">
-                                    {isBenar ? <CheckCircle2 className="h-4 w-4 text-success" /> : isSelected ? <X className="h-4 w-4 text-destructive" /> : <div className="h-4 w-4 rounded-full border-2 border-muted" />}
+                                    {isBenar ? <CheckCircle2 className="h-4 w-4 text-emerald-600" /> : isSelected ? <X className="h-4 w-4 text-destructive" /> : <div className="h-4 w-4 rounded-full border-2 border-muted" />}
                                   </div>
                                   <div className="flex-1 text-sm prose prose-sm leading-snug"><RichView html={opt.detail} /></div>
-                                  {isSelected && <div className="text-[10px] uppercase font-bold tracking-wider bg-background px-1.5 py-0.5 rounded border opacity-70">Dipilih</div>}
+                                  {isSelected && <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-wider">Dipilih</Badge>}
                                 </div>
                               );
                             })}

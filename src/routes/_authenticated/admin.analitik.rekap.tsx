@@ -5,6 +5,15 @@ import { sesiRepo, usersRepo, unitAkademikRepo, mataKuliahRepo, semesterRepo } f
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Select,
   SelectContent,
@@ -12,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Download, BookOpen, Clock, CalendarDays, BadgeCheck } from "lucide-react";
+import { Download, BookOpen, CalendarDays, BadgeCheck } from "lucide-react";
 import { exportSheet } from "@/lib/cbt/excel";
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import { visibleUjians } from "@/lib/cbt/access";
@@ -52,7 +61,7 @@ function RekapPage() {
     const smt = ex?.semesterId ? semesterRepo.byId(ex.semesterId) : null;
     const g = units.find((x) => x.id === u?.unitId);
     const durasi = s.mulaiAt && s.selesaiAt ? Math.round((s.selesaiAt - s.mulaiAt) / 1000) : 0;
-    
+
     function formatDateExcel(ms: number | undefined | null) {
       if (!ms) return "-";
       const d = new Date(ms);
@@ -74,7 +83,6 @@ function RekapPage() {
       durasi,
       tanggal: s.selesaiAt ? new Date(s.selesaiAt).toLocaleString("id-ID", { timeZone: "Asia/Jakarta" }) : "-",
       mulaiAtStr: formatDateExcel(s.mulaiAt),
-
     };
   });
 
@@ -82,7 +90,6 @@ function RekapPage() {
     const aoa: (string | number)[][] = [
       ["No", "Waktu Mulai", "Nama Tes", "Username", "Nama", "Group", "Poin"],
       ...rows.map((r, i) => [i + 1, r.mulaiAtStr, r.ujian, r.username, r.nama, r.unit, r.skor]),
-
     ];
     exportSheet(`rekap-hasil-${Date.now()}.xlsx`, [{ name: "Rekap", aoa }]);
   }
@@ -100,9 +107,9 @@ function RekapPage() {
       <Card>
         <CardContent className="grid grid-cols-2 gap-3 p-4 lg:grid-cols-5">
           <div>
-            <label className="text-xs">Ujian</label>
+            <label className="text-xs font-medium text-muted-foreground">Ujian</label>
             <Select value={ujianId} onValueChange={setUjianId}>
-              <SelectTrigger>
+              <SelectTrigger className="mt-1">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -119,16 +126,14 @@ function RekapPage() {
             </Select>
           </div>
           <div>
-            <label className="text-xs">Unit Akademik</label>
+            <label className="text-xs font-medium text-muted-foreground">Unit Akademik</label>
             <Select value={unitId} onValueChange={setUnitId}>
-
-              <SelectTrigger>
+              <SelectTrigger className="mt-1">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Semua unit</SelectItem>
                 {units.map((g) => (
-
                   <SelectItem key={g.id} value={g.id}>
                     {g.nama}
                   </SelectItem>
@@ -137,89 +142,85 @@ function RekapPage() {
             </Select>
           </div>
           <div>
-            <label className="text-xs">Dari tanggal</label>
-            <Input type="date" value={dari} onChange={(e) => setDari(e.target.value)} />
+            <label className="text-xs font-medium text-muted-foreground">Dari tanggal</label>
+            <Input type="date" value={dari} onChange={(e) => setDari(e.target.value)} className="mt-1" />
           </div>
           <div>
-            <label className="text-xs">Sampai tanggal</label>
-            <Input type="date" value={sampai} onChange={(e) => setSampai(e.target.value)} />
+            <label className="text-xs font-medium text-muted-foreground">Sampai tanggal</label>
+            <Input type="date" value={sampai} onChange={(e) => setSampai(e.target.value)} className="mt-1" />
           </div>
           <div className="flex items-end">
             <Button onClick={exportExcel} disabled={rows.length === 0} className="w-full">
-              <Download className="mr-1 h-4 w-4" />
+              <Download className="mr-1.5 h-4 w-4" />
               Export Excel
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      <Card className="shadow-sm border-0 ring-1 ring-border/50">
-        <CardContent className="p-0 overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/50 text-left text-muted-foreground font-medium border-b">
-              <tr>
-                <th className="p-4 font-semibold">Nama Peserta</th>
-                <th className="p-4 font-semibold">Unit Akademik</th>
-
-                <th className="p-4 font-semibold">Ujian (Mata Kuliah)</th>
-                <th className="p-4 font-semibold">Skor Akhir</th>
-                <th className="p-4 font-semibold">Persentase</th>
-                <th className="p-4 font-semibold">Waktu Penyelesaian</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r, i) => (
-                <tr key={i} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
-                  <td className="p-4">
-                    <div className="font-semibold">{r.nama}</div>
-                    <div className="text-xs text-muted-foreground font-mono mt-0.5">{r.username}</div>
-                  </td>
-                  <td className="p-4">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-accent text-accent-foreground border">
-                      {r.unit}
-
-                    </span>
-                  </td>
-                  <td className="p-4">
-                    <div className="font-medium text-foreground">{r.ujian}</div>
-                    {r.mataKuliah !== "-" && (
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
-                        <BookOpen className="h-3 w-3" />
-                        {r.mataKuliah}
-                      </div>
-                    )}
-                  </td>
-                  <td className="p-4 font-bold text-base">
-                    {r.skor} <span className="text-xs font-normal text-muted-foreground">/ {r.maks}</span>
-                  </td>
-                  <td className="p-4">
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold ${
-                      r.persen >= 75 ? 'bg-success/15 text-success' :
-                      r.persen >= 50 ? 'bg-warning/15 text-warning-foreground' :
-                      'bg-destructive/15 text-destructive'
-                    }`}>
-                      <BadgeCheck className="h-3 w-3" /> {r.persen}%
-                    </span>
-                  </td>
-                  <td className="p-4">
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <CalendarDays className="h-3.5 w-3.5" />
-                      {r.tanggal}
+      <Card className="shadow-sm border ring-1 ring-border/50 overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/50 hover:bg-muted/50">
+              <TableHead className="py-3.5 font-semibold text-xs text-muted-foreground uppercase tracking-wider">Nama Peserta</TableHead>
+              <TableHead className="py-3.5 font-semibold text-xs text-muted-foreground uppercase tracking-wider">Unit Akademik</TableHead>
+              <TableHead className="py-3.5 font-semibold text-xs text-muted-foreground uppercase tracking-wider">Ujian (Mata Kuliah)</TableHead>
+              <TableHead className="py-3.5 font-semibold text-xs text-muted-foreground uppercase tracking-wider">Skor Akhir</TableHead>
+              <TableHead className="py-3.5 font-semibold text-xs text-muted-foreground uppercase tracking-wider">Persentase</TableHead>
+              <TableHead className="py-3.5 font-semibold text-xs text-muted-foreground uppercase tracking-wider">Waktu Penyelesaian</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {rows.map((r, i) => (
+              <TableRow key={i} className="hover:bg-muted/30 transition-colors">
+                <TableCell className="p-4">
+                  <div className="font-semibold text-foreground">{r.nama}</div>
+                  <div className="text-xs text-muted-foreground font-mono mt-0.5">{r.username}</div>
+                </TableCell>
+                <TableCell className="p-4">
+                  <Badge variant="outline" className="font-medium">
+                    {r.unit}
+                  </Badge>
+                </TableCell>
+                <TableCell className="p-4">
+                  <div className="font-medium text-foreground">{r.ujian}</div>
+                  {r.mataKuliah !== "-" && (
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
+                      <BookOpen className="h-3.5 w-3.5" />
+                      {r.mataKuliah}
                     </div>
-                  </td>
-                </tr>
-              ))}
-              {rows.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="p-12 text-center text-muted-foreground border-t border-dashed bg-muted/10">
-                    Tidak ada data sesi ujian yang sesuai dengan filter.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </CardContent>
+                  )}
+                </TableCell>
+                <TableCell className="p-4 font-bold text-base">
+                  {r.skor} <span className="text-xs font-normal text-muted-foreground">/ {r.maks}</span>
+                </TableCell>
+                <TableCell className="p-4">
+                  <Badge
+                    variant={r.persen >= 75 ? "default" : r.persen >= 50 ? "secondary" : "destructive"}
+                    className="gap-1 font-bold"
+                  >
+                    <BadgeCheck className="h-3.5 w-3.5" /> {r.persen}%
+                  </Badge>
+                </TableCell>
+                <TableCell className="p-4">
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <CalendarDays className="h-3.5 w-3.5" />
+                    {r.tanggal}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+            {rows.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={6} className="p-12 text-center text-muted-foreground bg-muted/10">
+                  Tidak ada data sesi ujian yang sesuai dengan filter.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </Card>
     </div>
   );
 }
+
