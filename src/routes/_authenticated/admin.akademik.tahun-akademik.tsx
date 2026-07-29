@@ -4,11 +4,10 @@ import { tahunAkademikRepo } from "@/lib/cbt/repos";
 import { mutateTahunAkademikServer } from "@/lib/server/akademik/functions";
 import { uid } from "@/lib/cbt/storage";
 import type { TahunAkademik } from "@/lib/cbt/types";
-import { AdminPageContent } from "@/components/cbt/AdminPage";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash2, Pencil } from "lucide-react";
+import { Plus, Trash2, Pencil, Calendar, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -20,16 +19,15 @@ import {
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export const Route = createFileRoute("/_authenticated/admin/akademik/tahun-akademik")({
-
   component: TahunAkademikPage,
 });
 
 function TahunAkademikPage() {
   const [items, setItems] = useState<TahunAkademik[]>(tahunAkademikRepo.all());
-
-  
   const [editing, setEditing] = useState<TahunAkademik | null>(null);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ id: "", nama: "", aktif: false });
@@ -56,7 +54,6 @@ function TahunAkademikPage() {
     tahunAkademikRepo.remove(id);
     setItems(tahunAkademikRepo.all());
     toast.success("Tahun Akademik dihapus");
-
   }
 
   async function save() {
@@ -80,49 +77,65 @@ function TahunAkademikPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">Daftar Tahun Akademik</h2>
-          <p className="text-sm text-slate-500">Kelola periode waktu perkuliahan institusi.</p>
+          <h2 className="text-xl font-bold tracking-tight text-foreground">Daftar Tahun Akademik</h2>
+          <p className="text-sm text-muted-foreground">Kelola periode waktu perkuliahan institusi.</p>
         </div>
-        <Button onClick={handleAdd} size="sm" className="h-9">
-
+        <Button onClick={handleAdd} size="sm" className="shadow-sm">
           <Plus className="mr-2 h-4 w-4" /> Tambah Tahun Akademik
         </Button>
       </div>
 
-      <AdminPageContent className="p-0">
-
-        <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800/60">
-          {items.map((item) => (
-            <div key={item.id} className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 hover:bg-white dark:hover:bg-slate-800/50 transition-colors gap-2">
-              <div className="flex items-center gap-3">
-                <div className="font-medium text-slate-900 dark:text-slate-100">{item.nama}</div>
-                {item.aktif ? (
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-[10px] font-semibold tracking-wide uppercase text-emerald-700 dark:text-emerald-400">
-                    Aktif
-                  </span>
-                ) : (
-                  <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-semibold tracking-wide uppercase text-slate-500">
-                    Tidak Aktif
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" className="h-8" onClick={() => handleEdit(item)}>
-                  <Pencil className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="sm" className="h-8 text-destructive hover:bg-destructive/10" onClick={() => handleRemove(item.id)}>
-
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          ))}
-          {items.length === 0 && (
-            <div className="p-8 text-center text-sm text-slate-400">Belum ada data tahun akademik.</div>
-          )}
-        </div>
-      </AdminPageContent>
-
+      <Card className="shadow-sm border-border overflow-hidden">
+        <Table>
+          <TableHeader className="bg-muted/30">
+            <TableRow>
+              <TableHead className="w-[50%]">Tahun Akademik</TableHead>
+              <TableHead className="w-[30%]">Status</TableHead>
+              <TableHead className="w-[20%] text-right">Aksi</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {items.map((item) => (
+              <TableRow key={item.id} className="group hover:bg-muted/30 transition-colors">
+                <TableCell className="font-semibold text-foreground">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    {item.nama}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  {item.aktif ? (
+                    <Badge variant="default" className="bg-emerald-500 hover:bg-emerald-600 border-transparent shadow-none text-white">
+                      <CheckCircle2 className="mr-1 h-3 w-3" /> Aktif
+                    </Badge>
+                  ) : (
+                    <Badge variant="secondary" className="text-muted-foreground shadow-none">
+                      Tidak Aktif
+                    </Badge>
+                  )}
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex items-center justify-end gap-1">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => handleEdit(item)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10" onClick={() => handleRemove(item.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+            {items.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={3} className="h-32 text-center text-muted-foreground">
+                  Belum ada data tahun akademik.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </Card>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
@@ -142,13 +155,13 @@ function TahunAkademikPage() {
                 autoFocus
               />
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 pt-2">
               <Switch
                 checked={form.aktif}
                 onCheckedChange={(c) => setForm({ ...form, aktif: c })}
                 id="aktif-mode"
               />
-              <Label htmlFor="aktif-mode" className="font-normal">
+              <Label htmlFor="aktif-mode" className="font-normal cursor-pointer">
                 Tandai sebagai Tahun Akademik Aktif
               </Label>
             </div>

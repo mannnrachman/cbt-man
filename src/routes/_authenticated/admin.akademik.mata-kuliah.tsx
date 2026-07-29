@@ -4,11 +4,10 @@ import { mataKuliahRepo, unitAkademikRepo, semesterRepo, tahunAkademikRepo } fro
 import { mutateMataKuliahServer } from "@/lib/server/akademik/functions";
 import { uid } from "@/lib/cbt/storage";
 import type { MataKuliah } from "@/lib/cbt/types";
-import { AdminPageContent } from "@/components/cbt/AdminPage";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash2, Pencil } from "lucide-react";
+import { Plus, Trash2, Pencil, BookOpen, Search } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -25,14 +24,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export const Route = createFileRoute("/_authenticated/admin/akademik/mata-kuliah")({
-
   component: MataKuliahPage,
 });
 
 function MataKuliahPage() {
   const [items, setItems] = useState<MataKuliah[]>(mataKuliahRepo.all());
+  const [search, setSearch] = useState("");
   const unitList = unitAkademikRepo.all();
   const semesterList = semesterRepo.all();
   const taList = tahunAkademikRepo.all();
@@ -43,14 +45,12 @@ function MataKuliahPage() {
 
   function handleAdd() {
     setForm({ id: uid("mk_"), kode: "", nama: "", sks: 2, unitId: "", semesterId: "" });
-
     setEditing(null);
     setOpen(true);
   }
 
   function handleEdit(item: MataKuliah) {
     setForm({ id: item.id, kode: item.kode, nama: item.nama, sks: item.sks, unitId: item.unitId || "", semesterId: item.semesterId || "" });
-
     setEditing(item);
     setOpen(true);
   }
@@ -99,63 +99,99 @@ function MataKuliahPage() {
     setOpen(false);
   }
 
+  const filteredItems = items.filter(
+    (item) =>
+      item.nama.toLowerCase().includes(search.toLowerCase()) ||
+      item.kode.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">Daftar Mata Kuliah</h2>
-          <p className="text-sm text-slate-500">Kelola mata kuliah untuk penjadwalan ujian.</p>
+          <h2 className="text-xl font-bold tracking-tight text-foreground">Daftar Mata Kuliah</h2>
+          <p className="text-sm text-muted-foreground">Kelola mata kuliah untuk penjadwalan ujian.</p>
         </div>
-        <Button onClick={handleAdd} size="sm" className="h-9">
-
-          <Plus className="mr-2 h-4 w-4" /> Tambah Mata Kuliah
-        </Button>
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="relative flex-1 sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Cari mata kuliah..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9 h-9 text-sm"
+            />
+          </div>
+          <Button onClick={handleAdd} size="sm" className="shadow-sm h-9 shrink-0">
+            <Plus className="mr-2 h-4 w-4" /> Tambah MK
+          </Button>
+        </div>
       </div>
 
-      <AdminPageContent className="p-0">
-        <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800/60">
-          {items.map((item) => {
-            const unit = unitList.find((p) => p.id === item.unitId);
+      <Card className="shadow-sm border-border overflow-hidden">
+        <Table>
+          <TableHeader className="bg-muted/30">
+            <TableRow>
+              <TableHead className="w-[15%]">Kode</TableHead>
+              <TableHead className="w-[35%]">Nama Mata Kuliah</TableHead>
+              <TableHead className="w-[25%]">Unit & Semester</TableHead>
+              <TableHead className="w-[10%] text-center">SKS</TableHead>
+              <TableHead className="w-[15%] text-right">Aksi</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredItems.map((item) => {
+              const unit = unitList.find((p) => p.id === item.unitId);
+              const semester = semesterList.find((s) => s.id === item.semesterId);
+              const ta = taList.find((t) => t.id === semester?.tahunAkademikId);
 
-            const semester = semesterList.find((s) => s.id === item.semesterId);
-            const ta = taList.find((t) => t.id === semester?.tahunAkademikId);
-            return (
-              <div key={item.id} className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 hover:bg-white dark:hover:bg-slate-800/50 transition-colors gap-2">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-mono font-bold tracking-widest text-slate-500 uppercase">
+              return (
+                <TableRow key={item.id} className="group hover:bg-muted/30 transition-colors">
+                  <TableCell>
+                    <Badge variant="outline" className="font-mono font-bold text-xs uppercase bg-muted/50 text-foreground border-border">
                       {item.kode}
-                    </span>
-                    <div className="font-semibold text-slate-900 dark:text-slate-100">{item.nama}</div>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="font-semibold text-foreground">
+                    <div className="flex items-center gap-2">
+                      <BookOpen className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <span>{item.nama}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-xs text-muted-foreground">
+                    <div className="space-y-0.5">
+                      <div className="font-medium text-foreground">{unit?.nama ?? "-"}</div>
+                      <div>{semester?.nama ?? "-"} {ta ? `(${ta.nama})` : ""}</div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <Badge variant="secondary" className="font-bold text-xs">
                       {item.sks} SKS
-                    </span>
-                  </div>
-                  <div className="text-xs text-slate-500 mt-1.5 flex flex-wrap items-center gap-3">
-                    <span className="flex items-center gap-1"><span className="text-slate-400">Unit:</span> <span className="font-medium text-slate-600 dark:text-slate-300">{unit?.nama ?? "-"}</span></span>
-
-                    <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
-                    <span className="flex items-center gap-1"><span className="text-slate-400">Semester:</span> <span className="font-medium text-slate-600 dark:text-slate-300">{semester?.nama ?? "-"} {ta ? `(${ta.nama})` : ""}</span></span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" className="h-8" onClick={() => handleEdit(item)}>
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" className="h-8 text-destructive hover:bg-destructive/10" onClick={() => handleRemove(item.id)}>
-
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            );
-          })}
-          {items.length === 0 && (
-            <div className="p-8 text-center text-sm text-slate-400">Belum ada data mata kuliah.</div>
-          )}
-        </div>
-      </AdminPageContent>
-
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-1">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => handleEdit(item)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10" onClick={() => handleRemove(item.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+            {filteredItems.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
+                  {search ? "Tidak ada mata kuliah yang sesuai dengan kata kunci." : "Belum ada data mata kuliah."}
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </Card>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
@@ -199,7 +235,6 @@ function MataKuliahPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {unitList.map((p) => (
-
                     <SelectItem key={p.id} value={p.id}>
                       {p.nama}
                     </SelectItem>
