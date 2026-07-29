@@ -78,27 +78,30 @@ function FilesPage() {
       : myJurusanId;
       
     setIsUploading(true);
-    let successCount = 0;
-    
-    for (const f of Array.from(fileList)) {
-      try {
-        await putFile(f, targetJurusan);
-        successCount++;
-      } catch (e) {
-        toast.error(`Gagal upload ${f.name}: ${e instanceof Error ? e.message : String(e)}`);
+    try {
+      let successCount = 0;
+      
+      for (const f of Array.from(fileList)) {
+        try {
+          await putFile(f, targetJurusan);
+          successCount++;
+        } catch (e) {
+          toast.error(`Gagal upload ${f.name}: ${e instanceof Error ? e.message : String(e)}`);
+        }
       }
-    }
-    
-    if (successCount > 0) {
-      const folderName = targetJurusan ? jurusans.find((j) => j.id === targetJurusan)?.nama : "Global";
-      toast.success(`${successCount} file berhasil di-upload ke folder ${folderName}`);
-      try {
-        await refresh();
-      } catch (e) {
-        toast.error(`Gagal memuat ulang daftar file: ${e instanceof Error ? e.message : String(e)}`);
+      
+      if (successCount > 0) {
+        const folderName = targetJurusan ? jurusans.find((j) => j.id === targetJurusan)?.nama : "Global";
+        toast.success(`${successCount} file berhasil di-upload ke folder ${folderName}`);
+        try {
+          await refresh();
+        } catch (e) {
+          toast.error(`Gagal memuat ulang daftar file: ${e instanceof Error ? e.message : String(e)}`);
+        }
       }
+    } finally {
+      setIsUploading(false);
     }
-    setIsUploading(false);
   }
   
   const filteredFiles = files.filter(f => {
