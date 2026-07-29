@@ -2,7 +2,7 @@ import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import * as XLSX from "xlsx";
 import { upsertUserServer, getUsersList, mutateUserServer } from "@/lib/server/users/functions";
-import { getUnitAkademikList, mutateUnitAkademikServer } from "@/lib/server/akademik/functions";
+import { getUnitAkademikList } from "@/lib/server/akademik/functions";
 import { uid } from "@/lib/cbt/storage";
 import type { UnitAkademik, User } from "@/lib/cbt/types";
 
@@ -13,9 +13,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, Plus, Printer, Upload, Users as UsersIcon, Search, Loader2, ChevronLeft, ChevronRight, FileX } from "lucide-react";
+import { Pencil, Trash2, Plus, Printer, Upload, Users as UsersIcon, Activity, Search, Loader2, ChevronLeft, ChevronRight, FileX } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/peserta/")({
@@ -41,6 +42,7 @@ function PesertaPage() {
   const [editing, setEditing] = useState<PesertaWithPwd | null>(null);
   const [open, setOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isImporting, setIsImporting] = useState(false);
   const [filterUnit, setFilterUnit] = useState<string>("all");
   const [query, setQuery] = useState("");
@@ -51,7 +53,19 @@ function PesertaPage() {
   const itemsPerPage = 10;
 
   function refresh() {
+    setSelectedIds([]);
     router.invalidate();
+  }
+
+  async function handleBulkDelete() {
+    if (!confirm(`Hapus ${selectedIds.length} peserta terpilih secara permanen?`)) return;
+    const res = await mutateUserServer({ data: { action: "bulkRemove", payload: { ids: selectedIds } } });
+    if (res.ok) {
+      toast.success(`${selectedIds.length} peserta berhasil dihapus`);
+      refresh();
+    } else {
+      toast.error(res.error ?? "Gagal menghapus peserta");
+    }
   }
 
   const filtered = peserta.filter((p) =>
@@ -82,27 +96,20 @@ function PesertaPage() {
       for (const r of rows) {
         const username = String(r.username ?? r.Username ?? "").trim();
         const nama = String(r.nama ?? r.Nama ?? r.namaLengkap ?? "").trim();
-        const password = String(r.password ?? r.Password ?? username + "123").trim();
+        const password = String(r.password ?? r.Password ?? "").trim();
         const unitName = String(r.group ?? r.Group ?? r.kelas ?? r.unit ?? "").trim();
-        let unitId: string | undefined;
-        
-        if (unitName) {
-          let g = localUnits.find((x: UnitAkademik) => x.nama.toLowerCase() === unitName.toLowerCase());
-          if (!g) { 
-            g = { id: uid("u_"), nama: unitName, tipe: "kelas", parentId: null }; 
-            const resUnit = await mutateUnitAkademikServer({ data: { action: "upsert", payload: g } });
-            if (resUnit.ok) {
-              localUnits.push(g);
-            } else {
-              g = undefined;
-            }
-          }
-          if (!g) {
-            failed++;
-            continue;
-          }
-          unitId = g.id;
+        if (!username || !nama || !password) {
+          failed++;
+          continue;
         }
+        const unit = unitName
+          ? localUnits.find((x: UnitAkademik) => x.nama.toLowerCase() === unitName.toLowerCase())
+          : undefined;
+        if (unitName && !unit) {
+          failed++;
+          continue;
+        }
+        const unitId = unit?.id;
 
         const existingUser = (allUsers as User[]).find((u: User) => u.username === username);
         const userId = existingUser ? existingUser.id : uid("u_");
@@ -160,9 +167,14 @@ function PesertaPage() {
               Import Excel
             </Button>
             <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1"></div>
-            <Link to="/admin/peserta/kartu">
+            <Link to="/admin/akademik">
               <Button variant="outline" size="sm" className="h-9">
                 <UsersIcon className="mr-2 h-4 w-4" /> Unit Akademik
+              </Button>
+            </Link>
+            <Link to="/admin/peserta/online">
+              <Button variant="outline" size="sm" className="h-9">
+                <Activity className="mr-2 h-4 w-4" /> Live Ujian
               </Button>
             </Link>
             <Link to="/admin/peserta/kartu">
@@ -196,6 +208,11 @@ function PesertaPage() {
             {units.map((g) => <SelectItem key={g.id} value={g.id}>{g.nama}</SelectItem>)}
           </SelectContent>
         </Select>
+        {selectedIds.length > 0 && (
+          <Button variant="destructive" size="sm" onClick={handleBulkDelete} className="sm:ml-auto">
+            <Trash2 className="mr-2 h-4 w-4" /> Hapus Terpilih ({selectedIds.length})
+          </Button>
+        )}
       </div>
 
       <AdminPageContent className="p-0">
@@ -204,6 +221,13 @@ function PesertaPage() {
             <Table>
               <TableHeader>
                 <TableRow className="bg-slate-50/50 dark:bg-slate-900/50">
+                  <TableHead className="w-12 text-center">
+                    <Checkbox
+                      checked={shown.length > 0 && shown.every((p) => selectedIds.includes(p.id))}
+                      onCheckedChange={(checked) => setSelectedIds(checked ? shown.map((p) => p.id) : [])}
+                      aria-label="Pilih semua peserta pada halaman ini"
+                    />
+                  </TableHead>
                   <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Username</TableHead>
                   <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Nama Lengkap</TableHead>
                   <TableHead className="font-semibold text-slate-700 dark:text-slate-300 text-center">Grup / Kelas</TableHead>
@@ -214,6 +238,13 @@ function PesertaPage() {
               <TableBody>
                 {shown.map((p) => (
                   <TableRow key={p.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
+                    <TableCell className="text-center">
+                      <Checkbox
+                        checked={selectedIds.includes(p.id)}
+                        onCheckedChange={(checked) => setSelectedIds((ids) => checked ? [...ids, p.id] : ids.filter((id) => id !== p.id))}
+                        aria-label={`Pilih ${p.namaLengkap}`}
+                      />
+                    </TableCell>
                     <TableCell className="font-medium text-slate-900 dark:text-slate-100">{p.username}</TableCell>
                     <TableCell className="text-slate-600 dark:text-slate-400">{p.namaLengkap}</TableCell>
                     <TableCell className="text-center">
@@ -248,7 +279,7 @@ function PesertaPage() {
                 ))}
                 {shown.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={5} className="h-48 text-center">
+                    <TableCell colSpan={6} className="h-48 text-center">
                       <div className="flex flex-col items-center justify-center text-slate-500">
                         <FileX className="h-10 w-10 text-slate-300 dark:text-slate-600 mb-3" />
                         <p>Tidak ada data peserta yang sesuai.</p>
@@ -366,7 +397,7 @@ function PesertaDialog({
           namaLengkap: form.namaLengkap.trim(),
           role: "mahasiswa",
           allowedTopikIds: editing?.allowedTopikIds ?? [],
-          unitId: form.unitId || undefined,
+          unitId: form.unitId === "none" ? undefined : form.unitId || undefined,
           detail: editing?.detail,
           aktif: form.aktif,
           createdAt: editing?.createdAt ?? Date.now(),
@@ -419,7 +450,7 @@ function PesertaDialog({
                 <SelectValue placeholder="(Tanpa Unit)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">-- Tidak ada --</SelectItem>
+                <SelectItem value="none">-- Tidak ada --</SelectItem>
                 {units.map((g) => (
                   <SelectItem key={g.id} value={g.id}>
                     {g.nama}
