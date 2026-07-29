@@ -99,6 +99,7 @@ function TokenPage() {
       for (const tok of result.tokens) {
         tokenRepo.upsert(tok);
       }
+      await tokenRepo.flush();
       toast.success(`${result.tokens.length} token dibuat`);
       refresh();
     } catch (err) {
@@ -219,9 +220,10 @@ function TokenPage() {
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => {
+                        onClick={async () => {
                           if (!confirm("Hapus token?")) return;
                           tokenRepo.remove(t.id);
+                          await tokenRepo.flush();
                           refresh();
                         }}
                       >

@@ -37,8 +37,11 @@ function UjianList() {
   const [list, setList] = useState<Ujian[]>(visibleUjians(user));
   const [activeTab, setActiveTab] = useState<"semua" | "persiapan" | "berlangsung" | "selesai">("semua");
   const [search, setSearch] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
 
-  function add() {
+  async function add() {
+    if (isAdding) return;
+    setIsAdding(true);
     const u: Ujian = {
       id: uid("ex_"),
       nama: "Ujian Baru",
@@ -61,8 +64,10 @@ function UjianList() {
       createdAt: Date.now(),
     };
     ujianRepo.upsert(u);
+    await ujianRepo.flush();
     setList(visibleUjians(user));
     toast.success("Ujian baru dibuat — silakan edit");
+    setIsAdding(false);
   }
 
   const now = Date.now();
@@ -166,7 +171,7 @@ function UjianList() {
         title="Manajemen Paket Ujian"
         description="Kelola pembuatan ujian, soal, dan akses peserta."
         action={
-          <Button onClick={add} size="sm" className="shadow-sm h-9">
+          <Button onClick={add} disabled={isAdding} size="sm" className="shadow-sm h-9">
             <Plus className="mr-2 h-4 w-4" /> Paket Baru
           </Button>
         }
