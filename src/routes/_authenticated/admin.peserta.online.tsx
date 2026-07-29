@@ -1,6 +1,6 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useEffect, useState, useMemo, useRef } from "react";
-import { getLiveOnlineSesis, mutateSesiServer } from "@/lib/server/sesi/functions";
+import { actionLiveSesiServer, getLiveOnlineSesis } from "@/lib/server/sesi/functions";
 import { Activity, AlertTriangle, Users, Timer, CheckCircle2, Search, MonitorPlay, StopCircle, RefreshCcw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -48,15 +48,8 @@ function OnlinePage() {
   async function handleForceSubmit(session: LiveSession) {
     if (!confirm(`Paksa kumpulkan ujian untuk ${session.user?.namaLengkap ?? "Peserta"}? Sesi ini akan ditutup secara permanen.`)) return;
     try {
-      const res = await mutateSesiServer({
-        data: {
-          action: "upsert",
-          payload: {
-            ...session,
-            status: "selesai",
-            selesaiAt: Date.now(),
-          }
-        }
+      const res = await actionLiveSesiServer({
+        data: { sesiId: session.id, action: "forceSubmit" },
       });
       if (res.ok) {
         toast.success("Sesi berhasil dihentikan paksa");
@@ -72,14 +65,8 @@ function OnlinePage() {
   async function handleResetPelanggaran(session: LiveSession) {
     if (!confirm(`Reset jumlah pelanggaran untuk ${session.user?.namaLengkap ?? "Peserta"} menjadi 0?`)) return;
     try {
-      const res = await mutateSesiServer({
-        data: {
-          action: "upsert",
-          payload: {
-            ...session,
-            pelanggaran: 0,
-          }
-        }
+      const res = await actionLiveSesiServer({
+        data: { sesiId: session.id, action: "resetPelanggaran" },
       });
       if (res.ok) {
         toast.success("Pelanggaran berhasil di-reset");
