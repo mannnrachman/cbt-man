@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import * as XLSX from "xlsx";
 import { upsertUserServer, getUsersList, mutateUserServer } from "@/lib/server/users/functions";
 import { getUnitAkademikList, mutateUnitAkademikServer } from "@/lib/server/akademik/functions";
-import { hashPassword } from "@/lib/cbt/hash";
 import { uid } from "@/lib/cbt/storage";
 import type { UnitAkademik, User } from "@/lib/cbt/types";
 
@@ -12,10 +11,11 @@ import { AdminPage, AdminPageHeader, AdminPageContent } from "@/components/cbt/A
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Pencil, Trash2, Plus, Printer, Upload, Users as UsersIcon, Activity } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Pencil, Trash2, Plus, Printer, Upload, Users as UsersIcon, Search, Loader2, ChevronLeft, ChevronRight, FileX } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/peserta/")({
@@ -40,127 +40,127 @@ function PesertaPage() {
 
   const [editing, setEditing] = useState<PesertaWithPwd | null>(null);
   const [open, setOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isImporting, setIsImporting] = useState(false);
   const [filterUnit, setFilterUnit] = useState<string>("all");
   const [query, setQuery] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   function refresh() {
     router.invalidate();
-    setSelectedIds([]);
   }
 
-  async function handleBulkDelete() {
-    if (!confirm(`Hapus ${selectedIds.length} peserta terpilih secara permanen?`)) return;
-    const res = await mutateUserServer({ data: { action: "bulkRemove", payload: { ids: selectedIds } } });
+  const filtered = peserta.filter((p) =>
+    (filterUnit === "all" || p.unitId === filterUnit) &&
+    (query === "" || p.namaLengkap.toLowerCase().includes(query.toLowerCase()) || p.username.toLowerCase().includes(query.toLowerCase()))
+  );
+
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const shown = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  // Reset page when filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query, filterUnit]);
+
+  async function importExcel(file: File) {
+    setIsImporting(true);
+    try {
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf);
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const rows: Record<string, unknown>[] = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+      
+      let added = 0;
+      let failed = 0;
+      const localUnits = [...units];
+      
+      for (const r of rows) {
+        const username = String(r.username ?? r.Username ?? "").trim();
+        const nama = String(r.nama ?? r.Nama ?? r.namaLengkap ?? "").trim();
+        const password = String(r.password ?? r.Password ?? username + "123").trim();
+        const unitName = String(r.group ?? r.Group ?? r.kelas ?? r.unit ?? "").trim();
+        let unitId: string | undefined;
+        
+        if (unitName) {
+          let g = localUnits.find((x: UnitAkademik) => x.nama.toLowerCase() === unitName.toLowerCase());
+          if (!g) { 
+            g = { id: uid("u_"), nama: unitName, tipe: "kelas", parentId: null }; 
+            const resUnit = await mutateUnitAkademikServer({ data: { action: "upsert", payload: g } });
+            if (resUnit.ok) {
+              localUnits.push(g);
+            } else {
+              g = undefined;
+            }
+          }
+          if (!g) {
+            failed++;
+            continue;
+          }
+          unitId = g.id;
+        }
+
+        const existingUser = (allUsers as User[]).find((u: User) => u.username === username);
+        const userId = existingUser ? existingUser.id : uid("u_");
+
+        const res = await upsertUserServer({
+          data: {
+            id: userId, username, namaLengkap: nama, role: "mahasiswa",
+            allowedTopikIds: existingUser ? existingUser.allowedTopikIds : [], unitId: unitId, aktif: true,
+            createdAt: existingUser ? existingUser.createdAt : Date.now(), newPassword: password,
+          }
+        });
+        if (res.ok) {
+          added++;
+        } else {
+          failed++;
+        }
+      }
+      if (failed > 0) {
+        toast.warning(`${added} peserta diimport, ${failed} gagal diimport`);
+      } else {
+        toast.success(`${added} peserta berhasil diimport`);
+      }
+      refresh();
+    } catch (e) {
+      toast.error("Gagal memproses file Excel");
+    } finally {
+      setIsImporting(false);
+    }
+  }
+
+  async function confirmDelete() {
+    if (!deleteId) return;
+    const res = await mutateUserServer({ data: { action: "remove", payload: { id: deleteId } } });
     if (res.ok) {
-      toast.success(`${selectedIds.length} peserta berhasil dihapus`);
+      toast.success("Peserta berhasil dihapus");
       refresh();
     } else {
       toast.error(res.error ?? "Gagal menghapus peserta");
     }
-  }
-
-  const shown = peserta.filter((p) =>
-    (filterUnit === "all" || p.unitId === filterUnit) &&
-
-    (query === "" || p.namaLengkap.toLowerCase().includes(query.toLowerCase()) || p.username.toLowerCase().includes(query.toLowerCase())),
-  );
-
-  async function importExcel(file: File) {
-    const buf = await file.arrayBuffer();
-    const wb = XLSX.read(buf);
-    const sheet = wb.Sheets[wb.SheetNames[0]];
-    const rows: Record<string, unknown>[] = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-    let added = 0;
-    let failed = 0;
-    const localUnits = [...units];
-    const missingUnits = new Set<string>();
-
-    for (const r of rows) {
-      const username = String(r.username ?? r.Username ?? "").trim();
-      const nama = String(r.nama ?? r.Nama ?? r.namaLengkap ?? "").trim();
-      if (!username || !nama) {
-        failed++;
-        continue;
-      }
-
-      const password = String(r.password ?? r.Password ?? "").trim();
-      if (!password) {
-        failed++;
-        continue;
-      }
-      
-      const unitName = String(r.group ?? r.Group ?? r.kelas ?? r.unit ?? "").trim();
-      let unitId: string | undefined;
-      
-      if (unitName) {
-        const g = localUnits.find((x: UnitAkademik) => x.nama.toLowerCase() === unitName.toLowerCase());
-        if (!g) { 
-          // DO NOT create new unit to prevent breaking hierarchy. Just track the missing unit.
-          missingUnits.add(unitName);
-        } else {
-          unitId = g.id;
-        }
-      }
-
-      const existingUser = (allUsers as User[]).find((u: User) => u.username === username);
-      const userId = existingUser ? existingUser.id : uid("u_");
-
-      const res = await upsertUserServer({
-        data: {
-          id: userId, username, namaLengkap: nama, role: "mahasiswa",
-          allowedTopikIds: existingUser ? existingUser.allowedTopikIds : [], unitId: unitId, aktif: true,
-          createdAt: existingUser ? existingUser.createdAt : Date.now(), newPassword: password,
-        }
-      });
-      if (res.ok) {
-        added++;
-      } else {
-        failed++;
-      }
-    }
-    
-    if (failed > 0 || missingUnits.size > 0) {
-      const missingMsg = missingUnits.size > 0 ? ` | Unit tidak ditemukan (diabaikan): ${Array.from(missingUnits).join(", ")}` : "";
-      toast.warning(`${added} sukses, ${failed} gagal${missingMsg}`, { duration: 6000 });
-    } else {
-      toast.success(`${added} peserta berhasil diimport`);
-    }
-    refresh();
-  }
-
-  function downloadTemplate() {
-    const ws = XLSX.utils.json_to_sheet([
-      { username: "siswa10", nama: "Contoh Siswa", password: "siswa10123", group: "XII IPA 1" },
-    ]);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "peserta");
-    XLSX.writeFile(wb, "template-peserta.xlsx");
+    setDeleteId(null);
   }
 
   return (
-        <AdminPage className="neo-ready">
-
+    <AdminPage>
       <AdminPageHeader
         title="Akun Peserta"
         description="Kelola data mahasiswa, grup kelas, dan import akun dari Excel."
         action={
           <>
-
             <input id="file-upload" type="file" accept=".xlsx,.xls" hidden onChange={(e) => {
               const f = e.target.files?.[0]; if (f) importExcel(f); e.target.value = "";
             }} />
-            <Button variant="outline" size="sm" onClick={() => document.getElementById("file-upload")?.click()} className="h-9">
-              <Upload className="mr-2 h-4 w-4" /> Import Excel
+            <Button variant="outline" size="sm" onClick={() => document.getElementById("file-upload")?.click()} className="h-9" disabled={isImporting}>
+              {isImporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+              Import Excel
             </Button>
-            <Link to="/admin/peserta/online">
-              <Button variant="outline" size="sm" className="h-9 border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary">
-                <Activity className="mr-2 h-4 w-4" /> Live Ujian
-              </Button>
-            </Link>
             <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1"></div>
-            <Link to="/admin/akademik">
+            <Link to="/admin/peserta/kartu">
               <Button variant="outline" size="sm" className="h-9">
                 <UsersIcon className="mr-2 h-4 w-4" /> Unit Akademik
               </Button>
@@ -174,132 +174,145 @@ function PesertaPage() {
               <Plus className="mr-2 h-4 w-4" /> Tambah Akun
             </Button>
           </>
-
         }
       />
 
-      {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row gap-3 items-center">
-        <Input 
-          placeholder="Cari nama atau username..." 
-          value={query} 
-          onChange={(e) => setQuery(e.target.value)} 
-          className="max-w-xs" 
-        />
+      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+        <div className="relative max-w-xs w-full">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
+          <Input 
+            placeholder="Cari nama atau username..." 
+            value={query} 
+            onChange={(e) => setQuery(e.target.value)} 
+            className="pl-9" 
+          />
+        </div>
         <Select value={filterUnit} onValueChange={setFilterUnit}>
-          <SelectTrigger className="w-full sm:w-56">
+          <SelectTrigger className="w-full sm:w-48">
             <SelectValue placeholder="Pilih Unit" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Semua Unit</SelectItem>
-            {units.map((g) => {
-              const parent = g.parentId ? units.find((u) => u.id === g.parentId) : undefined;
-              const tipeLabel = g.tipe === "prodi" ? "Prodi" : g.tipe === "fakultas" ? "Fakultas" : "Kelas";
-              return (
-                <SelectItem key={g.id} value={g.id}>
-                  [{tipeLabel}] {g.nama} {parent ? `(${parent.nama})` : ""}
-                </SelectItem>
-              );
-            })}
+            {units.map((g) => <SelectItem key={g.id} value={g.id}>{g.nama}</SelectItem>)}
           </SelectContent>
         </Select>
-        {selectedIds.length > 0 && (
-          <Button variant="destructive" size="sm" onClick={handleBulkDelete} className="ml-auto">
-            <Trash2 className="mr-2 h-4 w-4" /> Hapus Terpilih ({selectedIds.length})
-          </Button>
-        )}
       </div>
 
-      {/* List Section */}
       <AdminPageContent className="p-0">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-semibold">
-              <tr>
-                <th className="p-4 w-12 text-center border-b border-slate-100 dark:border-slate-800">
-                  <Checkbox 
-                    checked={shown.length > 0 && selectedIds.length === shown.length}
-                    onCheckedChange={(c) => {
-                      if (c) setSelectedIds(shown.map(p => p.id));
-                      else setSelectedIds([]);
-                    }}
-                  />
-                </th>
-                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left border-b border-slate-100 dark:border-slate-800">Username</th>
-                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left">Nama Lengkap</th>
-                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left">Grup / Kelas</th>
-                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Status</th>
-                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {shown.map((p) => {
-                const assignedUnit = units.find((g) => g.id === p.unitId);
-                const parentUnit = assignedUnit?.parentId ? units.find((u) => u.id === assignedUnit.parentId) : undefined;
-                return (
-                  <tr key={p.id} className="transition-colors border-t border-slate-100 dark:border-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                    <td className="p-4 text-center align-middle">
-                      <Checkbox 
-                        checked={selectedIds.includes(p.id)}
-                        onCheckedChange={(c) => {
-                          if (c) setSelectedIds([...selectedIds, p.id]);
-                          else setSelectedIds(selectedIds.filter(id => id !== p.id));
-                        }}
-                      />
-                    </td>
-                    <td className="p-4 font-medium text-slate-900 dark:text-slate-100 text-left">{p.username}</td>
-                    <td className="p-4 text-slate-600 dark:text-slate-400 text-left">{p.namaLengkap}</td>
-                    <td className="p-4 text-left">
-                      {assignedUnit ? (
-                        <div className="flex flex-col text-xs">
-                          <span className="font-medium text-slate-800 dark:text-slate-200">
-                            [{assignedUnit.tipe === "prodi" ? "Prodi" : assignedUnit.tipe === "fakultas" ? "Fakultas" : "Kelas"}] {assignedUnit.nama}
-                          </span>
-                          {parentUnit && <span className="text-[11px] text-muted-foreground">{parentUnit.nama}</span>}
-                        </div>
+        <Card className="border-0 shadow-none sm:border sm:shadow-sm">
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-slate-50/50 dark:bg-slate-900/50">
+                  <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Username</TableHead>
+                  <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Nama Lengkap</TableHead>
+                  <TableHead className="font-semibold text-slate-700 dark:text-slate-300 text-center">Grup / Kelas</TableHead>
+                  <TableHead className="font-semibold text-slate-700 dark:text-slate-300 text-center">Status</TableHead>
+                  <TableHead className="font-semibold text-slate-700 dark:text-slate-300 text-center">Aksi</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {shown.map((p) => (
+                  <TableRow key={p.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
+                    <TableCell className="font-medium text-slate-900 dark:text-slate-100">{p.username}</TableCell>
+                    <TableCell className="text-slate-600 dark:text-slate-400">{p.namaLengkap}</TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant="outline" className="bg-slate-50 dark:bg-slate-900 font-medium">
+                        {units.find((g) => g.id === p.unitId)?.nama ?? "-"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {p.aktif ? (
+                        <Badge variant="outline" className="font-medium shadow-none border-slate-200 dark:border-slate-800">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-2"></span>
+                          Aktif
+                        </Badge>
                       ) : (
-                        <span className="text-xs text-muted-foreground italic">(Tanpa Unit)</span>
+                        <Badge variant="outline" className="font-medium text-slate-500 shadow-none border-slate-200 dark:border-slate-800">
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-700 mr-2"></span>
+                          Nonaktif
+                        </Badge>
                       )}
-                    </td>
-                  <td className="p-4 text-center">
-
-                    {p.aktif ? (
-                      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">Aktif</span>
-                    ) : (
-                      <span className="px-2 py-0.5 rounded text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400">Nonaktif</span>
-                    )}
-                  </td>
-                  <td className="p-4 text-center space-x-2">
-                    <Button variant="outline" size="sm" onClick={() => { setEditing(p); setOpen(true); }} className="h-8">
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm" className="h-8 text-destructive hover:bg-destructive/10" onClick={async () => {
-                      if (confirm("Hapus peserta ini?")) {
-                        const res = await mutateUserServer({ data: { action: "remove", payload: { id: p.id } } });
-                        if (res.ok) {
-                          refresh();
-                        } else {
-                          toast.error(res.error ?? "Gagal menghapus peserta");
-                        }
-                      }
-                    }}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </td>
-                </tr>
-                );
-              })}
-              {shown.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="p-8 text-center text-slate-500">Tidak ada data peserta yang sesuai.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex justify-center items-center gap-2">
+                        <Button variant="outline" size="sm" onClick={() => { setEditing(p); setOpen(true); }} className="h-8 w-8 p-0">
+                          <Pencil className="h-4 w-4 text-slate-500" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => setDeleteId(p.id)} className="h-8 w-8 p-0 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/50 hover:text-rose-600">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {shown.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={5} className="h-48 text-center">
+                      <div className="flex flex-col items-center justify-center text-slate-500">
+                        <FileX className="h-10 w-10 text-slate-300 dark:text-slate-600 mb-3" />
+                        <p>Tidak ada data peserta yang sesuai.</p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+            
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200 dark:border-slate-800">
+                <div className="text-sm text-slate-500">
+                  Menampilkan {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, filtered.length)} dari {filtered.length} peserta
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="h-8 w-8" 
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <div className="text-sm font-medium px-2">
+                    {currentPage} / {totalPages}
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="h-8 w-8" 
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </AdminPageContent>
-<PesertaDialog open={open} onOpenChange={setOpen} editing={editing} units={units} onSaved={refresh} />
+      
+      <PesertaDialog open={open} onOpenChange={setOpen} editing={editing} units={units} onSaved={refresh} />
 
+      <Dialog open={!!deleteId} onOpenChange={(v) => !v && setDeleteId(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-rose-600 flex items-center gap-2">
+              <Trash2 className="h-5 w-5" />
+              Hapus Peserta
+            </DialogTitle>
+            <DialogDescription>
+              Apakah Anda yakin ingin menghapus data peserta ini? Tindakan ini tidak dapat dibatalkan.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setDeleteId(null)}>Batal</Button>
+            <Button variant="destructive" onClick={confirmDelete}>Hapus Permanen</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminPage>
   );
 }
@@ -309,7 +322,6 @@ function PesertaDialog({
   onOpenChange,
   editing,
   units,
-
   onSaved,
 }: {
   open: boolean;
@@ -317,16 +329,16 @@ function PesertaDialog({
   editing: User | null;
   units: UnitAkademik[];
   onSaved: () => void;
-
 }) {
   const [form, setForm] = useState({
     username: "",
     namaLengkap: "",
     unitId: "",
-
     aktif: true,
     password: "",
   });
+
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -334,7 +346,6 @@ function PesertaDialog({
       username: editing?.username ?? "",
       namaLengkap: editing?.namaLengkap ?? "",
       unitId: editing?.unitId ?? "",
-
       aktif: editing?.aktif ?? true,
       password: "",
     });
@@ -342,89 +353,99 @@ function PesertaDialog({
 
   async function save() {
     if (!form.username.trim() || !form.namaLengkap.trim()) {
-      toast.error("Wajib diisi");
+      toast.error("Username dan Nama Lengkap wajib diisi");
       return;
     }
 
-    const res = await upsertUserServer({
-      data: {
-        id: editing?.id ?? uid("u_"),
-        username: form.username.trim(),
-        namaLengkap: form.namaLengkap.trim(),
-        role: "mahasiswa",
-        allowedTopikIds: editing?.allowedTopikIds ?? [],
-        unitId: form.unitId === "none" || !form.unitId ? undefined : form.unitId,
-        detail: editing?.detail,
-        aktif: form.aktif,
-        createdAt: editing?.createdAt ?? Date.now(),
-        newPassword: form.password.trim() || undefined,
-      },
-    });
+    setIsSaving(true);
+    try {
+      const res = await upsertUserServer({
+        data: {
+          id: editing?.id ?? uid("u_"),
+          username: form.username.trim(),
+          namaLengkap: form.namaLengkap.trim(),
+          role: "mahasiswa",
+          allowedTopikIds: editing?.allowedTopikIds ?? [],
+          unitId: form.unitId || undefined,
+          detail: editing?.detail,
+          aktif: form.aktif,
+          createdAt: editing?.createdAt ?? Date.now(),
+          newPassword: form.password.trim() || undefined,
+        },
+      });
 
+      if (!res.ok) {
+        toast.error(res.error ?? "Gagal menyimpan peserta");
+        return;
+      }
 
-    if (!res.ok) {
-      toast.error(res.error ?? "Gagal menyimpan peserta");
-      return;
+      toast.success(editing ? "Peserta berhasil diperbarui" : "Peserta baru ditambahkan");
+      onSaved();
+      onOpenChange(false);
+    } catch (e) {
+      toast.error("Terjadi kesalahan sistem");
+    } finally {
+      setIsSaving(false);
     }
-
-    toast.success("Disimpan");
-    onSaved();
-
-    onOpenChange(false);
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{editing ? "Edit Peserta" : "Peserta Baru"}</DialogTitle>
+          <DialogTitle>{editing ? "Edit Data Peserta" : "Tambah Peserta Baru"}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-3">
-          <div>
+        <div className="space-y-4 py-2">
+          <div className="space-y-2">
             <Label>Username</Label>
-            <Input value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} />
+            <Input 
+              placeholder="Misal: 19001234"
+              value={form.username} 
+              onChange={(e) => setForm({ ...form, username: e.target.value })} 
+            />
           </div>
-          <div>
-            <Label>Nama lengkap</Label>
+          <div className="space-y-2">
+            <Label>Nama Lengkap</Label>
             <Input
+              placeholder="Masukkan nama lengkap"
               value={form.namaLengkap}
               onChange={(e) => setForm({ ...form, namaLengkap: e.target.value })}
             />
           </div>
-          <div>
-            <Label>Unit Akademik</Label>
+          <div className="space-y-2">
+            <Label>Unit Akademik / Kelas</Label>
             <Select value={form.unitId} onValueChange={(v) => setForm({ ...form, unitId: v })}>
               <SelectTrigger>
-                <SelectValue placeholder="(tanpa unit)" />
+                <SelectValue placeholder="(Tanpa Unit)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">-- Tidak ada --</SelectItem>
-                {units.map((g) => {
-                  const parent = g.parentId ? units.find((u) => u.id === g.parentId) : undefined;
-                  const tipeLabel = g.tipe === "prodi" ? "Prodi" : g.tipe === "fakultas" ? "Fakultas" : "Kelas";
-                  return (
-                    <SelectItem key={g.id} value={g.id}>
-                      [{tipeLabel}] {g.nama} {parent ? `(${parent.nama})` : ""}
-                    </SelectItem>
-                  );
-                })}
+                <SelectItem value="">-- Tidak ada --</SelectItem>
+                {units.map((g) => (
+                  <SelectItem key={g.id} value={g.id}>
+                    {g.nama}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
-          <div>
-            <Label>{editing ? "Password baru (opsional)" : "Password"}</Label>
+          <div className="space-y-2">
+            <Label>{editing ? "Password Baru (Opsional)" : "Password"}</Label>
             <Input
               type="password"
+              placeholder={editing ? "Kosongkan jika tidak ingin diubah" : "Masukkan password awal"}
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
             />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={isSaving}>
             Batal
           </Button>
-          <Button onClick={save}>Simpan</Button>
+          <Button onClick={save} disabled={isSaving}>
+            {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            {editing ? "Simpan Perubahan" : "Tambahkan"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
