@@ -69,7 +69,7 @@ function OnlinePage() {
   }, [search, rawSesis]);
 
   return (
-    <AdminPage className="neo-ready">
+    <AdminPage className="">
       
       {/* Header */}
       <AdminPageHeader

@@ -46,7 +46,7 @@ function PanduanPage() {
   }, []);
 
   return (
-    <AdminPage className="neo-ready">
+    <AdminPage className="">
       <AdminPageHeader
         title="Panduan Penggunaan"
         description={`Referensi lengkap ${cfg.appName} — dari pembuatan soal hingga evaluasi hasil.`}

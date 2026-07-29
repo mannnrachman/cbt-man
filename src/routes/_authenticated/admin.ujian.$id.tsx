@@ -230,7 +230,7 @@ function UjianEditor() {
   }
 
   return (
-    <div className="space-y-4 max-w-4xl neo-ready">
+    <div className="space-y-4 max-w-4xl ">
       <div className="flex items-center justify-between">
         <div>
           <Link to="/admin/ujian" className="text-sm text-muted-foreground hover:underline">
