@@ -120,7 +120,7 @@ function PesertaPage() {
   }
 
   return (
-        <AdminPage className="neo-ready">
+        <AdminPage className="">
 
       <AdminPageHeader
         title="Akun Peserta"

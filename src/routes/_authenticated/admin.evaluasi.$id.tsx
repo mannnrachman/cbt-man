@@ -82,7 +82,7 @@ function EvaluasiSesi() {
         </p>
       </div>
 
-      <div className="space-y-6 neo-ready">
+      <div className="space-y-6 ">
         {items.map(({ j, idx, soal }) => {
           const isGraded = typeof j.skor === 'number';
           

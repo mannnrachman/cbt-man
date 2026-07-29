@@ -63,7 +63,7 @@ function EvaluasiList() {
   const totalBelumEssay = items.reduce((acc, curr) => acc + curr.belumEssay, 0);
 
   return (
-    <AdminPage className="neo-ready">
+    <AdminPage className="">
       <AdminPageHeader
         title="Penilaian Essay"
         description="Pilih ujian untuk mulai memeriksa dan memberikan nilai pada jawaban essay."

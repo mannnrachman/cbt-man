@@ -62,7 +62,7 @@ function PengaturanPage() {
   }
 
   return (
-    <AdminPage className="neo-ready">
+    <AdminPage className="">
       <AdminPageHeader
         title="Pengaturan Aplikasi"
         description="Konfigurasi institusi, keamanan, browser ujian, dan branding CBT."

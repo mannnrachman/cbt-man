@@ -64,7 +64,7 @@ function SoalPage() {
   );
 
   return (
-    <div className="relative min-h-screen neo-ready">
+    <div className="relative min-h-screen ">
       {/* Subtle radial glow background */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-indigo-50/50 via-white to-white dark:from-indigo-950/20 dark:via-zinc-950 dark:to-zinc-950 -z-10" />
       

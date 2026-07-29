@@ -98,7 +98,7 @@ function AnalisisPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 pb-12 neo-ready">
+    <div className="mx-auto max-w-6xl space-y-6 pb-12 ">
       <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6 rounded-xl border shadow-sm">
         <Link to="/admin/analitik" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 w-fit mb-3">
           ← Kembali ke daftar analitik

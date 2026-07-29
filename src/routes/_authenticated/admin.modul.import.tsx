@@ -35,7 +35,7 @@ function ImportPage() {
 
   if (moduls.length === 0 || topiks.length === 0) {
     return (
-      <div className="space-y-4 max-w-5xl neo-ready">
+      <div className="space-y-4 max-w-5xl ">
         <div>
           <Link to="/admin/modul" className="text-sm text-muted-foreground hover:underline">
             ← Modul
@@ -229,7 +229,7 @@ function ImportPage() {
   }
 
   return (
-    <div className="space-y-4 max-w-5xl neo-ready">
+    <div className="space-y-4 max-w-5xl ">
       <div>
         <Link to="/admin/modul" className="text-sm text-muted-foreground hover:underline">
           ← Modul

@@ -162,7 +162,7 @@ function UjianList() {
 
   if (theme === "neobrutalism") {
     return (
-      <AdminPage className="neo-ready">
+      <AdminPage className="">
         <AdminPageHeader
           title="Manajemen Paket Ujian"
           description="Kelola pembuatan ujian, soal, dan akses peserta."
