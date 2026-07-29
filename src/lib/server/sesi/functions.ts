@@ -203,6 +203,27 @@ export const mutateSesiServer = createServerFn({ method: "POST" })
 		}
 	});
 
+export const actionLiveSesiServer = createServerFn({ method: "POST" })
+	.validator(z.object({ sesiId: z.string().min(1), action: z.enum(["forceSubmit", "resetPelanggaran"]) }))
+	.handler(async ({ data }) => {
+		try {
+			const caller = await requireCaller();
+			if (!caller || caller.role === "mahasiswa") return { ok: false as const, error: "Forbidden" };
+			const sesi = await prisma.sesiUjian.findUnique({ where: { id: data.sesiId }, select: { ujianId: true } });
+			if (!sesi || (caller.role !== "super_admin" && !(await operatorCanTouchUjian(caller, sesi.ujianId)))) {
+				return { ok: false as const, error: "Forbidden" };
+			}
+			await prisma.sesiUjian.update({
+				where: { id: data.sesiId },
+				data: data.action === "forceSubmit" ? { status: "selesai", selesaiAt: BigInt(Date.now()) } : { pelanggaran: 0 },
+			});
+			void writeAuditLog({ userId: caller.id, userRole: caller.role, action: `sesi.${data.action}`, entity: "sesi", entityId: data.sesiId });
+			return { ok: true as const };
+		} catch (err) {
+			return { ok: false as const, error: err instanceof Error ? err.message : String(err) };
+		}
+	});
+
 export const getLiveOnlineSesis = createServerFn({ method: "GET" }).handler(
 	async () => {
 		const caller = await requireCaller();
