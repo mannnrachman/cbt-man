@@ -111,13 +111,14 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
   const [editIdx, setEditIdx] = useState<number | null>(null);
   const [editSkor, setEditSkor] = useState<string>("");
 
-  function saveEdit(sesiId: string, idx: number) {
+  async function saveEdit(sesiId: string, idx: number) {
     const s = sesiRepo.byId(sesiId);
     if (!s) return;
     const v = editSkor === "" ? undefined : Number(editSkor);
     const next = { ...s, jawaban: s.jawaban.map((j, i) => (i === idx ? { ...j, skor: v } : j)) };
     const recalc = recomputeSkor(next, ujian);
     sesiRepo.upsert(recalc);
+    await sesiRepo.flush();
     setEditIdx(null);
     setEditSkor("");
     refresh();
@@ -181,9 +182,10 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
                         <Button size="sm" variant={isOpen ? "default" : "outline"} onClick={() => { setOpenId(isOpen ? null : s.id); setEditIdx(null); }}>
                           {isOpen ? "Tutup Lembar" : "Koreksi Lembar"}
                         </Button>
-                        <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10" onClick={() => {
+                        <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10" onClick={async () => {
                           if (confirm("Hapus sesi ujian ini secara permanen?")) {
                             sesiRepo.remove(s.id);
+                            await sesiRepo.flush();
                             refresh();
                           }
                         }}>

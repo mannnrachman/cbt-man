@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import { AdminPage, AdminPageHeader } from "@/components/cbt/AdminPage";
 import { visibleUjians } from "@/lib/cbt/access";
-import { BookOpen, BarChart3, ChevronRight, Activity } from "lucide-react";
+import { BookOpen, BarChart3, ChevronRight, Activity, Download, Target } from "lucide-react";
 
 
 export const Route = createFileRoute("/_authenticated/admin/analitik/")({
@@ -53,6 +53,31 @@ export function AnalitikIndex() {
           </div>
         }
       />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <Link to="/admin/analitik/rekap">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-xl flex items-center gap-4 hover:border-primary/50 hover:shadow-sm transition-all group cursor-pointer h-full">
+            <div className="h-12 w-12 shrink-0 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+              <Download className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <div className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-primary transition-colors">Rekap Global & Export</div>
+              <div className="text-xs text-slate-500 mt-0.5">Filter dan ekspor semua nilai mahasiswa ke Excel berdasarkan tanggal atau prodi.</div>
+            </div>
+          </div>
+        </Link>
+        <Link to="/admin/analitik/analisis">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-xl flex items-center gap-4 hover:border-accent/50 hover:shadow-sm transition-all group cursor-pointer h-full">
+            <div className="h-12 w-12 shrink-0 bg-accent/10 rounded-xl flex items-center justify-center group-hover:bg-accent/20 transition-colors">
+              <Target className="h-6 w-6 text-accent" />
+            </div>
+            <div>
+              <div className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-accent transition-colors">Analisis Butir Soal</div>
+              <div className="text-xs text-slate-500 mt-0.5">Laporan evaluasi Tingkat Kesukaran (TK) dan Daya Pembeda (DK) per soal.</div>
+            </div>
+          </div>
+        </Link>
+      </div>
 
       {/* Data List */}
       <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden">
