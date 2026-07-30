@@ -106,7 +106,7 @@ function UnitAkademikExplorer() {
     const payload: UnitAkademik = {
       id,
       nama: form.nama.trim(),
-      tipe: form.tipe as any,
+      tipe: form.tipe as UnitAkademik["tipe"],
       parentId: form.parentId === "none" ? null : form.parentId,
     };
 
