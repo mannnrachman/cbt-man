@@ -45,7 +45,7 @@ export const mutateUnitAkademikServer = createServerFn({ method: "POST" })
 				await prisma.unitAkademik.upsert({ where: { id: item.id }, update: item, create: item });
 			} else if (action === "remove") {
 				const id = (payload as { id: string }).id;
-				await prisma.unitAkademik.delete({ where: { id } });
+				await prisma.unitAkademik.delete({ where: { id } }).catch(() => {});
 			}
 			audit(caller, "unitAkademik", action, payload);
 
