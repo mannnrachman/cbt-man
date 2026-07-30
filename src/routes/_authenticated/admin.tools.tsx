@@ -37,6 +37,10 @@ function ToolsPage() {
   const [validationErrors, setValidationErrors] = useState<ValidationIssue[] | null>(null);
   const [confirmReset, setConfirmReset] = useState(false);
   const [confirmText, setConfirmText] = useState("");
+  const [isRestoring, setIsRestoring] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+  const [isSeeding, setIsSeeding] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
@@ -67,26 +71,60 @@ function ToolsPage() {
     reader.readAsText(f);
   }
 
-  function doRestore() {
-    if (!preview) return;
+  async function handleDownloadBackup() {
+    setIsDownloading(true);
     try {
-      importBackup(preview);
-      toast.success("Restore berhasil! Aplikasi akan disegarkan...");
-      setTimeout(() => window.location.reload(), 1500);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : String(e));
+      await downloadBackup();
+      toast.success("Pencadangan berhasil diunduh.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Gagal mengunduh backup");
+    } finally {
+      setIsDownloading(false);
     }
   }
 
-  function doReset() {
+  async function doRestore() {
+    if (!preview || isRestoring) return;
+    setIsRestoring(true);
+    try {
+      await importBackup(preview);
+      toast.success("Restore berhasil! Aplikasi akan disegarkan...");
+      setTimeout(() => window.location.reload(), 1500);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Gagal memulihkan backup");
+      setIsRestoring(false);
+    }
+  }
+
+  async function doReset() {
     if (confirmText !== "HAPUS") {
       toast.error("Ketik 'HAPUS' untuk konfirmasi");
       return;
     }
-    resetAllData();
-    ensureSeed();
-    toast.success("Database berhasil dikosongkan! Memuat data awal...");
-    setTimeout(() => window.location.reload(), 1500);
+    if (isResetting) return;
+    setIsResetting(true);
+    try {
+      await resetAllData();
+      await ensureSeed();
+      toast.success("Database berhasil dikosongkan! Memuat data awal...");
+      setTimeout(() => window.location.reload(), 1500);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Gagal mengatur ulang database");
+      setIsResetting(false);
+    }
+  }
+
+  async function handleSeed() {
+    if (isSeeding) return;
+    setIsSeeding(true);
+    try {
+      await ensureSeed();
+      toast.success("Seed data dimuat (hanya jika kosong).");
+      setTimeout(() => window.location.reload(), 600);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Gagal memuat seed data");
+      setIsSeeding(false);
+    }
   }
 
   return (
@@ -120,7 +158,7 @@ function ToolsPage() {
               <p className="text-xs text-slate-500 pl-8">Menghasilkan berkas JSON tunggal berisi snapshot pangkalan data saat ini.</p>
             </div>
             <div className="shrink-0">
-              <Button onClick={() => void downloadBackup()} className="w-full sm:w-auto shadow-sm">
+              <Button onClick={handleDownloadBackup} disabled={isDownloading} className="w-full sm:w-auto shadow-sm">
                 Unduh Backup
               </Button>
             </div>
@@ -181,11 +219,7 @@ function ToolsPage() {
               <p className="text-xs text-slate-500 pl-8">Isi pangkalan data kosong dengan sampel otomatis (pengguna, soal, ujian).</p>
             </div>
             <div className="shrink-0">
-              <Button variant="outline" onClick={() => {
-                ensureSeed();
-                toast.success("Seed data dimuat (hanya jika kosong).");
-                setTimeout(() => window.location.reload(), 600);
-              }} className="w-full sm:w-auto bg-white dark:bg-slate-950">
+              <Button variant="outline" onClick={handleSeed} disabled={isSeeding} className="w-full sm:w-auto bg-white dark:bg-slate-950">
                 Muat Seed Data
               </Button>
             </div>
@@ -241,7 +275,7 @@ function ToolsPage() {
             <Button variant="ghost" onClick={() => setPreview(null)}>
               Batal
             </Button>
-            <Button onClick={doRestore}>Terapkan restore</Button>
+            <Button onClick={doRestore} disabled={isRestoring}>Terapkan restore</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -283,7 +317,7 @@ function ToolsPage() {
             >
               Batal
             </Button>
-            <Button variant="destructive" onClick={doReset}>
+            <Button variant="destructive" onClick={doReset} disabled={isResetting}>
               Reset sekarang
             </Button>
           </DialogFooter>
