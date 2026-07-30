@@ -90,7 +90,7 @@ function ToolsPage() {
   }
 
   return (
-    <AdminPage className="neo-ready">
+    <AdminPage className="">
 
       <AdminPageHeader
         title="Alat Sistem"

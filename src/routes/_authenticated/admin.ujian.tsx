@@ -165,7 +165,7 @@ function UjianList() {
     activeTab === "selesai" ? selesai : filteredList;
 
   return (
-    <AdminPage className="neo-ready">
+    <AdminPage className="">
       
       <AdminPageHeader
         title="Manajemen Paket Ujian"

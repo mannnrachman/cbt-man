@@ -128,7 +128,7 @@ function FilesPage() {
   });
 
   return (
-    <AdminPage className="neo-ready">
+    <AdminPage className="">
       <AdminPageHeader
         title={!isSuper && myJurusan ? `Penyimpanan: ${myJurusan.nama}` : "Drive Penyimpanan"}
         description={!isSuper ? "Kelola gambar dan audio khusus untuk program studi Anda." : "Kelola gambar & audio ujian yang terorganisir per Program Studi."}
