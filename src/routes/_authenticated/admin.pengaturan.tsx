@@ -31,14 +31,15 @@ function PengaturanPage() {
   const { theme, setTheme } = useThemeStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  function save() {
+  async function save() {
     const parsed = ConfigSchema.safeParse(cfg);
     if (!parsed.success) {
       toast.error(parsed.error.issues[0]?.message ?? "Konfigurasi tidak valid");
       return;
     }
     configRepo.set(parsed.data);
-    toast.success("Pengaturan disimpan.");
+    const result = await configRepo.flush();
+    if (result.ok) toast.success("Pengaturan disimpan.");
   }
 
   async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
