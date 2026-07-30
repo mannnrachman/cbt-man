@@ -232,7 +232,7 @@ function AdminLayout() {
                 {cfg.appLogo ? (
                   <img src={cfg.appLogo} alt="Logo" className="h-7 w-auto object-contain" />
                 ) : (
-                  <span className="grid h-8 w-8 place-items-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground font-bold text-base shadow-sm">
+                  <span className="grid h-8 w-8 place-items-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground font-bold text-base shadow-sm border border-transparent">
                     Z
                   </span>
                 )}
@@ -266,7 +266,7 @@ function AdminLayout() {
                             to={n.to as never}
                             activeOptions={{ exact: n.exact }}
                             activeProps={{
-                              className: "bg-sidebar-primary text-sidebar-primary-foreground font-semibold shadow-sm"
+                              className: "bg-sidebar-primary text-sidebar-primary-foreground font-semibold shadow-sm border border-transparent"
                             }}
                             inactiveProps={{
                               className: "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"

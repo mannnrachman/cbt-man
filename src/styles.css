@@ -202,24 +202,24 @@
 [data-theme='neobrutalism'] {
   /* Ubah variabel Shadcn inti (TAPI biarkan background tetap putih agar rapi seperti dashboard) */
   --radius: 0px;
-  --primary: #a3e635; /* Lime green untuk tombol utama */
-  --primary-foreground: #000000;
-  --accent: #facc15; /* Yellow untuk highlight */
-  --accent-foreground: #000000;
-  --border: #000000;
-  --ring: #000000;
+  --primary: oklch(0.85 0.18 135); /* #a3e635 Lime green */
+  --primary-foreground: oklch(0 0 0);
+  --accent: oklch(0.85 0.18 90); /* #facc15 Yellow */
+  --accent-foreground: oklch(0 0 0);
+  --border: oklch(0 0 0);
+  --ring: oklch(0 0 0);
   
   /* Semantic Shadcn overrides for Neobrutalism */
-  --sidebar: #facc15;
-  --sidebar-foreground: #000000;
-  --sidebar-primary: #a3e635;
-  --sidebar-primary-foreground: #000000;
-  --sidebar-accent: #ffffff;
-  --sidebar-accent-foreground: #000000;
-  --sidebar-border: #000000;
-  --card: #ffffff;
-  --card-foreground: #000000;
-  --background: #fdfdfd;
+  --sidebar: oklch(0.85 0.18 90); /* #facc15 Yellow */
+  --sidebar-foreground: oklch(0 0 0);
+  --sidebar-primary: oklch(0.85 0.18 135); /* #a3e635 Lime green */
+  --sidebar-primary-foreground: oklch(0 0 0);
+  --sidebar-accent: oklch(1 0 0); /* #ffffff White */
+  --sidebar-accent-foreground: oklch(0 0 0);
+  --sidebar-border: oklch(0 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0 0 0);
+  --background: oklch(0.99 0 0); /* #fdfdfd */
   
   /* Variabel mundur (backward compatibility) untuk dashboard lama */
   --neo-shadow: 4px 4px 0 0 rgba(0,0,0,1);
