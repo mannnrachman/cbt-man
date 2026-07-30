@@ -12,6 +12,7 @@ import { configRepo, hydrateRepos } from "@/lib/cbt/repos";
 import { type AppConfig, type NavKey, type Role } from "@/lib/cbt/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useThemeStore } from "@/lib/cbt/theme-store";
 import {
   LayoutDashboard,
   Users,
@@ -206,9 +207,10 @@ function AdminLayout() {
   }, [pathname]);
 
   const isPanduanPage = pathname === "/admin/panduan";
+  const globalTheme = useThemeStore((s) => s.theme);
 
   return (
-    <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+    <div className={cn("min-h-screen bg-slate-50/50 dark:bg-slate-950 text-slate-900 dark:text-slate-100", globalTheme === "neobrutalism" && "neo-ready")}>
       <div className="flex">
         
         {/* Mobile Menu Overlay */}
