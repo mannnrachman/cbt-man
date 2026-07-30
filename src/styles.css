@@ -209,6 +209,18 @@
   --border: #000000;
   --ring: #000000;
   
+  /* Semantic Shadcn overrides for Neobrutalism */
+  --sidebar: #facc15;
+  --sidebar-foreground: #000000;
+  --sidebar-primary: #a3e635;
+  --sidebar-primary-foreground: #000000;
+  --sidebar-accent: #ffffff;
+  --sidebar-accent-foreground: #000000;
+  --sidebar-border: #000000;
+  --card: #ffffff;
+  --card-foreground: #000000;
+  --background: #fdfdfd;
+  
   /* Variabel mundur (backward compatibility) untuk dashboard lama */
   --neo-shadow: 4px 4px 0 0 rgba(0,0,0,1);
   --neo-border-width: 3px;

@@ -210,7 +210,7 @@ function AdminLayout() {
   const globalTheme = useThemeStore((s) => s.theme);
 
   return (
-    <div className={cn("min-h-screen bg-slate-50/50 dark:bg-slate-950 text-slate-900 dark:text-slate-100", globalTheme === "neobrutalism" && "neo-ready")}>
+    <div className={cn("min-h-screen bg-background text-foreground", globalTheme === "neobrutalism" && "neo-ready")}>
       <div className="flex">
         
         {/* Mobile Menu Overlay */}
@@ -224,22 +224,22 @@ function AdminLayout() {
         {/* Sidebar (Hidden on Panduan full-screen docs mode) */}
         {!isPanduanPage && (
           <aside className={cn(
-            "w-64 shrink-0 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 lg:block transition-transform duration-200 z-50 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto scrollbar-thin",
+            "w-64 shrink-0 border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:block transition-transform duration-200 z-50 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto scrollbar-thin",
             mobileMenuOpen ? "fixed inset-y-0 left-0 h-screen overflow-y-auto shadow-xl" : "hidden"
           )}>
-            <div className="flex h-16 items-center justify-between border-b border-slate-200 dark:border-slate-800 px-5">
+            <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-5">
               <div className="flex items-center gap-3">
                 {cfg.appLogo ? (
                   <img src={cfg.appLogo} alt="Logo" className="h-7 w-auto object-contain" />
                 ) : (
-                  <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground font-bold text-base shadow-sm">
+                  <span className="grid h-8 w-8 place-items-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground font-bold text-base shadow-sm">
                     Z
                   </span>
                 )}
-                <span className="font-bold text-slate-900 dark:text-slate-100 text-base tracking-tight truncate">{appName}</span>
+                <span className="font-bold text-sidebar-foreground text-base tracking-tight truncate">{appName}</span>
               </div>
               {mobileMenuOpen && (
-                <Button variant="ghost" size="icon" className="lg:hidden h-8 w-8 text-slate-500 hover:text-slate-900" onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" size="icon" className="lg:hidden h-8 w-8 text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent" onClick={() => setMobileMenuOpen(false)}>
                   <X className="h-5 w-5" />
                 </Button>
               )}
@@ -266,10 +266,10 @@ function AdminLayout() {
                             to={n.to as never}
                             activeOptions={{ exact: n.exact }}
                             activeProps={{
-                              className: "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 font-semibold shadow-sm"
+                              className: "bg-sidebar-primary text-sidebar-primary-foreground font-semibold shadow-sm"
                             }}
                             inactiveProps={{
-                              className: "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-slate-100"
+                              className: "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                             }}
                             className="flex items-center gap-3 px-3 py-2 text-xs md:text-sm rounded-lg transition-colors duration-150"
                           >
@@ -288,32 +288,28 @@ function AdminLayout() {
 
         <div className="flex min-h-screen flex-1 flex-col min-w-0">
 
-          <header className="flex h-16 items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md px-4 lg:px-6 sticky top-0 z-30">
+          <header className="flex h-16 items-center justify-between border-b border-border bg-background/80 backdrop-blur-md px-4 lg:px-6 sticky top-0 z-30">
             <div className="flex items-center gap-4">
               {isPanduanPage ? (
                 <Button 
                   asChild 
                   variant="outline" 
                   size="sm" 
-                  className="font-medium border-slate-200 dark:border-slate-800 text-xs flex items-center gap-1.5 shadow-sm"
+                  className="font-medium border-border text-xs flex items-center gap-1.5 shadow-sm"
                 >
                   <Link to="/admin">
-                    <ChevronLeft className="h-4 w-4" /> Kembali ke Dasbor
+                    <ChevronLeft className="h-4 w-4" />
+                    Kembali ke Dashboard
                   </Link>
                 </Button>
               ) : (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="lg:hidden h-9 w-9 text-slate-500 hover:text-slate-900"
-                  onClick={() => setMobileMenuOpen(true)}
-                >
+                <Button variant="ghost" size="icon" className="lg:hidden h-8 w-8 text-foreground/60 hover:text-foreground hover:bg-accent -ml-2" onClick={() => setMobileMenuOpen(true)}>
                   <Menu className="h-5 w-5" />
                 </Button>
               )}
               <div className="text-sm hidden sm:flex items-center gap-3">
-                <span className="font-semibold text-slate-900 dark:text-slate-100 text-sm">{user.namaLengkap}</span>
-                <Badge variant="outline" className="font-medium text-[11px] uppercase border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400">
+                <span className="font-semibold text-foreground text-sm">{user.namaLengkap}</span>
+                <Badge variant="outline" className="font-medium text-[11px] uppercase border-border bg-background text-foreground/70">
                   {user.role}
                 </Badge>
               </div>
