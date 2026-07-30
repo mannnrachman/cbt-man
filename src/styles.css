@@ -251,12 +251,63 @@
   box-shadow: 4px 4px 0px 0px rgba(0,0,0,1) !important;
 }
 
-/* Tipografi Khas Neobrutalism (Font tebal & uppercase untuk tabel/badge) */
+/* Tipografi & Sidebar Khas Neobrutalism */
 [data-theme='neobrutalism'] .neo-ready th {
   font-weight: 900 !important;
   text-transform: uppercase !important;
   color: #000000 !important;
   letter-spacing: 0.05em;
+}
+
+/* Sidebar Neobrutalism Dedicated Overrides */
+[data-theme='neobrutalism'] aside {
+  border-right-width: 3px !important;
+  border-color: #000000 !important;
+  background-color: #facc15 !important;
+  color: #000000 !important;
+}
+
+/* Section Boundary Containers */
+[data-theme='neobrutalism'] aside .nav-group-section {
+  border: 2px solid #000000 !important;
+  background-color: rgba(255, 255, 255, 0.4) !important;
+  padding: 10px !important;
+  border-radius: 0px !important;
+  box-shadow: 2px 2px 0px 0px #000000 !important;
+  margin-bottom: 4px !important;
+}
+
+[data-theme='neobrutalism'] aside h3 {
+  color: #000000 !important;
+  font-weight: 900 !important;
+  font-size: 10px !important;
+  letter-spacing: 0.05em !important;
+  background-color: #ffffff !important;
+  border: 2px solid #000000 !important;
+  box-shadow: 2px 2px 0px 0px #000000 !important;
+  padding: 3px 8px !important;
+  display: inline-block !important;
+  width: fit-content !important;
+  margin-left: 0px !important;
+  margin-bottom: 8px !important;
+  text-transform: uppercase !important;
+}
+
+[data-theme='neobrutalism'] aside a {
+  border-radius: 0px !important;
+  font-weight: 700 !important;
+  border: 1px solid rgba(0, 0, 0, 0.25) !important;
+  background-color: rgba(255, 255, 255, 0.7) !important;
+  color: #000000 !important;
+  transition: all 0.15s ease !important;
+}
+
+[data-theme='neobrutalism'] aside a:hover {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+  box-shadow: 2px 2px 0px 0px #000000 !important;
+  transform: translate(-1px, -1px) !important;
 }
 
 [data-theme='neobrutalism'] .neo-ready td {

@@ -232,7 +232,10 @@ function AdminLayout() {
                 {cfg.appLogo ? (
                   <img src={cfg.appLogo} alt="Logo" className="h-7 w-auto object-contain" />
                 ) : (
-                  <span className="grid h-8 w-8 place-items-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground font-bold text-base shadow-sm border border-transparent">
+                  <span className={cn(
+                    "grid h-8 w-8 place-items-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground font-bold text-base shadow-sm border border-transparent",
+                    globalTheme === "neobrutalism" && "rounded-none bg-amber-400 text-black border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] font-black"
+                  )}>
                     Z
                   </span>
                 )}
@@ -253,7 +256,7 @@ function AdminLayout() {
                 if (visibleItems.length === 0) return null;
 
                 return (
-                  <div key={group.label} className="flex flex-col gap-1.5">
+                  <div key={group.label} className="nav-group-section flex flex-col gap-1.5">
                     <h3 className="px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                       {group.label}
                     </h3>
@@ -266,12 +269,15 @@ function AdminLayout() {
                             to={n.to as never}
                             activeOptions={{ exact: n.exact }}
                             activeProps={{
-                              className: "bg-sidebar-primary text-sidebar-primary-foreground font-semibold shadow-sm border border-transparent"
+                              className: cn(
+                                "bg-sidebar-primary text-sidebar-primary-foreground font-semibold shadow-sm border border-transparent",
+                                globalTheme === "neobrutalism" && "bg-lime-400! text-black! border-2! border-black! shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]! font-black! rounded-none!"
+                              )
                             }}
                             inactiveProps={{
                               className: "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                             }}
-                            className="flex items-center gap-3 px-3 py-2 text-xs md:text-sm rounded-lg transition-colors duration-150"
+                            className="flex items-center gap-3 px-3 py-2 text-xs md:text-sm rounded-lg transition-all duration-150"
                           >
                             <Icon className="h-4 w-4 shrink-0" />
                             <span className="leading-snug">{n.label}</span>
