@@ -572,7 +572,7 @@ function PanduanPage() {
   }, [search]);
 
   return (
-    <AdminPage className="neo-ready max-w-7xl mx-auto space-y-6 pb-28">
+    <AdminPage className="max-w-7xl mx-auto space-y-6 pb-28">
       <AdminPageHeader
         title="Dokumentasi & Panduan"
         description={`Pusat pengetahuan resmi ${cfg.appName} — panduan alur kerja, pengelolaan ujian, dan pemecahan masalah.`}

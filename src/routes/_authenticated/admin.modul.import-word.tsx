@@ -94,7 +94,7 @@ function ImportWord() {
 
   if (moduls.length === 0 || topiks.length === 0) {
     return (
-      <div className="max-w-5xl space-y-4 neo-ready">
+      <div className="max-w-5xl space-y-4">
         <div>
           <Link to="/admin/modul" className="text-sm text-muted-foreground hover:underline">
             ← Modul
@@ -158,7 +158,7 @@ function ImportWord() {
   }
 
   return (
-    <div className="max-w-5xl space-y-4 neo-ready">
+    <div className="max-w-5xl space-y-4">
       <div>
         <Link to="/admin/modul" className="text-sm text-muted-foreground hover:underline">
           ← Modul

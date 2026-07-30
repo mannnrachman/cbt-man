@@ -39,7 +39,7 @@ function PesertaUjian() {
 
 
   return (
-    <div className="max-w-4xl space-y-4 neo-ready">
+    <div className="max-w-4xl space-y-4">
       <div className="flex items-start justify-between">
         <div>
           <Link to="/admin/ujian" className="text-sm text-muted-foreground hover:underline">

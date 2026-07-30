@@ -39,7 +39,7 @@ function ImportPage() {
 
   if (moduls.length === 0 || topiks.length === 0) {
     return (
-      <div className="space-y-4 max-w-5xl neo-ready">
+      <div className="space-y-4 max-w-5xl">
         <div>
           <Link to="/admin/modul" className="text-sm text-muted-foreground hover:underline">
             ← Modul
@@ -338,7 +338,7 @@ function ImportPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-5xl neo-ready pb-12">
+    <div className="space-y-6 max-w-5xl pb-12">
       <div>
         <Link to="/admin/modul" className="text-sm font-medium text-slate-500 hover:text-primary transition-colors">
           ← Kembali ke Bank Soal

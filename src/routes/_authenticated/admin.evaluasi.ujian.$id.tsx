@@ -57,7 +57,7 @@ function EvaluasiUjianList() {
   const totalBelum = items.reduce((acc, curr) => acc + curr.belum, 0);
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-12 neo-ready">
+    <div className="space-y-6 max-w-6xl mx-auto pb-12">
       <div className="mb-4">
         <Link to="/admin/evaluasi" className="inline-flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 transition-colors">
           ← Kembali ke Penilaian Essay

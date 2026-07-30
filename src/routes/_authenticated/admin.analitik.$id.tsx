@@ -414,7 +414,7 @@ function ExamReportTab({ ujian, sesis }: { ujian: Ujian, sesis: SesiUjian[] }) {
     ]);
   }
   return (
-    <div className="space-y-6 neo-ready">
+    <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-xl font-semibold">Laporan Kelulusan</h2>
@@ -523,7 +523,7 @@ function AiInsightTab({ ujian, sesis }: { ujian: Ujian, sesis: SesiUjian[] }) {
   }
 
   return (
-    <div className="space-y-6 neo-ready">
+    <div className="space-y-6">
       <Card className="bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 shadow-sm">
         <CardContent className="p-8 text-center space-y-4">
           <div className="mx-auto w-12 h-12 bg-slate-100 dark:bg-slate-900 rounded-full flex items-center justify-center mb-2">

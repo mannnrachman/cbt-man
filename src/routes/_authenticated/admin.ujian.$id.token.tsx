@@ -148,7 +148,7 @@ function TokenPage() {
   if (!ujian) return <div>Tidak ditemukan</div>;
 
   return (
-    <div className="max-w-3xl space-y-4 neo-ready">
+    <div className="max-w-3xl space-y-4">
       <div>
         <Link to="/admin/ujian" className="text-sm text-muted-foreground hover:underline">
           ← Paket ujian

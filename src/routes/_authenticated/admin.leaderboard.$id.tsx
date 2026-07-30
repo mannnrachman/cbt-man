@@ -21,7 +21,7 @@ function Leaderboard() {
   const users = usersRepo.all();
 
   return (
-    <div className="space-y-4 max-w-3xl neo-ready">
+    <div className="space-y-4 max-w-3xl">
       <div>
         <Link to="/admin/ujian" className="text-sm text-muted-foreground hover:underline">← Paket ujian</Link>
         <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2"><Trophy className="h-6 w-6 text-warning" />Leaderboard — {ujian.nama}</h1>
