@@ -1,5 +1,5 @@
 import { useAuthStore } from "@/lib/cbt/auth-store";
-import { soalRepo, sesiRepo, ujianRepo, invalidateReposCache } from "@/lib/cbt/repos";
+import { soalRepo, sesiRepo, ujianRepo, invalidateReposCache, hydrateRepos } from "@/lib/cbt/repos";
 import type { SesiUjian, Ujian } from "@/lib/cbt/types";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
@@ -123,7 +123,42 @@ function RouteComponent() {
         submit("Waktu Habis");
       }
     }, 1000);
-    return () => clearInterval(interval);
+
+    const pollInterval = setInterval(async () => {
+      try {
+        await hydrateRepos();
+        const latestSesi = sesiRepo.byId(sesi.id);
+        if (latestSesi) {
+          if (latestSesi.status === "selesai") {
+            toast.warning("Ujian telah dihentikan oleh pengawas.");
+            navigate({
+              to: "/peserta/ujian/$id/hasil",
+              params: { id: ujian.id },
+            });
+          } else if (latestSesi.endsAt && sesiRef.current && latestSesi.endsAt !== sesiRef.current.endsAt) {
+            // Safely merge endsAt without wiping local un-flushed answers
+            setSesi(prev => prev ? { ...prev, endsAt: latestSesi.endsAt } : prev);
+            toast.info("Waktu ujian Anda telah diperbarui oleh pengawas.");
+          }
+        }
+      } catch (e) {
+        // silent error fallback
+      }
+    }, 10000);
+
+    const handleBeforeUnload = () => {
+      if (sesiRef.current) {
+        sesiRepo.upsert(sesiRef.current);
+        sesiRepo.flush();
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      clearInterval(interval);
+      clearInterval(pollInterval);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sesi, ujian, endsAt]);
 
@@ -161,16 +196,15 @@ function RouteComponent() {
 
   function handleNavigateIdx(newIdx: number) {
     if (!sesi) return;
-    const currentJawaban = sesi.jawaban[idx];
-    
-    if (newIdx !== idx) {
-      const dijawab = currentJawaban.jawabanIds.length > 0 || currentJawaban.jawabanEssay.trim().length > 0;
-      if (!dijawab) {
-        toast.error("Silakan pilih atau isi jawaban terlebih dahulu.");
-        return;
+    // Flush pending answer updates before moving to the next question
+    if (saveTimer.current) {
+      clearTimeout(saveTimer.current);
+      saveTimer.current = null;
+      if (sesiRef.current) {
+        sesiRepo.upsert(sesiRef.current);
+        sesiRepo.flush().catch(() => {});
       }
     }
-    
     setIdx(newIdx);
   }
 
@@ -313,7 +347,7 @@ function RouteComponent() {
                     <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/50 to-primary opacity-0 group-focus-within:opacity-100 rounded-2xl blur transition duration-300" />
                     <Textarea
                       rows={10}
-                      value={currentJawaban.jawabanEssay}
+                      value={currentJawaban.jawabanEssay ?? ""}
                       onChange={(e) => updateJawaban({ jawabanEssay: e.target.value })}
                       placeholder="Ketik jawaban esai Anda secara lengkap dan jelas di sini..."
                       className={cn(
@@ -452,7 +486,7 @@ function RouteComponent() {
             <div className="grid grid-cols-5 gap-2.5">
               {currentSesi.soalIds.map((_, i) => {
                 const a = currentSesi.jawaban[i];
-                const dijawab = a.jawabanIds.length > 0 || a.jawabanEssay.length > 0;
+                const dijawab = (a?.jawabanIds?.length ?? 0) > 0 || (a?.jawabanEssay ? a.jawabanEssay.length > 0 : false);
                 
                 return (
                   <button
@@ -529,7 +563,7 @@ function RouteComponent() {
               <div className="grid grid-cols-5 sm:grid-cols-6 gap-3">
                 {currentSesi.soalIds.map((_, i) => {
                   const a = currentSesi.jawaban[i];
-                  const dijawab = a.jawabanIds.length > 0 || a.jawabanEssay.length > 0;
+                  const dijawab = (a?.jawabanIds?.length ?? 0) > 0 || (a?.jawabanEssay ? a.jawabanEssay.length > 0 : false);
                   return (
                     <button
                       key={i}

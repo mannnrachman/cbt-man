@@ -119,22 +119,31 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
   const [openId, setOpenId] = useState<string | null>(null);
   const [editIdx, setEditIdx] = useState<number | null>(null);
   const [editSkor, setEditSkor] = useState<string>("");
+  const [savingKey, setSavingKey] = useState<string | null>(null);
 
-  function saveEdit(sesiId: string, idx: number) {
+  async function saveEdit(sesiId: string, idx: number) {
     const s = sesiRepo.byId(sesiId);
     if (!s) return;
+    const key = `${sesiId}:${idx}`;
     const v = editSkor === "" ? undefined : Number(editSkor);
     const next = { ...s, jawaban: s.jawaban.map((j, i) => (i === idx ? { ...j, skor: v } : j)) };
-    const recalc = recomputeSkor(next, ujian);
-    sesiRepo.upsert(recalc);
-    setEditIdx(null);
-    setEditSkor("");
-    refresh();
-    toast.success("Nilai diperbarui");
+    sesiRepo.upsert(recomputeSkor(next, ujian));
+    setSavingKey(key);
+    try {
+      const result = await sesiRepo.flush();
+      if (!result.ok) return;
+      setEditIdx(null);
+      setEditSkor("");
+      refresh();
+      toast.success("Nilai diperbarui");
+    } finally {
+      setSavingKey(null);
+    }
   }
 
   return (
     <>
+<<<<<<< HEAD
       <Card className="shadow-sm border ring-1 ring-border/50 overflow-hidden">
         <Table>
           <TableHeader>
@@ -214,6 +223,86 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
             )}
           </TableBody>
         </Table>
+=======
+      <Card className="shadow-sm overflow-hidden">
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-semibold">
+                <tr>
+                  <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center border-r border-slate-200 dark:border-slate-800">Peserta</th>
+                  <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center border-r border-slate-200 dark:border-slate-800">Status</th>
+                  <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center border-r border-slate-200 dark:border-slate-800">Mulai</th>
+                  <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center border-r border-slate-200 dark:border-slate-800">Skor</th>
+                  <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center border-r border-slate-200 dark:border-slate-800">Pelanggaran</th>
+                  <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sesis.map((s) => {
+                  const u = users.find((x) => x.id === s.pesertaId);
+                  const isOpen = openId === s.id;
+                  return (
+                    <tr key={s.id} className={`transition-colors ${isOpen ? 'bg-primary/5' : 'hover:bg-muted/30'}`}>
+                      <td className="p-4 font-medium text-center border-r border-slate-200 dark:border-slate-800">{u?.namaLengkap ?? s.pesertaId}</td>
+                      <td className="p-4 text-center border-r border-slate-200 dark:border-slate-800">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${
+                          s.status === 'selesai' ? 'bg-success/15 text-success' :
+                          s.status === 'sedang' ? 'bg-primary/15 text-primary' :
+                          'bg-accent text-accent-foreground'
+                        }`}>
+                          {s.status}
+                        </span>
+                      </td>
+                      <td className="p-4 text-muted-foreground text-center border-r border-slate-200 dark:border-slate-800">
+                        {s.mulaiAt ? (
+                          <span suppressHydrationWarning>
+                            {new Date(s.mulaiAt).toLocaleString("id-ID", { timeZone: "Asia/Jakarta" })}
+                          </span>
+                        ) : "-"}
+                      </td>
+                      <td className="p-4 text-center border-r border-slate-200 dark:border-slate-800">
+                        {s.status === "selesai" ? (
+                          <span className="font-bold text-base">{s.skorTotal ?? 0} <span className="text-xs text-muted-foreground font-normal">/ {s.maxSkor ?? 0}</span></span>
+                        ) : "-"}
+                      </td>
+                      <td className="p-4 text-center border-r border-slate-200 dark:border-slate-800">
+                        {s.pelanggaran > 0 ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-destructive/15 text-destructive">
+                            {s.pelanggaran} peringatan
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </td>
+                      <td className="p-4 text-center space-x-2">
+                        <Button size="sm" variant={isOpen ? "default" : "outline"} disabled={savingKey !== null} onClick={() => { setOpenId(isOpen ? null : s.id); setEditIdx(null); }}>
+                          {isOpen ? "Tutup Lembar" : "Koreksi Lembar"}
+                        </Button>
+                        <Button size="sm" variant="ghost" disabled={savingKey !== null} className="text-destructive hover:bg-destructive/10" onClick={async () => {
+                          if (!confirm("Hapus sesi ujian ini secara permanen?")) return;
+                          sesiRepo.remove(s.id);
+                          const result = await sesiRepo.flush();
+                          if (result.ok) refresh();
+                        }}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {sesis.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="p-6 text-center text-muted-foreground">
+                      Belum ada sesi.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+>>>>>>> main
       </Card>
 
       {openId &&
@@ -260,11 +349,11 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
                             {editIdx === i ? (
                               <div className="flex items-center gap-1">
                                 <Input type="number" className="h-8 w-24 text-center font-bold" value={editSkor} onChange={(e) => setEditSkor(e.target.value)} autoFocus />
-                                <Button size="sm" onClick={() => saveEdit(s.id, i)} className="h-8 px-3">Simpan</Button>
-                                <Button size="sm" variant="ghost" onClick={() => setEditIdx(null)} className="h-8 px-2 text-destructive">Batal</Button>
+                                <Button size="sm" disabled={savingKey !== null} onClick={() => saveEdit(s.id, i)} className="h-8 px-3">Simpan</Button>
+                                <Button size="sm" variant="ghost" disabled={savingKey !== null} onClick={() => setEditIdx(null)} className="h-8 px-2 text-destructive">Batal</Button>
                               </div>
                             ) : isEssay ? (
-                              <Button size="sm" variant={needsGrading ? "default" : "secondary"} className={`h-8 text-xs ${needsGrading ? 'animate-pulse' : ''}`} onClick={() => { setEditIdx(i); setEditSkor(String(j.skor ?? "")); }}>
+                              <Button size="sm" disabled={savingKey !== null} variant={needsGrading ? "default" : "secondary"} className={`h-8 text-xs ${needsGrading ? 'animate-pulse' : ''}`} onClick={() => { setEditIdx(i); setEditSkor(String(j.skor ?? "")); }}>
                                 <Pencil className="h-3.5 w-3.5 mr-1.5" /> {needsGrading ? "Beri Nilai" : "Ubah Nilai"}
                               </Button>
                             ) : null}

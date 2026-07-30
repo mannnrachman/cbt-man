@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
 import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/ujian/$id/peserta")({
   component: PesertaUjian,
@@ -14,6 +16,8 @@ function PesertaUjian() {
   const { id } = useParams({ from: "/_authenticated/admin/ujian/$id/peserta" });
   const ujian = ujianRepo.byId(id);
   const [selectedUnit, setSelectedUnit] = useState("all");
+
+  const [search, setSearch] = useState("");
 
   if (!ujian) return <div>Tidak ditemukan</div>;
   const users = usersRepo.all();
@@ -28,7 +32,9 @@ function PesertaUjian() {
       (ujian.groupIds.includes("all") ||
         ujian.groupIds.length === 0 ||
         ujian.groupIds.includes(u.unitId ?? "")) &&
-      (selectedUnit === "all" || u.unitId === selectedUnit),
+      (selectedUnit === "all" || u.unitId === selectedUnit) &&
+      (u.namaLengkap.toLowerCase().includes(search.toLowerCase()) || 
+       u.username.toLowerCase().includes(search.toLowerCase()))
   );
 
 
@@ -58,19 +64,32 @@ function PesertaUjian() {
       <Card>
         <CardContent className="p-4">
           <div className="mb-3 text-sm font-medium">Unit yang berhak ikut:</div>
-          <Select value={selectedUnit} onValueChange={setSelectedUnit}>
-            <SelectTrigger className="w-[280px] mb-4">
-              <SelectValue placeholder="Filter Unit" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Semua Unit</SelectItem>
-              {unitYangIkut.map((u) => (
-                <SelectItem key={u.id} value={u.id}>
-                  {u.nama}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex flex-col sm:flex-row gap-4 mb-4">
+            <Select value={selectedUnit} onValueChange={setSelectedUnit}>
+              <SelectTrigger className="w-full sm:w-[280px]">
+                <SelectValue placeholder="Filter Unit" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Semua Unit</SelectItem>
+                {unitYangIkut.map((u) => (
+                  <SelectItem key={u.id} value={u.id}>
+                    {u.nama}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="relative flex-1 w-full sm:max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Input
+                type="search"
+                aria-label="Cari peserta"
+                placeholder="Cari nama atau username..."
+                className="pl-9"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+          </div>
           <div className="flex flex-wrap gap-2">
             {unitYangIkut.map((u) => (
               <span key={u.id} className="rounded bg-accent px-3 py-1 text-sm">

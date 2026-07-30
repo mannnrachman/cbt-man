@@ -24,6 +24,7 @@ function EvaluasiSesi() {
   const { id } = useParams({ from: "/_authenticated/admin/evaluasi/$id" });
   const me = useAuthStore((s) => s.user);
   const [sesi, setSesi] = useState(sesiRepo.byId(id));
+  const [isSaving, setIsSaving] = useState(false);
   
   if (!me) return <div className="py-20 text-center text-sm font-bold text-slate-500">Akses Ditolak</div>;
   if (!sesi) return <div className="py-20 text-center text-sm font-bold text-slate-500">Sesi tidak ditemukan</div>;
@@ -35,7 +36,7 @@ function EvaluasiSesi() {
 
   const items = sesi.jawaban
     .map((j, idx) => ({ j, idx, soal: soalRepo.byId(j.soalId) }))
-    .filter((x) => x.soal?.tipe === "essay" || x.j.jawabanEssay.trim().length > 0);
+    .filter((x) => x.soal?.tipe === "essay");
 
   const totalUngraded = items.filter(x => typeof x.j.skor !== 'number').length;
 
@@ -56,13 +57,49 @@ function EvaluasiSesi() {
     setSesi(next);
   }
 
-  function selesaikan() {
+  async function fillZeroForEmpty() {
     if (!sesi) return;
-    const final = recomputeSkor(sesi, ujian!);
-    const withMeta = { ...final, gradedAt: Date.now(), gradedBy: me!.id };
-    sesiRepo.upsert(withMeta);
-    setSesi(withMeta);
-    toast.success(`Berhasil disimpan. Nilai Akhir: ${withMeta.skorTotal} / ${withMeta.maxSkor}`);
+    let changed = false;
+    const nextJawaban = sesi.jawaban.map((j) => {
+      const soal = soalRepo.byId(j.soalId);
+      if (soal?.tipe === "essay" && typeof j.skor !== "number") {
+        if (!j.jawabanEssay || j.jawabanEssay.trim().length === 0) {
+          changed = true;
+          return { ...j, skor: 0, catatanGrader: "Tidak menjawab" };
+        }
+      }
+      return j;
+    });
+    if (changed) {
+      const next = { ...sesi, jawaban: nextJawaban };
+      sesiRepo.upsert(next);
+      setSesi(next);
+      try {
+        await sesiRepo.flush();
+        toast.success("Berhasil memberi nilai 0 pada jawaban kosong.");
+      } catch {
+        toast.error("Gagal menyimpan nilai 0.");
+      }
+    } else {
+      toast.info("Tidak ada jawaban kosong yang belum dinilai.");
+    }
+  }
+
+  async function selesaikan() {
+    if (!sesi) return;
+    setIsSaving(true);
+    try {
+      const final = recomputeSkor(sesi, ujian!);
+      const withMeta = { ...final, gradedAt: Date.now(), gradedBy: me!.id };
+      sesiRepo.upsert(withMeta);
+      setSesi(withMeta);
+      await sesiRepo.flush();
+      toast.success(`Berhasil disimpan. Nilai Akhir: ${withMeta.skorTotal} / ${withMeta.maxSkor}`);
+    } catch (e) {
+      toast.error("Gagal menyimpan nilai");
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   return (
@@ -74,12 +111,24 @@ function EvaluasiSesi() {
         >
           ← Kembali
         </Link>
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
-          {peserta?.namaLengkap || "Peserta Anonim"}
-        </h1>
-        <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-2">
-          {ujian.nama} • <span className="font-bold text-slate-700 dark:text-slate-300">{items.length}</span> essay untuk dinilai
-        </p>
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mt-2">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
+              {peserta?.namaLengkap || "Peserta Anonim"}
+            </h1>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-2">
+              {ujian.nama} • <span className="font-bold text-slate-700 dark:text-slate-300">{items.length}</span> essay untuk dinilai
+            </p>
+          </div>
+          
+          <button 
+            onClick={fillZeroForEmpty} 
+            className="inline-flex items-center gap-1.5 text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-lg transition-colors border border-slate-200 dark:border-slate-700 self-start sm:self-auto"
+          >
+            <AlertTriangle className="h-3.5 w-3.5 text-slate-500" />
+            Beri 0 untuk yang Kosong
+          </button>
+        </div>
       </div>
 
       <div className="space-y-6 ">
@@ -105,7 +154,7 @@ function EvaluasiSesi() {
                     <CheckCircle2 className="h-3.5 w-3.5" /> Dinilai
                   </span>
                 ) : (
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-accent flex items-center gap-1.5 bg-accent/10 px-2 py-1 rounded-md border border-accent/20">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-amber-600 flex items-center gap-1.5 bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 rounded-md border border-amber-200 dark:border-amber-900/40">
                     Belum
                   </span>
                 )}
@@ -192,10 +241,14 @@ function EvaluasiSesi() {
           
           <button 
             onClick={selesaikan}
-            className="flex items-center gap-2 text-sm font-bold bg-primary text-primary-foreground px-5 sm:px-6 py-2.5 rounded-full hover:opacity-90 active:scale-95 shadow-md transition-all"
+            disabled={isSaving}
+            className="flex items-center gap-2 text-sm font-bold bg-primary text-primary-foreground px-5 sm:px-6 py-2.5 rounded-full hover:opacity-90 active:scale-95 shadow-md transition-all disabled:opacity-50"
           >
-            <Save className="h-4 w-4" />
-            Simpan Nilai
+            {isSaving ? (
+              <span className="flex items-center gap-2"><div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Menyimpan...</span>
+            ) : (
+              <span className="flex items-center gap-2"><Save className="h-4 w-4" /> Simpan Nilai</span>
+            )}
           </button>
         </div>
 

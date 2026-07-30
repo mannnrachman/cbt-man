@@ -209,7 +209,10 @@ async function pesertaCanAccessFile(
 export const listStoredFiles = createServerFn({ method: "GET" }).handler(async () => {
   const auth = await requireFileManagerAccess();
   if (!auth.ok) throw new Error(auth.error);
-  return listMetas();
+  const files = await listMetas();
+  return auth.caller.role === "super_admin"
+    ? files
+    : files.filter((file) => file.jurusanId === auth.caller.unitId);
 });
 
 export const uploadStoredFile = createServerFn({ method: "POST" })
@@ -237,7 +240,7 @@ export const uploadStoredFile = createServerFn({ method: "POST" })
       size: buffer.byteLength,
       createdAt: Date.now(),
       extension,
-      jurusanId: data.jurusanId,
+      jurusanId: auth.caller.role === "super_admin" ? data.jurusanId : auth.caller.unitId ?? undefined,
     };
 
     await writeFile(await filePath(id, extension), buffer);

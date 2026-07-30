@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { sesiRepo, ujianRepo, soalRepo, mataKuliahRepo } from "@/lib/cbt/repos";
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import { visibleUjians } from "@/lib/cbt/access";
 import { AdminPage, AdminPageHeader } from "@/components/cbt/AdminPage";
-import { ClipboardCheck, Calendar, BookOpen, ChevronRight, CheckCircle2 } from "lucide-react";
+import { ClipboardCheck, Calendar, BookOpen, ChevronRight, CheckCircle2, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 import { hydrateRepos } from "@/lib/cbt/repos";
 
@@ -26,39 +28,47 @@ function formatDate(ts?: number) {
 
 function EvaluasiList() {
   const user = useAuthStore((s) => s.user);
-  const navigate = useNavigate();
+  const [search, setSearch] = useState("");
+
   const visibleIds = new Set(visibleUjians(user).map((u) => u.id));
   const sesis = sesiRepo.all().filter((s) => s.status === "selesai" && visibleIds.has(s.ujianId));
   const ujians = ujianRepo.all();
   const soals = soalRepo.all();
   const mks = mataKuliahRepo.all();
-  const soalSet = new Set(soals.filter((s) => s.tipe === "essay").map((s) => s.id));
+  const items = (() => {
+    const soalSet = new Set(soals.filter((s) => s.tipe === "essay").map((s) => s.id));
+    const ujianMap = new Map<string, { ujian: any, mk: any, totalSesi: number, belumSesi: number, totalEssay: number, belumEssay: number }>();
 
-  const ujianMap = new Map<string, { ujian: any, mk: any, totalSesi: number, belumSesi: number, totalEssay: number, belumEssay: number }>();
+    sesis.forEach(s => {
+      const essays = s.jawaban.filter((j) => soalSet.has(j.soalId));
+      if (essays.length === 0) return;
 
-  sesis.forEach(s => {
-    const essays = s.jawaban.filter((j) => soalSet.has(j.soalId));
-    if (essays.length === 0) return;
+      const belumCount = essays.filter((j) => typeof j.skor !== "number").length;
+      
+      if (!ujianMap.has(s.ujianId)) {
+        const u = ujians.find(x => x.id === s.ujianId);
+        if (!u) return;
+        const mk = mks.find(m => m.id === u.mataKuliahId);
+        ujianMap.set(s.ujianId, { ujian: u, mk, totalSesi: 0, belumSesi: 0, totalEssay: 0, belumEssay: 0 });
+      }
+      
+      const entry = ujianMap.get(s.ujianId)!;
+      entry.totalSesi += 1;
+      entry.totalEssay += essays.length;
+      entry.belumEssay += belumCount;
+      if (belumCount > 0) {
+        entry.belumSesi += 1;
+      }
+    });
 
-    const belumCount = essays.filter((j) => typeof j.skor !== "number").length;
-    
-    if (!ujianMap.has(s.ujianId)) {
-      const u = ujians.find(x => x.id === s.ujianId);
-      if (!u) return;
-      const mk = mks.find(m => m.id === u.mataKuliahId);
-      ujianMap.set(s.ujianId, { ujian: u, mk, totalSesi: 0, belumSesi: 0, totalEssay: 0, belumEssay: 0 });
-    }
-    
-    const entry = ujianMap.get(s.ujianId)!;
-    entry.totalSesi += 1;
-    entry.totalEssay += essays.length;
-    entry.belumEssay += belumCount;
-    if (belumCount > 0) {
-      entry.belumSesi += 1;
-    }
-  });
+    return Array.from(ujianMap.values())
+      .filter((i) => 
+        i.ujian.nama.toLowerCase().includes(search.toLowerCase()) || 
+        (i.mk?.nama || "").toLowerCase().includes(search.toLowerCase())
+      )
+      .sort((a, b) => b.belumSesi - a.belumSesi);
+  })();
 
-  const items = Array.from(ujianMap.values()).sort((a, b) => b.belumSesi - a.belumSesi);
   const totalBelumSesi = items.reduce((acc, curr) => acc + curr.belumSesi, 0);
   const totalBelumEssay = items.reduce((acc, curr) => acc + curr.belumEssay, 0);
 
@@ -79,8 +89,8 @@ function EvaluasiList() {
               <div className="w-px h-8 bg-slate-200 dark:bg-slate-800" />
               <div className="flex flex-col items-end">
                 <span className="text-[10px] font-medium uppercase tracking-widest text-slate-400 mb-0.5">Belum Dinilai</span>
-                <span className="text-xl font-medium text-accent tabular-nums leading-none">
-                  {totalBelumEssay} <span className="text-sm text-accent/70 font-medium ml-1">Jawaban</span>
+                <span className="text-xl font-medium text-amber-600 dark:text-amber-500 tabular-nums leading-none">
+                  {totalBelumEssay} <span className="text-sm text-amber-600/70 dark:text-amber-500/70 font-medium ml-1">Jawaban</span>
                 </span>
               </div>
             </div>
@@ -88,6 +98,16 @@ function EvaluasiList() {
         }
       />
 
+      {/* Filter / Search Bar */}
+      <div className="relative mb-6 max-w-sm">
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+        <Input 
+          placeholder="Cari nama ujian atau mata kuliah..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="pl-10 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800"
+        />
+      </div>
 
       {/* Data List (Concentric Borders Math & Advanced Soft Shadow) */}
       <div className="p-1.5 rounded-[20px] border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 shadow-sleek">
@@ -102,9 +122,19 @@ function EvaluasiList() {
 
           {items.length === 0 ? (
             <div className="py-24 text-center flex flex-col items-center">
-              <CheckCircle2 className="h-10 w-10 text-primary mb-3 opacity-80" />
-              <span className="text-slate-900 dark:text-slate-100 font-bold">Semua Essay Telah Dinilai</span>
-              <span className="text-sm text-slate-500 dark:text-slate-400 mt-1">Tidak ada jawaban essay yang menunggu penilaian.</span>
+              {search ? (
+                <>
+                  <Search className="h-10 w-10 text-slate-300 dark:text-slate-600 mb-3" />
+                  <span className="text-slate-900 dark:text-slate-100 font-bold">Pencarian Tidak Ditemukan</span>
+                  <span className="text-sm text-slate-500 mt-1">Coba kata kunci lain.</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="h-10 w-10 text-emerald-500 mb-3 opacity-80" />
+                  <span className="text-slate-900 dark:text-slate-100 font-bold">Semua Essay Telah Dinilai</span>
+                  <span className="text-sm text-slate-500 dark:text-slate-400 mt-1">Tidak ada jawaban essay yang menunggu penilaian.</span>
+                </>
+              )}
             </div>
           ) : (
             <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800/60">
@@ -170,11 +200,11 @@ function EvaluasiList() {
                       {/* Col 4: Status & Action */}
                       <div className="hidden sm:flex sm:col-span-2 items-center justify-end gap-4">
                         {isWarning ? (
-                          <div className="flex items-center gap-1.5 text-xs font-semibold text-accent bg-accent/10 px-2.5 py-1 rounded-md">
+                          <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-600 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/40 px-2.5 py-1 rounded-md">
                             Perlu Dinilai
                           </div>
                         ) : (
-                          <div className="flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-md">
+                          <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/40 px-2.5 py-1 rounded-md">
                             Selesai
                           </div>
                         )}

@@ -5,7 +5,9 @@ import { uid } from "@/lib/cbt/storage";
 import type { Topik } from "@/lib/cbt/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash2, ChevronRight, Lock, BookOpen, Layers } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Plus, Trash2, ChevronRight, Lock, BookOpen, Layers, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import { allowedTopikIdSet, isUnrestricted } from "@/lib/cbt/access";
@@ -24,6 +26,9 @@ function TopikPage() {
     list.filter((t) => t.modulId === modulId && (!allowedSet || allowedSet.has(t.id)));
   const [topiks, setTopiks] = useState<Topik[]>(filterMine(topikRepo.all()));
   const [nama, setNama] = useState("");
+  const [editingTopik, setEditingTopik] = useState<Topik | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editNama, setEditNama] = useState("");
 
   if (!modul) return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -38,11 +43,27 @@ function TopikPage() {
     topikRepo.upsert({ id: uid("t_"), modulId, nama: nama.trim() });
     setNama(""); setTopiks(filterMine(topikRepo.all())); toast.success("Topik ditambahkan");
   }
+
   function remove(id: string) {
     if (!canEdit) return;
     if (soalRepo.all().some((s) => s.topikId === id)) { toast.error("Hapus soal di topik ini dulu"); return; }
     if (!confirm("Hapus topik?")) return;
     topikRepo.remove(id); setTopiks(filterMine(topikRepo.all()));
+    toast.success("Topik dihapus");
+  }
+
+  function openEdit(t: Topik) {
+    setEditingTopik(t);
+    setEditNama(t.nama);
+    setEditDialogOpen(true);
+  }
+
+  function saveEdit() {
+    if (!editingTopik || !editNama.trim()) return;
+    topikRepo.upsert({ ...editingTopik, nama: editNama.trim() });
+    setTopiks(filterMine(topikRepo.all()));
+    toast.success("Nama topik diperbarui");
+    setEditDialogOpen(false);
   }
 
   return (
@@ -65,17 +86,17 @@ function TopikPage() {
 
       {/* Creation Row */}
       {canEdit ? (
-        <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center gap-3">
+        <form onSubmit={(e) => { e.preventDefault(); add(); }} className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center gap-3">
           <Input 
             placeholder="Ketik nama topik baru (misal: Bab 1: Pengantar)" 
             value={nama} 
             onChange={(e) => setNama(e.target.value)} 
             className="flex-1 bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800"
           />
-          <Button onClick={add} className="w-full sm:w-auto font-semibold">
+          <Button type="submit" disabled={!nama.trim()} className="w-full sm:w-auto font-semibold">
             <Plus className="mr-2 h-4 w-4" />Tambah Topik
           </Button>
-        </div>
+        </form>
       ) : (
         <div className="flex items-center gap-3 rounded-xl border border-amber-200/50 bg-amber-50/50 dark:bg-amber-950/20 p-4 text-sm text-amber-700 dark:text-amber-400">
           <Lock className="h-4 w-4" />
@@ -111,9 +132,14 @@ function TopikPage() {
 
                 <div className="flex items-center gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                   {canEdit && (
-                    <Button size="sm" variant="ghost" className="h-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950" onClick={() => remove(t.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <>
+                      <Button size="sm" variant="ghost" className="h-8 text-slate-500 hover:text-slate-900 dark:hover:text-white" onClick={() => openEdit(t)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button size="sm" variant="ghost" className="h-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950" onClick={() => remove(t.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </>
                   )}
                   <Button size="sm" className="h-8 shadow-sm" asChild>
                     <Link to="/admin/topik/$id/soal" params={{ id: t.id }}>
@@ -132,6 +158,27 @@ function TopikPage() {
           )}
         </div>
       </section>
+
+      {/* Edit Topik Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Nama Topik</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <Label>Nama Topik / Bab</Label>
+            <Input
+              value={editNama}
+              onChange={(e) => setEditNama(e.target.value)}
+              placeholder="Ketik nama topik..."
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>Batal</Button>
+            <Button onClick={saveEdit}>Simpan</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

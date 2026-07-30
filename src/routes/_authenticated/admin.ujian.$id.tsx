@@ -209,7 +209,7 @@ function UjianEditor() {
     set("topicSets", [...u!.topicSets, ts]);
   }
 
-  function save() {
+  async function save() {
     if (!u!.nama.trim()) {
       toast.error("Nama wajib");
       return;
@@ -225,7 +225,16 @@ function UjianEditor() {
       }
     }
     ujianRepo.upsert(u!);
+    await ujianRepo.flush();
     toast.success("Disimpan");
+    navigate({ to: "/admin/ujian" });
+  }
+
+  async function hapus() {
+    if (!confirm(`Yakin ingin menghapus ujian "${u!.nama}" beserta seluruh data yang terkait?`)) return;
+    ujianRepo.remove(u!.id);
+    await ujianRepo.flush();
+    toast.success("Ujian dihapus");
     navigate({ to: "/admin/ujian" });
   }
 
@@ -238,10 +247,16 @@ function UjianEditor() {
           </Link>
           <h1 className="text-2xl font-semibold tracking-tight">Editor Ujian</h1>
         </div>
-        <Button onClick={save}>
-          <Save className="mr-1 h-4 w-4" />
-          Simpan
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" className="text-destructive border-destructive/30 hover:bg-destructive/10" onClick={hapus}>
+            <Trash2 className="mr-1 h-4 w-4" />
+            Hapus
+          </Button>
+          <Button onClick={save}>
+            <Save className="mr-1 h-4 w-4" />
+            Simpan
+          </Button>
+        </div>
       </div>
 
       <Card>

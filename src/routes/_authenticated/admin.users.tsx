@@ -23,8 +23,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Pencil, Trash2, Plus, LogOut } from "lucide-react";
+import { Pencil, Trash2, Plus, LogOut, ShieldCheck, Building2 } from "lucide-react";
 import { toast } from "sonner";
+import { Link } from "@tanstack/react-router";
 import { AdminPage, AdminPageHeader, AdminPageContent } from "@/components/cbt/AdminPage";
 
 export const Route = createFileRoute("/_authenticated/admin/users")({
@@ -65,10 +66,16 @@ function UsersPage() {
         title="Pengguna Sistem"
         description="Kelola akses akun admin, admin jurusan, dan evaluator."
         action={
-          <Button onClick={() => { setEditing(null); setOpen(true); }} size="sm" className="h-9">
-
-            <Plus className="mr-2 h-4 w-4" /> Tambah Akun
-          </Button>
+          <div className="flex gap-2">
+            <Button asChild variant="outline" size="sm" className="h-9">
+              <Link to="/admin/users/roles">
+                <ShieldCheck className="mr-2 h-4 w-4" /> Hak Akses Role
+              </Link>
+            </Button>
+            <Button onClick={() => { setEditing(null); setOpen(true); }} size="sm" className="h-9">
+              <Plus className="mr-2 h-4 w-4" /> Tambah Akun
+            </Button>
+          </div>
         }
       />
 
@@ -104,8 +111,8 @@ function UsersPage() {
                 <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left">Username</th>
                 <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left">Nama Lengkap</th>
                 <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Peran</th>
+                <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-left">Unit / Jurusan</th>
                 <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Status</th>
-
                 <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Aksi</th>
               </tr>
             </thead>
@@ -118,6 +125,13 @@ function UsersPage() {
                     <span className="px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
                       {u.role === "super_admin" ? "Super Admin" : u.role === "admin_prodi" ? "Admin Jurusan" : u.role === "evaluator" ? "Evaluator" : u.role}
                     </span>
+                  </td>
+                  <td className="p-4 text-left text-xs text-slate-600 dark:text-slate-400">
+                    {u.role === "super_admin" ? (
+                      <span className="text-slate-400 italic">Semua Unit (Global)</span>
+                    ) : (
+                      units.find((unit) => unit.id === u.unitId)?.nama ?? <span className="text-slate-400 italic">Tanpa Unit</span>
+                    )}
                   </td>
                   <td className="p-4 text-center">
                     {u.aktif ? (
@@ -160,7 +174,7 @@ function UsersPage() {
               ))}
               {shown.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-slate-500">Tidak ada data pengguna.</td>
+                  <td colSpan={6} className="p-8 text-center text-slate-500">Tidak ada data pengguna.</td>
                 </tr>
               )}
             </tbody>
