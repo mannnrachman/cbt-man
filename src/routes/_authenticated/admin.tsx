@@ -233,7 +233,7 @@ function AdminLayout() {
                 <span className="font-bold text-slate-900 dark:text-slate-100 text-base tracking-tight truncate">{appName}</span>
               </div>
               {mobileMenuOpen && (
-                <Button variant="ghost" size="icon" className="lg:hidden h-8 w-8 text-slate-500 hover:text-slate-900" onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" size="icon" title="Tutup menu navigasi" aria-label="Tutup menu navigasi" className="lg:hidden h-8 w-8 text-slate-500 hover:text-slate-900" onClick={() => setMobileMenuOpen(false)}>
                   <X className="h-5 w-5" />
                 </Button>
               )}
