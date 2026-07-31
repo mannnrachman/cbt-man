@@ -224,7 +224,7 @@ function AdminLayout() {
         {/* Sidebar (Hidden on Panduan full-screen docs mode) */}
         {!isPanduanPage && (
           <aside className={cn(
-            "w-64 shrink-0 border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:block transition-transform duration-200 z-50 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto scrollbar-thin",
+            "neo-sidebar w-64 shrink-0 border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:block transition-transform duration-200 z-50 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto scrollbar-thin",
             mobileMenuOpen ? "fixed inset-y-0 left-0 h-screen overflow-y-auto shadow-xl" : "hidden"
           )}>
             <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-5">
@@ -271,7 +271,7 @@ function AdminLayout() {
                             activeProps={{
                               className: cn(
                                 "bg-sidebar-primary text-sidebar-primary-foreground font-semibold shadow-sm border border-transparent",
-                                globalTheme === "neobrutalism" && "bg-lime-400! text-black! border-2! border-black! shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]! font-black! rounded-none!"
+                                globalTheme === "neobrutalism" && "bg-sidebar-primary text-sidebar-primary-foreground border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] font-black rounded-none"
                               )
                             }}
                             inactiveProps={{

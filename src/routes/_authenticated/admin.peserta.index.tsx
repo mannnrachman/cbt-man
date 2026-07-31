@@ -414,12 +414,12 @@ function PesertaDialog({
           </div>
           <div className="space-y-2">
             <Label>Unit Akademik / Kelas</Label>
-            <Select value={form.unitId} onValueChange={(v) => setForm({ ...form, unitId: v })}>
+            <Select value={form.unitId || "none"} onValueChange={(v) => setForm({ ...form, unitId: v === "none" ? "" : v })}>
               <SelectTrigger>
                 <SelectValue placeholder="(Tanpa Unit)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">-- Tidak ada --</SelectItem>
+                <SelectItem value="none">-- Tidak ada --</SelectItem>
                 {units.map((g) => (
                   <SelectItem key={g.id} value={g.id}>
                     {g.nama}

@@ -1,4 +1,4 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { revokeUserSessionsServer, upsertUserServer, getUsersList, mutateUserServer } from "@/lib/server/users/functions";
 import { getUnitAkademikList } from "@/lib/server/akademik/functions";
@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { AdminPage, AdminPageHeader, AdminPageContent } from "@/components/cbt/AdminPage";
-import { Pencil, Trash2, Plus, LogOut, Search, FileX, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Pencil, Trash2, Plus, LogOut, Search, FileX, Loader2, ChevronLeft, ChevronRight, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/users")({
@@ -98,9 +98,16 @@ function UsersPage() {
         title="Pengguna Sistem"
         description="Kelola akses akun admin, admin jurusan, dan evaluator."
         action={
-          <Button onClick={() => { setEditing(null); setOpen(true); }} size="sm" className="h-9">
-            <Plus className="mr-2 h-4 w-4" /> Tambah Akun
-          </Button>
+          <div className="flex items-center gap-2">
+            <Link to="/admin/users/roles">
+              <Button variant="outline" size="sm" className="h-9">
+                <ShieldCheck className="mr-2 h-4 w-4" /> Hak Akses Role
+              </Button>
+            </Link>
+            <Button onClick={() => { setEditing(null); setOpen(true); }} size="sm" className="h-9">
+              <Plus className="mr-2 h-4 w-4" /> Tambah Akun
+            </Button>
+          </div>
         }
       />
 

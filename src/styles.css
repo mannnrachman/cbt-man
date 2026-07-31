@@ -202,17 +202,17 @@
 [data-theme='neobrutalism'] {
   /* Ubah variabel Shadcn inti (TAPI biarkan background tetap putih agar rapi seperti dashboard) */
   --radius: 0px;
-  --primary: oklch(0.85 0.18 135); /* #a3e635 Lime green */
+  --primary: oklch(0.867 0.201 130.4); /* #a3e635 Lime green */
   --primary-foreground: oklch(0 0 0);
-  --accent: oklch(0.85 0.18 90); /* #facc15 Yellow */
+  --accent: oklch(0.867 0.181 96.5); /* #facc15 Yellow */
   --accent-foreground: oklch(0 0 0);
   --border: oklch(0 0 0);
   --ring: oklch(0 0 0);
   
   /* Semantic Shadcn overrides for Neobrutalism */
-  --sidebar: oklch(0.85 0.18 90); /* #facc15 Yellow */
+  --sidebar: oklch(0.867 0.181 96.5); /* #facc15 Yellow */
   --sidebar-foreground: oklch(0 0 0);
-  --sidebar-primary: oklch(0.85 0.18 135); /* #a3e635 Lime green */
+  --sidebar-primary: oklch(0.867 0.201 130.4); /* #a3e635 Lime green */
   --sidebar-primary-foreground: oklch(0 0 0);
   --sidebar-accent: oklch(1 0 0); /* #ffffff White */
   --sidebar-accent-foreground: oklch(0 0 0);
@@ -260,54 +260,54 @@
 }
 
 /* Sidebar Neobrutalism Dedicated Overrides */
-[data-theme='neobrutalism'] aside {
-  border-right-width: 3px !important;
-  border-color: #000000 !important;
-  background-color: #facc15 !important;
-  color: #000000 !important;
+[data-theme='neobrutalism'] .neo-ready aside.neo-sidebar {
+  border-right-width: 3px;
+  border-color: #000000;
+  background-color: #facc15;
+  color: #000000;
 }
 
 /* Section Boundary Containers */
-[data-theme='neobrutalism'] aside .nav-group-section {
-  border: 2px solid #000000 !important;
-  background-color: rgba(255, 255, 255, 0.4) !important;
-  padding: 10px !important;
-  border-radius: 0px !important;
-  box-shadow: 2px 2px 0px 0px #000000 !important;
-  margin-bottom: 4px !important;
+[data-theme='neobrutalism'] .neo-ready aside.neo-sidebar .nav-group-section {
+  border: 2px solid #000000;
+  background-color: rgba(255, 255, 255, 0.4);
+  padding: 10px;
+  border-radius: 0px;
+  box-shadow: 2px 2px 0px 0px #000000;
+  margin-bottom: 4px;
 }
 
-[data-theme='neobrutalism'] aside h3 {
-  color: #000000 !important;
-  font-weight: 900 !important;
-  font-size: 10px !important;
-  letter-spacing: 0.05em !important;
-  background-color: #ffffff !important;
-  border: 2px solid #000000 !important;
-  box-shadow: 2px 2px 0px 0px #000000 !important;
-  padding: 3px 8px !important;
-  display: inline-block !important;
-  width: fit-content !important;
-  margin-left: 0px !important;
-  margin-bottom: 8px !important;
-  text-transform: uppercase !important;
+[data-theme='neobrutalism'] .neo-ready aside.neo-sidebar h3 {
+  color: #000000;
+  font-weight: 900;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  background-color: #ffffff;
+  border: 2px solid #000000;
+  box-shadow: 2px 2px 0px 0px #000000;
+  padding: 3px 8px;
+  display: inline-block;
+  width: fit-content;
+  margin-left: 0px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
 }
 
-[data-theme='neobrutalism'] aside a {
-  border-radius: 0px !important;
-  font-weight: 700 !important;
-  border: 1px solid rgba(0, 0, 0, 0.25) !important;
-  background-color: rgba(255, 255, 255, 0.7) !important;
-  color: #000000 !important;
-  transition: all 0.15s ease !important;
+[data-theme='neobrutalism'] .neo-ready aside.neo-sidebar a {
+  border-radius: 0px;
+  font-weight: 700;
+  border: 2px solid rgba(0, 0, 0, 0.25);
+  background-color: rgba(255, 255, 255, 0.7);
+  color: #000000;
+  transition: all 0.15s ease;
 }
 
-[data-theme='neobrutalism'] aside a:hover {
-  background-color: #ffffff !important;
-  color: #000000 !important;
-  border: 2px solid #000000 !important;
-  box-shadow: 2px 2px 0px 0px #000000 !important;
-  transform: translate(-1px, -1px) !important;
+[data-theme='neobrutalism'] .neo-ready aside.neo-sidebar a:hover {
+  background-color: #ffffff;
+  color: #000000;
+  border-color: #000000;
+  box-shadow: 2px 2px 0px 0px #000000;
+  transform: translate(-1px, -1px);
 }
 
 [data-theme='neobrutalism'] .neo-ready td {

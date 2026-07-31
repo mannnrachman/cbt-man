@@ -65,7 +65,8 @@ function UjianList() {
     };
     ujianRepo.upsert(u);
     await ujianRepo.flush();
-    setList(visibleUjians(user));
+    const next = visibleUjians(user);
+    setList(next.some((x) => x.id === u.id) ? next : [...next, u]);
     toast.success("Ujian baru dibuat — silakan edit");
     setIsAdding(false);
   }
