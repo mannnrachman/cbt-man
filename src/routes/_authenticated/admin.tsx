@@ -33,7 +33,6 @@ import {
   X,
   BookOpenCheck,
   ChevronDown,
-  ClipboardList,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -112,9 +111,7 @@ const navGroups: NavGroup[] = [
     label: "Hasil & Pelaporan",
     icon: BarChart3,
     items: [
-      { to: "/admin/hasil", label: "Hasil & Riwayat", icon: ClipboardList },
       { to: "/admin/evaluasi", label: "Evaluasi Essay", icon: PenLine },
-      { to: "/admin/laporan", label: "Laporan", icon: BarChart3 },
       { to: "/admin/leaderboard", label: "Leaderboard", icon: Trophy },
     ],
   },
