@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { Network, Calendar, Clock, BookOpen, ChevronRight, AlertTriangle } from "lucide-react";
 import { AdminPageHeader } from "@/components/cbt/AdminPage";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useThemeStore } from "@/lib/cbt/theme-store";
 
 export const Route = createFileRoute("/_authenticated/admin/akademik")({
   component: AkademikLayout,
@@ -32,6 +33,7 @@ const TREE_MENU = [
 
 function AkademikLayout() {
   const { pathname } = useLocation();
+  const { theme } = useThemeStore();
 
   return (
     <div className="w-full space-y-6">
@@ -44,10 +46,34 @@ function AkademikLayout() {
         />
 
         {/* Informasi Penekanan (Alert) */}
-        <Alert variant="destructive" className="bg-amber-500/10 text-amber-900 dark:text-amber-300 border-amber-500/30">
-          <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-          <AlertTitle className="font-semibold text-amber-800 dark:text-amber-300">Perhatian: Modifikasi Struktur Induk</AlertTitle>
-          <AlertDescription className="text-xs text-amber-700 dark:text-amber-400/90 leading-relaxed mt-1">
+        <Alert
+          variant="destructive"
+          className={cn(
+            "bg-amber-500/10 text-amber-900 dark:text-amber-300 border-amber-500/30",
+            theme === "neobrutalism" &&
+              "rounded-none border-[3px] border-black bg-[color:var(--neo-accent)] text-black shadow-[4px_4px_0_0_#000]",
+          )}
+        >
+          <AlertTriangle
+            className={cn(
+              "h-4 w-4 text-amber-600 dark:text-amber-400",
+              theme === "neobrutalism" && "text-black dark:text-black stroke-[3]",
+            )}
+          />
+          <AlertTitle
+            className={cn(
+              "font-semibold text-amber-800 dark:text-amber-300",
+              theme === "neobrutalism" && "font-black uppercase tracking-wide text-black dark:text-black",
+            )}
+          >
+            Perhatian: Modifikasi Struktur Induk
+          </AlertTitle>
+          <AlertDescription
+            className={cn(
+              "text-xs text-amber-700 dark:text-amber-400/90 leading-relaxed mt-1",
+              theme === "neobrutalism" && "font-bold text-black dark:text-black",
+            )}
+          >
             Penghapusan atau perubahan mendasar pada <strong>Fakultas atau Jurusan</strong> dapat menyebabkan data mahasiswa dan modul bank soal yang terkait menjadi tidak sinkron (<em>orphaned</em>). Pastikan Anda hanya mengubah data ini jika benar-benar diperlukan.
           </AlertDescription>
         </Alert>
@@ -59,7 +85,13 @@ function AkademikLayout() {
         <aside className="w-full lg:w-64 shrink-0 space-y-6">
           {TREE_MENU.map((group, idx) => (
             <div key={idx} className="space-y-2">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-2">
+              <h4
+                className={cn(
+                  "text-xs font-semibold uppercase tracking-wider text-muted-foreground px-2",
+                  theme === "neobrutalism" &&
+                    "mb-2 inline-block border-b-[3px] border-black px-0 pb-1 font-black text-black dark:text-black",
+                )}
+              >
                 {group.section}
               </h4>
               <nav className="flex flex-col space-y-1">
@@ -74,17 +106,33 @@ function AkademikLayout() {
                       to={item.to}
                       className={cn(
                         "group flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md transition-colors",
-                        active
-                          ? "bg-accent text-accent-foreground font-semibold"
-                          : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                        theme === "neobrutalism"
+                          ? cn(
+                              "rounded-none border-[3px] font-bold",
+                              active
+                                ? "-translate-x-0.5 -translate-y-0.5 border-black bg-[color:var(--neo-bg)] text-black shadow-[4px_4px_0_0_#000]"
+                                : "border-transparent text-black hover:-translate-x-0.5 hover:-translate-y-0.5 hover:border-black hover:bg-white hover:shadow-[4px_4px_0_0_#000]",
+                            )
+                          : active
+                            ? "bg-accent text-accent-foreground font-semibold"
+                            : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
                       )}
-                      style={{ marginLeft: `${item.indent * 12}px` }}
+                      style={{
+                        marginLeft: theme === "neobrutalism" ? 0 : `${item.indent * 12}px`,
+                        paddingLeft: theme === "neobrutalism" ? `${item.indent * 12 + 12}px` : undefined,
+                      }}
                     >
                       <div className="flex items-center gap-3">
-                        <Icon className={cn(
-                          "h-4 w-4 shrink-0", 
-                          active ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
-                        )} />
+                        <Icon
+                          className={cn(
+                            "h-4 w-4 shrink-0",
+                            theme === "neobrutalism"
+                              ? "text-black dark:text-black"
+                              : active
+                                ? "text-foreground"
+                                : "text-muted-foreground group-hover:text-foreground",
+                          )}
+                        />
                         {item.label}
                       </div>
                       {active && <ChevronRight className="h-4 w-4 opacity-50" />}
