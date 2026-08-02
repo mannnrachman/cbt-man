@@ -4,7 +4,7 @@ import type { SesiUjian, Ujian } from "@/lib/cbt/types";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { LayoutGrid, X, ChevronLeft, ChevronRight, Flag, CheckCircle2, AlertCircle, Type, Clock } from "lucide-react";
+import { LayoutGrid, X, ChevronLeft, ChevronRight, Flag, CheckCircle2, AlertCircle, Type, Clock, Calculator } from "lucide-react";
 import {
   createFileRoute,
   useNavigate,
@@ -14,6 +14,14 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { AudioPlayer } from "@/components/cbt/AudioPlayer";
 import { RichView } from "@/components/cbt/RichEditor";
+import { ExamCalculator } from "@/components/cbt/ExamCalculator";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 export const Route = createFileRoute(
   "/_authenticated/peserta/ujian/$id/kerjakan",
@@ -62,6 +70,27 @@ function gradeSesi(sesi: SesiUjian, ujian: Ujian) {
   }
 
   return currentSesi;
+}
+
+function CalculatorAction({ ujian }: { ujian: Ujian }) {
+  if (!ujian.allowCalculator) return null;
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm" className="mt-4 w-full">
+          <Calculator className="mr-2 h-4 w-4" aria-hidden="true" />
+          Buka Kalkulator
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[90dvh] w-[calc(100%_-_2rem)] max-w-sm overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Kalkulator Ujian</DialogTitle>
+        </DialogHeader>
+        <ExamCalculator />
+      </DialogContent>
+    </Dialog>
+  );
 }
 
 function RouteComponent() {
@@ -468,7 +497,8 @@ function RouteComponent() {
         <div className="hidden md:flex flex-col w-80 bg-slate-50/50 dark:bg-slate-950/30 border-l border-slate-200 dark:border-slate-800">
           <div className="p-6 border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
             <h3 className="font-extrabold text-slate-800 dark:text-slate-200 text-lg tracking-tight">Navigasi Soal</h3>
-            
+            <CalculatorAction ujian={ujian} />
+
             <div className="mt-4 flex flex-col gap-2">
               <div className="flex items-center gap-3 text-sm font-medium text-slate-600 dark:text-slate-400">
                 <div className="w-4 h-4 rounded-full bg-primary shadow-sm" /> Sudah Dijawab
@@ -544,8 +574,9 @@ function RouteComponent() {
           
           <div className="flex-1 overflow-y-auto p-6">
             <div className="max-w-xl mx-auto">
-              
-              <div className="flex justify-between items-center bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 mb-8 shadow-sm">
+              <CalculatorAction ujian={ujian} />
+
+              <div className="flex justify-between items-center bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 mb-8 mt-6 shadow-sm">
                 <div className="flex flex-col items-center">
                   <div className="w-4 h-4 rounded-full bg-primary shadow-sm mb-1" />
                   <span className="text-xs font-semibold text-slate-500">Sudah</span>

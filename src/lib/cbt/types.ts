@@ -149,6 +149,7 @@ export const UjianSchema = z.object({
 	maxPindahTab: z.number().int().nonnegative().default(3),
 	blokirShortcut: z.boolean().default(true),
 	mode: z.enum(["online", "offline"]).default("online"),
+	allowCalculator: z.boolean().default(false),
 	createdBy: z.string(),
 	createdAt: z.number(),
 });

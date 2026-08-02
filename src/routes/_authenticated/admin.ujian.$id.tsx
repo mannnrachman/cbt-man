@@ -498,6 +498,25 @@ function UjianEditor() {
       </Card>
 
       <Card>
+        <CardContent className="space-y-3 p-4">
+          <h3 className="font-medium">Alat bantu ujian</h3>
+          <div className="flex items-center justify-between rounded border p-2">
+            <div>
+              <Label htmlFor="allow-calculator">Kalkulator ujian</Label>
+              <p className="text-xs text-muted-foreground">
+                Izinkan peserta membuka kalkulator selama ujian.
+              </p>
+            </div>
+            <Switch
+              id="allow-calculator"
+              checked={u.allowCalculator}
+              onCheckedChange={(value) => set("allowCalculator", value)}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
         <CardContent className="p-4 space-y-3">
           <h3 className="font-medium">Tampilan hasil & anti-cheat</h3>
           <div className="flex items-center justify-between rounded border p-2">

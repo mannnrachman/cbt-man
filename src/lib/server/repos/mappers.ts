@@ -154,6 +154,7 @@ export function mapUjian(
 		maxPindahTab: row.maxPindahTab,
 		blokirShortcut: row.blokirShortcut,
 		mode: (row.mode ?? "online") as "online" | "offline",
+		allowCalculator: row.allowCalculator,
 		createdBy: row.createdBy,
 		createdAt: Number(row.createdAt),
 	};
