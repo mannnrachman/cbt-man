@@ -166,55 +166,55 @@ function PesertaPage() {
             <input id="file-upload" type="file" accept=".xlsx,.xls" hidden onChange={(e) => {
               const f = e.target.files?.[0]; if (f) importExcel(f); e.target.value = "";
             }} />
-            <Button variant="outline" size="sm" onClick={() => document.getElementById("file-upload")?.click()} className="h-9" disabled={isImporting}>
-              {isImporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+            <Button variant="outline" size="sm" onClick={() => document.getElementById("file-upload")?.click()} className="h-9 bg-white border-2 border-black hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-black font-black uppercase transition-all" disabled={isImporting}>
+              {isImporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin stroke-[3]" /> : <Upload className="mr-2 h-4 w-4 stroke-[3]" />}
               Import Excel
             </Button>
-            <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1"></div>
+            <div className="w-1 h-8 bg-black mx-1 rounded-full"></div>
             <Link to="/admin/akademik">
-              <Button variant="outline" size="sm" className="h-9">
-                <UsersIcon className="mr-2 h-4 w-4" /> Unit Akademik
+              <Button variant="outline" size="sm" className="h-9 bg-white border-2 border-black hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-black font-black uppercase transition-all">
+                <UsersIcon className="mr-2 h-4 w-4 stroke-[3]" /> Unit Akademik
               </Button>
             </Link>
             <Link to="/admin/peserta/online">
-              <Button variant="outline" size="sm" className="h-9">
-                <Activity className="mr-2 h-4 w-4" /> Live Ujian
+              <Button variant="outline" size="sm" className="h-9 bg-white border-2 border-black hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-black font-black uppercase transition-all">
+                <Activity className="mr-2 h-4 w-4 stroke-[3]" /> Live Ujian
               </Button>
             </Link>
             <Link to="/admin/peserta/kartu">
-              <Button variant="outline" size="sm" className="h-9">
-                <Printer className="mr-2 h-4 w-4" /> Cetak Kartu
+              <Button variant="outline" size="sm" className="h-9 bg-white border-2 border-black hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-black font-black uppercase transition-all">
+                <Printer className="mr-2 h-4 w-4 stroke-[3]" /> Cetak Kartu
               </Button>
             </Link>
-            <Button onClick={() => { setEditing(null); setOpen(true); }} size="sm" className="h-9">
-              <Plus className="mr-2 h-4 w-4" /> Tambah Akun
+            <Button onClick={() => { setEditing(null); setOpen(true); }} size="sm" className="h-9 bg-[#00FF41] hover:bg-[#00e63a] border-2 border-black hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-black font-black uppercase transition-all">
+              <Plus className="mr-2 h-4 w-4 stroke-[3]" /> Tambah Akun
             </Button>
           </>
         }
       />
 
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative max-w-xs w-full">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
+          <Search className="absolute left-3 top-3 h-4 w-4 text-black stroke-[3]" />
           <Input 
             placeholder="Cari nama atau username..." 
             value={query} 
             onChange={(e) => setQuery(e.target.value)} 
-            className="pl-9" 
+            className="pl-10 h-10 border-4 border-black rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] font-bold focus-visible:ring-0 focus-visible:border-black text-black bg-white" 
           />
         </div>
         <Select value={filterUnit} onValueChange={setFilterUnit}>
-          <SelectTrigger className="w-full sm:w-48">
+          <SelectTrigger className="w-full sm:w-48 h-10 border-4 border-black rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] font-bold text-black focus:ring-0 bg-white">
             <SelectValue placeholder="Pilih Unit" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="border-4 border-black rounded-xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] font-bold">
             <SelectItem value="all">Semua Unit</SelectItem>
             {units.map((g) => <SelectItem key={g.id} value={g.id}>{g.nama}</SelectItem>)}
           </SelectContent>
         </Select>
         {selectedIds.length > 0 && (
-          <Button variant="destructive" size="sm" onClick={handleBulkDelete} className="sm:ml-auto">
-            <Trash2 className="mr-2 h-4 w-4" /> Hapus Terpilih ({selectedIds.length})
+          <Button variant="destructive" size="sm" onClick={handleBulkDelete} className="sm:ml-auto h-10 bg-[#FF006B] hover:bg-[#d9005a] border-4 border-black rounded-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] text-white font-black uppercase transition-all">
+            <Trash2 className="mr-2 h-4 w-4 stroke-[3]" /> Hapus ({selectedIds.length})
           </Button>
         )}
       </div>
