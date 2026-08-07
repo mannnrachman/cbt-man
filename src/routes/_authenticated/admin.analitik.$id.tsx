@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
-import { ujianRepo, sesiRepo, usersRepo, soalRepo, hydrateRepos, mataKuliahRepo, semesterRepo, unitAkademikRepo } from "@/lib/cbt/repos";
 import { recomputeSkor } from "@/lib/cbt/exam";
+import { ujianRepo, sesiRepo, soalRepo, usersRepo, unitAkademikRepo, semesterRepo, hydrateRepos } from "@/lib/cbt/repos";
 import { exportSheet, stripHtml } from "@/lib/cbt/excel";
 import { analisisButir, labelKesukaran, labelDiskriminasi } from "@/lib/cbt/analisis";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -45,7 +45,6 @@ function HasilUjian() {
 
   if (!ujian) return <div>Tidak ditemukan</div>;
   
-  const mk = ujian.mataKuliahId ? mataKuliahRepo.byId(ujian.mataKuliahId) : null;
   const smt = ujian.semesterId ? semesterRepo.byId(ujian.semesterId) : null;
 
   function refresh() {
@@ -61,10 +60,10 @@ function HasilUjian() {
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{ujian.nama}</h1>
-            {mk && (
+            {smt && (
               <p className="text-muted-foreground mt-1 flex items-center gap-1.5 font-medium">
                 <BookOpen className="h-4 w-4" />
-                {mk.nama} {smt ? `· ${smt.nama}` : ""}
+                {smt.nama}
               </p>
             )}
           </div>

@@ -5,7 +5,7 @@ import { z } from "zod";
 import { prisma } from "../db/prisma";
 import { requireCaller, seedIfNeeded } from "../db/auth";
 import { writeAuditLog } from "../db/audit";
-import type { UnitAkademik, TahunAkademik, Semester, MataKuliah } from "@/lib/cbt/types";
+import type { UnitAkademik, TahunAkademik, Semester } from "@/lib/cbt/types";
 import { UnitAkademikSchema } from "@/lib/cbt/types";
 
 
@@ -109,27 +109,6 @@ export const mutateSemesterServer = createServerFn({ method: "POST" })
 		}
 	});
 
-export const mutateMataKuliahServer = createServerFn({ method: "POST" })
-	.validator(z.object({ action: z.enum(["upsert", "remove"]), payload: z.any() }))
-	.handler(async ({ data }) => {
-		try {
-			const caller = await requireSuperAdmin();
-			if (!caller) return { ok: false as const, error: "Forbidden" };
-			const { action, payload } = data;
-			
-			if (action === "upsert") {
-				const item = payload as MataKuliah;
-				await prisma.mataKuliah.upsert({ where: { id: item.id }, update: item, create: item });
-			} else if (action === "remove") {
-				const id = String((payload as { id?: string }).id ?? "");
-				await prisma.mataKuliah.delete({ where: { id } }).catch(() => {});
-			}
-			audit(caller, "mataKuliah", action, payload);
-			return { ok: true as const };
-		} catch (e: any) {
-			return { ok: false as const, error: e.message };
-		}
-	});
 export const getUnitAkademikList = createServerFn({ method: "GET" }).handler(
 	async (): Promise<UnitAkademik[]> => {
 		const caller = await requireCaller();

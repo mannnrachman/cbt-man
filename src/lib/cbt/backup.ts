@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import {
   usersRepo,
   unitAkademikRepo,
-  modulRepo,
   topikRepo,
   soalRepo,
   ujianRepo,
@@ -18,7 +17,6 @@ import {
 import {
   UserSchema,
   UnitAkademikSchema,
-  ModulSchema,
   TopikSchema,
   SoalSchema,
   UjianSchema,
@@ -45,7 +43,6 @@ export const BackupSchema = z.object({
   exportedAt: z.number(),
   users: z.array(UserSchema),
   unitAkademik: z.array(UnitAkademikSchema),
-  modul: z.array(ModulSchema),
   topik: z.array(TopikSchema),
   soal: z.array(SoalSchema),
   ujian: z.array(UjianSchema),
@@ -64,7 +61,6 @@ export async function exportBackup(): Promise<Backup> {
     exportedAt: Date.now(),
     users: usersRepo.all(),
     unitAkademik: unitAkademikRepo.all(),
-    modul: modulRepo.all(),
     topik: topikRepo.all(),
     soal: soalRepo.all(),
     ujian: ujianRepo.all(),
@@ -117,7 +113,6 @@ export async function importBackup(raw: any): Promise<Backup> {
     data: {
       users: data.users,
       unitAkademik: data.unitAkademik,
-      modul: data.modul,
       topik: data.topik,
       soal: data.soal,
       ujian: data.ujian,
@@ -142,7 +137,6 @@ export function backupSummary(b: Backup) {
   return {
     users: b.users.length,
     unitAkademik: b.unitAkademik.length,
-    modul: b.modul.length,
     topik: b.topik.length,
     soal: b.soal.length,
     ujian: b.ujian.length,

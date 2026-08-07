@@ -1,6 +1,6 @@
 
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { sesiRepo, mataKuliahRepo, semesterRepo, usersRepo, ujianRepo } from "@/lib/cbt/repos";
+import { ujianRepo, sesiRepo, usersRepo, semesterRepo } from "@/lib/cbt/repos";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import { AdminPage, AdminPageHeader } from "@/components/cbt/AdminPage";
@@ -20,8 +20,10 @@ export function AnalitikIndex() {
   // High level stats
   const semuaUjian = ujianRepo.all();
   const semuaSesi = sesiRepo.all();
-  const peserta = usersRepo.all().filter((u) => u.role === "mahasiswa");
-  const totalSelesai = semuaSesi.filter((s) => s.status === "selesai").length;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const peserta = usersRepo.all().filter((u: any) => u.role === "mahasiswa");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const totalSelesai = semuaSesi.filter((s: any) => s.status === "selesai").length;
 
   return (
     <AdminPage className="">
@@ -100,7 +102,22 @@ export function AnalitikIndex() {
 
             {ujians.map((u) => {
               const sesiLengkap = semuaSesi.filter((s) => s.ujianId === u.id && s.status === "selesai").length;
-              const mk = u.mataKuliahId ? mataKuliahRepo.byId(u.mataKuliahId) : null;
+              
+              const stats = ujians.map((u) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const s = semuaSesi.filter((s: any) => s.ujianId === u.id);
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const sel = s.filter((s: any) => s.status === "selesai");
+                return {
+                  u,
+                  selesai: sel.length,
+                  rataRata:
+                    sel.length > 0
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      ? sel.reduce((a: any, b: any) => a + (b.skorAkhir || 0), 0) / sel.length
+                      : 0,
+                };
+              });
               
               const skors = semuaSesi.filter(s => s.ujianId === u.id && s.status === "selesai" && s.skorTotal !== undefined).map(s => s.skorTotal!);
               const avg = skors.length > 0 ? Math.round(skors.reduce((a,b)=>a+b, 0) / skors.length) : 0;
@@ -127,13 +144,9 @@ export function AnalitikIndex() {
                           {u.nama}
                         </div>
                         <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
-                          {mk ? (
-                            <span className="flex items-center gap-1">
-                              <BookOpen className="h-3 w-3" /> {mk.nama}
-                            </span>
-                          ) : (
-                            <span className="italic">Tanpa mata kuliah</span>
-                          )}
+                          <div>
+                            <h3 className="font-semibold text-lg">{u.nama}</h3>
+                          </div>
                         </div>
                       </div>
                     </div>

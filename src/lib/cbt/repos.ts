@@ -2,18 +2,17 @@
 import { getCbtSnapshot, getPublicBootConfigServer } from "@/lib/server/snapshot/functions";
 import { claimExamToken as claimExamTokenServer, saveConfigServer, mutateUjianServer, mutateTokenServer } from "@/lib/server/ujian/functions";
 import { mutateUserServer } from "@/lib/server/users/functions";
-import { mutateModulServer, mutateTopikServer, mutateSoalServer } from "@/lib/server/modul/functions";
+import { mutateTopikServer, mutateSoalServer } from "@/lib/server/modul/functions";
 import { mutateSesiServer } from "@/lib/server/sesi/functions";
 import { getTodaysExamsServer } from "@/lib/server/exams";
 import { 
 	mutateUnitAkademikServer, 
-	mutateTahunAkademikServer, mutateSemesterServer, mutateMataKuliahServer 
+	mutateTahunAkademikServer, mutateSemesterServer
 } from "@/lib/server/akademik/functions";
 import { toast } from "sonner";
 import type {
 	AppConfig,
 
-	Modul,
 	NavKey,
 	SesiUjian,
 	Soal,
@@ -24,7 +23,6 @@ import type {
 	UnitAkademik,
 	TahunAkademik,
 	Semester,
-	MataKuliah,
 } from "./types";
 
 type Snapshot = Awaited<ReturnType<typeof getCbtSnapshot>>;
@@ -38,8 +36,6 @@ type EntityName =
 	| "unitAkademik"
 	| "tahunAkademik"
 	| "semester"
-	| "mataKuliah"
-	| "modul"
 	| "topik"
 	| "soal"
 	| "ujian"
@@ -63,8 +59,6 @@ const cache = {
 	unitAkademik: [] as UnitAkademik[],
 	tahunAkademik: [] as TahunAkademik[],
 	semester: [] as Semester[],
-	mataKuliah: [] as MataKuliah[],
-	modul: [] as Modul[],
 	topik: [] as Topik[],
 	soal: [] as Soal[],
 	ujian: [] as Ujian[],
@@ -101,8 +95,6 @@ function applySnapshot(snapshot: Snapshot) {
 	cache.unitAkademik = snapshot.unitAkademik;
 	cache.tahunAkademik = snapshot.tahunAkademik;
 	cache.semester = snapshot.semester;
-	cache.mataKuliah = snapshot.mataKuliah;
-	cache.modul = snapshot.modul;
 	cache.topik = snapshot.topik;
 	cache.soal = snapshot.soal;
 	cache.ujian = snapshot.ujian;
@@ -177,7 +169,6 @@ function runEntityMutation(
 	switch (entity) {
 		case "users": mutationPromise = mutateUserServer({ data: { action, payload } }); break;
 
-		case "modul": mutationPromise = mutateModulServer({ data: { action, payload } }); break;
 		case "topik": mutationPromise = mutateTopikServer({ data: { action, payload } }); break;
 		case "soal": mutationPromise = mutateSoalServer({ data: { action, payload } }); break;
 		case "ujian": mutationPromise = mutateUjianServer({ data: { action, payload } }); break;
@@ -186,7 +177,6 @@ function runEntityMutation(
 		case "unitAkademik": mutationPromise = mutateUnitAkademikServer({ data: { action: action as any, payload } }); break;
 		case "tahunAkademik": mutationPromise = mutateTahunAkademikServer({ data: { action: action as any, payload } }); break;
 		case "semester": mutationPromise = mutateSemesterServer({ data: { action: action as any, payload } }); break;
-		case "mataKuliah": mutationPromise = mutateMataKuliahServer({ data: { action: action as any, payload } }); break;
 		default: mutationPromise = Promise.resolve({ ok: false, error: "Unknown entity" });
 	}
 
@@ -279,22 +269,6 @@ export const semesterRepo = createRepo(
 	() => cache.semester,
 	(items) => {
 		cache.semester = items;
-	},
-);
-
-export const mataKuliahRepo = createRepo(
-	"mataKuliah",
-	() => cache.mataKuliah,
-	(items) => {
-		cache.mataKuliah = items;
-	},
-);
-
-export const modulRepo = createRepo(
-	"modul",
-	() => cache.modul,
-	(items) => {
-		cache.modul = items;
 	},
 );
 

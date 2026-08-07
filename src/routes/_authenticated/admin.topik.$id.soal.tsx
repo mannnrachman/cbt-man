@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useState } from "react";
-import { topikRepo, modulRepo, soalRepo } from "@/lib/cbt/repos";
+import { topikRepo, unitAkademikRepo, soalRepo } from "@/lib/cbt/repos";
 import { uid } from "@/lib/cbt/storage";
 import type { Soal, TipeSoal, Kesulitan, Jawaban } from "@/lib/cbt/types";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,7 @@ const KES_LABEL: Record<Kesulitan, string> = { mudah: "Mudah", sedang: "Sedang",
 function SoalPage() {
   const { id: topikId } = useParams({ from: "/_authenticated/admin/topik/$id/soal" });
   const topik = topikRepo.byId(topikId);
-  const modul = topik ? modulRepo.byId(topik.modulId) : null;
+  const unit = topik ? unitAkademikRepo.byId(topik.unitId) : null;
   const user = useAuthStore((s) => s.user);
   const allowed = isTopikAllowed(user, topikId);
   const [soals, setSoals] = useState<Soal[]>(soalRepo.all().filter((s) => s.topikId === topikId));
@@ -40,7 +40,7 @@ function SoalPage() {
   const [moveDialogOpen, setMoveDialogOpen] = useState(false);
   const [targetTopikId, setTargetTopikId] = useState<string>("");
 
-  if (!topik || !modul) return (
+  if (!topik || !unit) return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
       <p className="text-slate-500 mb-4">Topik tidak ditemukan.</p>
       <Button asChild variant="outline"><Link to="/admin/modul">Kembali ke Bank Soal</Link></Button>
@@ -120,8 +120,8 @@ function SoalPage() {
                 ← Bank Soal
               </Link>
               <span className="text-slate-300 dark:text-zinc-700">/</span>
-              <Link to="/admin/modul/$id/topik" params={{ id: modul.id }} className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-                {modul.nama}
+              <Link to="/admin/modul/$id/topik" params={{ id: unit.id }} className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                {unit.nama}
               </Link>
             </div>
             
@@ -336,7 +336,7 @@ function SoalPage() {
                   {visibleTopiks(user)
                     .filter((t) => t.id !== topikId)
                     .map((t) => {
-                      const m = modulRepo.byId(t.modulId);
+                      const m = unitAkademikRepo.byId(t.unitId);
                       return (
                         <SelectItem key={t.id} value={t.id}>
                           {m ? `${m.nama} → ` : ""}{t.nama}

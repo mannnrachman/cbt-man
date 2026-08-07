@@ -53,7 +53,6 @@ export const upsertUserServer = createServerFn({ method: "POST" })
 					allowedTopikIds: stringifyJson(data.allowedTopikIds),
 					unitId: data.unitId ?? null,
 
-					mataKuliahIds: stringifyJson(data.mataKuliahIds),
 					detail: data.detail ?? null,
 					aktif: data.aktif,
 				},
@@ -66,7 +65,6 @@ export const upsertUserServer = createServerFn({ method: "POST" })
 					allowedTopikIds: stringifyJson(data.allowedTopikIds),
 					unitId: data.unitId ?? null,
 
-					mataKuliahIds: stringifyJson(data.mataKuliahIds),
 					detail: data.detail ?? null,
 					aktif: data.aktif,
 					createdAt: BigInt(data.createdAt ?? Date.now()),
@@ -174,8 +172,6 @@ export const mutateUserServer = createServerFn({ method: "POST" })
 								...item,
 								allowedTopikIds: stringifyJson(item.allowedTopikIds),
 								unitId: item.unitId ?? null,
-
-								mataKuliahIds: stringifyJson(item.mataKuliahIds),
 								detail: item.detail ?? null,
 								createdAt: BigInt(item.createdAt),
 							},
@@ -201,7 +197,6 @@ export const mutateUserServer = createServerFn({ method: "POST" })
 							allowedTopikIds: stringifyJson(item.allowedTopikIds),
 							unitId: item.unitId ?? null,
 
-							mataKuliahIds: stringifyJson(item.mataKuliahIds),
 							detail: item.detail ?? null,
 							aktif: item.aktif,
 						},
@@ -214,7 +209,6 @@ export const mutateUserServer = createServerFn({ method: "POST" })
 							allowedTopikIds: stringifyJson(item.allowedTopikIds),
 							unitId: item.unitId ?? null,
 
-							mataKuliahIds: stringifyJson(item.mataKuliahIds),
 							detail: item.detail ?? null,
 							aktif: item.aktif,
 							createdAt: BigInt(item.createdAt),
@@ -247,7 +241,6 @@ export const getUsersList = createServerFn({ method: "GET" }).handler(
 			aktif: u.aktif,
 			unitId: u.unitId ?? undefined,
 			allowedTopikIds: parseJson<string[]>(u.allowedTopikIds, []),
-			mataKuliahIds: parseJson<string[]>(u.mataKuliahIds, []),
 			detail: u.detail ?? undefined,
 			createdAt: Number(u.createdAt)
 		}));

@@ -2,9 +2,9 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { prisma } from "../db/prisma";
 import { requireAdminResult } from "../db/auth";
-import type { User, UnitAkademik, Modul, Topik, Soal, Ujian, TokenUjian, SesiUjian, AppConfig } from "@/lib/cbt/types";
 
 import { stringifyJson, toBigInt } from "../db/json";
+import type { UnitAkademik, Topik, User, Soal, Ujian, TokenUjian, SesiUjian, AppConfig } from "@/lib/cbt/types";
 
 export const importBackupServer = createServerFn({ method: "POST" })
 	.validator(
@@ -12,7 +12,6 @@ export const importBackupServer = createServerFn({ method: "POST" })
 			users: z.array(z.any()),
 			unitAkademik: z.array(z.any()),
 
-			modul: z.array(z.any()),
 			topik: z.array(z.any()),
 			soal: z.array(z.any()),
 			ujian: z.array(z.any()),
@@ -31,7 +30,6 @@ export const importBackupServer = createServerFn({ method: "POST" })
 			await tx.soal.deleteMany();
 			await tx.ujian.deleteMany();
 			await tx.topik.deleteMany();
-			await tx.modul.deleteMany();
 			await tx.user.deleteMany();
 			await tx.unitAkademik.deleteMany();
 			await tx.appConfig.deleteMany();
@@ -39,8 +37,6 @@ export const importBackupServer = createServerFn({ method: "POST" })
 			if (data.unitAkademik.length)
 				await tx.unitAkademik.createMany({ data: data.unitAkademik as UnitAkademik[] });
 
-			if (data.modul.length)
-				await tx.modul.createMany({ data: data.modul as Modul[] });
 			if (data.topik.length)
 				await tx.topik.createMany({ data: data.topik as Topik[] });
 			for (const item of data.users as User[]) {
@@ -50,7 +46,6 @@ export const importBackupServer = createServerFn({ method: "POST" })
 						allowedTopikIds: stringifyJson(item.allowedTopikIds),
 						unitId: item.unitId ?? null,
 
-						mataKuliahIds: stringifyJson(item.mataKuliahIds),
 						detail: item.detail ?? null,
 						createdAt: BigInt(item.createdAt),
 					},
@@ -79,6 +74,7 @@ export const importBackupServer = createServerFn({ method: "POST" })
 						beginAt: toBigInt(item.beginAt),
 						endAt: toBigInt(item.endAt),
 						groupIds: stringifyJson(item.groupIds),
+						angkatanIds: stringifyJson(item.angkatanIds),
 						topicSets: stringifyJson(item.topicSets),
 						createdAt: BigInt(item.createdAt),
 					},
@@ -152,7 +148,6 @@ export const resetAllDataServer = createServerFn({ method: "POST" }).handler(
 			await tx.soal.deleteMany();
 			await tx.ujian.deleteMany();
 			await tx.topik.deleteMany();
-			await tx.modul.deleteMany();
 			await tx.user.deleteMany();
 			await tx.unitAkademik.deleteMany();
 

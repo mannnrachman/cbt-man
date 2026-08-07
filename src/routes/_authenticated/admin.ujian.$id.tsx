@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useParams, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ujianRepo, unitAkademikRepo, hydrateRepos, mataKuliahRepo, semesterRepo } from "@/lib/cbt/repos";
+import { ujianRepo, unitAkademikRepo, hydrateRepos, semesterRepo, usersRepo } from "@/lib/cbt/repos";
 
 import { uid } from "@/lib/cbt/storage";
 import type { Ujian, TopicSet } from "@/lib/cbt/types";
@@ -25,7 +25,6 @@ import {
   allowedTopikIdSet,
   isTopikAllowed,
   ujianTouchesAllowed,
-  visibleModuls,
   visibleTopiks,
 } from "@/lib/cbt/access";
 import { fetchUjianByIdServer } from "@/lib/server/ujian/functions";
@@ -46,8 +45,6 @@ function UjianEditor() {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const initial = ujianRepo.byId(id);
-  
-  const mkList = mataKuliahRepo.all();
   const smtList = semesterRepo.all();
 
   // (Must-fix #2) Re-order guards so `ujianTouchesAllowed` runs BEFORE we
@@ -176,14 +173,18 @@ function UjianEditor() {
 
   const groups = unitAkademikRepo.all();
   const topiks = visibleTopiks(user);
-  const moduls = visibleModuls(user);
+  
+  const currentYear = new Date().getFullYear();
+  const INCEPTION_YEAR = 2019;
+  const defaultYears = Array.from({ length: currentYear - INCEPTION_YEAR + 2 }, (_, i) => String(INCEPTION_YEAR + i));
+  const availableAngkatan = Array.from(new Set([
+    ...usersRepo.all()
+      .map(u => u.angkatan)
+      .filter((a): a is string => typeof a === 'string' && a.trim().length > 0),
+    ...defaultYears
+  ])).sort();
   
   const sortedTopiks = [...topiks].sort((a, b) => {
-    const mA = moduls.find((m) => m.id === a.modulId);
-    const mB = moduls.find((m) => m.id === b.modulId);
-    const aIsMk = mA?.mataKuliahId === u?.mataKuliahId ? -1 : 1;
-    const bIsMk = mB?.mataKuliahId === u?.mataKuliahId ? -1 : 1;
-    if (aIsMk !== bIsMk) return aIsMk - bIsMk;
     return a.nama.localeCompare(b.nama);
   });
   
@@ -282,20 +283,6 @@ function UjianEditor() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label>Mata Kuliah (Opsional)</Label>
-              <Select value={u.mataKuliahId || "none"} onValueChange={(v) => set("mataKuliahId", v === "none" ? undefined : v)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Pilih Mata Kuliah" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">(Tanpa Mata Kuliah)</SelectItem>
-                  {mkList.map((mk) => (
-                    <SelectItem key={mk.id} value={mk.id}>{mk.nama}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
               <Label>Semester (Opsional)</Label>
               <Select value={u.semesterId || "none"} onValueChange={(v) => set("semesterId", v === "none" ? undefined : v)}>
                 <SelectTrigger>
@@ -359,7 +346,7 @@ function UjianEditor() {
           </div>
           {u.topicSets.map((ts, i) => {
             const t = topiks.find((tk) => tk.id === ts.topikId);
-            const m = t ? moduls.find((mm) => mm.id === t.modulId) : null;
+            const m = t ? unitAkademikRepo.byId(t.unitId) : null;
             const inScope = isTopikAllowed(user, ts.topikId);
             return (
               <div key={ts.id} className="rounded border p-3 space-y-2">
@@ -380,11 +367,10 @@ function UjianEditor() {
                       </SelectTrigger>
                       <SelectContent>
                         {sortedTopiks.map((tk) => {
-                          const mm = moduls.find((mm) => mm.id === tk.modulId);
-                          const isMatchMk = u.mataKuliahId && mm?.mataKuliahId === u.mataKuliahId;
+                          const mm = unitAkademikRepo.byId(tk.unitId);
                           return (
                             <SelectItem key={tk.id} value={tk.id}>
-                              {isMatchMk ? "★ " : ""} {mm?.nama} — {tk.nama}
+                              {mm?.nama} — {tk.nama}
                             </SelectItem>
                           );
                         })}
@@ -466,25 +452,61 @@ function UjianEditor() {
       <Card>
         <CardContent className="p-4 space-y-3">
           <h3 className="font-medium">Akses peserta</h3>
-          <div className="space-y-1">
-            <Label className="text-xs">Group yang boleh ikut (kosong = semua)</Label>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {groups.map((g) => (
-                <label key={g.id} className="flex items-center gap-2 rounded border p-2 text-sm">
-                  <Checkbox
-                    checked={u.groupIds.includes(g.id)}
-                    onCheckedChange={(v) =>
-                      set(
-                        "groupIds",
-                        v ? [...u.groupIds, g.id] : u.groupIds.filter((x) => x !== g.id),
-                      )
-                    }
-                  />
-                  {g.nama}
-                </label>
-              ))}
+          
+          <div className="flex items-center justify-between rounded border p-2 bg-blue-50/50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
+            <div>
+              <Label className="text-blue-700 dark:text-blue-400">Ujian Umum (Mata Kuliah Umum)</Label>
+              <p className="text-xs text-blue-600/70 dark:text-blue-400/70">
+                Bila diaktifkan, ujian ini terbuka untuk semua prodi dan angkatan
+              </p>
             </div>
+            <Switch checked={u.isUmum} onCheckedChange={(v) => set("isUmum", v)} />
           </div>
+
+          {!u.isUmum && (
+            <>
+              <div className="space-y-1 mt-4">
+                <Label className="text-xs">Program Studi / Unit (Kosong = Semua Prodi)</Label>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {groups.map((g) => (
+                    <label key={g.id} className="flex items-center gap-2 rounded border p-2 text-sm">
+                      <Checkbox
+                        checked={u.groupIds.includes(g.id)}
+                        onCheckedChange={(v) =>
+                          set(
+                            "groupIds",
+                            v ? [...u.groupIds, g.id] : u.groupIds.filter((x) => x !== g.id),
+                          )
+                        }
+                      />
+                      {g.nama}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2 mt-4 pt-4 border-t">
+                <Label className="text-xs">Tahun Angkatan (Kosong = Semua Angkatan)</Label>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {availableAngkatan.map((angkatan) => (
+                    <label key={angkatan} className="flex items-center gap-2 rounded border p-2 text-sm">
+                      <Checkbox
+                        checked={u.angkatanIds?.includes(angkatan) ?? false}
+                        onCheckedChange={(v) => {
+                          const current = u.angkatanIds ?? [];
+                          set(
+                            "angkatanIds",
+                            v ? [...current, angkatan] : current.filter((x) => x !== angkatan)
+                          );
+                        }}
+                      />
+                      {angkatan}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
           <div className="flex items-center justify-between rounded border p-2">
             <div>
               <Label>Token ujian wajib</Label>
@@ -554,6 +576,29 @@ function UjianEditor() {
               />
               <Label>Blokir copy/paste & klik kanan</Label>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="p-4 space-y-3">
+          <h3 className="font-medium">Alat Bantu & Cheat Sheet</h3>
+          <p className="text-xs text-slate-500">
+            Izinkan peserta mengakses alat bantu ini selama ujian berlangsung.
+          </p>
+          <div className="flex items-center justify-between rounded border p-2">
+            <Label>Kalkulator Ilmiah</Label>
+            <Switch
+              checked={u.allowCalculator}
+              onCheckedChange={(v) => set("allowCalculator", v)}
+            />
+          </div>
+          <div className="flex items-center justify-between rounded border p-2">
+            <Label>Tabel Nilai Normal Kesehatan</Label>
+            <Switch
+              checked={u.allowNormalValues}
+              onCheckedChange={(v) => set("allowNormalValues", v)}
+            />
           </div>
         </CardContent>
       </Card>

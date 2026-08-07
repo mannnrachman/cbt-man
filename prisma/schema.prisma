@@ -42,7 +42,7 @@ model UnitAkademik {
   parent   UnitAkademik?  @relation("UnitToUnit", fields: [parentId], references: [id], onDelete: Cascade)
   children UnitAkademik[] @relation("UnitToUnit")
   users    User[]
-  mataKuliah MataKuliah[]
+  topik    Topik[]
 }
 
 model User {
@@ -53,6 +53,7 @@ model User {
   role            Role
   allowedTopikIds String        @default("[]")
   unitId          String?
+  angkatan        String?
   mataKuliahIds   String        @default("[]")
   detail          String?
   aktif           Boolean       @default(true)
@@ -77,19 +78,11 @@ model Session {
   @@index([userId])
 }
 
-model Modul {
-  id           String  @id
-  nama         String
-  aktif        Boolean @default(true)
-  mataKuliahId String?
-  topik        Topik[]
-}
-
 model Topik {
   id      String @id
-  modulId String
+  unitId  String
   nama    String
-  modul   Modul  @relation(fields: [modulId], references: [id], onDelete: Cascade)
+  unit    UnitAkademik @relation(fields: [unitId], references: [id], onDelete: Cascade)
   soal    Soal[]
 }
 
@@ -128,8 +121,8 @@ model Ujian {
   tokenAktif       Boolean      @default(false)
   ipRange          String       @default("")
   groupIds         String       @default("[]")
-  mataKuliahId     String?
-  mataKuliah       MataKuliah?  @relation(fields: [mataKuliahId], references: [id], onDelete: SetNull)
+  angkatanIds      String       @default("[]")
+  isUmum           Boolean      @default(false)
   semesterId       String?
   semester         Semester?    @relation(fields: [semesterId], references: [id], onDelete: SetNull)
   topicSets        String       @default("[]")
@@ -139,7 +132,8 @@ model Ujian {
   maxPindahTab     Int          @default(3)
   blokirShortcut   Boolean      @default(true)
   mode             String       @default("online") // "online" | "offline"
-  allowCalculator  Boolean      @default(false)
+  allowCalculator   Boolean      @default(false)
+  allowNormalValues Boolean      @default(false)
   createdBy        String
   createdAt        BigInt
   creator          User         @relation("UjianCreator", fields: [createdBy], references: [id])
@@ -222,18 +216,5 @@ model Semester {
   nama            String
   tahunAkademikId String
   tahunAkademik   TahunAkademik @relation(fields: [tahunAkademikId], references: [id], onDelete: Cascade)
-  mataKuliah      MataKuliah[]
   ujians          Ujian[]
-}
-
-model MataKuliah {
-  id         String       @id
-  kode       String
-  nama       String
-  sks        Int          @default(2)
-  unitId     String?
-  unit       UnitAkademik? @relation(fields: [unitId], references: [id], onDelete: Cascade)
-  semesterId String?
-  semester   Semester?     @relation(fields: [semesterId], references: [id], onDelete: Cascade)
-  ujians     Ujian[]
 }

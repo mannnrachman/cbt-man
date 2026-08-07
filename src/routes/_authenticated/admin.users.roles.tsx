@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import { getUsersList, patchUserTopikAccessServer } from "@/lib/server/users/functions";
-import { getModulsList, getTopiksList } from "@/lib/server/modul/functions";
+import { getTopiksList } from "@/lib/server/modul/functions";
+import { getUnitAkademikList } from "@/lib/server/akademik/functions";
 import { getFullConfigServer, saveConfigServer } from "@/lib/server/ujian/functions";
 import { NAV_KEYS, type NavKey, type User } from "@/lib/cbt/types";
 import { Card, CardContent } from "@/components/ui/card";
@@ -33,7 +34,7 @@ export const Route = createFileRoute("/_authenticated/admin/users/roles")({
   loader: async () => {
     const [allUsers, moduls, topiks, config] = await Promise.all([
       getUsersList(),
-      getModulsList(),
+      getUnitAkademikList(),
       getTopiksList(),
       getFullConfigServer(),
     ]);
@@ -150,7 +151,7 @@ function RolesPage() {
               </div>
               <div className="space-y-3">
                 {moduls.map((m) => {
-                  const ts = topiks.filter((t) => t.modulId === m.id);
+                  const ts = topiks.filter((t) => t.unitId === m.id);
                   if (ts.length === 0) return null;
                   const allSelected = u.allowedTopikIds.length === 0 || ts.every((t) => u.allowedTopikIds.includes(t.id));
                   return (

@@ -17,7 +17,8 @@ import {
 import { Upload, Check, Lock, AlertTriangle, Download, Info, ImagePlus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuthStore } from "@/lib/cbt/auth-store";
-import { isTopikAllowed, visibleModuls, visibleTopiks } from "@/lib/cbt/access";
+import { isTopikAllowed, visibleTopiks } from "@/lib/cbt/access";
+import { unitAkademikRepo } from "@/lib/cbt/repos";
 
 export const Route = createFileRoute("/_authenticated/admin/modul/import")({
   component: ImportPage,
@@ -27,9 +28,9 @@ type PreviewRow = { soal: Soal; valid: boolean; error?: string };
 
 function ImportPage() {
   const user = useAuthStore((s) => s.user);
-  const moduls = visibleModuls(user);
-  const [modulId, setModulId] = useState<string>(moduls[0]?.id ?? "");
-  const topiks = visibleTopiks(user).filter((t) => t.modulId === modulId);
+  const units = unitAkademikRepo.all();
+  const [unitId, setUnitId] = useState<string>(units[0]?.id ?? "");
+  const topiks = visibleTopiks(user).filter((t) => t.unitId === unitId);
   const [topikId, setTopikId] = useState<string>(topiks[0]?.id ?? "");
   const [preview, setPreview] = useState<PreviewRow[]>([]);
   const [imageMap, setImageMap] = useState<Record<string, string>>({});
@@ -37,7 +38,7 @@ function ImportPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const imageRef = useRef<HTMLInputElement>(null);
 
-  if (moduls.length === 0 || topiks.length === 0) {
+  if (units.length === 0 || topiks.length === 0) {
     return (
       <div className="space-y-4 max-w-5xl">
         <div>
@@ -356,22 +357,22 @@ function ImportPage() {
         <CardContent className="space-y-4 p-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Modul Tujuan</label>
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Unit Tujuan</label>
               <Select
-                value={modulId}
+                value={unitId}
                 onValueChange={(v) => {
-                  setModulId(v);
-                  const ts = visibleTopiks(user).filter((t) => t.modulId === v);
+                  setUnitId(v);
+                  const ts = visibleTopiks(user).filter((t) => t.unitId === v);
                   setTopikId(ts[0]?.id ?? "");
                 }}
               >
                 <SelectTrigger className="h-10">
-                  <SelectValue placeholder="Pilih modul" />
+                  <SelectValue placeholder="Pilih unit" />
                 </SelectTrigger>
                 <SelectContent>
-                  {moduls.map((m) => (
-                    <SelectItem key={m.id} value={m.id}>
-                      {m.nama}
+                  {units.map((u) => (
+                    <SelectItem key={u.id} value={u.id}>
+                      {u.nama}
                     </SelectItem>
                   ))}
                 </SelectContent>

@@ -102,6 +102,7 @@ function PesertaPage() {
         const nama = String(r.nama ?? r.Nama ?? r.namaLengkap ?? "").trim();
         const password = String(r.password ?? r.Password ?? "").trim();
         const unitName = String(r.group ?? r.Group ?? r.kelas ?? r.unit ?? "").trim();
+        const angkatan = String(r.angkatan ?? r.Angkatan ?? "").trim();
         if (!username || !nama || !password) {
           failed++;
           continue;
@@ -123,6 +124,7 @@ function PesertaPage() {
             id: userId, username, namaLengkap: nama, role: "mahasiswa",
             allowedTopikIds: existingUser ? existingUser.allowedTopikIds : [], unitId: unitId, aktif: true,
             createdAt: existingUser ? existingUser.createdAt : Date.now(), newPassword: password,
+            angkatan: angkatan || (existingUser?.angkatan ?? undefined),
           }
         });
         if (res.ok) {
@@ -236,8 +238,9 @@ function PesertaPage() {
                       aria-label="Pilih semua peserta pada halaman ini"
                     />
                   </TableHead>
-                  <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Username</TableHead>
+                  <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Username (NIM + Angkatan)</TableHead>
                   <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Nama Lengkap</TableHead>
+                  <TableHead className="font-semibold text-slate-700 dark:text-slate-300 text-center">Tahun Angkatan</TableHead>
                   <TableHead className="font-semibold text-slate-700 dark:text-slate-300 text-center">Grup / Kelas</TableHead>
                   <TableHead className="font-semibold text-slate-700 dark:text-slate-300 text-center">Status</TableHead>
                   <TableHead className="font-semibold text-slate-700 dark:text-slate-300 text-center">Aksi</TableHead>
@@ -255,6 +258,7 @@ function PesertaPage() {
                     </TableCell>
                     <TableCell className="font-medium text-slate-900 dark:text-slate-100">{p.username}</TableCell>
                     <TableCell className="text-slate-600 dark:text-slate-400">{p.namaLengkap}</TableCell>
+                    <TableCell className="text-center font-mono text-sm text-slate-500">{p.angkatan || "-"}</TableCell>
                     <TableCell className="text-center">
                       <Badge variant="outline" className="bg-slate-50 dark:bg-slate-900 font-medium">
                         {units.find((g) => g.id === p.unitId)?.nama ?? "-"}
@@ -373,6 +377,7 @@ function PesertaDialog({
     username: "",
     namaLengkap: "",
     unitId: "",
+    angkatan: "",
     aktif: true,
     password: "",
   });
@@ -385,6 +390,7 @@ function PesertaDialog({
       username: editing?.username ?? "",
       namaLengkap: editing?.namaLengkap ?? "",
       unitId: editing?.unitId ?? "",
+      angkatan: editing?.angkatan ?? "",
       aktif: editing?.aktif ?? true,
       password: "",
     });
@@ -406,6 +412,7 @@ function PesertaDialog({
           role: "mahasiswa",
           allowedTopikIds: editing?.allowedTopikIds ?? [],
           unitId: form.unitId === "none" ? undefined : form.unitId || undefined,
+          angkatan: form.angkatan.trim() || undefined,
           detail: editing?.detail,
           aktif: form.aktif,
           createdAt: editing?.createdAt ?? Date.now(),
@@ -435,13 +442,23 @@ function PesertaDialog({
           <DialogTitle>{editing ? "Edit Data Peserta" : "Tambah Peserta Baru"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-2">
-          <div className="space-y-2">
-            <Label>Username</Label>
-            <Input 
-              placeholder="Misal: 19001234"
-              value={form.username} 
-              onChange={(e) => setForm({ ...form, username: e.target.value })} 
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Username (NIM + Angkatan)</Label>
+              <Input 
+                placeholder="Misal: 190012342025"
+                value={form.username} 
+                onChange={(e) => setForm({ ...form, username: e.target.value })} 
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Tahun Angkatan</Label>
+              <Input 
+                placeholder="Misal: 2025"
+                value={form.angkatan} 
+                onChange={(e) => setForm({ ...form, angkatan: e.target.value })} 
+              />
+            </div>
           </div>
           <div className="space-y-2">
             <Label>Nama Lengkap</Label>

@@ -17,7 +17,8 @@ import { Upload, Check, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { RichView } from "@/components/cbt/RichEditor";
 import { useAuthStore } from "@/lib/cbt/auth-store";
-import { isTopikAllowed, visibleModuls, visibleTopiks } from "@/lib/cbt/access";
+import { isTopikAllowed, visibleTopiks } from "@/lib/cbt/access";
+import { unitAkademikRepo } from "@/lib/cbt/repos";
 
 export const Route = createFileRoute("/_authenticated/admin/modul/import-word")({
   component: ImportWord,
@@ -85,14 +86,14 @@ function parseDocxText(text: string): Parsed[] {
 
 function ImportWord() {
   const user = useAuthStore((s) => s.user);
-  const moduls = visibleModuls(user);
-  const [modulId, setModulId] = useState(moduls[0]?.id ?? "");
-  const topiks = visibleTopiks(user).filter((t) => t.modulId === modulId);
+  const units = unitAkademikRepo.all();
+  const [unitId, setUnitId] = useState(units[0]?.id ?? "");
+  const topiks = visibleTopiks(user).filter((t) => t.unitId === unitId);
   const [topikId, setTopikId] = useState(topiks[0]?.id ?? "");
   const [parsed, setParsed] = useState<Parsed[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  if (moduls.length === 0 || topiks.length === 0) {
+  if (units.length === 0 || topiks.length === 0) {
     return (
       <div className="max-w-5xl space-y-4">
         <div>
@@ -170,12 +171,12 @@ function ImportWord() {
         <CardContent className="space-y-3 p-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-sm font-medium">Modul tujuan</label>
+              <label className="text-sm font-medium">Unit tujuan</label>
               <Select
-                value={modulId}
+                value={unitId}
                 onValueChange={(v) => {
-                  setModulId(v);
-                  const ts = visibleTopiks(user).filter((t) => t.modulId === v);
+                  setUnitId(v);
+                  const ts = visibleTopiks(user).filter((t) => t.unitId === v);
                   setTopikId(ts[0]?.id ?? "");
                 }}
               >
@@ -183,9 +184,9 @@ function ImportWord() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {moduls.map((m) => (
-                    <SelectItem key={m.id} value={m.id}>
-                      {m.nama}
+                  {units.map((u) => (
+                    <SelectItem key={u.id} value={u.id}>
+                      {u.nama}
                     </SelectItem>
                   ))}
                 </SelectContent>

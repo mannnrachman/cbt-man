@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useParams, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { ujianRepo, sesiRepo, tokenRepo, hydrateRepos, claimExamToken, mataKuliahRepo, semesterRepo } from "@/lib/cbt/repos";
+import { ujianRepo, sesiRepo, tokenRepo, hydrateRepos, claimExamToken, semesterRepo } from "@/lib/cbt/repos";
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import { findOrCreateSesi, startSesi } from "@/lib/cbt/exam";
 import {
@@ -150,9 +150,15 @@ function PreUjianContent({
       }
       // Atomic claim (Issue #9): must succeed before any session is created.
       // Two participants racing the same unused token cannot both win here.
+      // Note: claimExamToken is idempotent for the same participant (it succeeds if already claimed by them).
+      // So no manual rollback is needed if startSesi fails later.
       const claim = await claimExamToken(ujian.id, kode);
       if (!claim.ok) {
-        toast.error(claim.error);
+        // Hide potential internal server errors (CWE-209)
+        const msg = typeof claim.error === "string" && claim.error.length < 100 
+          ? claim.error 
+          : "Gagal menggunakan token ujian";
+        toast.error(msg);
         return;
       }
     }
@@ -174,25 +180,25 @@ function PreUjianContent({
         navigate({ to: "/peserta" });
         return;
       }
-      toast.error("Gagal memulai ujian. Silakan coba lagi.");
+      // Hide internal errors from participant
+      toast.error("Gagal memulai ujian. Silakan hubungi pengawas.");
       return;
     }
   }
 
-  const mk = ujian.mataKuliahId ? mataKuliahRepo.byId(ujian.mataKuliahId) : null;
   const smt = ujian.semesterId ? semesterRepo.byId(ujian.semesterId) : null;
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] bg-slate-50/50 dark:bg-slate-950">
+    <div className="relative min-h-[calc(100vh-4rem)] bg-[#F4F9F6] dark:bg-slate-950 font-outfit">
       {/* Dynamic Background Elements */}
-      <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-blue-600/10 via-indigo-600/5 to-transparent dark:from-blue-500/10 dark:via-indigo-500/5 pointer-events-none" />
-      <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-500/20 dark:bg-blue-500/10 blur-[100px] rounded-full pointer-events-none" />
-      <div className="absolute top-40 -left-40 w-72 h-72 bg-indigo-500/20 dark:bg-indigo-500/10 blur-[80px] rounded-full pointer-events-none" />
+      <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-br from-emerald-100/50 via-teal-50/30 to-transparent dark:from-emerald-900/20 dark:via-teal-900/10 pointer-events-none" />
+      <div className="absolute -top-40 -right-40 w-96 h-96 bg-emerald-500/20 dark:bg-emerald-500/10 blur-[100px] rounded-full pointer-events-none" />
+      <div className="absolute top-40 -left-40 w-72 h-72 bg-teal-500/20 dark:bg-teal-500/10 blur-[80px] rounded-full pointer-events-none" />
 
       <div className="relative max-w-4xl mx-auto px-4 py-8 sm:py-12 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
         {/* Header Info */}
         <div className="space-y-6">
-          <Link to="/peserta" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group">
+          <Link to="/peserta" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors group">
             <span className="group-hover:-translate-x-1 transition-transform mr-1">←</span> Kembali ke Daftar Ujian
           </Link>
           <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/40 dark:border-slate-800/60 p-6 sm:p-8 rounded-3xl shadow-xl shadow-slate-200/40 dark:shadow-black/20">
@@ -201,24 +207,18 @@ function PreUjianContent({
                 <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300">
                   {ujian.nama}
                 </h1>
-                {mk && (
-                  <div className="flex items-center gap-2 mt-4 text-sm sm:text-base font-medium text-blue-600 dark:text-blue-400">
-                    <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                {smt && (
+                  <div className="flex items-center gap-2 mt-4 text-sm sm:text-base font-medium text-emerald-600 dark:text-emerald-400">
+                    <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
                       <BookOpen className="h-4 w-4" />
                     </div>
-                    <span>{mk.nama}</span>
-                    {smt && (
-                      <>
-                        <span className="text-slate-300 dark:text-slate-700 mx-1">•</span>
-                        <span>{smt.nama}</span>
-                      </>
-                    )}
+                    <span>{smt.nama}</span>
                   </div>
                 )}
               </div>
               <div className="flex flex-row sm:flex-col gap-3 shrink-0">
                 <div className="flex items-center gap-3 bg-white dark:bg-slate-800/80 px-4 py-3 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/50">
-                  <div className="p-2 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-500">
+                  <div className="p-2 rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500">
                     <Clock className="h-5 w-5" />
                   </div>
                   <div>
@@ -227,7 +227,7 @@ function PreUjianContent({
                   </div>
                 </div>
                 <div className="flex items-center gap-3 bg-white dark:bg-slate-800/80 px-4 py-3 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/50">
-                  <div className="p-2 rounded-full bg-indigo-50 dark:bg-indigo-900/20 text-indigo-500">
+                  <div className="p-2 rounded-full bg-teal-50 dark:bg-teal-900/20 text-teal-500">
                     <FileText className="h-5 w-5" />
                   </div>
                   <div>
@@ -340,7 +340,7 @@ function PreUjianContent({
                         value={token} 
                         onChange={(e) => setToken(e.target.value)}
                         placeholder="Contoh: X7Y9Q"
-                        className="h-14 text-center text-xl font-black tracking-[0.2em] uppercase bg-slate-50 dark:bg-slate-950/50 border-slate-300 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-blue-500/20 transition-all placeholder:tracking-normal placeholder:font-normal placeholder:text-sm"
+                        className="h-14 text-center text-xl font-black tracking-[0.2em] uppercase bg-slate-50 dark:bg-slate-950/50 border-slate-300 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-emerald-500/20 transition-all placeholder:tracking-normal placeholder:font-normal placeholder:text-sm"
                       />
                       <p className="text-[11px] text-center text-slate-500 font-medium uppercase tracking-wider">Minta token ke pengawas ruangan</p>
                     </div>
@@ -350,7 +350,7 @@ function PreUjianContent({
                     <div className="relative flex items-center justify-center shrink-0 mt-0.5">
                       <input 
                         type="checkbox" 
-                        className="peer appearance-none w-5 h-5 border-2 border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-slate-900 checked:bg-blue-600 checked:border-blue-600 transition-all cursor-pointer" 
+                        className="peer appearance-none w-5 h-5 border-2 border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-slate-900 checked:bg-emerald-600 checked:border-emerald-600 transition-all cursor-pointer" 
                         checked={agree} 
                         onChange={(e) => setAgree(e.target.checked)} 
                       />
@@ -365,7 +365,7 @@ function PreUjianContent({
                   
                   <Button 
                     size="lg" 
-                    className="w-full h-14 rounded-xl text-sm font-bold tracking-wide shadow-xl hover:shadow-blue-500/25 hover:-translate-y-0.5 transition-all bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 border-0" 
+                    className="w-full h-14 rounded-xl text-sm font-bold tracking-wide shadow-xl hover:shadow-emerald-500/25 hover:-translate-y-0.5 transition-all bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 border-0 text-white" 
                     onClick={mulai} 
                     disabled={!examAllowed || !agree}
                   >

@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useState } from "react";
-import { modulRepo, topikRepo, soalRepo } from "@/lib/cbt/repos";
+import { unitAkademikRepo, topikRepo, soalRepo } from "@/lib/cbt/repos";
 import { uid } from "@/lib/cbt/storage";
 import type { Topik } from "@/lib/cbt/types";
 import { Button } from "@/components/ui/button";
@@ -17,22 +17,22 @@ export const Route = createFileRoute("/_authenticated/admin/modul/$id/topik")({
 });
 
 function TopikPage() {
-  const { id: modulId } = useParams({ from: "/_authenticated/admin/modul/$id/topik" });
+  const { id: unitId } = useParams({ from: "/_authenticated/admin/modul/$id/topik" });
   const user = useAuthStore((s) => s.user);
   const canEdit = isUnrestricted(user);
   const allowedSet = allowedTopikIdSet(user);
-  const modul = modulRepo.byId(modulId);
+  const unit = unitAkademikRepo.byId(unitId);
   const filterMine = (list: Topik[]) =>
-    list.filter((t) => t.modulId === modulId && (!allowedSet || allowedSet.has(t.id)));
+    list.filter((t) => t.unitId === unitId && (!allowedSet || allowedSet.has(t.id)));
   const [topiks, setTopiks] = useState<Topik[]>(filterMine(topikRepo.all()));
   const [nama, setNama] = useState("");
   const [editingTopik, setEditingTopik] = useState<Topik | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editNama, setEditNama] = useState("");
 
-  if (!modul) return (
+  if (!unit) return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
-      <p className="text-slate-500 mb-4">Modul tidak ditemukan.</p>
+      <p className="text-slate-500 mb-4">Jurusan / Program Studi tidak ditemukan.</p>
       <Button asChild variant="outline"><Link to="/admin/modul">Kembali ke Bank Soal</Link></Button>
     </div>
   );
@@ -40,7 +40,7 @@ function TopikPage() {
   function add() {
     if (!canEdit) return;
     if (!nama.trim()) return;
-    topikRepo.upsert({ id: uid("t_"), modulId, nama: nama.trim() });
+    topikRepo.upsert({ id: uid("t_"), unitId: unitId, nama: nama.trim() });
     setNama(""); setTopiks(filterMine(topikRepo.all())); toast.success("Topik ditambahkan");
   }
 
@@ -76,10 +76,10 @@ function TopikPage() {
           </Link>
           <div className="flex items-center gap-2">
             <BookOpen className="h-6 w-6 text-slate-400" />
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{modul.nama}</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{unit.nama}</h1>
           </div>
           <p className="text-sm text-slate-600 dark:text-slate-400">
-            Kelola topik/bab untuk modul ini. Setiap topik dapat berisi puluhan hingga ratusan soal.
+            Kelola topik/bab untuk jurusan ini. Setiap topik dapat berisi puluhan hingga ratusan soal.
           </p>
         </div>
       </div>

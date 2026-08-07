@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { sesiRepo, ujianRepo, soalRepo, mataKuliahRepo, semesterRepo, usersRepo } from "@/lib/cbt/repos";
-
+import { ujianRepo, sesiRepo, soalRepo, usersRepo, semesterRepo } from "@/lib/cbt/repos";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -33,13 +32,12 @@ function AnalisisPage() {
 
   function exportExcel() {
     const selectedUjian = ujians.find((u) => u.id === ujianId);
-    const mk = selectedUjian?.mataKuliahId ? mataKuliahRepo.byId(selectedUjian.mataKuliahId) : null;
     const smt = selectedUjian?.semesterId ? semesterRepo.byId(selectedUjian.semesterId) : null;
 
     const aoaStatistik: (string | number)[][] = [
       ["Laporan Analisis Butir Soal"],
       ["Ujian", selectedUjian?.nama ?? "-"],
-      ["Mata Kuliah", mk?.nama ?? "-"],
+      ["Deskripsi", selectedUjian?.deskripsi ?? "-"],
       ["Semester", smt?.nama ?? "-"],
       [],
       [
@@ -119,11 +117,10 @@ function AnalisisPage() {
               </SelectTrigger>
               <SelectContent>
                 {ujians.map((u) => {
-                  const mk = u.mataKuliahId ? mataKuliahRepo.byId(u.mataKuliahId) : null;
                   return (
-                    <SelectItem key={u.id} value={u.id}>
-                      {u.nama} {mk ? `(${mk.nama})` : ""}
-                    </SelectItem>
+                      <SelectItem key={u.id} value={u.id}>
+                        {u.nama}
+                      </SelectItem>
                   );
                 })}
               </SelectContent>

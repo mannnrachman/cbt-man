@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import {
   usersRepo,
-  modulRepo,
+  topikRepo,
   soalRepo,
   ujianRepo,
   sesiRepo,
@@ -54,7 +54,7 @@ function CommandCenter() {
 
   const counts = {
     peserta: pesertaList.length,
-    modul: modulRepo.all().length,
+    modul: topikRepo.all().length,
     soal: soalList.length,
     ujian: semuaUjian.length,
     sesi: sesiRepo.all().length,

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { AppConfig, Modul, NavKey, Soal, SesiUjian, TokenUjian, Topik, Ujian, User, UnitAkademik, TahunAkademik, Semester, MataKuliah } from "@/lib/cbt/types";
+import type { AppConfig, NavKey, Soal, SesiUjian, TokenUjian, Topik, Ujian, User, UnitAkademik, TahunAkademik, Semester } from "@/lib/cbt/types";
 import { prisma } from "@/lib/server/db/prisma";
 import { parseJson, toNumber } from "@/lib/server/db/json";
 
@@ -8,8 +8,6 @@ export type Snapshot = {
 	unitAkademik: UnitAkademik[];
 	tahunAkademik: TahunAkademik[];
 	semester: Semester[];
-	mataKuliah: MataKuliah[];
-	modul: Modul[];
 	topik: Topik[];
 	soal: Soal[];
 	ujian: Ujian[];
@@ -32,8 +30,6 @@ export type SnapshotRows = {
 	unitAkademik: Awaited<ReturnType<typeof prisma.unitAkademik.findMany>>;
 	tahunAkademik: TahunAkademik[];
 	semester: Semester[];
-	mataKuliah: MataKuliah[];
-	modul: Modul[];
 	topik: Topik[];
 	soal: SoalRow[];
 	ujian: Awaited<ReturnType<typeof prisma.ujian.findMany>>;
@@ -48,8 +44,6 @@ export const entitySchema = z.enum([
 	"unitAkademik",
 	"tahunAkademik",
 	"semester",
-	"mataKuliah",
-	"modul",
 	"topik",
 	"soal",
 	"ujian",
@@ -63,7 +57,7 @@ export const upsertUserSchema = z.object({
 	role: roleSchema,
 	allowedTopikIds: z.array(z.string()).default([]),
 	unitId: z.string().min(1).optional(),
-	mataKuliahIds: z.array(z.string()).default([]),
+	angkatan: z.string().optional(),
 	detail: z.string().optional(),
 	aktif: z.boolean(),
 	createdAt: z.number().optional(),
@@ -99,7 +93,7 @@ export function mapUser(row: UserRow): User {
 		role: row.role,
 		allowedTopikIds: parseJson(row.allowedTopikIds, []),
 		unitId: row.unitId ?? undefined,
-		mataKuliahIds: parseJson(row.mataKuliahIds, []),
+		angkatan: row.angkatan ?? undefined,
 		detail: row.detail ?? undefined,
 		aktif: row.aktif,
 		createdAt: Number(row.createdAt),
@@ -145,7 +139,8 @@ export function mapUjian(
 		tokenAktif: row.tokenAktif,
 		ipRange: row.ipRange,
 		groupIds: parseJson(row.groupIds, []),
-		mataKuliahId: row.mataKuliahId ?? undefined,
+		angkatanIds: parseJson(row.angkatanIds, []),
+		isUmum: row.isUmum,
 		semesterId: row.semesterId ?? undefined,
 		topicSets: parseJson(row.topicSets, []),
 		showResult: row.showResult,
@@ -155,6 +150,7 @@ export function mapUjian(
 		blokirShortcut: row.blokirShortcut,
 		mode: (row.mode ?? "online") as "online" | "offline",
 		allowCalculator: row.allowCalculator,
+		allowNormalValues: row.allowNormalValues,
 		createdBy: row.createdBy,
 		createdAt: Number(row.createdAt),
 	};

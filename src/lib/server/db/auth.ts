@@ -25,8 +25,7 @@ export function allowedTopikIdsForCaller(caller: UserRow): Set<string> | null {
 	if (caller.role === "super_admin") return null;
 	if (caller.role !== "admin_prodi" && caller.role !== "evaluator") return new Set();
 	const topikIds = parseJson<string[]>(caller.allowedTopikIds, []);
-	const mkIds = parseJson<string[]>(caller.mataKuliahIds || "[]", []);
-	if (topikIds.length === 0 && mkIds.length === 0) return null; // unrestricted
+	if (topikIds.length === 0) return null; // unrestricted
 	return new Set(topikIds);
 }
 
@@ -56,14 +55,6 @@ export async function operatorCanTouchTopikId(caller: UserRow, topikId: string):
 	if (allowed === null) return true;
 	if (allowed.has(topikId)) return true;
 
-	const mkIds = parseJson<string[]>(caller.mataKuliahIds || "[]", []);
-	if (mkIds.length > 0) {
-		const topik = await prisma.topik.findUnique({
-			where: { id: topikId },
-			include: { modul: true },
-		});
-		if (topik?.modul?.mataKuliahId && mkIds.includes(topik.modul.mataKuliahId)) return true;
-	}
 	return false;
 }
 
@@ -77,24 +68,7 @@ export async function operatorCanTouchTopicSets(
 	return true;
 }
 
-export async function operatorCanTouchModul(
-	caller: UserRow,
-	modulId: string,
-): Promise<boolean> {
-	const allowed = allowedTopikIdsForCaller(caller);
-	if (allowed === null) return true;
-	
-	const mkIds = parseJson<string[]>(caller.mataKuliahIds || "[]", []);
-	if (mkIds.length > 0) {
-		const modul = await prisma.modul.findUnique({ where: { id: modulId } });
-		if (modul?.mataKuliahId && mkIds.includes(modul.mataKuliahId)) return true;
-	}
 
-	const count = await prisma.topik.count({
-		where: { modulId, id: { in: [...allowed] } },
-	});
-	return count > 0;
-}
 
 export async function operatorCanTouchSoal(
 	caller: UserRow,
@@ -113,16 +87,15 @@ export async function operatorCanTouchUjian(
 ): Promise<boolean> {
 	const ujian = await prisma.ujian.findUnique({
 		where: { id: ujianId },
-		select: { topicSets: true, mataKuliahId: true },
+		select: { topicSets: true },
 	});
 	if (!ujian) return false;
 	
-	const mkIds = parseJson<string[]>(caller.mataKuliahIds || "[]", []);
-	if (ujian.mataKuliahId && mkIds.includes(ujian.mataKuliahId)) return true;
-
 	const topicSets = parseJson<Ujian["topicSets"]>(ujian.topicSets, []);
 	return await operatorCanTouchTopicSets(caller, topicSets);
 }
+
+import { isParticipantAssignedToExam } from "@/lib/cbt/access";
 
 export async function pesertaCanTouchUjian(
 	caller: UserRow,
@@ -131,15 +104,17 @@ export async function pesertaCanTouchUjian(
 	if (caller.role !== "mahasiswa") return false;
 	const ujian = await prisma.ujian.findUnique({
 		where: { id: ujianId },
-		select: { groupIds: true },
+		select: { groupIds: true, isUmum: true, angkatanIds: true },
 	});
 	if (!ujian) return false;
 	const groupIds = parseJson<string[]>(ujian.groupIds, []);
-	return (
-		groupIds.length === 0 ||
-		  (!!caller.unitId && groupIds.includes(caller.unitId))
-
-	);
+	const angkatanIds = parseJson<string[]>(ujian.angkatanIds, []);
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	return isParticipantAssignedToExam(caller as any, {
+		isUmum: ujian.isUmum,
+		groupIds,
+		angkatanIds,
+	});
 }
 
 let seedPromise: Promise<void> | null = null;

@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { sesiRepo, usersRepo, unitAkademikRepo, mataKuliahRepo, semesterRepo } from "@/lib/cbt/repos";
+import { ujianRepo, sesiRepo, usersRepo, unitAkademikRepo, semesterRepo } from "@/lib/cbt/repos";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -57,7 +57,6 @@ function RekapPage() {
   const rows = sesi.map((s) => {
     const u = users.find((x) => x.id === s.pesertaId);
     const ex = ujians.find((x) => x.id === s.ujianId);
-    const mk = ex?.mataKuliahId ? mataKuliahRepo.byId(ex.mataKuliahId) : null;
     const smt = ex?.semesterId ? semesterRepo.byId(ex.semesterId) : null;
     const g = units.find((x) => x.id === u?.unitId);
     const durasi = s.mulaiAt && s.selesaiAt ? Math.round((s.selesaiAt - s.mulaiAt) / 1000) : 0;
@@ -75,7 +74,6 @@ function RekapPage() {
       unit: g?.nama ?? "-",
 
       ujian: ex?.nama ?? "-",
-      mataKuliah: mk?.nama ?? "-",
       semester: smt?.nama ?? "-",
       skor: s.skorTotal ?? 0,
       maks: s.maxSkor ?? 0,
@@ -115,11 +113,10 @@ function RekapPage() {
               <SelectContent>
                 <SelectItem value="all">Semua ujian</SelectItem>
                 {ujians.map((u) => {
-                  const mk = u.mataKuliahId ? mataKuliahRepo.byId(u.mataKuliahId) : null;
                   return (
-                    <SelectItem key={u.id} value={u.id}>
-                      {u.nama} {mk ? `(${mk.nama})` : ""}
-                    </SelectItem>
+                      <SelectItem key={u.id} value={u.id}>
+                        {u.nama}
+                      </SelectItem>
                   );
                 })}
               </SelectContent>
@@ -184,12 +181,6 @@ function RekapPage() {
                 </TableCell>
                 <TableCell className="p-4">
                   <div className="font-medium text-foreground">{r.ujian}</div>
-                  {r.mataKuliah !== "-" && (
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
-                      <BookOpen className="h-3.5 w-3.5" />
-                      {r.mataKuliah}
-                    </div>
-                  )}
                 </TableCell>
                 <TableCell className="p-4 font-bold text-base">
                   {r.skor} <span className="text-xs font-normal text-muted-foreground">/ {r.maks}</span>

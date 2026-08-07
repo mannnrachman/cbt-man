@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { sesiRepo, ujianRepo, soalRepo, mataKuliahRepo } from "@/lib/cbt/repos";
+import { sesiRepo, ujianRepo, soalRepo } from "@/lib/cbt/repos";
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import { visibleUjians } from "@/lib/cbt/access";
 import { AdminPage, AdminPageHeader } from "@/components/cbt/AdminPage";
@@ -34,10 +34,9 @@ function EvaluasiList() {
   const sesis = sesiRepo.all().filter((s) => s.status === "selesai" && visibleIds.has(s.ujianId));
   const ujians = ujianRepo.all();
   const soals = soalRepo.all();
-  const mks = mataKuliahRepo.all();
   const items = (() => {
     const soalSet = new Set(soals.filter((s) => s.tipe === "essay").map((s) => s.id));
-    const ujianMap = new Map<string, { ujian: any, mk: any, totalSesi: number, belumSesi: number, totalEssay: number, belumEssay: number }>();
+    const ujianMap = new Map<string, { ujian: any, totalSesi: number, belumSesi: number, totalEssay: number, belumEssay: number }>();
 
     sesis.forEach(s => {
       const essays = s.jawaban.filter((j) => soalSet.has(j.soalId));
@@ -48,8 +47,7 @@ function EvaluasiList() {
       if (!ujianMap.has(s.ujianId)) {
         const u = ujians.find(x => x.id === s.ujianId);
         if (!u) return;
-        const mk = mks.find(m => m.id === u.mataKuliahId);
-        ujianMap.set(s.ujianId, { ujian: u, mk, totalSesi: 0, belumSesi: 0, totalEssay: 0, belumEssay: 0 });
+        ujianMap.set(s.ujianId, { ujian: u, totalSesi: 0, belumSesi: 0, totalEssay: 0, belumEssay: 0 });
       }
       
       const entry = ujianMap.get(s.ujianId)!;
@@ -61,11 +59,7 @@ function EvaluasiList() {
       }
     });
 
-    return Array.from(ujianMap.values())
-      .filter((i) => 
-        i.ujian.nama.toLowerCase().includes(search.toLowerCase()) || 
-        (i.mk?.nama || "").toLowerCase().includes(search.toLowerCase())
-      )
+    return Array.from(ujianMap.values()).filter((i) => i.ujian.nama.toLowerCase().includes(search.toLowerCase()))
       .sort((a, b) => b.belumSesi - a.belumSesi);
   })();
 
@@ -138,7 +132,7 @@ function EvaluasiList() {
             </div>
           ) : (
             <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800/60">
-              {items.map(({ ujian, mk, totalSesi, belumSesi, totalEssay, belumEssay }) => {
+              {items.map(({ ujian, totalSesi, belumSesi, totalEssay, belumEssay }) => {
                 const isWarning = belumSesi > 0;
                 const gradedEssay = totalEssay - belumEssay;
                 const progressPct = totalEssay > 0 ? (gradedEssay / totalEssay) * 100 : 100;
@@ -153,7 +147,7 @@ function EvaluasiList() {
                     <div className="grid grid-cols-12 gap-4 px-6 py-4 items-center">
                       
                       {/* Col 1: Exam Info */}
-                      <div className="col-span-12 sm:col-span-5 flex items-center gap-3.5">
+                      <div className="col-span-12 sm:col-span-7 flex items-center gap-3.5">
                         <div className="flex items-center justify-center h-10 w-10 shrink-0 rounded-[10px] bg-slate-100 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/50 group-hover:bg-primary/10 group-hover:border-primary/20 transition-all duration-300 ease-spring">
                           <ClipboardCheck className="h-5 w-5 text-slate-500 group-hover:text-primary transition-all duration-300 ease-spring" />
                         </div>
@@ -173,14 +167,7 @@ function EvaluasiList() {
 
                       {/* Col 2: Subject Context */}
                       <div className="hidden sm:flex sm:col-span-2 items-center">
-                        {mk ? (
-                          <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-[11px] font-bold text-slate-600 dark:text-slate-400 truncate max-w-full">
-                            <BookOpen className="h-3 w-3 shrink-0 -translate-y-[0.5px]" />
-                            <span className="truncate">{mk.nama}</span>
-                          </span>
-                        ) : (
-                          <span className="text-xs text-slate-400 italic">Tanpa mata kuliah</span>
-                        )}
+                        <span className="text-xs text-slate-400 italic">Evaluasi Ujian</span>
                       </div>
 
                       {/* Col 3: Grading Progress */}

@@ -160,7 +160,6 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
     return {
       unitAkademik: [],
       users: [admin],
-      modul: [],
       topik: [],
       soal: [],
       ujian: [],
@@ -219,19 +218,13 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
     ["citra.lestari", "Citra Lestari", unitAkademik[3].id],
   ];
 
-  const modul = [
-    { id: uid("m_"), nama: "Pemrograman Web", aktif: true },
-    { id: uid("m_"), nama: "Basis Data", aktif: true },
-    { id: uid("m_"), nama: "Algoritma", aktif: true },
-  ];
-
   const topik = [
-    { id: uid("t_"), modulId: modul[0].id, nama: "HTML & CSS Dasar" },
-    { id: uid("t_"), modulId: modul[0].id, nama: "React dan State Management" },
-    { id: uid("t_"), modulId: modul[1].id, nama: "Desain Skema Relasional" },
-    { id: uid("t_"), modulId: modul[1].id, nama: "Query SQL Lanjut" },
-    { id: uid("t_"), modulId: modul[2].id, nama: "Struktur Data Pohon" },
-    { id: uid("t_"), modulId: modul[2].id, nama: "Kompleksitas Waktu (Big O)" },
+    { id: uid("t_"), unitId: unitAkademik[0].id, nama: "HTML & CSS Dasar" },
+    { id: uid("t_"), unitId: unitAkademik[0].id, nama: "React dan State Management" },
+    { id: uid("t_"), unitId: unitAkademik[1].id, nama: "Desain Skema Relasional" },
+    { id: uid("t_"), unitId: unitAkademik[1].id, nama: "Query SQL Lanjut" },
+    { id: uid("t_"), unitId: unitAkademik[2].id, nama: "Struktur Data Pohon" },
+    { id: uid("t_"), unitId: unitAkademik[2].id, nama: "Kompleksitas Waktu (Big O)" },
   ];
 
   const users = [admin, operator, evaluator1];
@@ -577,7 +570,7 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
     roleAccess: DEFAULT_ROLE_ACCESS,
   };
 
-  return { unitAkademik, users, modul, topik, soal, ujian, token, sesi, config };
+  return { unitAkademik, users, topik, soal, ujian, token, sesi, config };
 }
 
 export async function seedDatabase({ prisma, dataset, stringifyJson }) {
@@ -587,7 +580,6 @@ export async function seedDatabase({ prisma, dataset, stringifyJson }) {
   await prisma.soal.deleteMany();
   await prisma.ujian.deleteMany();
   await prisma.topik.deleteMany();
-  await prisma.modul.deleteMany();
   await prisma.user.deleteMany();
   await prisma.appConfig.deleteMany();
   await prisma.unitAkademik.deleteMany();
@@ -601,7 +593,6 @@ export async function seedDatabase({ prisma, dataset, stringifyJson }) {
       createdAt: BigInt(item.createdAt),
     })),
   });
-  await prisma.modul.createMany({ data: dataset.modul });
   await prisma.topik.createMany({ data: dataset.topik });
 
   for (const item of dataset.soal) {
