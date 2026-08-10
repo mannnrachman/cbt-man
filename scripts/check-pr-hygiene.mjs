@@ -6,7 +6,7 @@ const FORBIDDEN_PATHS = [
   [/^scratch\//, "artifact scratch"],
   [/(^|\/)ts_errors\.txt$/i, "dump error TypeScript"],
   [/(^|\/)diff_users\.txt$/i, "dump diff pengguna"],
-  [/(^|\/)(raw_.*\.(?:tsx|txt)|temp_.*\.txt)$/i, "file raw/temp"],
+  [/(^|\/)(?:raw_|temp_)[^/]*$/i, "file raw/temp"],
   [/^data\/uploads\//, "upload runtime"],
   [/^(dist|node_modules|coverage|artifacts|playwright-report)\//, "output/generated artifact"],
   [/^tests\/output\//, "output test"],
@@ -14,8 +14,20 @@ const FORBIDDEN_PATHS = [
   [/(?:^|\/)[^/]+\.log$/i, "log"],
 ];
 
-const LEGACY_BRANDING = /\bcbt[-_ ]?(kampus|universitas)\b/i;
-const SOURCE_PATH = /^(src|prisma|public)\//;
+const LEGACY_PREFIXES = ["kamp", "univers"];
+const LEGACY_SUFFIXES = ["us", "itas"];
+const LEGACY_BRANDING = new RegExp(
+  `\\bcbt[-_ ]?(?:${LEGACY_PREFIXES.map((prefix, index) => `${prefix}${LEGACY_SUFFIXES[index]}`).join("|")})\\b`,
+  "i",
+);
+const BRANDING_POLICY_ALLOWLIST = new Set([
+  "AGENTS.md",
+  "CLAUDE.md",
+  "CONTRIBUTING.md",
+  ".github/PULL_REQUEST_TEMPLATE.md",
+]);
+const GOVERNED_TEXT_PATH =
+  /(?:^|\/)(?:README(?:\.[^/]*)?|[^/]+\.(?:css|graphql|gql|html|ini|js|jsx|json|md|mdx|mjs|prisma|scss|sql|sh|svg|tsx?|txt|toml|xml|ya?ml))$/i;
 const CODE_PATH = /^src\/.*\.(?:ts|tsx)$/;
 const GENERATED_ROUTE_TREE = "src/routeTree.gen.ts";
 const MIGRATION_PATH = /^prisma\/migrations\//;
@@ -30,6 +42,11 @@ export function forbiddenReason(path) {
 
 export function hasLegacyBranding(content) {
   return LEGACY_BRANDING.test(content);
+}
+
+export function shouldScanBranding(path) {
+  const normalized = path.replaceAll("\\", "/");
+  return !BRANDING_POLICY_ALLOWLIST.has(normalized) && GOVERNED_TEXT_PATH.test(normalized);
 }
 
 export function packageIdentityErrors(packageJson, packageLock) {
@@ -146,14 +163,10 @@ function main() {
 
   for (const change of addedOrModified) {
     if (!existsSync(change.path)) continue;
-    if (
-      SOURCE_PATH.test(change.path) ||
-      change.path === "package.json" ||
-      change.path === "package-lock.json"
-    ) {
+    if (shouldScanBranding(change.path)) {
       const content = readFileSync(change.path, "utf8");
       if (hasLegacyBranding(content)) {
-        errors.push(`${change.path}: mengembalikan branding lama CBT-Kampus/CBT-Universitas`);
+        errors.push(`${change.path}: legacy branding is not allowed`);
       }
     }
     if (CODE_PATH.test(change.path)) {

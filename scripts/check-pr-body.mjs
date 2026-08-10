@@ -3,12 +3,19 @@ import { fileURLToPath } from "node:url";
 
 const REQUIRED_HEADINGS = [
   "## Ringkasan",
+  "## Issue, PR terkait, dan riwayat",
   "## Scope dan non-goal",
   "## Keamanan, otorisasi, dan data",
   "## Prisma dan migrasi",
   "## Validasi yang benar-benar dijalankan",
   "## Hygiene check",
   "## Risiko dan rollback",
+];
+
+const REQUIRED_HISTORY_FIELDS = [
+  "Issue/PR terkait",
+  "Apakah ini replacement dari PR closed/stale? Jika ya, tulis nomor PR dan kontribusi yang diekstrak",
+  "Mengapa perubahan ini tidak duplikat dari pekerjaan yang ada?",
 ];
 
 export function contractErrors(body) {
@@ -25,6 +32,17 @@ export function contractErrors(body) {
     )
   ) {
     errors.push("body PR masih memuat placeholder yang belum diisi");
+  }
+
+  const historyLines = body.split(/\r?\n/).map((line) => line.trim().replace(/^[-*]\s*/, ""));
+  for (const field of REQUIRED_HISTORY_FIELDS) {
+    const empty = historyLines.some((line) => {
+      if (!line.startsWith(field)) return false;
+      const suffix = line.slice(field.length);
+      if (suffix && !/^\s*:/.test(suffix)) return false;
+      return suffix.replace(/^\s*:\s*/, "").trim() === "";
+    });
+    if (empty) errors.push(`field wajib belum diisi: ${field}`);
   }
   return errors;
 }

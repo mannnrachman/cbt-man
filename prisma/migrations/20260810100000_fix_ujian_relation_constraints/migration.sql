@@ -35,7 +35,10 @@ CREATE TABLE "new_Ujian" (
     CONSTRAINT "Ujian_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
-INSERT INTO "new_Ujian" ("allowCalculator", "beginAt", "blokirShortcut", "createdAt", "createdBy", "deskripsi", "durasiMenit", "endAt", "fullscreenWajib", "groupIds", "id", "ipRange", "mataKuliahId", "maxPindahTab", "mode", "nama", "poinBenar", "poinKosong", "poinSalah", "semesterId", "showResult", "showResultDetail", "tokenAktif", "topicSets") SELECT "allowCalculator", "beginAt", "blokirShortcut", "createdAt", "createdBy", "deskripsi", "durasiMenit", "endAt", "fullscreenWajib", "groupIds", "id", "ipRange", "mataKuliahId", "maxPindahTab", "mode", "nama", "poinBenar", "poinKosong", "poinSalah", "semesterId", "showResult", "showResultDetail", "tokenAktif", "topicSets" FROM "Ujian";
+-- Normalize dangling optional relation IDs intentionally. Use the normal database
+-- backup/recovery procedure before deploy; this forward normalization rolls back
+-- at deployment level (restore the backup or revert the release), not in SQL.
+INSERT INTO "new_Ujian" ("allowCalculator", "beginAt", "blokirShortcut", "createdAt", "createdBy", "deskripsi", "durasiMenit", "endAt", "fullscreenWajib", "groupIds", "id", "ipRange", "mataKuliahId", "maxPindahTab", "mode", "nama", "poinBenar", "poinKosong", "poinSalah", "semesterId", "showResult", "showResultDetail", "tokenAktif", "topicSets") SELECT "allowCalculator", "beginAt", "blokirShortcut", "createdAt", "createdBy", "deskripsi", "durasiMenit", "endAt", "fullscreenWajib", "groupIds", "id", "ipRange", CASE WHEN "mataKuliahId" IS NULL THEN NULL WHEN EXISTS (SELECT 1 FROM "MataKuliah" WHERE "MataKuliah"."id" = "Ujian"."mataKuliahId") THEN "mataKuliahId" ELSE NULL END, "maxPindahTab", "mode", "nama", "poinBenar", "poinKosong", "poinSalah", CASE WHEN "semesterId" IS NULL THEN NULL WHEN EXISTS (SELECT 1 FROM "Semester" WHERE "Semester"."id" = "Ujian"."semesterId") THEN "semesterId" ELSE NULL END, "showResult", "showResultDetail", "tokenAktif", "topicSets" FROM "Ujian";
 
 DROP TABLE "Ujian";
 ALTER TABLE "new_Ujian" RENAME TO "Ujian";
