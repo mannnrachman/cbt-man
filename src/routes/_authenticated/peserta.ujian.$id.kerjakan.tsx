@@ -16,13 +16,7 @@ import { AudioPlayer } from "@/components/cbt/AudioPlayer";
 import { RichView } from "@/components/cbt/RichEditor";
 import { ExamCalculator } from "@/components/cbt/ExamCalculator";
 import { NilaiNormalTable } from "@/components/cbt/NilaiNormal";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+// dialog imports removed
 
 export const Route = createFileRoute(
   "/_authenticated/peserta/ujian/$id/kerjakan",
@@ -73,45 +67,39 @@ function gradeSesi(sesi: SesiUjian, ujian: Ujian) {
   return currentSesi;
 }
 
-function CalculatorAction({ ujian }: { ujian: Ujian }) {
+function CalculatorInline({ ujian }: { ujian: Ujian }) {
   if (!ujian.allowCalculator) return null;
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="mt-4 w-full">
-          <Calculator className="mr-2 h-4 w-4" aria-hidden="true" />
-          Buka Kalkulator
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-h-[90dvh] w-[calc(100%_-_2rem)] max-w-sm overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Kalkulator Ujian</DialogTitle>
-        </DialogHeader>
+    <details className="group mt-4 rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900/80" open>
+      <summary className="flex cursor-pointer select-none items-center justify-between p-4 font-bold text-slate-700 hover:text-primary dark:text-slate-200 dark:hover:text-primary transition-colors">
+        <div className="flex items-center gap-2">
+          <Calculator className="h-4 w-4" />
+          Kalkulator
+        </div>
+      </summary>
+      <div className="p-4 pt-0 border-t border-slate-100 dark:border-slate-800 mt-2">
         <ExamCalculator />
-      </DialogContent>
-    </Dialog>
+      </div>
+    </details>
   );
 }
 
-function NilaiNormalAction({ ujian }: { ujian: Ujian }) {
+function NilaiNormalInline({ ujian }: { ujian: Ujian }) {
   if (!ujian.allowNilaiNormal) return null;
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="mt-2 w-full border-indigo-200 text-indigo-700 hover:bg-indigo-50 hover:text-indigo-800 dark:border-indigo-800 dark:text-indigo-300 dark:hover:bg-indigo-950/50">
-          <ClipboardList className="mr-2 h-4 w-4" aria-hidden="true" />
+    <details className="group mt-4 rounded-xl border border-indigo-200 bg-indigo-50/50 shadow-sm dark:border-indigo-900/50 dark:bg-indigo-950/20" open>
+      <summary className="flex cursor-pointer select-none items-center justify-between p-4 font-bold text-indigo-700 hover:text-indigo-800 dark:text-indigo-300 dark:hover:text-indigo-200 transition-colors">
+        <div className="flex items-center gap-2">
+          <ClipboardList className="h-4 w-4" />
           Referensi Nilai Normal
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-h-[90dvh] w-[calc(100%_-_2rem)] max-w-2xl overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Tabel Nilai Normal Laboratorium</DialogTitle>
-        </DialogHeader>
+        </div>
+      </summary>
+      <div className="p-4 pt-0 border-t border-indigo-100 dark:border-indigo-900/50 mt-2 max-h-96 overflow-y-auto">
         <NilaiNormalTable />
-      </DialogContent>
-    </Dialog>
+      </div>
+    </details>
   );
 }
 
@@ -316,7 +304,7 @@ function RouteComponent() {
 
   return (
     <div className="flex flex-col h-[calc(100dvh-64px)] overflow-hidden bg-slate-50 dark:bg-slate-950/50 font-sans">
-      <div className="flex-1 flex mx-auto w-full max-w-7xl h-full relative">
+      <div className="flex-1 flex mx-auto w-full max-w-[1600px] h-full relative">
         
         {/* LEFT PANEL: MAIN EXAM AREA */}
         <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 relative z-10 shadow-2xl md:shadow-none">
@@ -516,11 +504,11 @@ function RouteComponent() {
         </div>
 
         {/* RIGHT PANEL: GRID NAVIGATION (Desktop Only) */}
-        <div className="hidden md:flex flex-col w-80 bg-slate-50/50 dark:bg-slate-950/30 border-l border-slate-200 dark:border-slate-800">
+        <div className="hidden md:flex flex-col w-[350px] lg:w-[450px] bg-slate-50/50 dark:bg-slate-950/30 border-l border-slate-200 dark:border-slate-800">
           <div className="p-6 border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
-            <h3 className="font-extrabold text-slate-800 dark:text-slate-200 text-lg tracking-tight">Navigasi Soal</h3>
-            <CalculatorAction ujian={ujian} />
-            <NilaiNormalAction ujian={ujian} />
+            <h3 className="font-extrabold text-slate-800 dark:text-slate-200 text-lg tracking-tight">Alat Bantu Ujian</h3>
+            <CalculatorInline ujian={ujian} />
+            <NilaiNormalInline ujian={ujian} />
 
             <div className="mt-4 flex flex-col gap-2">
               <div className="flex items-center gap-3 text-sm font-medium text-slate-600 dark:text-slate-400">
@@ -597,8 +585,8 @@ function RouteComponent() {
           
           <div className="flex-1 overflow-y-auto p-6">
             <div className="max-w-xl mx-auto">
-              <CalculatorAction ujian={ujian} />
-              <NilaiNormalAction ujian={ujian} />
+              <CalculatorInline ujian={ujian} />
+              <NilaiNormalInline ujian={ujian} />
 
               <div className="flex justify-between items-center bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 mb-8 mt-6 shadow-sm">
                 <div className="flex flex-col items-center">
