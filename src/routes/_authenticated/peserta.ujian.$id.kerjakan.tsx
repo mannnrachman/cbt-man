@@ -4,7 +4,7 @@ import type { SesiUjian, Ujian } from "@/lib/cbt/types";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { LayoutGrid, X, ChevronLeft, ChevronRight, Flag, CheckCircle2, AlertCircle, Type, Clock, Calculator } from "lucide-react";
+import { LayoutGrid, X, ChevronLeft, ChevronRight, Flag, CheckCircle2, AlertCircle, Type, Clock, Calculator, ClipboardList } from "lucide-react";
 import {
   createFileRoute,
   useNavigate,
@@ -15,13 +15,8 @@ import { toast } from "sonner";
 import { AudioPlayer } from "@/components/cbt/AudioPlayer";
 import { RichView } from "@/components/cbt/RichEditor";
 import { ExamCalculator } from "@/components/cbt/ExamCalculator";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { NilaiNormalTable } from "@/components/cbt/NilaiNormal";
+// dialog imports removed
 
 export const Route = createFileRoute(
   "/_authenticated/peserta/ujian/$id/kerjakan",
@@ -72,24 +67,56 @@ function gradeSesi(sesi: SesiUjian, ujian: Ujian) {
   return currentSesi;
 }
 
-function CalculatorAction({ ujian }: { ujian: Ujian }) {
-  if (!ujian.allowCalculator) return null;
+function AlatBantuUjian({ ujian }: { ujian: Ujian }) {
+  const [activeTab, setActiveTab] = useState<"calc" | "nilai" | null>(null);
+
+  if (!ujian.allowCalculator && !ujian.allowNilaiNormal) return null;
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="mt-4 w-full">
-          <Calculator className="mr-2 h-4 w-4" aria-hidden="true" />
-          Buka Kalkulator
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-h-[90dvh] w-[calc(100%_-_2rem)] max-w-sm overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Kalkulator Ujian</DialogTitle>
-        </DialogHeader>
-        <ExamCalculator />
-      </DialogContent>
-    </Dialog>
+    <div className="mt-3 flex flex-col gap-3">
+      <div className="flex gap-2">
+        {ujian.allowCalculator && (
+          <button
+            onClick={() => setActiveTab(activeTab === "calc" ? null : "calc")}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs sm:text-sm font-bold rounded-xl border-2 transition-all active:scale-95 select-none",
+              activeTab === "calc"
+                ? "bg-primary text-white border-primary shadow-sm"
+                : "bg-white text-slate-600 border-slate-200 hover:border-primary/40 hover:text-primary dark:bg-slate-900/50 dark:text-slate-300 dark:border-slate-700"
+            )}
+          >
+            <Calculator className="w-4 h-4" />
+            Kalkulator
+          </button>
+        )}
+        {ujian.allowNilaiNormal && (
+          <button
+            onClick={() => setActiveTab(activeTab === "nilai" ? null : "nilai")}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs sm:text-sm font-bold rounded-xl border-2 transition-all active:scale-95 select-none",
+              activeTab === "nilai"
+                ? "bg-indigo-600 text-white border-indigo-600 shadow-sm dark:bg-indigo-500 dark:border-indigo-500"
+                : "bg-white text-slate-600 border-slate-200 hover:border-indigo-400 hover:text-indigo-700 dark:bg-slate-900/50 dark:text-slate-300 dark:border-slate-700"
+            )}
+          >
+            <ClipboardList className="w-4 h-4" />
+            Nilai Normal
+          </button>
+        )}
+      </div>
+
+      {activeTab === "calc" && ujian.allowCalculator && (
+        <div className="p-3 bg-slate-50 border-2 border-slate-200 rounded-xl dark:bg-slate-900/80 dark:border-slate-800 animate-in zoom-in-95 fade-in duration-200 max-h-[60vh] overflow-x-auto overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <ExamCalculator />
+        </div>
+      )}
+
+      {activeTab === "nilai" && ujian.allowNilaiNormal && (
+        <div className="p-3 bg-indigo-50/50 border-2 border-indigo-100 rounded-xl dark:bg-indigo-950/20 dark:border-indigo-900/50 max-h-72 overflow-x-auto overflow-y-auto animate-in zoom-in-95 fade-in duration-200 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <NilaiNormalTable />
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -294,7 +321,7 @@ function RouteComponent() {
 
   return (
     <div className="flex flex-col h-[calc(100dvh-64px)] overflow-hidden bg-slate-50 dark:bg-slate-950/50 font-sans">
-      <div className="flex-1 flex mx-auto w-full max-w-7xl h-full relative">
+      <div className="flex-1 flex mx-auto w-full max-w-[1600px] h-full relative">
         
         {/* LEFT PANEL: MAIN EXAM AREA */}
         <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 relative z-10 shadow-2xl md:shadow-none">
@@ -494,10 +521,10 @@ function RouteComponent() {
         </div>
 
         {/* RIGHT PANEL: GRID NAVIGATION (Desktop Only) */}
-        <div className="hidden md:flex flex-col w-80 bg-slate-50/50 dark:bg-slate-950/30 border-l border-slate-200 dark:border-slate-800">
-          <div className="p-6 border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
-            <h3 className="font-extrabold text-slate-800 dark:text-slate-200 text-lg tracking-tight">Navigasi Soal</h3>
-            <CalculatorAction ujian={ujian} />
+        <div className="hidden md:flex flex-col w-[350px] lg:w-[450px] bg-slate-50/50 dark:bg-slate-950/30 border-l border-slate-200 dark:border-slate-800">
+          <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
+            <h3 className="font-extrabold text-slate-800 dark:text-slate-200 text-base tracking-tight">Alat Bantu Ujian</h3>
+            <AlatBantuUjian ujian={ujian} />
 
             <div className="mt-4 flex flex-col gap-2">
               <div className="flex items-center gap-3 text-sm font-medium text-slate-600 dark:text-slate-400">
@@ -512,8 +539,8 @@ function RouteComponent() {
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-6">
-            <div className="grid grid-cols-5 gap-2.5">
+          <div className="flex-1 overflow-y-auto p-4">
+            <div className="grid grid-cols-6 lg:grid-cols-8 gap-2">
               {currentSesi.soalIds.map((_, i) => {
                 const a = currentSesi.jawaban[i];
                 const dijawab = (a?.jawabanIds?.length ?? 0) > 0 || (a?.jawabanEssay ? a.jawabanEssay.length > 0 : false);
@@ -544,10 +571,10 @@ function RouteComponent() {
             </div>
           </div>
 
-          <div className="p-6 border-t border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
+          <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
             <Button
               variant="destructive"
-              className="w-full h-12 font-bold uppercase tracking-widest shadow-md"
+              className="w-full h-11 font-bold tracking-widest shadow-md"
               onClick={() => { if (confirm("Yakin ingin mengumpulkan?")) void submit(); }}
             >
               Akhiri Ujian
@@ -574,7 +601,7 @@ function RouteComponent() {
           
           <div className="flex-1 overflow-y-auto p-6">
             <div className="max-w-xl mx-auto">
-              <CalculatorAction ujian={ujian} />
+              <AlatBantuUjian ujian={ujian} />
 
               <div className="flex justify-between items-center bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 mb-8 mt-6 shadow-sm">
                 <div className="flex flex-col items-center">
@@ -591,7 +618,7 @@ function RouteComponent() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-5 sm:grid-cols-6 gap-3">
+              <div className="grid grid-cols-6 sm:grid-cols-8 gap-2">
                 {currentSesi.soalIds.map((_, i) => {
                   const a = currentSesi.jawaban[i];
                   const dijawab = (a?.jawabanIds?.length ?? 0) > 0 || (a?.jawabanEssay ? a.jawabanEssay.length > 0 : false);
