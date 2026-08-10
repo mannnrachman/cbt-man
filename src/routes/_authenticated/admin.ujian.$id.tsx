@@ -363,8 +363,8 @@ function UjianEditor() {
             const inScope = isTopikAllowed(user, ts.topikId);
             return (
               <div key={ts.id} className="rounded border p-3 space-y-2">
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-                  <div className="col-span-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  <div className="col-span-1 sm:col-span-2 lg:col-span-4">
                     <Label className="text-xs">Topik</Label>
                     <Select
                       value={ts.topikId}
@@ -391,8 +391,60 @@ function UjianEditor() {
                       </SelectContent>
                     </Select>
                   </div>
+                  
                   <div>
-                    <Label className="text-xs">Jumlah</Label>
+                    <Label className="text-xs">Tipe Soal</Label>
+                    <Select
+                      value={ts.tipe || "all"}
+                      onValueChange={(v) =>
+                        set(
+                          "topicSets",
+                          u.topicSets.map((x, idx) =>
+                            idx === i ? { ...x, tipe: v === "all" ? undefined : (v as any) } : x,
+                          ),
+                        )
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Semua Tipe</SelectItem>
+                        <SelectItem value="pg">Pilihan Ganda</SelectItem>
+                        <SelectItem value="multi">Ganda Kompleks</SelectItem>
+                        <SelectItem value="bs">Benar/Salah</SelectItem>
+                        <SelectItem value="essay">Esai</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label className="text-xs">Kesulitan</Label>
+                    <Select
+                      value={ts.kesulitan || "all"}
+                      onValueChange={(v) =>
+                        set(
+                          "topicSets",
+                          u.topicSets.map((x, idx) =>
+                            idx === i ? { ...x, kesulitan: v === "all" ? undefined : (v as any) } : x,
+                          ),
+                        )
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Semua Kesulitan</SelectItem>
+                        <SelectItem value="mudah">Mudah</SelectItem>
+                        <SelectItem value="sedang">Sedang</SelectItem>
+                        <SelectItem value="sulit">Sulit</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label className="text-xs">Jumlah Tarik</Label>
                     <Input
                       type="number"
                       min={1}
@@ -407,29 +459,32 @@ function UjianEditor() {
                       }
                     />
                   </div>
-                  <div className="flex items-center gap-2 pt-5">
-                    <Checkbox
-                      checked={ts.acakSoal}
-                      onCheckedChange={(v) =>
-                        set(
-                          "topicSets",
-                          u.topicSets.map((x, idx) => (idx === i ? { ...x, acakSoal: !!v } : x)),
-                        )
-                      }
-                    />
-                    <Label className="text-xs">Acak soal</Label>
-                  </div>
-                  <div className="flex items-center gap-2 pt-5">
-                    <Checkbox
-                      checked={ts.acakJawaban}
-                      onCheckedChange={(v) =>
-                        set(
-                          "topicSets",
-                          u.topicSets.map((x, idx) => (idx === i ? { ...x, acakJawaban: !!v } : x)),
-                        )
-                      }
-                    />
-                    <Label className="text-xs">Acak jawaban</Label>
+
+                  <div className="flex items-center gap-4 pt-4 sm:pt-6">
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        checked={ts.acakSoal}
+                        onCheckedChange={(v) =>
+                          set(
+                            "topicSets",
+                            u.topicSets.map((x, idx) => (idx === i ? { ...x, acakSoal: !!v } : x)),
+                          )
+                        }
+                      />
+                      <Label className="text-xs whitespace-nowrap">Acak soal</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        checked={ts.acakJawaban}
+                        onCheckedChange={(v) =>
+                          set(
+                            "topicSets",
+                            u.topicSets.map((x, idx) => (idx === i ? { ...x, acakJawaban: !!v } : x)),
+                          )
+                        }
+                      />
+                      <Label className="text-xs whitespace-nowrap">Acak jawaban</Label>
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -500,18 +555,33 @@ function UjianEditor() {
       <Card>
         <CardContent className="space-y-3 p-4">
           <h3 className="font-medium">Alat bantu ujian</h3>
-          <div className="flex items-center justify-between rounded border p-2">
-            <div>
-              <Label htmlFor="allow-calculator">Kalkulator ujian</Label>
-              <p className="text-xs text-muted-foreground">
-                Izinkan peserta membuka kalkulator selama ujian.
-              </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="flex items-center justify-between rounded border p-3">
+              <div>
+                <Label htmlFor="allow-calculator">Kalkulator Ilmiah</Label>
+                <p className="text-xs text-muted-foreground">
+                  Buka kalkulator on-screen untuk hitungan.
+                </p>
+              </div>
+              <Switch
+                id="allow-calculator"
+                checked={u.allowCalculator}
+                onCheckedChange={(value) => set("allowCalculator", value)}
+              />
             </div>
-            <Switch
-              id="allow-calculator"
-              checked={u.allowCalculator}
-              onCheckedChange={(value) => set("allowCalculator", value)}
-            />
+            <div className="flex items-center justify-between rounded border p-3">
+              <div>
+                <Label htmlFor="allow-nilai-normal">Tabel Nilai Normal</Label>
+                <p className="text-xs text-muted-foreground">
+                  Buka referensi lab/klinis untuk ujian medis.
+                </p>
+              </div>
+              <Switch
+                id="allow-nilai-normal"
+                checked={u.allowNilaiNormal}
+                onCheckedChange={(value) => set("allowNilaiNormal", value)}
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
