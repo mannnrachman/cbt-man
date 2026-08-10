@@ -400,7 +400,7 @@ function UjianEditor() {
                         set(
                           "topicSets",
                           u.topicSets.map((x, idx) =>
-                            idx === i ? { ...x, tipe: v === "all" ? undefined : (v as any) } : x,
+                            idx === i ? { ...x, tipe: v === "all" ? undefined : (v as "pg" | "multi" | "bs" | "essay") } : x,
                           ),
                         )
                       }
@@ -426,7 +426,7 @@ function UjianEditor() {
                         set(
                           "topicSets",
                           u.topicSets.map((x, idx) =>
-                            idx === i ? { ...x, kesulitan: v === "all" ? undefined : (v as any) } : x,
+                            idx === i ? { ...x, kesulitan: v === "all" ? undefined : (v as "mudah" | "sedang" | "sulit") } : x,
                           ),
                         )
                       }
