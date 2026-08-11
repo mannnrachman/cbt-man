@@ -100,58 +100,99 @@ export function TokenManager({ ujian }: { ujian: Ujian }) {
         </p>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="p-4 flex flex-col md:flex-row items-end gap-3 border-b border-slate-100 dark:border-slate-800">
-          <div className="flex flex-wrap items-end gap-3 flex-1">
-            <div className="space-y-1">
-              <Label className="text-xs font-medium">Jumlah token (Auto)</Label>
-              <Input
-                type="number"
-                min={1}
-                max={500}
-                value={jumlah}
-                onChange={(e) => setJumlah(Math.max(1, Number(e.target.value)))}
-                className="w-32 h-9"
-                disabled={customKode.length > 0}
-              />
+        <div className="p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* Kolom 1: Mode Token */}
+            <div className="space-y-4">
+              <div>
+                <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200">Mode Token</h4>
+                <p className="text-xs text-slate-500">Pilih salah satu cara pembuatan token.</p>
+              </div>
+              
+              <div className="p-3 bg-white dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 space-y-3 shadow-sm">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-slate-600 dark:text-slate-400">1. Otomatis (Jumlah)</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={500}
+                    value={jumlah}
+                    onChange={(e) => setJumlah(Math.max(1, Number(e.target.value)))}
+                    className="h-9"
+                    disabled={customKode.length > 0}
+                  />
+                </div>
+                
+                <div className="relative flex items-center justify-center py-2">
+                  <span className="bg-white dark:bg-slate-950 px-2 text-[10px] uppercase font-bold text-slate-400 absolute">Atau</span>
+                  <div className="w-full border-t border-slate-100 dark:border-slate-800"></div>
+                </div>
+                
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-slate-600 dark:text-slate-400">2. Custom Kode (Master)</Label>
+                  <Input
+                    type="text"
+                    value={customKode}
+                    onChange={(e) => setCustomKode(e.target.value.toUpperCase())}
+                    placeholder="Misal: MTK-2026"
+                    className="h-9 font-mono text-sm"
+                  />
+                </div>
+              </div>
             </div>
-            <div className="space-y-1">
-              <Label className="text-xs font-medium text-slate-500">ATAU Custom Kode</Label>
-              <Input
-                type="text"
-                value={customKode}
-                onChange={(e) => setCustomKode(e.target.value.toUpperCase())}
-                placeholder="Misal: MTK-2026"
-                className="w-40 h-9 font-mono text-sm"
-              />
+
+            {/* Kolom 2: Aturan & Expire */}
+            <div className="space-y-4">
+              <div>
+                <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200">Pengaturan Lanjutan</h4>
+                <p className="text-xs text-slate-500">Atur masa berlaku dan cakupan ujian.</p>
+              </div>
+
+              <div className="p-3 bg-white dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-blue-500" /> Batas Kedaluwarsa
+                  </Label>
+                  <Input
+                    type="datetime-local"
+                    value={expireDate}
+                    onChange={(e) => setExpireDate(e.target.value)}
+                    className="h-9 text-sm"
+                  />
+                  <p className="text-[10px] text-slate-400 leading-tight">Kosongkan jika token berlaku selamanya.</p>
+                </div>
+                
+                <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
+                  <div className="flex items-start gap-2.5">
+                    <Checkbox id="applyAll" checked={applyToAll} onCheckedChange={(c) => setApplyToAll(c === true)} className="mt-0.5" />
+                    <div className="space-y-1">
+                      <Label htmlFor="applyAll" className="text-sm font-medium leading-none cursor-pointer">
+                        Jadikan Master Token
+                      </Label>
+                      <p className="text-[10px] text-slate-500 leading-tight">
+                        Terapkan token ini ke semua ujian Anda lainnya yang berstatus Persiapan atau Berlangsung.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="space-y-1">
-              <Label className="text-xs font-medium text-slate-500 flex items-center gap-1">
-                <Clock className="w-3 h-3" /> Kedaluwarsa
-              </Label>
-              <Input
-                type="datetime-local"
-                value={expireDate}
-                onChange={(e) => setExpireDate(e.target.value)}
-                className="h-9 text-sm"
-              />
-            </div>
-            <Button onClick={generate} disabled={generating} size="sm" className="h-9">
-              <Plus className="mr-1 h-4 w-4" />
+            
+          </div>
+
+          {/* Action Row */}
+          <div className="mt-5 pt-4 flex items-center justify-between border-t border-slate-200/60 dark:border-slate-700/60">
+            <Button variant="outline" onClick={copyAll} size="sm" className="h-9">
+              <Copy className="mr-2 h-4 w-4" />
+              Salin Tersedia
+            </Button>
+            
+            <Button onClick={generate} disabled={generating} size="sm" className="h-9 px-6 bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
+              <Plus className="mr-2 h-4 w-4" />
               {generating ? "Membuat…" : "Buat Token"}
             </Button>
           </div>
-          <div className="w-full flex items-center gap-2 mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-            <Checkbox id="applyAll" checked={applyToAll} onCheckedChange={(c) => setApplyToAll(c === true)} />
-            <Label htmlFor="applyAll" className="text-sm font-medium text-slate-700 dark:text-slate-300">
-              Juga terapkan token ini ke semua ujian lain yang Anda kelola (Master Token)
-            </Label>
-          </div>
-        </div>
-        <div className="w-full flex justify-end p-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-900/30">
-          <Button variant="outline" onClick={copyAll} size="sm" className="h-9">
-            <Copy className="mr-1 h-4 w-4" />
-            Salin Tersedia
-          </Button>
         </div>
 
         <div className="max-h-[400px] overflow-auto">
