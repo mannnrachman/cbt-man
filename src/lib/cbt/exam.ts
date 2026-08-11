@@ -13,7 +13,7 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-export function buildSesi(ujian: Ujian, pesertaId: string, user?: User | null): SesiUjian {
+export function buildSesi(ujian: Ujian, pesertaId: string, user?: User | null, allSoal?: Soal[]): SesiUjian {
   // Defense-in-depth: the pre-exam route already checks group assignment
   // before reaching this point, but `buildSesi` is also reachable through
   // `mutateEntity` / stale client state. Re-assert here so the policy is
@@ -24,7 +24,7 @@ export function buildSesi(ujian: Ujian, pesertaId: string, user?: User | null): 
       pesertaId,
     });
   }
-  const all = soalRepo.all();
+  const all = allSoal || soalRepo.all();
   const soalTerpilih: Soal[] = [];
   for (const ts of ujian.topicSets) {
     let pool = all.filter((s) => s.topikId === ts.topikId);
@@ -131,6 +131,7 @@ export function findOrCreateSesi(
   ujianId: string,
   pesertaId: string,
   user?: User | null,
+  allSoal?: Soal[]
 ): SesiUjian {
   const all = sesiRepo.all();
   const existing = all.find(
@@ -151,7 +152,7 @@ export function findOrCreateSesi(
       pesertaId,
     });
   }
-  const fresh = buildSesi(ujian, pesertaId, user);
+  const fresh = buildSesi(ujian, pesertaId, user, allSoal);
   sesiRepo.upsert(fresh);
   return fresh;
 }

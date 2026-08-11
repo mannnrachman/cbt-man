@@ -1,13 +1,9 @@
 import { createFileRoute, Link, useParams, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ujianRepo, sesiRepo, tokenRepo, hydrateRepos, claimExamToken, mataKuliahRepo, semesterRepo } from "@/lib/cbt/repos";
+import { startSesiServer } from "@/lib/server/sesi/functions";
 import { useAuthStore } from "@/lib/cbt/auth-store";
-import { findOrCreateSesi, startSesi } from "@/lib/cbt/exam";
-import {
-  getExamAvailabilityMessage,
-  getExamAvailabilityStatus,
-  isExamAvailable,
-} from "@/lib/cbt/availability";
+import { getExamAvailabilityMessage, getExamAvailabilityStatus, isExamAvailable } from "@/lib/cbt/availability";
 import { isParticipantAssignedToExam, PesertaNotAssignedToExamError } from "@/lib/cbt/access";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -164,9 +160,15 @@ function PreUjianContent({
       }
     }
     try {
-      const sesi = findOrCreateSesi(ujian.id, user.id, user);
-      const started = sesi.status === "sedang" ? sesi : startSesi(sesi, ujian);
-      sesiRepo.upsert(started);
+      if (!sesiSelesai) {
+        const started = await startSesiServer({ data: { ujianId: ujian.id } });
+        if (!started.ok) {
+          toast.error(started.error);
+          return;
+        }
+        // Pastikan snapshot diperbarui sebelum pindah halaman, supaya soal muncul!
+        await hydrateRepos();
+      }
       navigate({ to: "/peserta/ujian/$id/kerjakan", params: { id: ujian.id } });
     } catch (err) {
       if (err instanceof PesertaNotAssignedToExamError) {
@@ -174,7 +176,7 @@ function PreUjianContent({
         navigate({ to: "/peserta" });
         return;
       }
-      toast.error("Gagal memulai ujian. Silakan coba lagi.");
+      toast.error(err instanceof Error ? err.message : "Gagal memulai ujian. Silakan coba lagi.");
       return;
     }
   }

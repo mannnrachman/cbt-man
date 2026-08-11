@@ -263,3 +263,59 @@ export const getLiveOnlineSesis = createServerFn({ method: "GET" }).handler(
 		});
 	}
 );
+
+import { buildSesi, startSesi } from "@/lib/cbt/exam";
+import { mapSoal, mapUjian, publicUser } from "../repos/mappers";
+
+export const startSesiServer = createServerFn({ method: "POST" })
+	.validator(z.object({ ujianId: z.string().min(1) }))
+	.handler(async ({ data }) => {
+		try {
+			await seedIfNeeded();
+			const caller = await requireCaller();
+			if (!caller || caller.role !== "mahasiswa") return { ok: false as const, error: "Forbidden" };
+
+			const ujianData = await prisma.ujian.findUnique({ where: { id: data.ujianId } });
+			if (!ujianData) return { ok: false as const, error: "Ujian tidak ditemukan." };
+
+			const existingSesi = await prisma.sesiUjian.findFirst({
+				where: { ujianId: data.ujianId, pesertaId: caller.id, status: { not: "selesai" } }
+			});
+
+			if (existingSesi) {
+				return { ok: true as const, sesiId: existingSesi.id };
+			}
+
+			const allSoal = await prisma.soal.findMany({ include: { jawaban: true } });
+			const mappedSoal = allSoal.map(mapSoal);
+			const mappedUjian = mapUjian(ujianData);
+
+			const freshSesi = buildSesi(mappedUjian, caller.id, publicUser(caller), mappedSoal);
+			const startedSesi = startSesi(freshSesi, mappedUjian);
+
+			await prisma.sesiUjian.create({
+				data: {
+					id: startedSesi.id,
+					ujianId: startedSesi.ujianId,
+					pesertaId: startedSesi.pesertaId,
+					status: startedSesi.status,
+					mulaiAt: toBigInt(startedSesi.mulaiAt),
+					selesaiAt: toBigInt(startedSesi.selesaiAt),
+					endsAt: toBigInt(startedSesi.endsAt),
+					soalIds: stringifyJson(startedSesi.soalIds),
+					jawabanOrder: stringifyJson(startedSesi.jawabanOrder),
+					jawaban: stringifyJson(startedSesi.jawaban),
+					pelanggaran: startedSesi.pelanggaran,
+					skorTotal: null,
+					maxSkor: null,
+					gradedAt: null,
+					gradedBy: null,
+					createdAt: BigInt(startedSesi.createdAt),
+				}
+			});
+
+			return { ok: true as const, sesiId: startedSesi.id };
+		} catch (err) {
+			return { ok: false as const, error: err instanceof Error ? err.message : String(err) };
+		}
+	});
