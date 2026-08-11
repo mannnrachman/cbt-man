@@ -495,26 +495,14 @@ function RouteComponent() {
                 </label>
               </div>
 
-              {idx < currentSesi.soalIds.length - 1 ? (
-                <Button
-                  size="lg"
-                  className="w-full sm:w-auto h-14 px-8 rounded-xl font-bold uppercase tracking-widest shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
-                  onClick={() => handleNavigateIdx(idx + 1)}
-                >
-                  SELANJUTNYA <ChevronRight className="w-5 h-5 ml-1" />
-                </Button>
-              ) : (
-                <Button
-                  size="lg"
-                  variant="destructive"
-                  className="w-full sm:w-auto h-14 px-8 rounded-xl font-black uppercase tracking-widest shadow-lg shadow-red-500/20 hover:shadow-red-500/40 transition-all hover:-translate-y-0.5"
-                  onClick={() => {
-                    if (confirm("Pastikan semua jawaban telah terisi dengan benar. Yakin kumpulkan ujian sekarang?")) void submit();
-                  }}
-                >
-                  KUMPULKAN
-                </Button>
-              )}
+              <Button
+                size="lg"
+                className="w-full sm:w-auto h-14 px-8 rounded-xl font-bold uppercase tracking-widest shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
+                disabled={idx === currentSesi.soalIds.length - 1}
+                onClick={() => handleNavigateIdx(idx + 1)}
+              >
+                BERIKUTNYA <ChevronRight className="w-5 h-5 ml-1" />
+              </Button>
 
             </div>
           </div>
