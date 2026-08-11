@@ -183,7 +183,7 @@ export function TokenManager({ ujian }: { ujian: Ujian }) {
               Salin Tersedia
             </Button>
             
-            <Button onClick={generate} disabled={generating} size="sm" className="h-9 px-6 bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
+            <Button onClick={generate} disabled={generating} size="sm" className="h-9 px-6 bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm">
               <Plus className="mr-2 h-4 w-4" />
               {generating ? "Membuat…" : "Buat Token"}
             </Button>
