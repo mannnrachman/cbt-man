@@ -227,6 +227,7 @@ export const generateExamTokensServer = createServerFn({ method: "POST" })
 			length: z.number().int().min(8).max(32).optional(),
 			customKode: z.string().optional(),
 			durasiMenit: z.number().optional(),
+			applyToAll: z.boolean().optional(),
 		}),
 	)
 	.handler(async ({ data }) => {
@@ -258,31 +259,47 @@ export const generateExamTokensServer = createServerFn({ method: "POST" })
 			? BigInt(Date.now() + data.durasiMenit * 60000) 
 			: null;
 
-		while (created.length < targetJumlah && attempts < maxAttempts) {
-			const code = isManual ? data.customKode!.trim().toUpperCase() : generateTokenCode(length);
-			attempts++;
-			try {
-				const row = await prisma.tokenUjian.create({
-					data: {
-						id: uid("tk_"),
-						ujianId: data.ujianId,
-						kode: code,
-						expireAt,
-					},
-				});
-				created.push(mapToken(row));
-			} catch (err) {
-				if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
-					if (isManual) {
-						return { ok: false as const, error: "Kode token sudah digunakan di ujian ini" };
-					}
-					continue;
+		const targetUjianIds = [data.ujianId];
+		if (data.applyToAll) {
+			const all = await prisma.ujian.findMany({ select: { id: true, createdBy: true, mataKuliahId: true, semesterId: true } });
+			for (const ex of all) {
+				if (ex.id !== data.ujianId && (caller.role === "super_admin" || await operatorCanTouchUjian(caller, ex.id))) {
+					targetUjianIds.push(ex.id);
 				}
-				throw err;
 			}
 		}
 
-		if (created.length < targetJumlah) {
+		for (const uId of targetUjianIds) {
+			let currentAttempts = 0;
+			const maxAttempts = targetJumlah * (1 + MAX_TOKEN_COLLISION_RETRIES);
+
+			while (created.filter(t => t.ujianId === uId).length < targetJumlah && currentAttempts < maxAttempts) {
+				const code = isManual ? data.customKode!.trim().toUpperCase() : generateTokenCode(length);
+				currentAttempts++;
+				try {
+					const row = await prisma.tokenUjian.create({
+						data: {
+							id: uid("tk_"),
+							ujianId: uId,
+							kode: code,
+							expireAt,
+						},
+					});
+					created.push(mapToken(row));
+				} catch (err) {
+					if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+						if (isManual && uId === data.ujianId) {
+							return { ok: false as const, error: "Kode token sudah digunakan di ujian ini" };
+						}
+						continue;
+					}
+					throw err;
+				}
+			}
+		}
+
+		const thisExamTokens = created.filter(t => t.ujianId === data.ujianId);
+		if (thisExamTokens.length < targetJumlah) {
 			return { ok: false as const, error: "Gagal membuat semua token karena tabrakan kode. Silakan coba lagi." };
 		}
 		return { ok: true as const, tokens: created };
@@ -346,49 +363,31 @@ export const claimExamToken = createServerFn({ method: "POST" })
 		}
 
 		const kode = data.kode.trim().toUpperCase();
-		const dipakaiAt = Date.now();
 
-		const result = await prisma.tokenUjian.updateMany({
+		const validToken = await prisma.tokenUjian.findFirst({
 			where: {
 				ujianId: data.ujianId,
 				kode,
-				AND: [
-					{ OR: [{ dipakaiOleh: null }, { dipakaiOleh: caller.id }] },
-					{ OR: [{ expireAt: null }, { expireAt: { gt: Date.now() } }] }
-				]
+				OR: [{ expireAt: null }, { expireAt: { gt: Date.now() } }]
 			},
-			data: { dipakaiOleh: caller.id, dipakaiAt: toBigInt(dipakaiAt) },
+			select: { id: true }
 		});
 
-		if (result.count === 0) {
+		if (!validToken) {
+			// Check if it exists but is expired
 			const existing = await prisma.tokenUjian.findFirst({
 				where: { ujianId: data.ujianId, kode },
-				select: { id: true, dipakaiOleh: true, expireAt: true },
+				select: { id: true, expireAt: true }
 			});
-			if (!existing)
+			if (!existing) {
 				return { ok: false as const, error: "Token tidak valid untuk ujian ini" };
-			if (existing.expireAt !== null && Number(existing.expireAt) <= Date.now()) {
-				return { ok: false as const, error: "Token sudah kadaluarsa" };
 			}
-			return { ok: false as const, error: "Token sudah dipakai peserta lain" };
-		}
-
-		const claimedId = await prisma.tokenUjian.findFirst({
-			where: { ujianId: data.ujianId, kode },
-			select: { id: true },
-		});
-		if (!claimedId) {
-			return {
-				ok: false as const,
-				error: "Token tidak dapat diklaim, silakan coba lagi",
-			};
+			return { ok: false as const, error: "Token sudah kadaluarsa" };
 		}
 		const token: TokenUjian = {
-			id: claimedId.id,
+			id: validToken.id,
 			ujianId: data.ujianId,
 			kode,
-			dipakaiOleh: caller.id,
-			dipakaiAt,
 		};
 		clearRateLimit(caller.id, "claimToken");
 		return { ok: true as const, token };

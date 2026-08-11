@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Copy, KeyRound, Trash2, Clock } from "lucide-react";
 import { toast } from "sonner";
 
@@ -14,6 +15,7 @@ export function TokenManager({ ujian }: { ujian: Ujian }) {
   const [jumlah, setJumlah] = useState(10);
   const [customKode, setCustomKode] = useState("");
   const [durasiMenit, setDurasiMenit] = useState("");
+  const [applyToAll, setApplyToAll] = useState(false);
   const [generating, setGenerating] = useState(false);
 
   useEffect(() => {
@@ -33,7 +35,8 @@ export function TokenManager({ ujian }: { ujian: Ujian }) {
           ujianId: ujian.id, 
           jumlah,
           customKode: customKode.trim() || undefined,
-          durasiMenit: durasiMenit ? Number(durasiMenit) : undefined
+          durasiMenit: durasiMenit ? Number(durasiMenit) : undefined,
+          applyToAll
         },
       });
       if (!result.ok) {
@@ -139,7 +142,15 @@ export function TokenManager({ ujian }: { ujian: Ujian }) {
               {generating ? "Membuat…" : "Buat Token"}
             </Button>
           </div>
-          <Button variant="outline" onClick={copyAll} size="sm" className="h-9 shrink-0">
+          <div className="w-full flex items-center gap-2 mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+            <Checkbox id="applyAll" checked={applyToAll} onCheckedChange={(c) => setApplyToAll(c === true)} />
+            <Label htmlFor="applyAll" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+              Juga terapkan token ini ke semua ujian lain yang Anda kelola (Master Token)
+            </Label>
+          </div>
+        </div>
+        <div className="w-full flex justify-end p-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-900/30">
+          <Button variant="outline" onClick={copyAll} size="sm" className="h-9">
             <Copy className="mr-1 h-4 w-4" />
             Salin Tersedia
           </Button>
