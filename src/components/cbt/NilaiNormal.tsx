@@ -17,25 +17,18 @@ const NILAI_NORMAL_DATA = [
 
 export function NilaiNormalTable() {
   return (
-    <div className="flex flex-col gap-4">
-      <div className="bg-blue-50/50 p-3 rounded border border-blue-100 text-xs text-blue-800 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-200 leading-relaxed shadow-sm">
-        <p className="font-semibold mb-1">Rentang Referensi Nilai Normal (Dewasa)</p>
-        <p>
-          <strong>Sumber Dokumen:</strong> Pedoman Interpretasi Data Klinik Kemenkes RI (Versi 2.0).
-          <strong> Populasi:</strong> Dewasa, Non-Hamil. <strong>Metode:</strong> Standar ISO 15189.
-        </p>
-        <p className="mt-1 italic opacity-80">
-          *Disclaimer: Data di bawah ini murni ditujukan untuk keperluan simulasi ujian dan edukasi sistem CBT. Tidak boleh digunakan sebagai rujukan diagnosis atau penanganan medis di dunia nyata.
-        </p>
+    <div className="flex flex-col gap-2">
+      <div className="bg-blue-50/50 p-2.5 rounded-lg border border-blue-100 text-xs text-blue-800 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-200 leading-normal shadow-sm">
+        <p className="font-semibold text-[11px]">Rentang Referensi Nilai Normal (Dewasa)</p>
       </div>
 
-      <div className="rounded-md border max-h-[60vh] overflow-auto relative">
-        <table className="w-full text-sm text-left">
-          <thead className="text-xs text-slate-700 uppercase bg-slate-100 dark:bg-slate-800 dark:text-slate-300 sticky top-0 shadow-sm">
+      <div className="rounded-lg border border-slate-200 dark:border-slate-800 max-h-[380px] overflow-auto relative [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-300 dark:[&::-webkit-scrollbar-thumb]:bg-slate-700 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-400">
+        <table className="w-full text-xs text-left">
+          <thead className="text-[11px] text-slate-700 uppercase bg-slate-100 dark:bg-slate-800 dark:text-slate-300 sticky top-0 shadow-sm font-bold">
             <tr>
-              <th scope="col" className="px-4 py-3">Pemeriksaan</th>
-              <th scope="col" className="px-4 py-3">Nilai Normal (Pria)</th>
-              <th scope="col" className="px-4 py-3">Nilai Normal (Wanita)</th>
+              <th scope="col" className="px-2.5 py-2">Pemeriksaan</th>
+              <th scope="col" className="px-2.5 py-2">Nilai Normal (Pria)</th>
+              <th scope="col" className="px-2.5 py-2">Nilai Normal (Wanita)</th>
             </tr>
           </thead>
           <tbody>
@@ -44,12 +37,12 @@ export function NilaiNormalTable() {
                 key={idx}
                 className="bg-white border-b dark:bg-slate-900 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"
               >
-                <td className="px-4 py-3">
-                  <div className="font-semibold text-slate-900 dark:text-slate-100">{item.tes}</div>
-                  <div className="text-xs text-slate-500">{item.kategori}</div>
+                <td className="px-2.5 py-1.5">
+                  <div className="font-semibold text-slate-900 dark:text-slate-100 text-xs">{item.tes}</div>
+                  <div className="text-[10px] text-slate-400">{item.kategori}</div>
                 </td>
-                <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{item.pria}</td>
-                <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{item.wanita}</td>
+                <td className="px-2.5 py-1.5 text-slate-600 dark:text-slate-300 text-xs font-mono">{item.pria}</td>
+                <td className="px-2.5 py-1.5 text-slate-600 dark:text-slate-300 text-xs font-mono">{item.wanita}</td>
               </tr>
             ))}
           </tbody>
