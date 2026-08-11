@@ -42,7 +42,7 @@ export const Route = createFileRoute("/_authenticated/admin/ujian/$id/")({
 });
 
 function UjianEditor() {
-  const { id } = useParams({ from: "/_authenticated/admin/ujian/$id" });
+  const { id } = useParams({ from: "/_authenticated/admin/ujian/$id/" });
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const initial = ujianRepo.byId(id);
