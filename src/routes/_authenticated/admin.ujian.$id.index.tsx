@@ -30,7 +30,7 @@ import {
 } from "@/lib/cbt/access";
 import { fetchUjianByIdServer } from "@/lib/server/ujian/functions";
 
-export const Route = createFileRoute("/_authenticated/admin/ujian/$id")({
+export const Route = createFileRoute("/_authenticated/admin/ujian/$id/")({
   loader: async () => {
     try {
       await hydrateRepos();
