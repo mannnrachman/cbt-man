@@ -226,7 +226,7 @@ export const generateExamTokensServer = createServerFn({ method: "POST" })
 			jumlah: z.number().int().min(1).max(500),
 			length: z.number().int().min(8).max(32).optional(),
 			customKode: z.string().optional(),
-			durasiMenit: z.number().optional(),
+			expireAtMs: z.number().optional(),
 			applyToAll: z.boolean().optional(),
 		}),
 	)
@@ -249,15 +249,11 @@ export const generateExamTokensServer = createServerFn({ method: "POST" })
 
 		const length = data.length ?? DEFAULT_TOKEN_LENGTH;
 		const created: TokenUjian[] = [];
-		let attempts = 0;
 		// If customKode is provided, we only generate 1 token with that exact code
 		const isManual = !!(data.customKode && data.customKode.trim().length > 0);
 		const targetJumlah = isManual ? 1 : data.jumlah;
-		const maxAttempts = targetJumlah * (1 + MAX_TOKEN_COLLISION_RETRIES);
 
-		const expireAt = data.durasiMenit && data.durasiMenit > 0 
-			? BigInt(Date.now() + data.durasiMenit * 60000) 
-			: null;
+		const expireAt = data.expireAtMs ? BigInt(data.expireAtMs) : null;
 
 		const targetUjianIds = [data.ujianId];
 		if (data.applyToAll) {
