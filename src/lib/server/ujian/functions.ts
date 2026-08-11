@@ -157,7 +157,7 @@ export const mutateTokenServer = createServerFn({ method: "POST" })
 
 			await prisma.$transaction(async (tx) => {
 				if (action === "remove")
-					await tx.tokenUjian.delete({ where: { id: String(payload.id) } });
+					await tx.tokenUjian.deleteMany({ where: { id: String(payload.id) } });
 				else if (action === "bulkSet") {
 					await tx.tokenUjian.deleteMany();
 					await tx.tokenUjian.createMany({
