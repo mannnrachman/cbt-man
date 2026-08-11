@@ -30,16 +30,31 @@ function TokenPage() {
   // (Must-fix #3) Same direct-URL pattern as the exam editor: if the
   // ujian is missing from the snapshot we ask the server to confirm
   // existence so we can distinguish "tidak ditemukan" from "lock screen".
-  const initialAllowed = initialUjian ? ujianTouchesAllowed(user, initialUjian) : null;
-  const [ujian, setUjian] = useState<Ujian | null>(
-    initialUjian && initialAllowed ? initialUjian : null,
-  );
+  const [authReady, setAuthReady] = useState(user != null);
+  useEffect(() => {
+    if (user != null) setAuthReady(true);
+  }, [user]);
+
+  const initialAllowed =
+    !authReady || !user || !initialUjian
+      ? true
+      : ujianTouchesAllowed(user, initialUjian);
+
+  const [ujian, setUjian] = useState<Ujian | null>(initialUjian ?? null);
   const [tokens, setTokens] = useState<TokenUjian[]>([]);
   const [users, setUsers] = useState(usersRepo.all());
   const [loadingRemote, setLoadingRemote] = useState(initialUjian === undefined);
-  const [denied, setDenied] = useState(initialUjian !== undefined && initialAllowed === false);
+  const [denied, setDenied] = useState(false);
   const [jumlah, setJumlah] = useState(10);
   const [generating, setGenerating] = useState(false);
+
+  useEffect(() => {
+    if (!authReady || !user || !initialUjian) return;
+    if (!ujianTouchesAllowed(user, initialUjian)) {
+      setUjian(null);
+      setDenied(true);
+    }
+  }, [authReady, user, initialUjian]);
 
   useEffect(() => {
     if (ujian === null || denied) return;
