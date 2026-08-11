@@ -192,11 +192,11 @@ export function TokenManager({ ujian }: { ujian: Ujian }) {
 
         <div className="max-h-[400px] overflow-auto">
           <table className="w-full text-sm">
-            <thead className="bg-muted/40 text-left sticky top-0 backdrop-blur-sm shadow-sm">
+            <thead className="bg-slate-100 dark:bg-slate-800 text-left sticky top-0 border-b border-slate-200 dark:border-slate-700 z-10">
               <tr>
-                <th className="p-3 font-medium text-slate-600 dark:text-slate-400">Kode</th>
-                <th className="p-3 font-medium text-slate-600 dark:text-slate-400">Status</th>
-                <th className="p-3 font-medium text-slate-600 dark:text-slate-400 text-right">Aksi</th>
+                <th className="p-3 font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-200">Kode</th>
+                <th className="p-3 font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-200">Status</th>
+                <th className="p-3 font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-200 text-right">Aksi</th>
               </tr>
             </thead>
             <tbody>
