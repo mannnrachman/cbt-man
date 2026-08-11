@@ -8,7 +8,8 @@ const NILAI_NORMAL_DATA = [
   { kategori: "Kimia Klinik", tes: "Gula Darah 2 Jam PP", pria: "< 140 mg/dL", wanita: "< 140 mg/dL" },
   { kategori: "Kimia Klinik", tes: "Kolesterol Total", pria: "< 200 mg/dL", wanita: "< 200 mg/dL" },
   { kategori: "Kimia Klinik", tes: "Asam Urat", pria: "3.4 - 7.0 mg/dL", wanita: "2.4 - 6.0 mg/dL" },
-  { kategori: "Fungsi Ginjal", tes: "Ureum (BUN)", pria: "8 - 24 mg/dL", wanita: "8 - 24 mg/dL" },
+  { kategori: "Fungsi Ginjal", tes: "BUN (Blood Urea Nitrogen)", pria: "8 - 24 mg/dL", wanita: "8 - 24 mg/dL" },
+  { kategori: "Fungsi Ginjal", tes: "Ureum (Urea)", pria: "17 - 50 mg/dL", wanita: "17 - 50 mg/dL" },
   { kategori: "Fungsi Ginjal", tes: "Kreatinin Darah", pria: "0.7 - 1.3 mg/dL", wanita: "0.6 - 1.1 mg/dL" },
   { kategori: "Fungsi Hati", tes: "SGOT (AST)", pria: "< 40 U/L", wanita: "< 40 U/L" },
   { kategori: "Fungsi Hati", tes: "SGPT (ALT)", pria: "< 41 U/L", wanita: "< 41 U/L" },
@@ -19,7 +20,10 @@ export function NilaiNormalTable() {
     <div className="flex flex-col gap-4">
       <div className="bg-blue-50/50 p-3 rounded border border-blue-100 text-xs text-blue-800 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-200 leading-relaxed shadow-sm">
         <p className="font-semibold mb-1">Rentang Referensi Nilai Normal (Dewasa)</p>
-        <p><strong>Sumber data:</strong> Standar Referensi Laboratorium Klinis Nasional. <strong>Revisi terakhir:</strong> Agustus 2026.</p>
+        <p>
+          <strong>Sumber Dokumen:</strong> Pedoman Interpretasi Data Klinik Kemenkes RI (Versi 2.0).
+          <strong> Populasi:</strong> Dewasa, Non-Hamil. <strong>Metode:</strong> Standar ISO 15189.
+        </p>
         <p className="mt-1 italic opacity-80">
           *Disclaimer: Data di bawah ini murni ditujukan untuk keperluan simulasi ujian dan edukasi sistem CBT. Tidak boleh digunakan sebagai rujukan diagnosis atau penanganan medis di dunia nyata.
         </p>
