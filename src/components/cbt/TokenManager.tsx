@@ -14,7 +14,7 @@ export function TokenManager({ ujian }: { ujian: Ujian }) {
   const [tokens, setTokens] = useState<TokenUjian[]>([]);
   const [jumlah, setJumlah] = useState(10);
   const [customKode, setCustomKode] = useState("");
-  const [durasiMenit, setDurasiMenit] = useState("");
+  const [expireDate, setExpireDate] = useState("");
   const [applyToAll, setApplyToAll] = useState(false);
   const [generating, setGenerating] = useState(false);
 
@@ -35,7 +35,7 @@ export function TokenManager({ ujian }: { ujian: Ujian }) {
           ujianId: ujian.id, 
           jumlah,
           customKode: customKode.trim() || undefined,
-          durasiMenit: durasiMenit ? Number(durasiMenit) : undefined,
+          expireAtMs: expireDate ? new Date(expireDate).getTime() : undefined,
           applyToAll
         },
       });
@@ -126,15 +126,13 @@ export function TokenManager({ ujian }: { ujian: Ujian }) {
             </div>
             <div className="space-y-1">
               <Label className="text-xs font-medium text-slate-500 flex items-center gap-1">
-                <Clock className="w-3 h-3" /> Durasi (Menit)
+                <Clock className="w-3 h-3" /> Kedaluwarsa
               </Label>
               <Input
-                type="number"
-                min={0}
-                value={durasiMenit}
-                onChange={(e) => setDurasiMenit(e.target.value)}
-                placeholder="0 = Selamanya"
-                className="w-32 h-9"
+                type="datetime-local"
+                value={expireDate}
+                onChange={(e) => setExpireDate(e.target.value)}
+                className="h-9 text-sm"
               />
             </div>
             <Button onClick={generate} disabled={generating} size="sm" className="h-9">
