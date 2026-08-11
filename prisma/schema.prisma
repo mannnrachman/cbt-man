@@ -154,6 +154,7 @@ model TokenUjian {
   kode        String
   dipakaiOleh String?
   dipakaiAt   BigInt?
+  expireAt    BigInt?
   ujian       Ujian   @relation(fields: [ujianId], references: [id], onDelete: Cascade)
 
   // Token codes are scoped to an exam so two exams may independently

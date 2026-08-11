@@ -170,6 +170,7 @@ export function mapToken(
 		kode: row.kode,
 		dipakaiOleh: row.dipakaiOleh ?? undefined,
 		dipakaiAt: toNumber(row.dipakaiAt),
+		expireAt: toNumber(row.expireAt),
 	};
 }
 
