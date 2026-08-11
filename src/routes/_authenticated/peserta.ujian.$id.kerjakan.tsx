@@ -484,29 +484,46 @@ function RouteComponent() {
                 </Button>
 
                 <label className={cn(
-                  "flex items-center justify-center gap-2 cursor-pointer h-11 px-4 sm:px-5 rounded-lg font-bold uppercase tracking-wider transition-all border-2 select-none text-xs sm:text-sm",
-                  currentJawaban.ragu 
-                    ? "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-700 shadow-sm" 
-                    : "bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-amber-200 dark:hover:border-amber-800/50 hover:bg-amber-50 dark:hover:bg-amber-950/20"
+                  "flex items-center justify-center gap-2 h-11 px-4 sm:px-5 rounded-lg font-bold uppercase tracking-wider transition-all border-2 select-none text-xs sm:text-sm",
+                  !isAnswered
+                    ? "opacity-50 cursor-not-allowed bg-slate-100 dark:bg-slate-800/50 text-slate-400 border-slate-200 dark:border-slate-800"
+                    : currentJawaban.ragu 
+                      ? "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-700 shadow-sm cursor-pointer" 
+                      : "bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-amber-200 dark:hover:border-amber-800/50 hover:bg-amber-50 dark:hover:bg-amber-950/20 cursor-pointer"
                 )}>
                   <input 
                     type="checkbox" 
-                    className="w-4 h-4 accent-amber-500 rounded cursor-pointer"
+                    disabled={!isAnswered}
+                    className="w-4 h-4 accent-amber-500 rounded cursor-pointer disabled:cursor-not-allowed"
                     checked={currentJawaban.ragu}
-                    onChange={(e) => updateJawaban({ ragu: e.target.checked })}
+                    onChange={(e) => isAnswered && updateJawaban({ ragu: e.target.checked })}
                   />
                   RAGU-RAGU
                 </label>
               </div>
 
-              <Button
-                size="default"
-                className="h-11 px-5 sm:px-6 rounded-lg font-bold uppercase tracking-wider shadow-sm hover:shadow-md transition-all text-xs sm:text-sm"
-                disabled={idx === currentSesi.soalIds.length - 1 || !isAnswered}
-                onClick={() => handleNavigateIdx(idx + 1)}
-              >
-                BERIKUTNYA <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
+              {idx < currentSesi.soalIds.length - 1 ? (
+                <Button
+                  size="default"
+                  className="h-11 px-5 sm:px-6 rounded-lg font-bold uppercase tracking-wider shadow-sm hover:shadow-md transition-all text-xs sm:text-sm"
+                  disabled={!isAnswered}
+                  onClick={() => handleNavigateIdx(idx + 1)}
+                >
+                  BERIKUTNYA <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              ) : (
+                <Button
+                  size="default"
+                  variant="destructive"
+                  className="h-11 px-5 sm:px-6 rounded-lg font-bold uppercase tracking-wider shadow-md hover:shadow-lg transition-all text-xs sm:text-sm"
+                  disabled={!isAnswered}
+                  onClick={() => {
+                    if (confirm("Yakin ingin mengumpulkan ujian?")) void submit();
+                  }}
+                >
+                  AKHIRI UJIAN
+                </Button>
+              )}
 
             </div>
           </div>
@@ -536,19 +553,32 @@ function RouteComponent() {
               {currentSesi.soalIds.map((_, i) => {
                 const a = currentSesi.jawaban[i];
                 const dijawab = (a?.jawabanIds?.length ?? 0) > 0 || (a?.jawabanEssay ? a.jawabanEssay.length > 0 : false);
+                const isBlocked = i > idx && !isAnswered;
                 
                 return (
                   <button
                     key={i}
-                    onClick={() => handleNavigateIdx(i)}
+                    disabled={isBlocked}
+                    onClick={() => {
+                      if (isBlocked) {
+                        toast.warning("Pilih atau isi jawaban terlebih dahulu untuk melanjutkan.");
+                        return;
+                      }
+                      handleNavigateIdx(i);
+                    }}
                     className={cn(
-                      "relative aspect-square flex items-center justify-center rounded-lg text-xs sm:text-sm font-bold border-2 transition-all hover:scale-105",
+                      "relative aspect-square flex items-center justify-center rounded-lg text-xs sm:text-sm font-bold border-2 transition-all",
+                      isBlocked
+                        ? "opacity-40 cursor-not-allowed bg-slate-100 dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700"
+                        : "hover:scale-105",
                       i === idx && "ring-2 ring-primary/40 dark:ring-primary/60",
-                      a.ragu
-                        ? "bg-amber-400 text-white border-amber-500 shadow-sm"
-                        : dijawab
-                          ? "bg-primary text-white border-primary shadow-sm"
-                          : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500"
+                      !isBlocked && (
+                        a.ragu
+                          ? "bg-amber-400 text-white border-amber-500 shadow-sm"
+                          : dijawab
+                            ? "bg-primary text-white border-primary shadow-sm"
+                            : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500"
+                      )
                     )}
                   >
                     {i + 1}
@@ -614,18 +644,32 @@ function RouteComponent() {
                 {currentSesi.soalIds.map((_, i) => {
                   const a = currentSesi.jawaban[i];
                   const dijawab = (a?.jawabanIds?.length ?? 0) > 0 || (a?.jawabanEssay ? a.jawabanEssay.length > 0 : false);
+                  const isBlocked = i > idx && !isAnswered;
                   return (
                     <button
                       key={i}
-                      onClick={() => { handleNavigateIdx(i); setShowList(false); }}
+                      disabled={isBlocked}
+                      onClick={() => { 
+                        if (isBlocked) {
+                          toast.warning("Pilih atau isi jawaban terlebih dahulu untuk melanjutkan.");
+                          return;
+                        }
+                        handleNavigateIdx(i); 
+                        setShowList(false); 
+                      }}
                       className={cn(
-                        "relative aspect-square rounded-2xl text-lg font-bold border-2 transition-all shadow-sm active:scale-95",
+                        "relative aspect-square rounded-2xl text-lg font-bold border-2 transition-all shadow-sm",
+                        isBlocked
+                          ? "opacity-40 cursor-not-allowed bg-slate-100 dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700"
+                          : "active:scale-95",
                         i === idx && "ring-4 ring-primary/30",
-                        a.ragu
-                          ? "bg-amber-400 text-white border-amber-500"
-                          : dijawab
-                            ? "bg-primary text-white border-primary"
-                            : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700"
+                        !isBlocked && (
+                          a.ragu
+                            ? "bg-amber-400 text-white border-amber-500"
+                            : dijawab
+                              ? "bg-primary text-white border-primary"
+                              : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700"
+                        )
                       )}
                     >
                       {i + 1}
