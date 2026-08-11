@@ -107,7 +107,7 @@ function UjianList() {
           </div>
           
           <div className="flex flex-col min-w-0">
-            <Link to={type === "persiapan" ? "/admin/ujian/$id" : "/admin/ujian/$id/peserta"} params={{ id: u.id }} className="font-semibold text-sm text-slate-900 dark:text-slate-100 truncate hover:text-slate-600 dark:hover:text-slate-300">
+            <Link to="/admin/ujian/$id" params={{ id: u.id }} className="font-semibold text-sm text-slate-900 dark:text-slate-100 truncate hover:text-slate-600 dark:hover:text-slate-300">
               {u.nama}
             </Link>
             <div className="flex items-center gap-2 mt-1">
@@ -121,7 +121,7 @@ function UjianList() {
         <div className="flex items-center gap-2 shrink-0 ml-4">
           {type === "persiapan" && (
             <>
-              <Link to="/admin/ujian/$id/token" params={{ id: u.id }} className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-colors">
+              <Link to="/admin/ujian/$id" params={{ id: u.id }} hash="token" className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-colors">
                 <KeyRound className="h-3.5 w-3.5"/> Token
               </Link>
               <Link to="/admin/ujian/$id/peserta" params={{ id: u.id }} className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-colors">
@@ -134,7 +134,7 @@ function UjianList() {
           )}
           {type === "berlangsung" && (
             <>
-              <Link to="/admin/ujian/$id/token" params={{ id: u.id }} className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-colors">
+              <Link to="/admin/ujian/$id" params={{ id: u.id }} hash="token" className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-colors">
                 <KeyRound className="h-3.5 w-3.5"/> Token
               </Link>
               <Link to="/admin/peserta/online" search={{ ujianId: u.id }} className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 dark:bg-emerald-500 text-white rounded-md text-xs font-medium hover:bg-emerald-700 transition-colors">
