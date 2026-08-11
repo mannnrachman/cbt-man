@@ -48,7 +48,6 @@ import { Route as AuthenticatedPesertaUjianIdIndexRouteImport } from './routes/_
 import { Route as AuthenticatedAdminUjianIdIndexRouteImport } from './routes/_authenticated/admin.ujian.$id.index'
 import { Route as AuthenticatedPesertaUjianIdKerjakanRouteImport } from './routes/_authenticated/peserta.ujian.$id.kerjakan'
 import { Route as AuthenticatedPesertaUjianIdHasilRouteImport } from './routes/_authenticated/peserta.ujian.$id.hasil'
-import { Route as AuthenticatedAdminUjianIdTokenRouteImport } from './routes/_authenticated/admin.ujian.$id.token'
 import { Route as AuthenticatedAdminUjianIdPesertaRouteImport } from './routes/_authenticated/admin.ujian.$id.peserta'
 import { Route as AuthenticatedAdminTopikIdSoalRouteImport } from './routes/_authenticated/admin.topik.$id.soal'
 import { Route as AuthenticatedAdminModulIdTopikRouteImport } from './routes/_authenticated/admin.modul.$id.topik'
@@ -274,12 +273,6 @@ const AuthenticatedPesertaUjianIdHasilRoute =
     path: '/ujian/$id/hasil',
     getParentRoute: () => AuthenticatedPesertaRoute,
   } as any)
-const AuthenticatedAdminUjianIdTokenRoute =
-  AuthenticatedAdminUjianIdTokenRouteImport.update({
-    id: '/$id/token',
-    path: '/$id/token',
-    getParentRoute: () => AuthenticatedAdminUjianRoute,
-  } as any)
 const AuthenticatedAdminUjianIdPesertaRoute =
   AuthenticatedAdminUjianIdPesertaRouteImport.update({
     id: '/$id/peserta',
@@ -344,7 +337,6 @@ export interface FileRoutesByFullPath {
   '/admin/modul/$id/topik': typeof AuthenticatedAdminModulIdTopikRoute
   '/admin/topik/$id/soal': typeof AuthenticatedAdminTopikIdSoalRoute
   '/admin/ujian/$id/peserta': typeof AuthenticatedAdminUjianIdPesertaRoute
-  '/admin/ujian/$id/token': typeof AuthenticatedAdminUjianIdTokenRoute
   '/peserta/ujian/$id/hasil': typeof AuthenticatedPesertaUjianIdHasilRoute
   '/peserta/ujian/$id/kerjakan': typeof AuthenticatedPesertaUjianIdKerjakanRoute
   '/admin/ujian/$id/': typeof AuthenticatedAdminUjianIdIndexRoute
@@ -386,7 +378,6 @@ export interface FileRoutesByTo {
   '/admin/modul/$id/topik': typeof AuthenticatedAdminModulIdTopikRoute
   '/admin/topik/$id/soal': typeof AuthenticatedAdminTopikIdSoalRoute
   '/admin/ujian/$id/peserta': typeof AuthenticatedAdminUjianIdPesertaRoute
-  '/admin/ujian/$id/token': typeof AuthenticatedAdminUjianIdTokenRoute
   '/peserta/ujian/$id/hasil': typeof AuthenticatedPesertaUjianIdHasilRoute
   '/peserta/ujian/$id/kerjakan': typeof AuthenticatedPesertaUjianIdKerjakanRoute
   '/admin/ujian/$id': typeof AuthenticatedAdminUjianIdIndexRoute
@@ -433,7 +424,6 @@ export interface FileRoutesById {
   '/_authenticated/admin/modul/$id/topik': typeof AuthenticatedAdminModulIdTopikRoute
   '/_authenticated/admin/topik/$id/soal': typeof AuthenticatedAdminTopikIdSoalRoute
   '/_authenticated/admin/ujian/$id/peserta': typeof AuthenticatedAdminUjianIdPesertaRoute
-  '/_authenticated/admin/ujian/$id/token': typeof AuthenticatedAdminUjianIdTokenRoute
   '/_authenticated/peserta/ujian/$id/hasil': typeof AuthenticatedPesertaUjianIdHasilRoute
   '/_authenticated/peserta/ujian/$id/kerjakan': typeof AuthenticatedPesertaUjianIdKerjakanRoute
   '/_authenticated/admin/ujian/$id/': typeof AuthenticatedAdminUjianIdIndexRoute
@@ -480,7 +470,6 @@ export interface FileRouteTypes {
     | '/admin/modul/$id/topik'
     | '/admin/topik/$id/soal'
     | '/admin/ujian/$id/peserta'
-    | '/admin/ujian/$id/token'
     | '/peserta/ujian/$id/hasil'
     | '/peserta/ujian/$id/kerjakan'
     | '/admin/ujian/$id/'
@@ -522,7 +511,6 @@ export interface FileRouteTypes {
     | '/admin/modul/$id/topik'
     | '/admin/topik/$id/soal'
     | '/admin/ujian/$id/peserta'
-    | '/admin/ujian/$id/token'
     | '/peserta/ujian/$id/hasil'
     | '/peserta/ujian/$id/kerjakan'
     | '/admin/ujian/$id'
@@ -568,7 +556,6 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/modul/$id/topik'
     | '/_authenticated/admin/topik/$id/soal'
     | '/_authenticated/admin/ujian/$id/peserta'
-    | '/_authenticated/admin/ujian/$id/token'
     | '/_authenticated/peserta/ujian/$id/hasil'
     | '/_authenticated/peserta/ujian/$id/kerjakan'
     | '/_authenticated/admin/ujian/$id/'
@@ -858,13 +845,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPesertaUjianIdHasilRouteImport
       parentRoute: typeof AuthenticatedPesertaRoute
     }
-    '/_authenticated/admin/ujian/$id/token': {
-      id: '/_authenticated/admin/ujian/$id/token'
-      path: '/$id/token'
-      fullPath: '/admin/ujian/$id/token'
-      preLoaderRoute: typeof AuthenticatedAdminUjianIdTokenRouteImport
-      parentRoute: typeof AuthenticatedAdminUjianRoute
-    }
     '/_authenticated/admin/ujian/$id/peserta': {
       id: '/_authenticated/admin/ujian/$id/peserta'
       path: '/$id/peserta'
@@ -940,7 +920,6 @@ const AuthenticatedAdminModulRouteWithChildren =
 
 interface AuthenticatedAdminUjianRouteChildren {
   AuthenticatedAdminUjianIdPesertaRoute: typeof AuthenticatedAdminUjianIdPesertaRoute
-  AuthenticatedAdminUjianIdTokenRoute: typeof AuthenticatedAdminUjianIdTokenRoute
   AuthenticatedAdminUjianIdIndexRoute: typeof AuthenticatedAdminUjianIdIndexRoute
 }
 
@@ -948,7 +927,6 @@ const AuthenticatedAdminUjianRouteChildren: AuthenticatedAdminUjianRouteChildren
   {
     AuthenticatedAdminUjianIdPesertaRoute:
       AuthenticatedAdminUjianIdPesertaRoute,
-    AuthenticatedAdminUjianIdTokenRoute: AuthenticatedAdminUjianIdTokenRoute,
     AuthenticatedAdminUjianIdIndexRoute: AuthenticatedAdminUjianIdIndexRoute,
   }
 
