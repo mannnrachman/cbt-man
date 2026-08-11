@@ -161,6 +161,7 @@ export const TokenUjianSchema = z.object({
 	kode: z.string(),
 	dipakaiOleh: z.string().optional(),
 	dipakaiAt: z.number().optional(),
+	expireAt: z.number().optional(),
 });
 export type TokenUjian = z.infer<typeof TokenUjianSchema>;
 

@@ -225,6 +225,8 @@ export const generateExamTokensServer = createServerFn({ method: "POST" })
 			ujianId: z.string().min(1),
 			jumlah: z.number().int().min(1).max(500),
 			length: z.number().int().min(8).max(32).optional(),
+			customKode: z.string().optional(),
+			durasiMenit: z.number().optional(),
 		}),
 	)
 	.handler(async ({ data }) => {
@@ -247,10 +249,17 @@ export const generateExamTokensServer = createServerFn({ method: "POST" })
 		const length = data.length ?? DEFAULT_TOKEN_LENGTH;
 		const created: TokenUjian[] = [];
 		let attempts = 0;
-		const maxAttempts = data.jumlah * (1 + MAX_TOKEN_COLLISION_RETRIES);
+		// If customKode is provided, we only generate 1 token with that exact code
+		const isManual = !!(data.customKode && data.customKode.trim().length > 0);
+		const targetJumlah = isManual ? 1 : data.jumlah;
+		const maxAttempts = targetJumlah * (1 + MAX_TOKEN_COLLISION_RETRIES);
 
-		while (created.length < data.jumlah && attempts < maxAttempts) {
-			const code = generateTokenCode(length);
+		const expireAt = data.durasiMenit && data.durasiMenit > 0 
+			? BigInt(Date.now() + data.durasiMenit * 60000) 
+			: null;
+
+		while (created.length < targetJumlah && attempts < maxAttempts) {
+			const code = isManual ? data.customKode!.trim().toUpperCase() : generateTokenCode(length);
 			attempts++;
 			try {
 				const row = await prisma.tokenUjian.create({
@@ -258,26 +267,47 @@ export const generateExamTokensServer = createServerFn({ method: "POST" })
 						id: uid("tk_"),
 						ujianId: data.ujianId,
 						kode: code,
+						expireAt,
 					},
 				});
 				created.push(mapToken(row));
 			} catch (err) {
 				if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+					if (isManual) {
+						return { ok: false as const, error: "Kode token sudah digunakan di ujian ini" };
+					}
 					continue;
 				}
 				throw err;
 			}
 		}
 
-		if (created.length < data.jumlah) {
-			return {
-				ok: false as const,
-				error: `Gagal membuat token unik setelah ${maxAttempts} percobaan; berhasil ${created.length} dari ${data.jumlah}`,
-				created: created.length,
-			};
+		if (created.length < targetJumlah) {
+			return { ok: false as const, error: "Gagal membuat semua token karena tabrakan kode. Silakan coba lagi." };
+		}
+		return { ok: true as const, tokens: created };
+	});
+
+export const deleteExamTokenServer = createServerFn({ method: "POST" })
+	.validator(z.object({ id: z.string() }))
+	.handler(async ({ data }) => {
+		const caller = await requireCaller();
+		if (!caller) return { ok: false as const, error: "Unauthorized" };
+		if (caller.role !== "super_admin" && caller.role !== "admin_prodi") {
+			return { ok: false as const, error: "Forbidden" };
 		}
 
-		return { ok: true as const, tokens: created };
+		const token = await prisma.tokenUjian.findUnique({ where: { id: data.id } });
+		if (!token) return { ok: false as const, error: "Token tidak ditemukan" };
+
+		if (caller.role === "admin_prodi") {
+			if (!(await operatorCanTouchUjian(caller, token.ujianId))) {
+				return { ok: false as const, error: "Forbidden" };
+			}
+		}
+
+		await prisma.tokenUjian.delete({ where: { id: data.id } });
+		return { ok: true as const };
 	});
 
 export const claimExamToken = createServerFn({ method: "POST" })
@@ -322,7 +352,10 @@ export const claimExamToken = createServerFn({ method: "POST" })
 			where: {
 				ujianId: data.ujianId,
 				kode,
-				OR: [{ dipakaiOleh: null }, { dipakaiOleh: caller.id }],
+				AND: [
+					{ OR: [{ dipakaiOleh: null }, { dipakaiOleh: caller.id }] },
+					{ OR: [{ expireAt: null }, { expireAt: { gt: Date.now() } }] }
+				]
 			},
 			data: { dipakaiOleh: caller.id, dipakaiAt: toBigInt(dipakaiAt) },
 		});
@@ -330,13 +363,13 @@ export const claimExamToken = createServerFn({ method: "POST" })
 		if (result.count === 0) {
 			const existing = await prisma.tokenUjian.findFirst({
 				where: { ujianId: data.ujianId, kode },
-				select: { id: true },
+				select: { id: true, dipakaiOleh: true, expireAt: true },
 			});
 			if (!existing)
-				return {
-					ok: false as const,
-					error: "Token tidak valid untuk ujian ini",
-				};
+				return { ok: false as const, error: "Token tidak valid untuk ujian ini" };
+			if (existing.expireAt !== null && Number(existing.expireAt) <= Date.now()) {
+				return { ok: false as const, error: "Token sudah kadaluarsa" };
+			}
 			return { ok: false as const, error: "Token sudah dipakai peserta lain" };
 		}
 
