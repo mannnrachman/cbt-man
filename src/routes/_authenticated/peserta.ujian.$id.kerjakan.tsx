@@ -310,6 +310,10 @@ function RouteComponent() {
   const currentJawaban = j;
   const optOrder = currentSesi.jawabanOrder[currentSoal.id] ?? currentSoal.jawaban.map((o) => o.id);
 
+  const isAnswered =
+    currentJawaban.jawabanIds.length > 0 ||
+    Boolean(currentJawaban.jawabanEssay?.trim());
+
   const mm = Math.floor(remaining / 60000);
   const ss = Math.floor((remaining % 60000) / 1000);
   const danger = remaining < 300_000; // < 5 minutes
@@ -498,7 +502,7 @@ function RouteComponent() {
               <Button
                 size="lg"
                 className="w-full sm:w-auto h-14 px-8 rounded-xl font-bold uppercase tracking-widest shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
-                disabled={idx === currentSesi.soalIds.length - 1}
+                disabled={idx === currentSesi.soalIds.length - 1 || !isAnswered}
                 onClick={() => handleNavigateIdx(idx + 1)}
               >
                 BERIKUTNYA <ChevronRight className="w-5 h-5 ml-1" />
