@@ -130,7 +130,7 @@ export function TokenManager({ ujian }: { ujian: Ujian }) {
                 </div>
                 
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-slate-600 dark:text-slate-400">2. Custom Kode (Master)</Label>
+                  <Label className="text-xs font-medium text-slate-600 dark:text-slate-400">2. Custom Kode</Label>
                   <Input
                     type="text"
                     value={customKode}
@@ -164,16 +164,11 @@ export function TokenManager({ ujian }: { ujian: Ujian }) {
                 </div>
                 
                 <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
-                  <div className="flex items-start gap-2.5">
-                    <Checkbox id="applyAll" checked={applyToAll} onCheckedChange={(c) => setApplyToAll(c === true)} className="mt-0.5" />
-                    <div className="space-y-1">
-                      <Label htmlFor="applyAll" className="text-sm font-medium leading-none cursor-pointer">
-                        Jadikan Master Token
-                      </Label>
-                      <p className="text-[10px] text-slate-500 leading-tight">
-                        Terapkan token ini ke semua ujian Anda lainnya yang berstatus Persiapan atau Berlangsung.
-                      </p>
-                    </div>
+                  <div className="flex items-center gap-2.5">
+                    <Checkbox id="applyAll" checked={applyToAll} onCheckedChange={(c) => setApplyToAll(c === true)} />
+                    <Label htmlFor="applyAll" className="text-sm font-medium cursor-pointer">
+                      Terapkan ke semua ujian
+                    </Label>
                   </div>
                 </div>
               </div>
