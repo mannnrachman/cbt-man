@@ -2,6 +2,7 @@
 import { soalRepo, sesiRepo, ujianRepo } from "./repos";
 import type { SesiUjian, Soal, Ujian, User } from "./types";
 import { uid } from "./storage";
+import { gradeAnswers } from "./scoring";
 import { PesertaNotAssignedToExamError, isParticipantAssignedToExam } from "./access";
 
 function shuffle<T>(arr: T[]): T[] {
@@ -83,39 +84,14 @@ export function startSesi(sesi: SesiUjian, ujian: Ujian): SesiUjian {
 
 // Auto-grade for objective questions. Essay diisi 0 (perlu manual grading).
 export function gradeSesi(sesi: SesiUjian, ujian: Ujian): SesiUjian {
-  let total = 0;
-  let maxSkor = 0;
-  const jawabanGraded = sesi.jawaban.map((j) => {
-    const soal = soalRepo.byId(j.soalId);
-    if (!soal) return j;
-    maxSkor += ujian.poinBenar;
-    if (soal.tipe === "essay") {
-      // tunda penilaian
-      return { ...j, skor: j.skor ?? undefined };
-    }
-    const benarIds = soal.jawaban.filter((x) => x.benar).map((x) => x.id);
-    const selected = j.jawabanIds;
-    let skor = 0;
-    if (selected.length === 0) skor = ujian.poinKosong;
-    else if (benarIds.length === selected.length && benarIds.every((id) => selected.includes(id)))
-      skor = ujian.poinBenar;
-    else skor = ujian.poinSalah;
-    total += skor;
-    return { ...j, skor };
-  });
-
-  // tambahkan skor essay yang sudah dinilai (jika ada)
-  for (const j of jawabanGraded) {
-    const soal = soalRepo.byId(j.soalId);
-    if (soal?.tipe === "essay" && typeof j.skor === "number") total += j.skor;
-  }
-
+  const soalById = new Map(soalRepo.all().map((s) => [s.id, s]));
+  const { jawaban, skorTotal, maxSkor } = gradeAnswers(ujian, soalById, sesi.jawaban);
   return {
     ...sesi,
     status: "selesai",
     selesaiAt: sesi.selesaiAt ?? Date.now(),
-    jawaban: jawabanGraded,
-    skorTotal: total,
+    jawaban,
+    skorTotal,
     maxSkor,
   };
 }
