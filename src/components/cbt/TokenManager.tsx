@@ -86,30 +86,36 @@ export function TokenManager({ ujian }: { ujian: Ujian }) {
   const validTokens = tokens.filter(t => !t.expireAt || t.expireAt > Date.now());
 
   return (
-    <Card className="mt-6 border-slate-200 dark:border-slate-800 shadow-sm" id="token">
-      <CardHeader className="bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800 pb-4">
-        <CardTitle className="text-lg flex items-center gap-2">
-          <KeyRound className="h-5 w-5 text-slate-500" />
-          Kelola Token
+    <Card className="mt-6 border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden" id="token">
+      <CardHeader className="bg-slate-50/80 dark:bg-slate-900/80 border-b border-slate-100 dark:border-slate-800 py-4">
+        <CardTitle className="text-base font-bold flex items-center gap-3 text-slate-900 dark:text-slate-100">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shrink-0">
+            <KeyRound className="h-4 w-4" />
+          </div>
+          <div>
+            <span>Kelola Token Ujian</span>
+            <p className="text-xs font-normal text-slate-500 dark:text-slate-400 mt-0.5">
+              {ujian.tokenAktif
+                ? "Token ujian aktif. Peserta harus menginput salah satu kode di bawah."
+                : "Token tidak diwajibkan saat ini. Aktifkan di pengaturan utama jika perlu."}
+            </p>
+          </div>
         </CardTitle>
-        <p className="text-sm text-muted-foreground mt-1">
-          {ujian.tokenAktif
-            ? "Token ujian aktif. Peserta harus menginput salah satu kode di bawah."
-            : "Token tidak diwajibkan saat ini. Aktifkan di pengaturan utama jika perlu."}
-        </p>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+        <div className="p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/40">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
             {/* Kolom 1: Mode Token */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div>
-                <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200">Mode Token</h4>
-                <p className="text-xs text-slate-500">Pilih salah satu cara pembuatan token.</p>
+                <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                  <KeyRound className="w-4 h-4 text-primary" /> Mode Token
+                </h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Pilih salah satu cara pembuatan token.</p>
               </div>
 
-              <div className="p-3 bg-white dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 space-y-3 shadow-sm">
+              <div className="p-4 bg-white dark:bg-slate-950 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-3 shadow-xs">
                 <div className="space-y-1.5">
                   <Label className="text-xs font-medium text-slate-600 dark:text-slate-400">1. Otomatis (Jumlah)</Label>
                   <Input
@@ -123,7 +129,7 @@ export function TokenManager({ ujian }: { ujian: Ujian }) {
                   />
                 </div>
 
-                <div className="relative flex items-center justify-center py-2">
+                <div className="relative flex items-center justify-center py-1">
                   <span className="bg-white dark:bg-slate-950 px-2 text-[10px] uppercase font-bold text-slate-400 absolute">Atau</span>
                   <div className="w-full border-t border-slate-100 dark:border-slate-800"></div>
                 </div>
@@ -135,23 +141,25 @@ export function TokenManager({ ujian }: { ujian: Ujian }) {
                     value={customKode}
                     onChange={(e) => setCustomKode(e.target.value.toUpperCase())}
                     placeholder="Misal: MTK-2026"
-                    className="h-9 font-mono text-sm"
+                    className="h-9 font-mono text-sm uppercase tracking-wider"
                   />
                 </div>
               </div>
             </div>
 
             {/* Kolom 2: Aturan & Expire */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div>
-                <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200">Pengaturan Lanjutan</h4>
-                <p className="text-xs text-slate-500">Atur masa berlaku dan cakupan ujian.</p>
+                <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-primary" /> Pengaturan Lanjutan
+                </h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Atur masa berlaku dan cakupan ujian.</p>
               </div>
 
-              <div className="p-3 bg-white dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
+              <div className="p-4 bg-white dark:bg-slate-950 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-4 shadow-xs">
                 <div className="space-y-1.5">
                   <Label className="text-xs font-medium text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-blue-500" /> Batas Kedaluwarsa
+                    <Clock className="w-3.5 h-3.5 text-primary" /> Batas Kedaluwarsa Waktu
                   </Label>
                   <Input
                     type="datetime-local"
@@ -165,8 +173,8 @@ export function TokenManager({ ujian }: { ujian: Ujian }) {
                 <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
                   <div className="flex items-center gap-2.5">
                     <Checkbox id="applyAll" checked={applyToAll} onCheckedChange={(c) => setApplyToAll(c === true)} />
-                    <Label htmlFor="applyAll" className="text-sm font-medium cursor-pointer">
-                      Terapkan ke semua ujian
+                    <Label htmlFor="applyAll" className="text-xs font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                      Terapkan ke semua paket ujian
                     </Label>
                   </div>
                 </div>
@@ -176,36 +184,38 @@ export function TokenManager({ ujian }: { ujian: Ujian }) {
           </div>
 
           {/* Action Row */}
-          <div className="mt-5 pt-4 flex items-center justify-between border-t border-slate-200/60 dark:border-slate-700/60">
-            <Button variant="outline" onClick={copyAll} size="sm" className="h-9">
-              <Copy className="mr-2 h-4 w-4" />
-              Salin Tersedia
+          <div className="mt-5 pt-4 flex items-center justify-between border-t border-slate-200/60 dark:border-slate-800">
+            <Button variant="outline" onClick={copyAll} size="sm" className="h-9 text-xs">
+              <Copy className="mr-2 h-3.5 w-3.5" />
+              Salin Kode Tersedia
             </Button>
 
-            <Button onClick={generate} disabled={generating} size="sm" className="h-9 px-6 bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
-              <Plus className="mr-2 h-4 w-4" />
+            <Button onClick={generate} disabled={generating} size="sm" className="h-9 px-5 text-xs font-semibold shadow-sm">
+              <Plus className="mr-1.5 h-4 w-4" />
               {generating ? "Membuat…" : "Buat Token"}
             </Button>
           </div>
         </div>
 
-        <div className="max-h-[400px] overflow-auto">
+        <div className="max-h-[350px] overflow-auto">
           <table className="w-full text-sm">
-            <thead className="bg-muted/40 text-left sticky top-0 backdrop-blur-sm shadow-sm">
+            <thead className="bg-slate-100/70 dark:bg-slate-900/80 text-left sticky top-0 backdrop-blur-sm shadow-xs border-b border-slate-200/60 dark:border-slate-800">
               <tr>
-                <th className="p-3 font-medium text-slate-600 dark:text-slate-400">Kode</th>
-                <th className="p-3 font-medium text-slate-600 dark:text-slate-400">Status</th>
-                <th className="p-3 font-medium text-slate-600 dark:text-slate-400 text-right">Aksi</th>
+                <th className="p-3 font-semibold text-slate-600 dark:text-slate-400 text-xs">Kode Token</th>
+                <th className="p-3 font-semibold text-slate-600 dark:text-slate-400 text-xs">Status</th>
+                <th className="p-3 font-semibold text-slate-600 dark:text-slate-400 text-xs text-right">Aksi</th>
               </tr>
             </thead>
             <tbody>
               {validTokens.map((t) => {
                 return (
-                  <tr key={t.id} className="border-b last:border-0 border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
-                    <td className="p-3 font-mono text-slate-900 dark:text-slate-100 font-semibold">{t.kode}</td>
+                  <tr key={t.id} className="border-b last:border-0 border-slate-100 dark:border-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
+                    <td className="p-3 font-mono text-slate-900 dark:text-slate-100 font-bold text-sm tracking-wider">{t.kode}</td>
                     <td className="p-3">
                         <div className="flex flex-col items-start">
-                          <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20 dark:bg-emerald-950 dark:text-emerald-400 dark:ring-emerald-400/20 mb-1">Aktif</span>
+                          <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 mb-1">
+                            Aktif
+                          </span>
                           {t.expireAt && (
                             <span className="text-[10px] text-slate-500 font-medium">
                               S/d: {new Date(t.expireAt).toLocaleTimeString("id-ID", { hour: '2-digit', minute: '2-digit' })}
@@ -223,8 +233,8 @@ export function TokenManager({ ujian }: { ujian: Ujian }) {
               })}
               {validTokens.length === 0 && (
                 <tr>
-                  <td colSpan={3} className="p-8 text-center text-slate-500 dark:text-slate-400">
-                    Belum ada token.
+                  <td colSpan={3} className="p-8 text-center text-slate-500 dark:text-slate-400 text-xs">
+                    Belum ada token aktif untuk ujian ini.
                   </td>
                 </tr>
               )}
