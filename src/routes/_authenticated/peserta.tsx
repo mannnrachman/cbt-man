@@ -72,7 +72,7 @@ function PesertaLayout() {
 				</div>
 			)}
 
-			<header className="w-full bg-white/40 dark:bg-black/20 backdrop-blur-md px-6 py-4 flex items-center justify-between relative z-20 font-sans border-b border-slate-200/50 dark:border-white/5 shadow-sm transition-colors shrink-0">
+			<header className="w-full bg-white/40 dark:bg-black/20 backdrop-blur-md px-6 py-3 flex items-center justify-between relative z-20 font-sans border-b border-slate-200/50 dark:border-white/5 shadow-sm transition-colors shrink-0">
 				<div className="flex items-center gap-3">
 					{appLogo ? (
 						<img src={appLogo} alt="Logo" className="h-8 max-w-[120px] object-contain drop-shadow-sm" />
