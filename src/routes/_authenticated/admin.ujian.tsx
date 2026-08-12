@@ -61,6 +61,7 @@ function UjianList() {
       blokirShortcut: true,
       mode: "online",
       allowCalculator: false,
+      allowNilaiNormal: false,
       createdBy: user.id,
       createdAt: Date.now(),
     };
