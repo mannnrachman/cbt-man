@@ -460,8 +460,10 @@ function UjianEditor() {
                 );
               })}
               {u.topicSets.length === 0 && (
-                <div className="p-8 text-center border border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Belum ada topic set. Klik "Tambah Topic Set" untuk memilih bank soal.</p>
+                <div className="flex flex-col items-center justify-center py-6 px-4 text-center rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20">
+                  <Layers className="h-8 w-8 text-slate-400 mb-2 opacity-50" />
+                  <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Belum ada topik soal (Topic Set).</p>
+                  <p className="text-xs text-slate-500 mt-1">Silakan klik "Tambah Topic Set" untuk mengambil soal dari bank soal.</p>
                 </div>
               )}
             </CardContent>
@@ -577,7 +579,7 @@ function UjianEditor() {
                 </div>
                 <Switch
                   id="allow-calculator"
-                  checked={u.allowCalculator}
+                  checked={u.allowCalculator ?? false}
                   onCheckedChange={(value) => set("allowCalculator", value)}
                 />
               </div>
@@ -590,7 +592,7 @@ function UjianEditor() {
                 </div>
                 <Switch
                   id="allow-nilai-normal"
-                  checked={u.allowNilaiNormal}
+                  checked={u.allowNilaiNormal ?? false}
                   onCheckedChange={(value) => set("allowNilaiNormal", value)}
                 />
               </div>

@@ -166,6 +166,7 @@ function PreUjianContent({
         return;
       }
 
+      await hydrateRepos();
       navigate({ to: "/peserta/ujian/$id/kerjakan", params: { id: ujian.id } });
     } catch (err) {
       toast.error("Terjadi kesalahan. Silakan coba lagi.");
