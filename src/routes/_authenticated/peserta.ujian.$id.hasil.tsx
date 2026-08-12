@@ -229,7 +229,19 @@ function HasilPeserta() {
 												<div className="bg-slate-50 dark:bg-slate-950 rounded-2xl p-6 border border-slate-200 dark:border-slate-800">
 													<p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Jawaban Anda:</p>
 													<div className="prose prose-slate dark:prose-invert max-w-none prose-p:my-0 text-slate-700 dark:text-slate-300">
-														<RichView html={j.jawabanEssay || "<em>(Kosong)</em>"} />
+														<RichView
+															html={
+																j.jawabanEssay
+																	? j.jawabanEssay
+																			.replace(/&/g, "&amp;")
+																			.replace(/</g, "&lt;")
+																			.replace(/>/g, "&gt;")
+																			.replace(/"/g, "&quot;")
+																			.replace(/'/g, "&#39;")
+																			.replace(/\n/g, "<br />")
+																	: "<em>(Kosong)</em>"
+															}
+														/>
 													</div>
 												</div>
 											) : (
