@@ -17,9 +17,10 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Trash2, Save, Lock } from "lucide-react";
+import { Plus, Trash2, Save, Lock, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 import { RichEditor } from "@/components/cbt/RichEditor";
+import { TokenManager } from "@/components/cbt/TokenManager";
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import {
   allowedTopikIdSet,
@@ -30,7 +31,7 @@ import {
 } from "@/lib/cbt/access";
 import { fetchUjianByIdServer } from "@/lib/server/ujian/functions";
 
-export const Route = createFileRoute("/_authenticated/admin/ujian/$id")({
+export const Route = createFileRoute("/_authenticated/admin/ujian/$id/")({
   loader: async () => {
     try {
       await hydrateRepos();
@@ -42,7 +43,7 @@ export const Route = createFileRoute("/_authenticated/admin/ujian/$id")({
 });
 
 function UjianEditor() {
-  const { id } = useParams({ from: "/_authenticated/admin/ujian/$id" });
+  const { id } = useParams({ from: "/_authenticated/admin/ujian/$id/" });
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const initial = ujianRepo.byId(id);
@@ -557,6 +558,8 @@ function UjianEditor() {
           </div>
         </CardContent>
       </Card>
+
+      <TokenManager ujian={u} />
     </div>
   );
 }

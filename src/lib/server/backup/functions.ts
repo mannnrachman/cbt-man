@@ -107,8 +107,7 @@ export const importBackupServer = createServerFn({ method: "POST" })
 					await tx.tokenUjian.createMany({
 						data: toInsert.map((item) => ({
 							...item,
-							dipakaiOleh: item.dipakaiOleh ?? null,
-							dipakaiAt: toBigInt(item.dipakaiAt),
+							expireAt: toBigInt(item.expireAt),
 						})),
 					});
 				}

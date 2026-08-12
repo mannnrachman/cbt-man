@@ -163,8 +163,7 @@ export const mutateTokenServer = createServerFn({ method: "POST" })
 					await tx.tokenUjian.createMany({
 						data: (payload as TokenUjian[]).map((item) => ({
 							...item,
-							dipakaiOleh: item.dipakaiOleh ?? null,
-							dipakaiAt: toBigInt(item.dipakaiAt),
+							expireAt: toBigInt(item.expireAt),
 						})),
 					});
 				} else {
@@ -174,15 +173,13 @@ export const mutateTokenServer = createServerFn({ method: "POST" })
 						update: {
 							ujianId: item.ujianId,
 							kode: item.kode,
-							dipakaiOleh: item.dipakaiOleh ?? null,
-							dipakaiAt: toBigInt(item.dipakaiAt),
+							expireAt: toBigInt(item.expireAt),
 						},
 						create: {
 							id: item.id,
 							ujianId: item.ujianId,
 							kode: item.kode,
-							dipakaiOleh: item.dipakaiOleh ?? null,
-							dipakaiAt: toBigInt(item.dipakaiAt),
+							expireAt: toBigInt(item.expireAt),
 						},
 					});
 				}
@@ -225,6 +222,9 @@ export const generateExamTokensServer = createServerFn({ method: "POST" })
 			ujianId: z.string().min(1),
 			jumlah: z.number().int().min(1).max(500),
 			length: z.number().int().min(8).max(32).optional(),
+			customKode: z.string().trim().max(32).optional(),
+			expireAtMs: z.number().int().positive().optional(),
+			applyToAll: z.boolean().optional(),
 		}),
 	)
 	.handler(async ({ data }) => {
@@ -246,38 +246,78 @@ export const generateExamTokensServer = createServerFn({ method: "POST" })
 
 		const length = data.length ?? DEFAULT_TOKEN_LENGTH;
 		const created: TokenUjian[] = [];
-		let attempts = 0;
-		const maxAttempts = data.jumlah * (1 + MAX_TOKEN_COLLISION_RETRIES);
+		// If customKode is provided, we only generate 1 token with that exact code
+		const isManual = !!(data.customKode && data.customKode.trim().length > 0);
+		const targetJumlah = isManual ? 1 : data.jumlah;
 
-		while (created.length < data.jumlah && attempts < maxAttempts) {
-			const code = generateTokenCode(length);
-			attempts++;
-			try {
-				const row = await prisma.tokenUjian.create({
-					data: {
-						id: uid("tk_"),
-						ujianId: data.ujianId,
-						kode: code,
-					},
-				});
-				created.push(mapToken(row));
-			} catch (err) {
-				if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
-					continue;
+		const expireAt = data.expireAtMs ? BigInt(data.expireAtMs) : null;
+
+		const targetUjianIds = [data.ujianId];
+		if (data.applyToAll) {
+			const all = await prisma.ujian.findMany({ select: { id: true, createdBy: true, mataKuliahId: true, semesterId: true } });
+			for (const ex of all) {
+				if (ex.id !== data.ujianId && (caller.role === "super_admin" || await operatorCanTouchUjian(caller, ex.id))) {
+					targetUjianIds.push(ex.id);
 				}
-				throw err;
 			}
 		}
 
-		if (created.length < data.jumlah) {
-			return {
-				ok: false as const,
-				error: `Gagal membuat token unik setelah ${maxAttempts} percobaan; berhasil ${created.length} dari ${data.jumlah}`,
-				created: created.length,
-			};
+		for (const uId of targetUjianIds) {
+			let currentAttempts = 0;
+			const maxAttempts = targetJumlah * (1 + MAX_TOKEN_COLLISION_RETRIES);
+
+			while (created.filter(t => t.ujianId === uId).length < targetJumlah && currentAttempts < maxAttempts) {
+				const code = isManual ? data.customKode!.trim().toUpperCase() : generateTokenCode(length);
+				currentAttempts++;
+				try {
+					const row = await prisma.tokenUjian.create({
+						data: {
+							id: uid("tk_"),
+							ujianId: uId,
+							kode: code,
+							expireAt,
+						},
+					});
+					created.push(mapToken(row));
+				} catch (err) {
+					if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+						if (isManual && uId === data.ujianId) {
+							return { ok: false as const, error: "Kode token sudah digunakan di ujian ini" };
+						}
+						continue;
+					}
+					throw err;
+				}
+			}
 		}
 
+		const thisExamTokens = created.filter(t => t.ujianId === data.ujianId);
+		if (thisExamTokens.length < targetJumlah) {
+			return { ok: false as const, error: "Gagal membuat semua token karena tabrakan kode. Silakan coba lagi." };
+		}
 		return { ok: true as const, tokens: created };
+	});
+
+export const deleteExamTokenServer = createServerFn({ method: "POST" })
+	.validator(z.object({ id: z.string() }))
+	.handler(async ({ data }) => {
+		const caller = await requireCaller();
+		if (!caller) return { ok: false as const, error: "Unauthorized" };
+		if (caller.role !== "super_admin" && caller.role !== "admin_prodi") {
+			return { ok: false as const, error: "Forbidden" };
+		}
+
+		const token = await prisma.tokenUjian.findUnique({ where: { id: data.id } });
+		if (!token) return { ok: false as const, error: "Token tidak ditemukan" };
+
+		if (caller.role === "admin_prodi") {
+			if (!(await operatorCanTouchUjian(caller, token.ujianId))) {
+				return { ok: false as const, error: "Forbidden" };
+			}
+		}
+
+		await prisma.tokenUjian.delete({ where: { id: data.id } });
+		return { ok: true as const };
 	});
 
 export const claimExamToken = createServerFn({ method: "POST" })
@@ -316,47 +356,50 @@ export const claimExamToken = createServerFn({ method: "POST" })
 		}
 
 		const kode = data.kode.trim().toUpperCase();
-		const dipakaiAt = Date.now();
 
-		const result = await prisma.tokenUjian.updateMany({
+		const validToken = await prisma.tokenUjian.findFirst({
 			where: {
 				ujianId: data.ujianId,
 				kode,
-				OR: [{ dipakaiOleh: null }, { dipakaiOleh: caller.id }],
+				OR: [{ expireAt: null }, { expireAt: { gt: Date.now() } }]
 			},
-			data: { dipakaiOleh: caller.id, dipakaiAt: toBigInt(dipakaiAt) },
+			select: { id: true }
 		});
 
-		if (result.count === 0) {
+		if (!validToken) {
+			// Check if it exists but is expired
 			const existing = await prisma.tokenUjian.findFirst({
 				where: { ujianId: data.ujianId, kode },
-				select: { id: true },
+				select: { id: true, expireAt: true }
 			});
-			if (!existing)
-				return {
-					ok: false as const,
-					error: "Token tidak valid untuk ujian ini",
-				};
-			return { ok: false as const, error: "Token sudah dipakai peserta lain" };
-		}
-
-		const claimedId = await prisma.tokenUjian.findFirst({
-			where: { ujianId: data.ujianId, kode },
-			select: { id: true },
-		});
-		if (!claimedId) {
-			return {
-				ok: false as const,
-				error: "Token tidak dapat diklaim, silakan coba lagi",
-			};
+			if (!existing) {
+				return { ok: false as const, error: "Token tidak valid untuk ujian ini" };
+			}
+			return { ok: false as const, error: "Token sudah kadaluarsa" };
 		}
 		const token: TokenUjian = {
-			id: claimedId.id,
+			id: validToken.id,
 			ujianId: data.ujianId,
 			kode,
-			dipakaiOleh: caller.id,
-			dipakaiAt,
 		};
+		await prisma.tokenClaim.upsert({
+			where: {
+				ujianId_pesertaId: {
+					ujianId: data.ujianId,
+					pesertaId: caller.id,
+				},
+			},
+			update: {
+				kode,
+				claimedAt: Date.now(),
+			},
+			create: {
+				ujianId: data.ujianId,
+				pesertaId: caller.id,
+				kode,
+				claimedAt: Date.now(),
+			},
+		});
 		clearRateLimit(caller.id, "claimToken");
 		return { ok: true as const, token };
 	});

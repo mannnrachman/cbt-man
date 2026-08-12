@@ -35,13 +35,13 @@ enum StatusSesi {
 }
 
 model UnitAkademik {
-  id       String         @id
-  nama     String
-  tipe     String
-  parentId String?
-  parent   UnitAkademik?  @relation("UnitToUnit", fields: [parentId], references: [id], onDelete: Cascade)
-  children UnitAkademik[] @relation("UnitToUnit")
-  users    User[]
+  id         String         @id
+  nama       String
+  tipe       String
+  parentId   String?
+  parent     UnitAkademik?  @relation("UnitToUnit", fields: [parentId], references: [id], onDelete: Cascade)
+  children   UnitAkademik[] @relation("UnitToUnit")
+  users      User[]
   mataKuliah MataKuliah[]
 }
 
@@ -60,6 +60,7 @@ model User {
   unit            UnitAkademik? @relation(fields: [unitId], references: [id])
   createdUjians   Ujian[]       @relation("UjianCreator")
   sesi            SesiUjian[]   @relation("SesiPeserta")
+  tokenClaims     TokenClaim[]
   sessions        Session[]     @relation("UserSessions")
 }
 
@@ -144,22 +145,35 @@ model Ujian {
   createdAt        BigInt
   creator          User         @relation("UjianCreator", fields: [createdBy], references: [id])
   tokens           TokenUjian[]
+  tokenClaims      TokenClaim[]
   sesi             SesiUjian[]
 }
 
 model TokenUjian {
-  id          String  @id
-  ujianId     String
-  kode        String
-  dipakaiOleh String?
-  dipakaiAt   BigInt?
-  ujian       Ujian   @relation(fields: [ujianId], references: [id], onDelete: Cascade)
+  id       String  @id
+  ujianId  String
+  kode     String
+  expireAt BigInt?
+  ujian    Ujian   @relation(fields: [ujianId], references: [id], onDelete: Cascade)
 
   // Token codes are scoped to an exam so two exams may independently
   // re-use the same short code. Uniqueness is enforced at the DB layer
   // so a stale client cache or a backup import can never persist duplicates.
   @@unique([ujianId, kode])
   @@index([ujianId])
+}
+
+model TokenClaim {
+  id        String @id @default(cuid())
+  ujianId   String
+  pesertaId String
+  kode      String
+  claimedAt BigInt
+
+  ujian   Ujian @relation(fields: [ujianId], references: [id], onDelete: Cascade)
+  peserta User  @relation(fields: [pesertaId], references: [id], onDelete: Cascade)
+
+  @@unique([ujianId, pesertaId])
 }
 
 model SesiUjian {
@@ -209,7 +223,6 @@ model AuditLog {
   @@index([createdAt])
 }
 
-
 model TahunAkademik {
   id       String     @id
   nama     String
@@ -227,10 +240,10 @@ model Semester {
 }
 
 model MataKuliah {
-  id         String       @id
+  id         String        @id
   kode       String
   nama       String
-  sks        Int          @default(2)
+  sks        Int           @default(2)
   unitId     String?
   unit       UnitAkademik? @relation(fields: [unitId], references: [id], onDelete: Cascade)
   semesterId String?

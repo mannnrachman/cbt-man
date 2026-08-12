@@ -169,7 +169,7 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
       config: {
         appName: "CBT-MAN",
         appLogo: "",
-        appDeskripsi: "Sistem CBT Universitas",
+        appDeskripsi: "Sistem CBT MAN",
         pesanLogin: "Silakan login menggunakan akun Anda.",
         mobileLock: false,
         multiDevice: false,
@@ -570,7 +570,7 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
 
   const config = {
     appName: "CBT-MAN",
-    appDeskripsi: "Simulasi CBT Kampus dengan data dummy realistis untuk preview lokal.",
+    appDeskripsi: "Simulasi CBT MAN dengan data dummy realistis untuk preview lokal.",
     pesanLogin: "Selamat datang di portal ujian Universitas Teknologi Nusantara. Gunakan akun demo sesuai peran untuk mencoba alur sistem.",
     mobileLock: false,
     multiDevice: false,
@@ -640,11 +640,23 @@ export async function seedDatabase({ prisma, dataset, stringifyJson }) {
 
   await prisma.tokenUjian.createMany({
     data: dataset.token.map((item) => ({
-      ...item,
-      dipakaiOleh: item.dipakaiOleh ?? null,
-      dipakaiAt: item.dipakaiAt ? BigInt(item.dipakaiAt) : null,
+      id: item.id,
+      ujianId: item.ujianId,
+      kode: item.kode,
+      expireAt: item.expireAt ? BigInt(item.expireAt) : null,
     })),
   });
+
+  const claimsToCreate = dataset.token.filter(t => t.dipakaiOleh).map(item => ({
+    ujianId: item.ujianId,
+    pesertaId: item.dipakaiOleh,
+    kode: item.kode,
+    claimedAt: item.dipakaiAt ? BigInt(item.dipakaiAt) : BigInt(Date.now())
+  }));
+
+  if (claimsToCreate.length > 0) {
+    await prisma.tokenClaim.createMany({ data: claimsToCreate });
+  }
 
   await prisma.sesiUjian.createMany({
     data: dataset.sesi.map((item) => ({

@@ -167,8 +167,7 @@ export function mapToken(
 		id: row.id,
 		ujianId: row.ujianId,
 		kode: row.kode,
-		dipakaiOleh: row.dipakaiOleh ?? undefined,
-		dipakaiAt: toNumber(row.dipakaiAt),
+		expireAt: toNumber(row.expireAt),
 	};
 }
 

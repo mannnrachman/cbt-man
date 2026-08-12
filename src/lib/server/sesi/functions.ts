@@ -128,8 +128,8 @@ export const mutateSesiServer = createServerFn({ method: "POST" })
             select: { tokenAktif: true },
           });
           if (ujianData?.tokenAktif) {
-            const claimed = await prisma.tokenUjian.findFirst({
-              where: { ujianId: item.ujianId, dipakaiOleh: caller.id },
+            const claimed = await prisma.tokenClaim.findUnique({
+              where: { ujianId_pesertaId: { ujianId: item.ujianId, pesertaId: caller.id } },
             });
             if (!claimed) {
               return {

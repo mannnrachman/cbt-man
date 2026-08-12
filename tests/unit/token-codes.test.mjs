@@ -182,7 +182,7 @@ test("no `Math.random()` is used in the token code generation files", () => {
 test("no `Math.random()` is used in the client token admin route", () => {
   const abs = resolve(
     process.cwd(),
-    "src/routes/_authenticated/admin.ujian.$id.token.tsx",
+    "src/components/cbt/TokenManager.tsx",
   );
   const src = readFileSync(abs, "utf8");
   assert.equal(
