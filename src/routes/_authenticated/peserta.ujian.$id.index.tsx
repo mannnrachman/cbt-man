@@ -1,14 +1,13 @@
 import { createFileRoute, Link, useParams, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { ujianRepo, sesiRepo, tokenRepo, hydrateRepos, claimExamToken, mataKuliahRepo, semesterRepo } from "@/lib/cbt/repos";
+import { ujianRepo, sesiRepo, tokenRepo, hydrateRepos, claimExamToken, createExamSession, mataKuliahRepo, semesterRepo } from "@/lib/cbt/repos";
 import { useAuthStore } from "@/lib/cbt/auth-store";
-import { findOrCreateSesi, startSesi } from "@/lib/cbt/exam";
 import {
   getExamAvailabilityMessage,
   getExamAvailabilityStatus,
   isExamAvailable,
 } from "@/lib/cbt/availability";
-import { isParticipantAssignedToExam, PesertaNotAssignedToExamError } from "@/lib/cbt/access";
+import { isParticipantAssignedToExam } from "@/lib/cbt/access";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -111,6 +110,7 @@ function PreUjianContent({
   const navigate = useNavigate();
   const [token, setToken] = useState("");
   const [agree, setAgree] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
   const tokenInputId = `token-ujian-${ujian.id}`;
   const availability = getExamAvailabilityStatus(ujian);
   const examAllowed = isExamAvailable(ujian);
@@ -130,53 +130,52 @@ function PreUjianContent({
       toast.error("Centang persetujuan dulu");
       return;
     }
-    if (ujian.tokenAktif) {
-      const kode = token.trim().toUpperCase();
-      if (kode.length === 0) {
-        toast.error("Masukkan token");
-        return;
-      }
-      // Advisory pre-check only: surface an obvious "already used by someone
-      // else" from the local cache for a snappier message. On a cache miss or
-      // any stale state we FALL THROUGH to the server — `claimExamToken` is the
-      // sole authority and must not be short-circuited by the client cache
-      // (e.g. a token generated after this client hydrated).
-      const tokenRow = tokenRepo
-        .all()
-        .find((t) => t.ujianId === ujian.id && t.kode.toUpperCase() === kode);
-      // Atomic claim (Issue #9): must succeed before any session is created.
-      // Two participants racing the same unused token cannot both win here.
-      const claim = await claimExamToken(ujian.id, kode);
-      if (!claim.ok) {
-        toast.error(claim.error);
-        return;
-      }
-    }
-    if (ujian.fullscreenWajib) {
-      try {
-        await document.documentElement.requestFullscreen();
-      } catch {
-        /* ignore */
-      }
-    }
+    
+    setIsStarting(true);
+    
     try {
-      const sesi = findOrCreateSesi(ujian.id, user.id, user);
-      const started = sesi.status === "sedang" ? sesi : startSesi(sesi, ujian);
-      sesiRepo.upsert(started);
+      if (ujian.tokenAktif) {
+        const kode = token.trim().toUpperCase();
+        if (kode.length === 0) {
+          toast.error("Masukkan token");
+          setIsStarting(false);
+          return;
+        }
+        
+        const claim = await claimExamToken(ujian.id, kode);
+        if (!claim.ok) {
+          toast.error(claim.error);
+          setIsStarting(false);
+          return;
+        }
+      }
+      
+      if (ujian.fullscreenWajib) {
+        try {
+          await document.documentElement.requestFullscreen();
+        } catch {
+          /* ignore */
+        }
+      }
+      
+      // Request server to create and start session
+      const createRes = await createExamSession(ujian.id);
+      if (!createRes.ok) {
+        toast.error(createRes.error);
+        setIsStarting(false);
+        return;
+      }
+
       navigate({ to: "/peserta/ujian/$id/kerjakan", params: { id: ujian.id } });
     } catch (err) {
-      if (err instanceof PesertaNotAssignedToExamError) {
-        toast.error("Anda tidak terdaftar pada ujian ini");
-        navigate({ to: "/peserta" });
-        return;
-      }
-      toast.error("Gagal memulai ujian. Silakan coba lagi.");
-      return;
+      toast.error("Terjadi kesalahan. Silakan coba lagi.");
+      setIsStarting(false);
     }
   }
 
   const mk = ujian.mataKuliahId ? mataKuliahRepo.byId(ujian.mataKuliahId) : null;
   const smt = ujian.semesterId ? semesterRepo.byId(ujian.semesterId) : null;
+
 
   return (
     <div className="relative min-h-[calc(100vh-4rem)] bg-slate-50/50 dark:bg-slate-950">
@@ -359,9 +358,9 @@ function PreUjianContent({
                     size="lg" 
                     className="w-full h-14 rounded-xl text-sm font-bold tracking-wide shadow-xl hover:shadow-blue-500/25 hover:-translate-y-0.5 transition-all bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 border-0" 
                     onClick={mulai} 
-                    disabled={!examAllowed || !agree}
+                    disabled={!examAllowed || !agree || isStarting}
                   >
-                    MULAI UJIAN
+                    {isStarting ? "MEMULAI..." : "MULAI UJIAN"}
                   </Button>
                 </div>
               )}
