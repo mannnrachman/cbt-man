@@ -294,8 +294,8 @@ function RouteComponent() {
 
   return (
     <div className="flex flex-col h-[calc(100dvh-64px)] overflow-hidden bg-slate-50 dark:bg-slate-950/50 font-sans">
-      <div className="flex-1 flex mx-auto w-full max-w-7xl h-full relative">
-        
+      <div className="flex-1 flex mx-auto w-full max-w-[1600px] h-full relative">
+
         {/* LEFT PANEL: MAIN EXAM AREA */}
         <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 relative z-10 shadow-2xl md:shadow-none">
           
@@ -347,8 +347,8 @@ function RouteComponent() {
 
           {/* Question & Options Scrollable Area */}
           <div className="flex-1 overflow-y-auto overflow-x-hidden relative">
-            <div className="max-w-4xl mx-auto px-5 sm:px-10 py-8 sm:py-12 pb-32">
-              
+            <div className="max-w-5xl mx-auto px-5 sm:px-10 py-6 sm:py-10 pb-32">
+
               {/* Question Text */}
               <div 
                 aria-live="polite"
@@ -439,8 +439,8 @@ function RouteComponent() {
 
           {/* Bottom Action Footer */}
           <div className="sticky bottom-0 z-20 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 p-4 sm:p-6">
-            <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-              
+            <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+
               <div className="flex w-full sm:w-auto items-center gap-3">
                 <Button
                   variant="outline"

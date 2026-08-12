@@ -189,7 +189,7 @@ function PreUjianContent({
       <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-500/20 dark:bg-blue-500/10 blur-[100px] rounded-full pointer-events-none" />
       <div className="absolute top-40 -left-40 w-72 h-72 bg-indigo-500/20 dark:bg-indigo-500/10 blur-[80px] rounded-full pointer-events-none" />
 
-      <div className="relative max-w-4xl mx-auto px-4 pt-3 sm:pt-4 pb-8 sm:pb-12 space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 pb-8 sm:pb-12 space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-700">
         {/* Header Info */}
         <div className="space-y-4">
           <Link to="/peserta" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group">
