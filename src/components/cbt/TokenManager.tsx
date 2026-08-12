@@ -31,8 +31,8 @@ export function TokenManager({ ujian }: { ujian: Ujian }) {
     setGenerating(true);
     try {
       const result = await generateExamTokensServer({
-        data: { 
-          ujianId: ujian.id, 
+        data: {
+          ujianId: ujian.id,
           jumlah,
           customKode: customKode.trim() || undefined,
           expireAtMs: expireDate ? new Date(expireDate).getTime() : undefined,
@@ -59,8 +59,7 @@ export function TokenManager({ ujian }: { ujian: Ujian }) {
   }
 
   function copyAll() {
-    const tersedia = tokens
-      .filter((t) => !t.dipakaiOleh)
+    const tersedia = validTokens
       .map((t) => t.kode)
       .join("\n");
     navigator.clipboard.writeText(tersedia);
@@ -102,14 +101,14 @@ export function TokenManager({ ujian }: { ujian: Ujian }) {
       <CardContent className="p-0">
         <div className="p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
+
             {/* Kolom 1: Mode Token */}
             <div className="space-y-4">
               <div>
                 <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200">Mode Token</h4>
                 <p className="text-xs text-slate-500">Pilih salah satu cara pembuatan token.</p>
               </div>
-              
+
               <div className="p-3 bg-white dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 space-y-3 shadow-sm">
                 <div className="space-y-1.5">
                   <Label className="text-xs font-medium text-slate-600 dark:text-slate-400">1. Otomatis (Jumlah)</Label>
@@ -123,12 +122,12 @@ export function TokenManager({ ujian }: { ujian: Ujian }) {
                     disabled={customKode.length > 0}
                   />
                 </div>
-                
+
                 <div className="relative flex items-center justify-center py-2">
                   <span className="bg-white dark:bg-slate-950 px-2 text-[10px] uppercase font-bold text-slate-400 absolute">Atau</span>
                   <div className="w-full border-t border-slate-100 dark:border-slate-800"></div>
                 </div>
-                
+
                 <div className="space-y-1.5">
                   <Label className="text-xs font-medium text-slate-600 dark:text-slate-400">2. Custom Kode</Label>
                   <Input
@@ -162,7 +161,7 @@ export function TokenManager({ ujian }: { ujian: Ujian }) {
                   />
                   <p className="text-[10px] text-slate-400 leading-tight">Kosongkan jika token berlaku selamanya.</p>
                 </div>
-                
+
                 <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
                   <div className="flex items-center gap-2.5">
                     <Checkbox id="applyAll" checked={applyToAll} onCheckedChange={(c) => setApplyToAll(c === true)} />
@@ -173,7 +172,7 @@ export function TokenManager({ ujian }: { ujian: Ujian }) {
                 </div>
               </div>
             </div>
-            
+
           </div>
 
           {/* Action Row */}
@@ -182,7 +181,7 @@ export function TokenManager({ ujian }: { ujian: Ujian }) {
               <Copy className="mr-2 h-4 w-4" />
               Salin Tersedia
             </Button>
-            
+
             <Button onClick={generate} disabled={generating} size="sm" className="h-9 px-6 bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
               <Plus className="mr-2 h-4 w-4" />
               {generating ? "Membuat…" : "Buat Token"}
@@ -205,18 +204,14 @@ export function TokenManager({ ujian }: { ujian: Ujian }) {
                   <tr key={t.id} className="border-b last:border-0 border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
                     <td className="p-3 font-mono text-slate-900 dark:text-slate-100 font-semibold">{t.kode}</td>
                     <td className="p-3">
-                      {t.dipakaiOleh ? (
-                        <span className="inline-flex items-center rounded-full bg-rose-50 px-2 py-1 text-xs font-medium text-rose-700 ring-1 ring-inset ring-rose-600/20 dark:bg-rose-950 dark:text-rose-400 dark:ring-rose-400/20">Terpakai</span>
-                      ) : (
                         <div className="flex flex-col items-start">
-                          <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20 dark:bg-emerald-950 dark:text-emerald-400 dark:ring-emerald-400/20 mb-1">Tersedia</span>
+                          <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20 dark:bg-emerald-950 dark:text-emerald-400 dark:ring-emerald-400/20 mb-1">Aktif</span>
                           {t.expireAt && (
                             <span className="text-[10px] text-slate-500 font-medium">
                               S/d: {new Date(t.expireAt).toLocaleTimeString("id-ID", { hour: '2-digit', minute: '2-digit' })}
                             </span>
                           )}
                         </div>
-                      )}
                     </td>
                     <td className="p-3 text-right">
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-destructive hover:bg-destructive/10" onClick={() => hapusToken(t.id)}>

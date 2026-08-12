@@ -640,11 +640,23 @@ export async function seedDatabase({ prisma, dataset, stringifyJson }) {
 
   await prisma.tokenUjian.createMany({
     data: dataset.token.map((item) => ({
-      ...item,
-      dipakaiOleh: item.dipakaiOleh ?? null,
-      dipakaiAt: item.dipakaiAt ? BigInt(item.dipakaiAt) : null,
+      id: item.id,
+      ujianId: item.ujianId,
+      kode: item.kode,
+      expireAt: item.expireAt ? BigInt(item.expireAt) : null,
     })),
   });
+
+  const claimsToCreate = dataset.token.filter(t => t.dipakaiOleh).map(item => ({
+    ujianId: item.ujianId,
+    pesertaId: item.dipakaiOleh,
+    kode: item.kode,
+    claimedAt: item.dipakaiAt ? BigInt(item.dipakaiAt) : BigInt(Date.now())
+  }));
+
+  if (claimsToCreate.length > 0) {
+    await prisma.tokenClaim.createMany({ data: claimsToCreate });
+  }
 
   await prisma.sesiUjian.createMany({
     data: dataset.sesi.map((item) => ({

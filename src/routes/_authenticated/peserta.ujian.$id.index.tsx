@@ -144,10 +144,6 @@ function PreUjianContent({
       const tokenRow = tokenRepo
         .all()
         .find((t) => t.ujianId === ujian.id && t.kode.toUpperCase() === kode);
-      if (tokenRow?.dipakaiOleh && tokenRow.dipakaiOleh !== user.id) {
-        toast.error("Token sudah dipakai peserta lain");
-        return;
-      }
       // Atomic claim (Issue #9): must succeed before any session is created.
       // Two participants racing the same unused token cannot both win here.
       const claim = await claimExamToken(ujian.id, kode);

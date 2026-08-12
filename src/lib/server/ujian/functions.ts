@@ -163,8 +163,7 @@ export const mutateTokenServer = createServerFn({ method: "POST" })
 					await tx.tokenUjian.createMany({
 						data: (payload as TokenUjian[]).map((item) => ({
 							...item,
-							dipakaiOleh: item.dipakaiOleh ?? null,
-							dipakaiAt: toBigInt(item.dipakaiAt),
+							expireAt: toBigInt(item.expireAt),
 						})),
 					});
 				} else {
@@ -174,15 +173,13 @@ export const mutateTokenServer = createServerFn({ method: "POST" })
 						update: {
 							ujianId: item.ujianId,
 							kode: item.kode,
-							dipakaiOleh: item.dipakaiOleh ?? null,
-							dipakaiAt: toBigInt(item.dipakaiAt),
+							expireAt: toBigInt(item.expireAt),
 						},
 						create: {
 							id: item.id,
 							ujianId: item.ujianId,
 							kode: item.kode,
-							dipakaiOleh: item.dipakaiOleh ?? null,
-							dipakaiAt: toBigInt(item.dipakaiAt),
+							expireAt: toBigInt(item.expireAt),
 						},
 					});
 				}
@@ -225,8 +222,8 @@ export const generateExamTokensServer = createServerFn({ method: "POST" })
 			ujianId: z.string().min(1),
 			jumlah: z.number().int().min(1).max(500),
 			length: z.number().int().min(8).max(32).optional(),
-			customKode: z.string().optional(),
-			expireAtMs: z.number().optional(),
+			customKode: z.string().trim().max(32).optional(),
+			expireAtMs: z.number().int().positive().optional(),
 			applyToAll: z.boolean().optional(),
 		}),
 	)
@@ -385,6 +382,24 @@ export const claimExamToken = createServerFn({ method: "POST" })
 			ujianId: data.ujianId,
 			kode,
 		};
+		await prisma.tokenClaim.upsert({
+			where: {
+				ujianId_pesertaId: {
+					ujianId: data.ujianId,
+					pesertaId: caller.id,
+				},
+			},
+			update: {
+				kode,
+				claimedAt: Date.now(),
+			},
+			create: {
+				ujianId: data.ujianId,
+				pesertaId: caller.id,
+				kode,
+				claimedAt: Date.now(),
+			},
+		});
 		clearRateLimit(caller.id, "claimToken");
 		return { ok: true as const, token };
 	});
