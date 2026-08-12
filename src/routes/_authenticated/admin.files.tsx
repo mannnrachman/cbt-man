@@ -146,7 +146,7 @@ function FilesPage() {
               }}
             />
             <Button size="sm" onClick={() => inputRef.current?.click()} disabled={isUploading} className="h-9 font-semibold">
-              {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4 translate-y-[-0.5px]" />} 
+              {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4 translate-y-[-0.5px]" />}
               Upload File
             </Button>
           </>
