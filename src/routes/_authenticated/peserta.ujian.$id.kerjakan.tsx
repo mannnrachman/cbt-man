@@ -63,8 +63,8 @@ function AlatBantuUjian({ ujian }: { ujian: Ujian }) {
             className={cn(
               "flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs sm:text-sm font-bold rounded-xl border-2 transition-all active:scale-95 select-none",
               activeTab === "nilai"
-                ? "bg-indigo-600 text-white border-indigo-600 shadow-sm dark:bg-indigo-500 dark:border-indigo-500"
-                : "bg-white text-slate-600 border-slate-200 hover:border-indigo-400 hover:text-indigo-700 dark:bg-slate-900/50 dark:text-slate-300 dark:border-slate-700"
+                ? "bg-emerald-600 text-white border-emerald-600 shadow-sm dark:bg-emerald-500 dark:border-emerald-500"
+                : "bg-white text-slate-600 border-slate-200 hover:border-emerald-400 hover:text-emerald-700 dark:bg-slate-900/50 dark:text-slate-300 dark:border-slate-700"
             )}
           >
             <ClipboardList className="w-4 h-4" />
@@ -80,7 +80,7 @@ function AlatBantuUjian({ ujian }: { ujian: Ujian }) {
       )}
 
       {activeTab === "nilai" && ujian.allowNilaiNormal && (
-        <div className="p-3 bg-indigo-50/50 border-2 border-indigo-100 rounded-xl dark:bg-indigo-950/20 dark:border-indigo-900/50 max-h-72 overflow-x-auto overflow-y-auto animate-in zoom-in-95 fade-in duration-200 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="p-3 bg-emerald-50/50 border-2 border-emerald-100 rounded-xl dark:bg-emerald-950/20 dark:border-emerald-900/50 max-h-72 overflow-x-auto overflow-y-auto animate-in zoom-in-95 fade-in duration-200 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <NilaiNormalTable />
         </div>
       )}

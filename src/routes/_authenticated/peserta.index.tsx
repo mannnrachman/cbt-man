@@ -196,7 +196,7 @@ function PesertaDashboard() {
 												</TableCell>
 												<TableCell className="text-slate-600 dark:text-slate-300 font-bold text-sm py-4">
 													<span className="flex items-center gap-1.5">
-														<Clock className="h-4 w-4 text-blue-500" />
+														<Clock className="h-4 w-4 text-emerald-500" />
 														{u.durasiMenit} menit
 													</span>
 												</TableCell>

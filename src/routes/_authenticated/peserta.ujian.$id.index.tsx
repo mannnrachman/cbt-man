@@ -184,7 +184,7 @@ function PreUjianContent({
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 pb-8 sm:pb-12 space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-700">
         {/* Header Info */}
         <div className="space-y-4">
-          <Link to="/peserta" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group">
+          <Link to="/peserta" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors group">
             <span className="group-hover:-translate-x-1 transition-transform mr-1">←</span> Kembali ke Daftar Ujian
           </Link>
           <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/40 dark:border-slate-800/60 p-6 sm:p-8 rounded-3xl shadow-xl shadow-slate-200/40 dark:shadow-black/20">
@@ -194,8 +194,8 @@ function PreUjianContent({
                   {ujian.nama}
                 </h1>
                 {mk && (
-                  <div className="flex items-center gap-2 mt-4 text-sm sm:text-base font-medium text-blue-600 dark:text-blue-400">
-                    <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                  <div className="flex items-center gap-2 mt-4 text-sm sm:text-base font-medium text-emerald-600 dark:text-emerald-400">
+                    <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
                       <BookOpen className="h-4 w-4" />
                     </div>
                     <span>{mk.nama}</span>
@@ -210,7 +210,7 @@ function PreUjianContent({
               </div>
               <div className="flex flex-row sm:flex-col gap-3 shrink-0">
                 <div className="flex items-center gap-3 bg-white dark:bg-slate-800/80 px-4 py-3 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/50">
-                  <div className="p-2 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-500">
+                  <div className="p-2 rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500">
                     <Clock className="h-5 w-5" />
                   </div>
                   <div>
@@ -219,7 +219,7 @@ function PreUjianContent({
                   </div>
                 </div>
                 <div className="flex items-center gap-3 bg-white dark:bg-slate-800/80 px-4 py-3 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/50">
-                  <div className="p-2 rounded-full bg-indigo-50 dark:bg-indigo-900/20 text-indigo-500">
+                  <div className="p-2 rounded-full bg-teal-50 dark:bg-teal-900/20 text-teal-500">
                     <FileText className="h-5 w-5" />
                   </div>
                   <div>
@@ -287,7 +287,7 @@ function PreUjianContent({
 
           {/* Sidebar Action Area */}
           <div className="lg:col-span-1">
-            <div className="sticky top-8 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-6 sm:p-8 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-2xl shadow-blue-500/5 space-y-8">
+            <div className="sticky top-8 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-6 sm:p-8 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-2xl shadow-emerald-500/5 space-y-8">
               
               {!examAllowed && (
                 <div className="rounded-2xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 p-5 flex flex-col items-center text-center gap-3">
@@ -332,7 +332,7 @@ function PreUjianContent({
                         value={token} 
                         onChange={(e) => setToken(e.target.value)}
                         placeholder="Contoh: X7Y9Q"
-                        className="h-14 text-center text-xl font-black tracking-[0.2em] uppercase bg-slate-50 dark:bg-slate-950/50 border-slate-300 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-blue-500/20 transition-all placeholder:tracking-normal placeholder:font-normal placeholder:text-sm"
+                        className="h-14 text-center text-xl font-black tracking-[0.2em] uppercase bg-slate-50 dark:bg-slate-950/50 border-slate-300 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-emerald-500/20 transition-all placeholder:tracking-normal placeholder:font-normal placeholder:text-sm"
                       />
                       <p className="text-[11px] text-center text-slate-500 font-medium uppercase tracking-wider">Minta token ke pengawas ruangan</p>
                     </div>
@@ -342,9 +342,9 @@ function PreUjianContent({
                     <div className="relative flex items-center justify-center shrink-0 mt-0.5">
                       <input 
                         type="checkbox" 
-                        className="peer appearance-none w-5 h-5 border-2 border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-slate-900 checked:bg-blue-600 checked:border-blue-600 transition-all cursor-pointer" 
-                        checked={agree} 
-                        onChange={(e) => setAgree(e.target.checked)} 
+                        className="peer appearance-none w-5 h-5 border-2 border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-slate-900 checked:bg-emerald-600 checked:border-emerald-600 transition-all cursor-pointer"
+                        checked={agree}
+                        onChange={(e) => setAgree(e.target.checked)}
                       />
                       <svg className="absolute w-3 h-3 text-white pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity scale-50 peer-checked:scale-100 duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -357,7 +357,7 @@ function PreUjianContent({
                   
                   <Button 
                     size="lg" 
-                    className="w-full h-14 rounded-xl text-sm font-bold tracking-wide shadow-xl hover:shadow-blue-500/25 hover:-translate-y-0.5 transition-all bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 border-0" 
+                    className="w-full h-14 rounded-xl text-sm font-bold tracking-wide shadow-xl hover:shadow-emerald-500/25 hover:-translate-y-0.5 transition-all bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 border-0"
                     onClick={mulai} 
                     disabled={!examAllowed || !agree || isStarting}
                   >
