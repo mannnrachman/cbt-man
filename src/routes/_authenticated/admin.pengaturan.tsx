@@ -28,7 +28,7 @@ export const Route = createFileRoute("/_authenticated/admin/pengaturan")({
 
 function PengaturanPage() {
   const [cfg, setCfg] = useState(configRepo.get());
-  const { theme, setTheme } = useThemeStore();
+  const { theme, setTheme, font, setFont } = useThemeStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function save() {
@@ -190,47 +190,101 @@ function PengaturanPage() {
         <div className="space-y-2 lg:col-span-1">
           <h2 id="tema-heading" className="text-lg font-semibold text-slate-900 dark:text-white">Tema & Tampilan</h2>
           <p className="text-sm text-slate-500 leading-relaxed">
-            Sesuaikan gaya visual dan nuansa aplikasi. Tema ini akan diterapkan secara global untuk Anda.
+            Sesuaikan gaya visual dan nuansa aplikasi. Tema dan tipografi ini akan diterapkan secara global untuk Anda.
           </p>
         </div>
-        <div role="region" aria-labelledby="tema-heading" className="lg:col-span-2">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            
-            {/* Theme: Modern (Default) */}
-            <button 
-              onClick={() => setTheme("default")}
-              aria-pressed={theme === "default"}
-              className={`text-left p-4 rounded-xl border-2 transition-all ${theme === "default" ? "border-primary ring-2 ring-primary/20 bg-primary/5" : "border-slate-200 dark:border-slate-800 hover:border-primary/50 bg-white dark:bg-slate-900"}`}
-            >
-              <div className="flex justify-between items-start mb-4">
-                <div className="font-bold text-slate-900 dark:text-white">Modern (Default)</div>
-                {theme === "default" && <CheckCircle2 className="h-5 w-5 text-primary" />}
-              </div>
-              <div className="h-20 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-2 shadow-sm flex flex-col gap-2">
-                <div className="w-full h-3 bg-white dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-800 shadow-sm" />
-                <div className="w-2/3 h-3 bg-primary/20 rounded" />
-              </div>
-              <p className="text-xs text-slate-500 mt-4">Bersih, profesional, standar SaaS modern.</p>
-            </button>
+        <div role="region" aria-labelledby="tema-heading" className="lg:col-span-2 space-y-8">
+          
+          {/* Pilihan Tema Visual */}
+          <div className="space-y-3">
+            <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Gaya Tema Visual</Label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              
+              {/* Theme: Modern (Default) */}
+              <button 
+                onClick={() => setTheme("default")}
+                aria-pressed={theme === "default"}
+                className={`text-left p-4 rounded-xl border-2 transition-all cursor-pointer ${theme === "default" ? "border-primary ring-2 ring-primary/20 bg-primary/5" : "border-slate-200 dark:border-slate-800 hover:border-primary/50 bg-white dark:bg-slate-900"}`}
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <div className="font-bold text-slate-900 dark:text-white">Modern (Default)</div>
+                  {theme === "default" && <CheckCircle2 className="h-5 w-5 text-primary" />}
+                </div>
+                <div className="h-20 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-2 shadow-sm flex flex-col gap-2">
+                  <div className="w-full h-3 bg-white dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-800 shadow-sm" />
+                  <div className="w-2/3 h-3 bg-primary/20 rounded" />
+                </div>
+                <p className="text-xs text-slate-500 mt-4">Bersih, profesional, standar SaaS modern.</p>
+              </button>
 
-            {/* Theme: Neobrutalism */}
-            <button 
-              onClick={() => setTheme("neobrutalism")}
-              aria-pressed={theme === "neobrutalism"}
-              className={`text-left p-4 rounded-none border-4 transition-all ${theme === "neobrutalism" ? "border-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] bg-yellow-400/10" : "border-slate-200 dark:border-slate-800 hover:border-black bg-white dark:bg-slate-900"}`}
-            >
-              <div className="flex justify-between items-start mb-4">
-                <div className="font-black uppercase tracking-wider text-slate-900 dark:text-white">Neobrutalism</div>
-                {theme === "neobrutalism" && <CheckCircle2 className="h-5 w-5 text-black" />}
-              </div>
-              <div className="h-20 bg-yellow-400 border-4 border-black p-2 shadow-[4px_4px_0_0_rgba(0,0,0,1)] flex flex-col gap-2">
-                <div className="w-full h-3 bg-white border-2 border-black" />
-                <div className="w-2/3 h-3 bg-black" />
-              </div>
-              <p className="text-xs text-slate-500 mt-4 font-bold">Warna kontras, garis tegas, ekspresif.</p>
-            </button>
+              {/* Theme: Neobrutalism */}
+              <button 
+                onClick={() => setTheme("neobrutalism")}
+                aria-pressed={theme === "neobrutalism"}
+                className={`text-left p-4 rounded-none border-4 transition-all cursor-pointer ${theme === "neobrutalism" ? "border-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] bg-yellow-400/10" : "border-slate-200 dark:border-slate-800 hover:border-black bg-white dark:bg-slate-900"}`}
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <div className="font-black uppercase tracking-wider text-slate-900 dark:text-white">Neobrutalism</div>
+                  {theme === "neobrutalism" && <CheckCircle2 className="h-5 w-5 text-black" />}
+                </div>
+                <div className="h-20 bg-yellow-400 border-4 border-black p-2 shadow-[4px_4px_0_0_rgba(0,0,0,1)] flex flex-col gap-2">
+                  <div className="w-full h-3 bg-white border-2 border-black" />
+                  <div className="w-2/3 h-3 bg-black" />
+                </div>
+                <p className="text-xs text-slate-500 mt-4 font-bold">Warna kontras, garis tegas, ekspresif.</p>
+              </button>
 
+            </div>
           </div>
+
+          {/* Pilihan Tipografi / Font */}
+          <div className="space-y-3 pt-6 border-t border-slate-200 dark:border-slate-800/80">
+            <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Pilihan Font & Tipografi</Label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              
+              {/* Font: SN Pro */}
+              <button 
+                onClick={() => setFont("sn-pro")}
+                aria-pressed={font === "sn-pro"}
+                className={`text-left p-4 rounded-xl border-2 transition-all cursor-pointer ${font === "sn-pro" ? "border-primary ring-2 ring-primary/20 bg-primary/5" : "border-slate-200 dark:border-slate-800 hover:border-primary/50 bg-white dark:bg-slate-900"}`}
+              >
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <div className="font-bold text-slate-900 dark:text-white">SN Pro (Supernotes)</div>
+                    <span className="text-[10px] font-semibold text-primary uppercase tracking-wide">Modern & Readability</span>
+                  </div>
+                  {font === "sn-pro" && <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />}
+                </div>
+                <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm" style={{ fontFamily: "'SN Pro', sans-serif" }}>
+                  <div className="text-sm font-bold text-slate-900 dark:text-white">Aa Bb Cc 123</div>
+                  <div className="text-xs text-slate-600 dark:text-slate-400 mt-1">Ujian Berbasis Komputer Modern</div>
+                </div>
+                <p className="text-xs text-slate-500 mt-3">Font friendly berbasis Nunito yang dioptimalkan khusus untuk membaca soal & antarmuka CBT.</p>
+              </button>
+
+              {/* Font: System Default */}
+              <button 
+                onClick={() => setFont("system")}
+                aria-pressed={font === "system"}
+                className={`text-left p-4 rounded-xl border-2 transition-all cursor-pointer ${font === "system" ? "border-primary ring-2 ring-primary/20 bg-primary/5" : "border-slate-200 dark:border-slate-800 hover:border-primary/50 bg-white dark:bg-slate-900"}`}
+              >
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <div className="font-bold text-slate-900 dark:text-white">Sistem Default (Standar Lama)</div>
+                    <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">Inter / System Sans</span>
+                  </div>
+                  {font === "system" && <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />}
+                </div>
+                <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
+                  <div className="text-sm font-bold text-slate-900 dark:text-white">Aa Bb Cc 123</div>
+                  <div className="text-xs text-slate-600 dark:text-slate-400 mt-1">Ujian Berbasis Komputer Modern</div>
+                </div>
+                <p className="text-xs text-slate-500 mt-3">Font sans-serif bawaan sistem operasi (Inter, Segoe UI, Roboto, San Francisco).</p>
+              </button>
+
+            </div>
+          </div>
+
         </div>
       </div>
 
