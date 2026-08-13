@@ -10,10 +10,10 @@ export function ThemeSwitcher() {
       variant="outline"
       size="icon"
       onClick={toggleTheme}
-      title={`Beralih ke Tema ${theme === "default" ? "Neobrutalism" : "Modern"}`}
-      aria-label={`Beralih ke Tema ${theme === "default" ? "Neobrutalism" : "Modern"}`}
-      aria-pressed={theme === "neobrutalism"}
-      className="h-10 w-10 border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] bg-background text-foreground shadow-[var(--neo-shadow)] transition-all hover:bg-[color:var(--neo-hover)] hover:translate-x-[2px] hover:translate-y-[2px]"
+      title={`Beralih ke Tema ${theme === "default" ? "Neumorphism" : "Modern"}`}
+      aria-label={`Beralih ke Tema ${theme === "default" ? "Neumorphism" : "Modern"}`}
+      aria-pressed={theme === "neumorphism"}
+      className="h-10 w-10 border-[length:var(--neo-border-width)] border-[color:var(--neo-border-color)] bg-background text-foreground shadow-[var(--neo-shadow)] transition-all hover:bg-[color:var(--neo-hover)] hover:translate-x-[1px] hover:translate-y-[1px]"
       style={{
         borderRadius: 'var(--neo-radius)'
       }}
