@@ -61,8 +61,8 @@
  */
 
 @theme inline {
-  --font-sans: "SN Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-family-sans: "SN Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-sans: var(--font-family-base, "SN Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+  --font-family-sans: var(--font-family-base, "SN Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
 
   --shadow-neo: var(--neo-shadow);
   --border-width-neo: var(--neo-border-width);
@@ -120,6 +120,8 @@
 }
 
 :root {
+  --font-family-base: "SN Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
   /* Default Modern Theme values mapping to the 'neo' aliases */
   --neo-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
   --neo-border-width: 1px;
@@ -246,6 +248,20 @@
   .dark .shadow-popover-sleek {
     box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 4px 16px rgba(0,0,0,0.3);
   }
+}
+
+[data-font='system'],
+[data-font='system'] body,
+[data-font='system'] input,
+[data-font='system'] button,
+[data-font='system'] select,
+[data-font='system'] textarea {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+[data-font='sn-pro'],
+[data-font='sn-pro'] body {
+  font-family: "SN Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 [data-theme='neobrutalism'] {
