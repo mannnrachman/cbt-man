@@ -1,5 +1,7 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
-import { ujianRepo, usersRepo, unitAkademikRepo } from "@/lib/cbt/repos";
+import { ujianRepo, usersRepo } from "@/lib/cbt/repos";
+import { getRombelList } from "@/lib/server/akademik/functions";
+import type { Rombel } from "@/lib/cbt/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
@@ -9,10 +11,20 @@ import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/ujian/$id/peserta")({
+  loader: async () => {
+    let units: Rombel[] = [];
+    try {
+      units = await getRombelList() as Rombel[];
+    } catch (e) {
+      console.error(e);
+    }
+    return { units };
+  },
   component: PesertaUjian,
 });
 
 function PesertaUjian() {
+  const { units } = Route.useLoaderData();
   const { id } = useParams({ from: "/_authenticated/admin/ujian/$id/peserta" });
   const ujian = ujianRepo.byId(id);
   const [selectedUnit, setSelectedUnit] = useState("all");
@@ -21,18 +33,17 @@ function PesertaUjian() {
 
   if (!ujian) return <div>Tidak ditemukan</div>;
   const users = usersRepo.all();
-  const units = unitAkademikRepo.all();
   const unitYangIkut = ujian.groupIds.includes("all")
     ? units
-    : units.filter((u) => ujian.groupIds.includes(u.id));
+    : units.filter((u: Rombel) => ujian.groupIds.includes(u.id));
 
   const peserta = users.filter(
     (u) =>
       u.role === "mahasiswa" &&
       (ujian.groupIds.includes("all") ||
         ujian.groupIds.length === 0 ||
-        ujian.groupIds.includes(u.unitId ?? "")) &&
-      (selectedUnit === "all" || u.unitId === selectedUnit) &&
+        ujian.groupIds.includes(u.rombelId ?? "")) &&
+      (selectedUnit === "all" || u.rombelId === selectedUnit) &&
       (u.namaLengkap.toLowerCase().includes(search.toLowerCase()) || 
        u.username.toLowerCase().includes(search.toLowerCase()))
   );
@@ -71,7 +82,7 @@ function PesertaUjian() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Semua Unit</SelectItem>
-                {unitYangIkut.map((u) => (
+                {unitYangIkut.map((u: Rombel) => (
                   <SelectItem key={u.id} value={u.id}>
                     {u.nama}
                   </SelectItem>
@@ -91,7 +102,7 @@ function PesertaUjian() {
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            {unitYangIkut.map((u) => (
+            {unitYangIkut.map((u: Rombel) => (
               <span key={u.id} className="rounded bg-accent px-3 py-1 text-sm">
                 {u.nama}
               </span>
@@ -121,7 +132,7 @@ function PesertaUjian() {
                   <td className="p-3 text-muted-foreground">{i + 1}</td>
                   <td className="p-3 font-mono text-xs">{p.username}</td>
                   <td className="p-3">{p.namaLengkap}</td>
-                  <td className="p-3">{units.find((u) => u.id === p.unitId)?.nama ?? "-"}</td>
+                  <td className="p-3">{units.find((u: Rombel) => u.id === p.rombelId)?.nama ?? "-"}</td>
                   <td className="p-3">{p.aktif ? "Aktif" : "Nonaktif"}</td>
                 </tr>
               ))}

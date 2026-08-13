@@ -1,11 +1,13 @@
 import { z } from "zod";
-import type { AppConfig, Modul, NavKey, Soal, SesiUjian, TokenUjian, Topik, Ujian, User, UnitAkademik, TahunAkademik, Semester, MataKuliah } from "@/lib/cbt/types";
+import type { AppConfig, Modul, NavKey, Soal, SesiUjian, TokenUjian, Topik, Ujian, User, TahunAkademik, Semester, MataKuliah, Fakultas, ProgramStudi, Rombel } from "@/lib/cbt/types";
 import { prisma } from "@/lib/server/db/prisma";
 import { parseJson, toNumber } from "@/lib/server/db/json";
 
 export type Snapshot = {
 	users: User[];
-	unitAkademik: UnitAkademik[];
+	fakultas: Fakultas[];
+	programStudi: ProgramStudi[];
+	rombel: Rombel[];
 	tahunAkademik: TahunAkademik[];
 	semester: Semester[];
 	mataKuliah: MataKuliah[];
@@ -23,17 +25,19 @@ export type PublicBootConfig = Pick<
 	"appName" | "appLogo" | "appDeskripsi" | "pesanLogin"
 >;
 
-export type UserRow = Awaited<ReturnType<typeof prisma.user.findMany>>[number];
+export type UserRow = Awaited<ReturnType<typeof prisma.user.findMany>>[number] & { mataKuliah?: { mataKuliahId: string }[] };
 export type SoalRow = Awaited<ReturnType<typeof prisma.soal.findMany>>[number] & {
 	jawaban: { id: string; detail: string; benar: boolean }[];
 };
 export type SnapshotRows = {
 	users: UserRow[];
-	unitAkademik: Awaited<ReturnType<typeof prisma.unitAkademik.findMany>>;
+	fakultas: Awaited<ReturnType<typeof prisma.fakultas.findMany>>;
+	programStudi: Awaited<ReturnType<typeof prisma.programStudi.findMany>>;
+	rombel: Awaited<ReturnType<typeof prisma.rombel.findMany>>;
 	tahunAkademik: TahunAkademik[];
 	semester: Semester[];
 	mataKuliah: MataKuliah[];
-	modul: Modul[];
+	modul: (Awaited<ReturnType<typeof prisma.modul.findMany>>[number] & { mataKuliah?: { mataKuliahId: string }[] })[];
 	topik: Topik[];
 	soal: SoalRow[];
 	ujian: Awaited<ReturnType<typeof prisma.ujian.findMany>>;
@@ -45,7 +49,9 @@ export type SnapshotRows = {
 export const roleSchema = z.enum(["super_admin", "admin_prodi", "evaluator", "mahasiswa"]);
 export const entitySchema = z.enum([
 	"users",
-	"unitAkademik",
+	"fakultas",
+	"programStudi",
+	"rombel",
 	"tahunAkademik",
 	"semester",
 	"mataKuliah",
@@ -62,7 +68,7 @@ export const upsertUserSchema = z.object({
 	namaLengkap: z.string().min(1),
 	role: roleSchema,
 	allowedTopikIds: z.array(z.string()).default([]),
-	unitId: z.string().min(1).optional(),
+	rombelId: z.string().min(1).optional(),
 	mataKuliahIds: z.array(z.string()).default([]),
 	detail: z.string().optional(),
 	aktif: z.boolean(),
@@ -90,6 +96,49 @@ export const DEFAULT_EVALUATOR_ROLE_ACCESS = [
 	"leaderboard",
 ] as const;
 
+export function mapToSnapshot(raw: SnapshotRows): Snapshot {
+	return {
+		users: raw.users.map((u) => ({
+			id: u.id,
+			username: u.username,
+			passwordHash: u.passwordHash,
+			namaLengkap: u.namaLengkap,
+			role: roleSchema.parse(u.role),
+			allowedTopikIds: parseJson<string[]>(u.allowedTopikIds, []),
+			rombelId: u.rombelId ?? undefined,
+			mataKuliahIds: u.mataKuliah?.map(m => m.mataKuliahId) ?? [],
+			detail: u.detail ?? undefined,
+			aktif: u.aktif,
+			createdAt: Number(u.createdAt),
+		})),
+		fakultas: raw.fakultas,
+		programStudi: raw.programStudi,
+		rombel: raw.rombel,
+		tahunAkademik: raw.tahunAkademik,
+		semester: raw.semester,
+		mataKuliah: raw.mataKuliah.map(m => ({
+			id: m.id,
+			kode: m.kode,
+			nama: m.nama,
+			sks: m.sks,
+			programStudiId: m.programStudiId ?? undefined,
+			semesterId: m.semesterId ?? undefined,
+		})),
+		modul: raw.modul.map(m => ({
+			id: m.id,
+			nama: m.nama,
+			aktif: m.aktif,
+			mataKuliahIds: m.mataKuliah?.map(mk => mk.mataKuliahId) ?? [],
+		})),
+		topik: raw.topik,
+		soal: raw.soal.map(mapSoal),
+		ujian: raw.ujian.map(mapUjian),
+		token: raw.token.map(mapToken),
+		sesi: raw.sesi.map(mapSesi),
+		config: buildConfig(raw.config),
+	};
+}
+
 export function mapUser(row: UserRow): User {
 	return {
 		id: row.id,
@@ -98,8 +147,8 @@ export function mapUser(row: UserRow): User {
 		namaLengkap: row.namaLengkap,
 		role: row.role,
 		allowedTopikIds: parseJson(row.allowedTopikIds, []),
-		unitId: row.unitId ?? undefined,
-		mataKuliahIds: parseJson(row.mataKuliahIds, []),
+		rombelId: row.rombelId ?? undefined,
+		mataKuliahIds: row.mataKuliah?.map(m => m.mataKuliahId) ?? [],
 		detail: row.detail ?? undefined,
 		aktif: row.aktif,
 		createdAt: Number(row.createdAt),

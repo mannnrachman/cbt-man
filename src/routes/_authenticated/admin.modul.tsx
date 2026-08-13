@@ -59,10 +59,10 @@ function ModulPage() {
     if (!isQueryMatch) return false;
 
     // A module is orphaned if it has no mataKuliahId or if the referenced mataKuliah no longer exists.
-    const isOrphan = !m.mataKuliahId || !mkList.some(mk => mk.id === m.mataKuliahId);
+    const isOrphan = !m.mataKuliahIds || m.mataKuliahIds.length === 0 || !m.mataKuliahIds.some(id => mkList.some(mk => mk.id === id));
 
     if (filterMk === "orphan") return isOrphan;
-    if (filterMk !== "all" && m.mataKuliahId !== filterMk) return false;
+    if (filterMk !== "all" && !m.mataKuliahIds.includes(filterMk)) return false;
     
     return true;
   });
@@ -77,7 +77,7 @@ function ModulPage() {
       toast.error("Wajib memilih Mata Kuliah untuk modul baru!");
       return;
     }
-    modulRepo.upsert({ id: uid("m_"), nama: nama.trim(), aktif: true, mataKuliahId: mkId });
+    modulRepo.upsert({ id: uid("m_"), nama: nama.trim(), aktif: true, mataKuliahIds: [mkId] });
     setNama("");
     setMkId("none");
     setModuls(visibleModuls(user));
@@ -123,8 +123,8 @@ function ModulPage() {
       const raw = JSON.parse(await file.text());
       const bank = BankSchema.parse(raw);
       
-      const validMkId = bank.modul.mataKuliahId;
-      if (!validMkId || !mkList.some(mk => mk.id === validMkId)) {
+      const validMkIds = bank.modul.mataKuliahIds;
+      if (!validMkIds || validMkIds.length === 0 || !validMkIds.every(id => mkList.some(mk => mk.id === id))) {
         toast.error("Mata Kuliah pada file import tidak valid atau sudah dihapus. Import dibatalkan.");
         return;
       }
@@ -247,7 +247,7 @@ function ModulPage() {
             const t = allowedSet ? tAll.filter((x) => allowedSet.has(x.id)) : tAll;
             const tIds = new Set(t.map((x) => x.id));
             const sCount = soalRepo.all().filter((s) => tIds.has(s.topikId)).length;
-            const mkName = m.mataKuliahId ? mkList.find((x) => x.id === m.mataKuliahId)?.nama : null;
+            const mkName = m.mataKuliahIds && m.mataKuliahIds.length > 0 ? m.mataKuliahIds.map(id => mkList.find(x => x.id === id)?.nama).filter(Boolean).join(", ") : null;
 
             return (
               <div key={m.id} className="group relative flex flex-col justify-between p-5 rounded-[20px] border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 hover:border-primary/40 dark:hover:border-primary/40 shadow-sm hover:shadow-sleek transition-all duration-300 ease-spring gap-4 overflow-hidden">
@@ -336,13 +336,13 @@ function EditModulDialog({
   onSaved: () => void;
 }) {
   const [nama, setNama] = useState(modul?.nama ?? "");
-  const [mkId, setMkId] = useState(modul?.mataKuliahId ?? "none");
+  const [mkId, setMkId] = useState(modul?.mataKuliahIds?.[0] ?? "none");
 
   // Sync state on open
   useEffect(() => {
     if (open && modul) {
       setNama(modul.nama);
-      setMkId(modul.mataKuliahId ?? "none");
+      setMkId(modul.mataKuliahIds?.[0] ?? "none");
     }
   }, [open, modul]);
 
@@ -359,7 +359,7 @@ function EditModulDialog({
     modulRepo.upsert({
       ...modul,
       nama: nama.trim(),
-      mataKuliahId: mkId,
+      mataKuliahIds: [mkId],
     });
     toast.success("Modul berhasil diperbarui");
     onSaved();

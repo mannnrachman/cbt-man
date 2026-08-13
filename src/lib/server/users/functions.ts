@@ -51,11 +51,13 @@ export const upsertUserServer = createServerFn({ method: "POST" })
 					namaLengkap: data.namaLengkap,
 					role: data.role,
 					allowedTopikIds: stringifyJson(data.allowedTopikIds),
-					unitId: data.unitId ?? null,
-
-					mataKuliahIds: stringifyJson(data.mataKuliahIds),
+					rombelId: data.rombelId ?? null,
 					detail: data.detail ?? null,
 					aktif: data.aktif,
+					mataKuliah: {
+						deleteMany: {},
+						create: (data.mataKuliahIds || []).map(id => ({ mataKuliahId: id }))
+					}
 				},
 				create: {
 					id: data.id,
@@ -64,11 +66,12 @@ export const upsertUserServer = createServerFn({ method: "POST" })
 					namaLengkap: data.namaLengkap,
 					role: data.role,
 					allowedTopikIds: stringifyJson(data.allowedTopikIds),
-					unitId: data.unitId ?? null,
-
-					mataKuliahIds: stringifyJson(data.mataKuliahIds),
+					rombelId: data.rombelId ?? null,
 					detail: data.detail ?? null,
 					aktif: data.aktif,
+					mataKuliah: {
+						create: (data.mataKuliahIds || []).map(id => ({ mataKuliahId: id }))
+					},
 					createdAt: BigInt(data.createdAt ?? Date.now()),
 				},
 			});
@@ -173,11 +176,12 @@ export const mutateUserServer = createServerFn({ method: "POST" })
 							data: {
 								...item,
 								allowedTopikIds: stringifyJson(item.allowedTopikIds),
-								unitId: item.unitId ?? null,
-
-								mataKuliahIds: stringifyJson(item.mataKuliahIds),
+								rombelId: item.rombelId ?? null,
 								detail: item.detail ?? null,
 								createdAt: BigInt(item.createdAt),
+								mataKuliah: {
+									create: (item.mataKuliahIds || []).map(id => ({ mataKuliahId: id }))
+								}
 							},
 						});
 					}
@@ -199,11 +203,13 @@ export const mutateUserServer = createServerFn({ method: "POST" })
 							namaLengkap: item.namaLengkap,
 							role: item.role,
 							allowedTopikIds: stringifyJson(item.allowedTopikIds),
-							unitId: item.unitId ?? null,
-
-							mataKuliahIds: stringifyJson(item.mataKuliahIds),
+							rombelId: item.rombelId ?? null,
 							detail: item.detail ?? null,
 							aktif: item.aktif,
+							mataKuliah: {
+								deleteMany: {},
+								create: (item.mataKuliahIds || []).map(id => ({ mataKuliahId: id }))
+							}
 						},
 						create: {
 							id: item.id,
@@ -212,11 +218,12 @@ export const mutateUserServer = createServerFn({ method: "POST" })
 							namaLengkap: item.namaLengkap,
 							role: item.role,
 							allowedTopikIds: stringifyJson(item.allowedTopikIds),
-							unitId: item.unitId ?? null,
-
-							mataKuliahIds: stringifyJson(item.mataKuliahIds),
+							rombelId: item.rombelId ?? null,
 							detail: item.detail ?? null,
 							aktif: item.aktif,
+							mataKuliah: {
+								create: (item.mataKuliahIds || []).map(id => ({ mataKuliahId: id }))
+							},
 							createdAt: BigInt(item.createdAt),
 						},
 					});
@@ -238,16 +245,16 @@ export const getUsersList = createServerFn({ method: "GET" }).handler(
 	async (): Promise<PublicUser[]> => {
 		const caller = await requireCaller();
 		if (!caller || caller.role !== "super_admin") return [];
-		const users = await prisma.user.findMany();
+		const users = await prisma.user.findMany({ include: { mataKuliah: true } });
 		return users.map(u => ({
 			id: u.id,
 			username: u.username,
 			namaLengkap: u.namaLengkap,
 			role: u.role,
 			aktif: u.aktif,
-			unitId: u.unitId ?? undefined,
+			rombelId: u.rombelId ?? undefined,
 			allowedTopikIds: parseJson<string[]>(u.allowedTopikIds, []),
-			mataKuliahIds: parseJson<string[]>(u.mataKuliahIds, []),
+			mataKuliahIds: u.mataKuliah.map(m => m.mataKuliahId),
 			detail: u.detail ?? undefined,
 			createdAt: Number(u.createdAt)
 		}));

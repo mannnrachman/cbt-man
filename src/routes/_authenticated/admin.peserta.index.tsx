@@ -2,9 +2,9 @@ import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import * as XLSX from "xlsx";
 import { upsertUserServer, getUsersList, mutateUserServer } from "@/lib/server/users/functions";
-import { getUnitAkademikList } from "@/lib/server/akademik/functions";
+import { getRombelList } from "@/lib/server/akademik/functions";
 import { uid } from "@/lib/cbt/storage";
-import type { UnitAkademik, User } from "@/lib/cbt/types";
+import type { Rombel, User } from "@/lib/cbt/types";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { AdminPage, AdminPageHeader, AdminPageContent } from "@/components/cbt/AdminPage";
@@ -24,7 +24,7 @@ export const Route = createFileRoute("/_authenticated/admin/peserta/")({
   loader: async () => {
     const [allUsers, allUnits] = await Promise.all([
       getUsersList(),
-      getUnitAkademikList(),
+      getRombelList(),
     ]);
     return { allUsers, allUnits };
   }
@@ -37,7 +37,7 @@ function PesertaPage() {
   const router = useRouter();
   
   const peserta = (allUsers as User[]).filter((u: User) => u.role === "mahasiswa");
-  const units = allUnits;
+  const units = allUnits as Rombel[];
 
   const [editing, setEditing] = useState<PesertaWithPwd | null>(null);
   const [open, setOpen] = useState(false);
@@ -69,7 +69,7 @@ function PesertaPage() {
   }
 
   const filtered = peserta.filter((p) =>
-    (filterUnit === "all" || p.unitId === filterUnit) &&
+    (filterUnit === "all" || p.rombelId === filterUnit) &&
     (query === "" || p.namaLengkap.toLowerCase().includes(query.toLowerCase()) || p.username.toLowerCase().includes(query.toLowerCase()))
   );
 
@@ -107,13 +107,13 @@ function PesertaPage() {
           continue;
         }
         const unit = unitName
-          ? localUnits.find((x: UnitAkademik) => x.nama.toLowerCase() === unitName.toLowerCase())
+          ? localUnits.find((x: Rombel) => x.nama.toLowerCase() === unitName.toLowerCase())
           : undefined;
         if (unitName && !unit) {
           failed++;
           continue;
         }
-        const unitId = unit?.id;
+        const rombelId = unit?.id;
 
         const existingUser = (allUsers as User[]).find((u: User) => u.username === username);
         const userId = existingUser ? existingUser.id : uid("u_");
@@ -121,7 +121,7 @@ function PesertaPage() {
         const res = await upsertUserServer({
           data: {
             id: userId, username, namaLengkap: nama, role: "mahasiswa",
-            allowedTopikIds: existingUser ? existingUser.allowedTopikIds : [], unitId: unitId, aktif: true,
+            allowedTopikIds: existingUser ? existingUser.allowedTopikIds : [], rombelId: rombelId || undefined, aktif: true,
             createdAt: existingUser ? existingUser.createdAt : Date.now(), newPassword: password,
           }
         });
@@ -257,7 +257,7 @@ function PesertaPage() {
                     <TableCell className="text-slate-600 dark:text-slate-400">{p.namaLengkap}</TableCell>
                     <TableCell className="text-center">
                       <Badge variant="outline" className="bg-slate-50 dark:bg-slate-900 font-medium">
-                        {units.find((g) => g.id === p.unitId)?.nama ?? "-"}
+                        {units.find((g) => g.id === p.rombelId)?.nama ?? "-"}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-center">
@@ -366,13 +366,13 @@ function PesertaDialog({
   open: boolean;
   onOpenChange: (v: boolean) => void;
   editing: User | null;
-  units: UnitAkademik[];
+  units: Rombel[];
   onSaved: () => void;
 }) {
   const [form, setForm] = useState({
     username: "",
     namaLengkap: "",
-    unitId: "",
+    rombelId: "",
     aktif: true,
     password: "",
   });
@@ -384,7 +384,7 @@ function PesertaDialog({
     setForm({
       username: editing?.username ?? "",
       namaLengkap: editing?.namaLengkap ?? "",
-      unitId: editing?.unitId ?? "",
+      rombelId: editing?.rombelId ?? "",
       aktif: editing?.aktif ?? true,
       password: "",
     });
@@ -405,7 +405,7 @@ function PesertaDialog({
           namaLengkap: form.namaLengkap.trim(),
           role: "mahasiswa",
           allowedTopikIds: editing?.allowedTopikIds ?? [],
-          unitId: form.unitId === "none" ? undefined : form.unitId || undefined,
+          rombelId: form.rombelId === "none" ? undefined : form.rombelId || undefined,
           detail: editing?.detail,
           aktif: form.aktif,
           createdAt: editing?.createdAt ?? Date.now(),
@@ -453,7 +453,7 @@ function PesertaDialog({
           </div>
           <div className="space-y-2">
             <Label>Unit Akademik / Kelas</Label>
-            <Select value={form.unitId} onValueChange={(v) => setForm({ ...form, unitId: v })}>
+            <Select value={form.rombelId} onValueChange={(v) => setForm({ ...form, rombelId: v })}>
               <SelectTrigger>
                 <SelectValue placeholder="(Tanpa Unit)" />
               </SelectTrigger>

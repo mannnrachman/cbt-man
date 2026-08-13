@@ -154,7 +154,7 @@ function extractFileIds(html: string): string[] {
 // `pesertaSnapshot` (repos/functions.ts) so authorization and visibility stay
 // consistent, and prevents a peserta from fetching arbitrary file ids.
 async function pesertaCanAccessFile(
-  caller: { id: string; role: string; unitId: string | null },
+  caller: { id: string; role: string; rombelId: string | null },
   fileId: string,
 ): Promise<boolean> {
   // Group-assigned exams: groupIds empty (open to all) OR includes the group.
@@ -163,7 +163,7 @@ async function pesertaCanAccessFile(
   });
   const assigned = ujianRows.filter((u) => {
     const groupIds = parseJson<string[]>(u.groupIds, []);
-    return groupIds.length === 0 || (!!caller.unitId && groupIds.includes(caller.unitId));
+    return groupIds.length === 0 || (!!caller.rombelId && groupIds.includes(caller.rombelId));
   });
   const allowed = new Set<string>();
   for (const u of assigned) {
@@ -212,7 +212,7 @@ export const listStoredFiles = createServerFn({ method: "GET" }).handler(async (
   const files = await listMetas();
   return auth.caller.role === "super_admin"
     ? files
-    : files.filter((file) => file.jurusanId === auth.caller.unitId);
+    : files.filter((file) => file.jurusanId === auth.caller.rombelId);
 });
 
 export const uploadStoredFile = createServerFn({ method: "POST" })
@@ -240,7 +240,7 @@ export const uploadStoredFile = createServerFn({ method: "POST" })
       size: buffer.byteLength,
       createdAt: Date.now(),
       extension,
-      jurusanId: auth.caller.role === "super_admin" ? data.jurusanId : auth.caller.unitId ?? undefined,
+      jurusanId: auth.caller.role === "super_admin" ? data.jurusanId : auth.caller.rombelId ?? undefined,
     };
 
     await writeFile(await filePath(id, extension), buffer);

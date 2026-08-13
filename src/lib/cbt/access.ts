@@ -53,7 +53,7 @@ export function isTopikAllowed(user: User | null | undefined, topikId: string): 
   const topik = topikRepo.byId(topikId);
   if (!topik) return false;
   const modul = modulRepo.byId(topik.modulId);
-  if (modul?.mataKuliahId && mkSet.has(modul.mataKuliahId)) return true;
+  if (modul?.mataKuliahIds?.some((id: string) => mkSet.has(id))) return true;
   
   return false;
 }
@@ -81,7 +81,7 @@ export function visibleModuls(user: User | null | undefined) {
       .map((t) => t.modulId),
   );
   return all.filter((m) => 
-    (m.mataKuliahId && mkSet.has(m.mataKuliahId)) || allowedModulIds.has(m.id)
+    (m.mataKuliahIds?.some((id: string) => mkSet.has(id))) || allowedModulIds.has(m.id)
   );
 }
 
@@ -148,8 +148,8 @@ export function isParticipantAssignedToExam(
   if (!user) return false;
   const groupIds = ujian.groupIds ?? [];
   if (groupIds.length === 0) return true;
-  if (!user.unitId) return false;
-  return groupIds.includes(user.unitId);
+  if (!user.rombelId) return false;
+  return groupIds.includes(user.rombelId);
 }
 
 /**

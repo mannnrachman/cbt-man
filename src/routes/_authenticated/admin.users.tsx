@@ -1,9 +1,9 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { revokeUserSessionsServer, upsertUserServer, getUsersList, mutateUserServer } from "@/lib/server/users/functions";
-import { getUnitAkademikList } from "@/lib/server/akademik/functions";
+import { getRombelList } from "@/lib/server/akademik/functions";
 import { uid } from "@/lib/cbt/storage";
-import type { Role, User, UnitAkademik } from "@/lib/cbt/types";
+import type { Role, User, Rombel } from "@/lib/cbt/types";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_authenticated/admin/users")({
   loader: async () => {
     const [allUsers, units] = await Promise.all([
       getUsersList(),
-      getUnitAkademikList()
+      getRombelList()
     ]);
     return { allUsers, units };
   }
@@ -163,7 +163,7 @@ function UsersPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm text-slate-600 dark:text-slate-400">
-                      {u.role === "super_admin" ? "Semua Unit (Global)" : units.find((unit) => unit.id === u.unitId)?.nama ?? "Tanpa Unit"}
+                      {u.role === "super_admin" ? "Semua Unit (Global)" : units.find((unit: Rombel) => unit.id === u.rombelId)?.nama ?? "Tanpa Unit"}
                     </TableCell>
                     <TableCell className="text-center">
                       {u.aktif ? (
@@ -296,13 +296,13 @@ function UserDialog({
   onOpenChange: (v: boolean) => void;
   editing: User | null;
   onSaved: (user: User) => void;
-  units: UnitAkademik[];
+  units: Rombel[];
 }) {
   const [form, setForm] = useState({
     username: "",
     namaLengkap: "",
     role: "admin_prodi" as Role,
-    unitId: "",
+    rombelId: "",
     aktif: true,
     password: "",
   });
@@ -315,7 +315,7 @@ function UserDialog({
       username: editing?.username ?? "",
       namaLengkap: editing?.namaLengkap ?? "",
       role: editing?.role ?? "admin_prodi",
-      unitId: editing?.unitId ?? "none",
+      rombelId: editing?.rombelId ?? "none",
       aktif: editing?.aktif ?? true,
       password: "",
     });
@@ -337,7 +337,7 @@ function UserDialog({
           role: form.role,
           aktif: form.aktif,
           allowedTopikIds: editing?.allowedTopikIds ?? [],
-          unitId: form.unitId === "none" || !form.unitId ? undefined : form.unitId,
+          rombelId: form.rombelId === "none" || !form.rombelId ? undefined : form.rombelId,
           detail: editing?.detail,
           createdAt: editing?.createdAt ?? Date.now(),
           newPassword: form.password.trim() || undefined,
@@ -398,7 +398,7 @@ function UserDialog({
           {(form.role === "admin_prodi" || form.role === "mahasiswa") && (
             <div className="space-y-2">
               <Label>Unit Akademik (Opsional)</Label>
-              <Select value={form.unitId} onValueChange={(v) => setForm({ ...form, unitId: v })}>
+              <Select value={form.rombelId} onValueChange={(v) => setForm({ ...form, rombelId: v })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Pilih unit (opsional)" />
                 </SelectTrigger>

@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { prisma } from "../db/prisma";
 import { requireAdminResult } from "../db/auth";
-import type { User, UnitAkademik, Modul, Topik, Soal, Ujian, TokenUjian, SesiUjian, AppConfig } from "@/lib/cbt/types";
+import type { User, Fakultas, ProgramStudi, Rombel, TahunAkademik, Semester, MataKuliah, Modul, Topik, Soal, Ujian, TokenUjian, SesiUjian, AppConfig } from "@/lib/cbt/types";
 
 import { stringifyJson, toBigInt } from "../db/json";
 
@@ -10,8 +10,12 @@ export const importBackupServer = createServerFn({ method: "POST" })
 	.validator(
 		z.object({
 			users: z.array(z.any()),
-			unitAkademik: z.array(z.any()),
-
+			fakultas: z.array(z.any()),
+			programStudi: z.array(z.any()),
+			rombel: z.array(z.any()),
+			tahunAkademik: z.array(z.any()),
+			semester: z.array(z.any()),
+			mataKuliah: z.array(z.any()),
 			modul: z.array(z.any()),
 			topik: z.array(z.any()),
 			soal: z.array(z.any()),
@@ -33,11 +37,20 @@ export const importBackupServer = createServerFn({ method: "POST" })
 			await tx.topik.deleteMany();
 			await tx.modul.deleteMany();
 			await tx.user.deleteMany();
-			await tx.unitAkademik.deleteMany();
+			await tx.mataKuliah.deleteMany();
+			await tx.semester.deleteMany();
+			await tx.tahunAkademik.deleteMany();
+			await tx.rombel.deleteMany();
+			await tx.programStudi.deleteMany();
+			await tx.fakultas.deleteMany();
 			await tx.appConfig.deleteMany();
 
-			if (data.unitAkademik.length)
-				await tx.unitAkademik.createMany({ data: data.unitAkademik as UnitAkademik[] });
+			if (data.fakultas.length) await tx.fakultas.createMany({ data: data.fakultas as Fakultas[] });
+			if (data.programStudi.length) await tx.programStudi.createMany({ data: data.programStudi as ProgramStudi[] });
+			if (data.rombel.length) await tx.rombel.createMany({ data: data.rombel as Rombel[] });
+			if (data.tahunAkademik.length) await tx.tahunAkademik.createMany({ data: data.tahunAkademik as TahunAkademik[] });
+			if (data.semester.length) await tx.semester.createMany({ data: data.semester as Semester[] });
+			if (data.mataKuliah.length) await tx.mataKuliah.createMany({ data: data.mataKuliah as MataKuliah[] });
 
 			if (data.modul.length)
 				await tx.modul.createMany({ data: data.modul as Modul[] });
@@ -48,9 +61,10 @@ export const importBackupServer = createServerFn({ method: "POST" })
 					data: {
 						...item,
 						allowedTopikIds: stringifyJson(item.allowedTopikIds),
-						unitId: item.unitId ?? null,
-
-						mataKuliahIds: stringifyJson(item.mataKuliahIds),
+						rombelId: item.rombelId ?? null,
+						mataKuliah: {
+							create: item.mataKuliahIds.map((id: string) => ({ mataKuliahId: id })),
+						},
 						detail: item.detail ?? null,
 						createdAt: BigInt(item.createdAt),
 					},
@@ -153,7 +167,12 @@ export const resetAllDataServer = createServerFn({ method: "POST" }).handler(
 			await tx.topik.deleteMany();
 			await tx.modul.deleteMany();
 			await tx.user.deleteMany();
-			await tx.unitAkademik.deleteMany();
+			await tx.mataKuliah.deleteMany();
+			await tx.semester.deleteMany();
+			await tx.tahunAkademik.deleteMany();
+			await tx.rombel.deleteMany();
+			await tx.programStudi.deleteMany();
+			await tx.fakultas.deleteMany();
 
 			await tx.appConfig.deleteMany();
 		});

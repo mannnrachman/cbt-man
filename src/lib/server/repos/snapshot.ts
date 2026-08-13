@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from "@/lib/server/db/prisma";
 import { parseJson } from "@/lib/server/db/json";
 import { 
@@ -15,17 +14,19 @@ import {
 
 export async function loadSnapshotRows(): Promise<SnapshotRows> {
 		const [
-			users, unitAkademik, tahunAkademik, semester, mataKuliah,
+			users, fakultas, programStudi, rombel, tahunAkademik, semester, mataKuliah,
 			modul, topik, soal,
 			ujian, token, sesi, config
 		] = await Promise.all([
-			prisma.user.findMany({ include: { createdUjians: false } }),
-			prisma.unitAkademik.findMany({ orderBy: { nama: "asc" } }),
+			prisma.user.findMany({ include: { createdUjians: false, mataKuliah: true } }),
+			prisma.fakultas.findMany({ orderBy: { nama: "asc" } }),
+			prisma.programStudi.findMany({ orderBy: { nama: "asc" } }),
+			prisma.rombel.findMany({ orderBy: { nama: "asc" } }),
 
 			prisma.tahunAkademik.findMany({ orderBy: { nama: "asc" } }),
 			prisma.semester.findMany({ orderBy: { nama: "asc" } }),
 			prisma.mataKuliah.findMany({ orderBy: { nama: "asc" } }),
-			prisma.modul.findMany({ orderBy: { nama: "asc" } }),
+			prisma.modul.findMany({ orderBy: { nama: "asc" }, include: { mataKuliah: true } }),
 			prisma.topik.findMany({ orderBy: { nama: "asc" } }),
 			prisma.soal.findMany({
 				include: { jawaban: true },
@@ -39,11 +40,10 @@ export async function loadSnapshotRows(): Promise<SnapshotRows> {
 
 	return { 
 		users, 
-		unitAkademik: unitAkademik as any,
+		fakultas, programStudi, rombel,
 		tahunAkademik, semester, 
-		mataKuliah: mataKuliah.map(m => ({ ...m, unitId: m.unitId ?? undefined, semesterId: m.semesterId ?? undefined })),
-
-		modul: modul.map(m => ({ ...m, mataKuliahId: m.mataKuliahId ?? undefined })), 
+		mataKuliah: mataKuliah.map(m => ({ ...m, programStudiId: m.programStudiId ?? undefined, semesterId: m.semesterId ?? undefined })),
+		modul,
 		topik, soal, ujian, token, sesi, config 
 	};
 }
@@ -51,12 +51,13 @@ export async function loadSnapshotRows(): Promise<SnapshotRows> {
 export function adminSnapshot(rows: SnapshotRows): Snapshot {
 	return {
 		users: rows.users.map(publicUser),
-		unitAkademik: rows.unitAkademik as any,
-
+		fakultas: rows.fakultas,
+		programStudi: rows.programStudi,
+		rombel: rows.rombel,
 		tahunAkademik: rows.tahunAkademik,
 		semester: rows.semester,
 		mataKuliah: rows.mataKuliah,
-		modul: rows.modul,
+		modul: rows.modul.map(m => ({ id: m.id, nama: m.nama, aktif: m.aktif, mataKuliahIds: m.mataKuliah?.map(mk => mk.mataKuliahId) ?? [] })),
 		topik: rows.topik,
 		soal: rows.soal.map(mapSoal),
 		ujian: rows.ujian.map(mapUjian),
@@ -114,18 +115,20 @@ export function operatorSnapshot(rows: SnapshotRows, caller: UserRow): Snapshot 
 		if (item.role !== "mahasiswa") return false;
 		if (includeAllPeserta) return true;
 		if (visiblePesertaIds.has(item.id)) return true;
-		return item.unitId ? visibleUnitIds.has(item.unitId) : false;
+		if (item.rombelId) return visibleUnitIds.has(item.rombelId);
+		return false;
 
 	});
 
 	return {
 		users: users.map(publicUser),
-		unitAkademik: rows.unitAkademik as any,
-
+		fakultas: rows.fakultas,
+		programStudi: rows.programStudi,
+		rombel: rows.rombel,
 		tahunAkademik: rows.tahunAkademik,
 		semester: rows.semester,
 		mataKuliah: rows.mataKuliah,
-		modul,
+		modul: modul.map(m => ({ id: m.id, nama: m.nama, aktif: m.aktif, mataKuliahIds: m.mataKuliah?.map(mk => mk.mataKuliahId) ?? [] })),
 		topik,
 		soal: soal.map(mapSoal),
 		ujian: ujian.map(mapUjian),
@@ -140,7 +143,7 @@ export function pesertaSnapshot(rows: SnapshotRows, caller: UserRow): Snapshot {
 		const groupIds = parseJson<string[]>(item.groupIds, []);
 		return (
 			groupIds.length === 0 ||
-			(!!caller.unitId && groupIds.includes(caller.unitId))
+			(!!caller.rombelId && groupIds.includes(caller.rombelId))
 
 		);
 	});
@@ -156,8 +159,9 @@ export function pesertaSnapshot(rows: SnapshotRows, caller: UserRow): Snapshot {
 
 	return {
 		users: [publicUser(caller)],
-		unitAkademik: rows.unitAkademik as any,
-
+		fakultas: rows.fakultas,
+		programStudi: rows.programStudi,
+		rombel: rows.rombel,
 		tahunAkademik: [],
 		semester: [],
 		mataKuliah: [],

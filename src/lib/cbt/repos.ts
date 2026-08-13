@@ -6,8 +6,12 @@ import { mutateModulServer, mutateTopikServer, mutateSoalServer } from "@/lib/se
 import { mutateSesiServer, createSesiServer } from "@/lib/server/sesi/functions";
 import { getTodaysExamsServer } from "@/lib/server/exams";
 import { 
-	mutateUnitAkademikServer, 
-	mutateTahunAkademikServer, mutateSemesterServer, mutateMataKuliahServer 
+	mutateFakultasServer,
+	mutateProgramStudiServer,
+	mutateRombelServer,
+	mutateTahunAkademikServer, 
+	mutateSemesterServer, 
+	mutateMataKuliahServer 
 } from "@/lib/server/akademik/functions";
 import { toast } from "sonner";
 import type {
@@ -21,7 +25,9 @@ import type {
 	Topik,
 	Ujian,
 	User,
-	UnitAkademik,
+	Fakultas,
+	ProgramStudi,
+	Rombel,
 	TahunAkademik,
 	Semester,
 	MataKuliah,
@@ -35,16 +41,18 @@ export type PublicBootConfig = Awaited<
 type MutationResult = { ok: boolean; error?: string };
 type EntityName =
 	| "users"
-	| "unitAkademik"
+	| "soal"
+	| "ujian"
+	| "token"
+	| "sesi"
+	| "fakultas"
+	| "programStudi"
+	| "rombel"
 	| "tahunAkademik"
 	| "semester"
 	| "mataKuliah"
 	| "modul"
-	| "topik"
-	| "soal"
-	| "ujian"
-	| "token"
-	| "sesi";
+	| "topik";
 
 const DEFAULT_OPERATOR_NAV: NavKey[] = [
 	"dashboard",
@@ -60,7 +68,9 @@ const DEFAULT_OPERATOR_NAV: NavKey[] = [
 
 const cache = {
 	users: [] as User[],
-	unitAkademik: [] as UnitAkademik[],
+	fakultas: [] as Fakultas[],
+	programStudi: [] as ProgramStudi[],
+	rombel: [] as Rombel[],
 	tahunAkademik: [] as TahunAkademik[],
 	semester: [] as Semester[],
 	mataKuliah: [] as MataKuliah[],
@@ -98,7 +108,9 @@ export function invalidateReposCache(): void {
 
 function applySnapshot(snapshot: Snapshot) {
 	cache.users = snapshot.users;
-	cache.unitAkademik = snapshot.unitAkademik;
+	cache.fakultas = snapshot.fakultas;
+	cache.programStudi = snapshot.programStudi;
+	cache.rombel = snapshot.rombel;
 	cache.tahunAkademik = snapshot.tahunAkademik;
 	cache.semester = snapshot.semester;
 	cache.mataKuliah = snapshot.mataKuliah;
@@ -193,7 +205,9 @@ function runEntityMutation(
 		case "ujian": mutationPromise = mutateUjianServer({ data: { action, payload } }); break;
 		case "token": mutationPromise = mutateTokenServer({ data: { action, payload } }); break;
 		case "sesi": mutationPromise = mutateSesiServer({ data: { action, payload } }); break;
-		case "unitAkademik": mutationPromise = mutateUnitAkademikServer({ data: { action: action as any, payload } }); break;
+		case "fakultas": mutationPromise = mutateFakultasServer({ data: { action: action as any, payload } }); break;
+		case "programStudi": mutationPromise = mutateProgramStudiServer({ data: { action: action as any, payload } }); break;
+		case "rombel": mutationPromise = mutateRombelServer({ data: { action: action as any, payload } }); break;
 		case "tahunAkademik": mutationPromise = mutateTahunAkademikServer({ data: { action: action as any, payload } }); break;
 		case "semester": mutationPromise = mutateSemesterServer({ data: { action: action as any, payload } }); break;
 		case "mataKuliah": mutationPromise = mutateMataKuliahServer({ data: { action: action as any, payload } }); break;
@@ -268,11 +282,27 @@ export const usersRepo = createRepo(
 	},
 );
 
-export const unitAkademikRepo = createRepo(
-	"unitAkademik",
-	() => cache.unitAkademik,
+export const fakultasRepo = createRepo(
+	"fakultas",
+	() => cache.fakultas,
 	(items) => {
-		cache.unitAkademik = items;
+		cache.fakultas = items;
+	},
+);
+
+export const programStudiRepo = createRepo(
+	"programStudi",
+	() => cache.programStudi,
+	(items) => {
+		cache.programStudi = items;
+	},
+);
+
+export const rombelRepo = createRepo(
+	"rombel",
+	() => cache.rombel,
+	(items) => {
+		cache.rombel = items;
 	},
 );
 

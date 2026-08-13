@@ -19,16 +19,26 @@ export const StatusSesiEnum = z.enum([
 export type StatusSesi = z.infer<typeof StatusSesiEnum>;
 
 // ---------------- Master Akademik ----------------
-export const TipeUnitAkademikEnum = z.enum(["fakultas", "jurusan", "prodi", "semester", "kelas", "kategori_bebas"]);
-export type TipeUnitAkademik = z.infer<typeof TipeUnitAkademikEnum>;
-
-export const UnitAkademikSchema = z.object({
+export const FakultasSchema = z.object({
 	id: z.string(),
 	nama: z.string(),
-	tipe: TipeUnitAkademikEnum,
-	parentId: z.string().nullable(),
 });
-export type UnitAkademik = z.infer<typeof UnitAkademikSchema>;
+export type Fakultas = z.infer<typeof FakultasSchema>;
+
+export const ProgramStudiSchema = z.object({
+	id: z.string(),
+	nama: z.string(),
+	fakultasId: z.string(),
+});
+export type ProgramStudi = z.infer<typeof ProgramStudiSchema>;
+
+export const RombelSchema = z.object({
+	id: z.string(),
+	nama: z.string(),
+	programStudiId: z.string(),
+	tahunAkademikId: z.string(),
+});
+export type Rombel = z.infer<typeof RombelSchema>;
 
 
 export const TahunAkademikSchema = z.object({
@@ -50,7 +60,7 @@ export const MataKuliahSchema = z.object({
 	kode: z.string(),
 	nama: z.string(),
 	sks: z.number().int().default(2),
-	unitId: z.string().optional(),
+	programStudiId: z.string().optional(),
 	semesterId: z.string().optional(),
 
 });
@@ -64,7 +74,7 @@ export const UserSchema = z.object({
 	namaLengkap: z.string(),
 	role: RoleEnum,
 	allowedTopikIds: z.array(z.string()).default([]),
-	unitId: z.string().optional(),
+	rombelId: z.string().optional(),
 
 	mataKuliahIds: z.array(z.string()).default([]),
 	detail: z.string().optional(),
@@ -80,7 +90,7 @@ export const ModulSchema = z.object({
 	id: z.string(),
 	nama: z.string(),
 	aktif: z.boolean().default(true),
-	mataKuliahId: z.string().optional(),
+	mataKuliahIds: z.array(z.string()).default([]),
 });
 export type Modul = z.infer<typeof ModulSchema>;
 

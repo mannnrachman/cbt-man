@@ -5,8 +5,8 @@ import { z } from "zod";
 import { prisma } from "../db/prisma";
 import { requireCaller, seedIfNeeded } from "../db/auth";
 import { writeAuditLog } from "../db/audit";
-import type { UnitAkademik, TahunAkademik, Semester, MataKuliah } from "@/lib/cbt/types";
-import { UnitAkademikSchema } from "@/lib/cbt/types";
+import type { Fakultas, ProgramStudi, Rombel, TahunAkademik, Semester, MataKuliah } from "@/lib/cbt/types";
+import { FakultasSchema, ProgramStudiSchema, RombelSchema } from "@/lib/cbt/types";
 
 
 function audit(caller: any, entity: string, action: string, payload: any) {
@@ -33,7 +33,7 @@ async function requireSuperAdmin() {
 	return caller;
 }
 
-export const mutateUnitAkademikServer = createServerFn({ method: "POST" })
+export const mutateFakultasServer = createServerFn({ method: "POST" })
 	.validator(z.object({ action: z.enum(["upsert", "remove"]), payload: z.any() }))
 	.handler(async ({ data }) => {
 		const caller = await requireSuperAdmin();
@@ -41,13 +41,57 @@ export const mutateUnitAkademikServer = createServerFn({ method: "POST" })
 		const { action, payload } = data;
 		try {
 			if (action === "upsert") {
-				const item = payload as UnitAkademik;
-				await prisma.unitAkademik.upsert({ where: { id: item.id }, update: item, create: item });
+				const item = payload as Fakultas;
+				await prisma.fakultas.upsert({ where: { id: item.id }, update: item, create: item });
 			} else if (action === "remove") {
 				const id = (payload as { id: string }).id;
-				await prisma.unitAkademik.delete({ where: { id } });
+				await prisma.fakultas.delete({ where: { id } });
 			}
-			audit(caller, "unitAkademik", action, payload);
+			audit(caller, "fakultas", action, payload);
+
+			return { ok: true as const };
+		} catch (e: any) {
+			return { ok: false as const, error: e.message };
+		}
+	});
+
+export const mutateProgramStudiServer = createServerFn({ method: "POST" })
+	.validator(z.object({ action: z.enum(["upsert", "remove"]), payload: z.any() }))
+	.handler(async ({ data }) => {
+		const caller = await requireSuperAdmin();
+		if (!caller) return { ok: false as const, error: "Unauthorized" };
+		const { action, payload } = data;
+		try {
+			if (action === "upsert") {
+				const item = payload as ProgramStudi;
+				await prisma.programStudi.upsert({ where: { id: item.id }, update: item, create: item });
+			} else if (action === "remove") {
+				const id = (payload as { id: string }).id;
+				await prisma.programStudi.delete({ where: { id } });
+			}
+			audit(caller, "programStudi", action, payload);
+
+			return { ok: true as const };
+		} catch (e: any) {
+			return { ok: false as const, error: e.message };
+		}
+	});
+
+export const mutateRombelServer = createServerFn({ method: "POST" })
+	.validator(z.object({ action: z.enum(["upsert", "remove"]), payload: z.any() }))
+	.handler(async ({ data }) => {
+		const caller = await requireSuperAdmin();
+		if (!caller) return { ok: false as const, error: "Unauthorized" };
+		const { action, payload } = data;
+		try {
+			if (action === "upsert") {
+				const item = payload as Rombel;
+				await prisma.rombel.upsert({ where: { id: item.id }, update: item, create: item });
+			} else if (action === "remove") {
+				const id = (payload as { id: string }).id;
+				await prisma.rombel.delete({ where: { id } });
+			}
+			audit(caller, "rombel", action, payload);
 
 			return { ok: true as const };
 		} catch (e: any) {
@@ -130,14 +174,42 @@ export const mutateMataKuliahServer = createServerFn({ method: "POST" })
 			return { ok: false as const, error: e.message };
 		}
 	});
-export const getUnitAkademikList = createServerFn({ method: "GET" }).handler(
-	async (): Promise<UnitAkademik[]> => {
+export const getFakultasList = createServerFn({ method: "GET" }).handler(
+	async (): Promise<Fakultas[]> => {
 		const caller = await requireCaller();
 		if (!caller || caller.role !== "super_admin") return [];
-		const records = await prisma.unitAkademik.findMany();
-		const results: UnitAkademik[] = [];
+		const records = await prisma.fakultas.findMany();
+		const results: Fakultas[] = [];
 		for (const rec of records) {
-			const parsed = UnitAkademikSchema.safeParse(rec);
+			const parsed = FakultasSchema.safeParse(rec);
+			if (parsed.success) results.push(parsed.data);
+		}
+		return results;
+	}
+);
+
+export const getProgramStudiList = createServerFn({ method: "GET" }).handler(
+	async (): Promise<ProgramStudi[]> => {
+		const caller = await requireCaller();
+		if (!caller || caller.role !== "super_admin") return [];
+		const records = await prisma.programStudi.findMany();
+		const results: ProgramStudi[] = [];
+		for (const rec of records) {
+			const parsed = ProgramStudiSchema.safeParse(rec);
+			if (parsed.success) results.push(parsed.data);
+		}
+		return results;
+	}
+);
+
+export const getRombelList = createServerFn({ method: "GET" }).handler(
+	async (): Promise<Rombel[]> => {
+		const caller = await requireCaller();
+		if (!caller || caller.role !== "super_admin") return [];
+		const records = await prisma.rombel.findMany();
+		const results: Rombel[] = [];
+		for (const rec of records) {
+			const parsed = RombelSchema.safeParse(rec);
 			if (parsed.success) results.push(parsed.data);
 		}
 		return results;

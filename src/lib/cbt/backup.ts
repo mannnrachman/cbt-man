@@ -4,7 +4,12 @@ import { z } from "zod";
 import { toast } from "sonner";
 import {
   usersRepo,
-  unitAkademikRepo,
+  fakultasRepo,
+  programStudiRepo,
+  rombelRepo,
+  tahunAkademikRepo,
+  semesterRepo,
+  mataKuliahRepo,
   modulRepo,
   topikRepo,
   soalRepo,
@@ -17,7 +22,12 @@ import {
 } from "./repos";
 import {
   UserSchema,
-  UnitAkademikSchema,
+  FakultasSchema,
+  ProgramStudiSchema,
+  RombelSchema,
+  TahunAkademikSchema,
+  SemesterSchema,
+  MataKuliahSchema,
   ModulSchema,
   TopikSchema,
   SoalSchema,
@@ -44,7 +54,12 @@ export const BackupSchema = z.object({
   version: z.literal(1),
   exportedAt: z.number(),
   users: z.array(UserSchema),
-  unitAkademik: z.array(UnitAkademikSchema),
+  fakultas: z.array(FakultasSchema),
+  programStudi: z.array(ProgramStudiSchema),
+  rombel: z.array(RombelSchema),
+  tahunAkademik: z.array(TahunAkademikSchema),
+  semester: z.array(SemesterSchema),
+  mataKuliah: z.array(MataKuliahSchema),
   modul: z.array(ModulSchema),
   topik: z.array(TopikSchema),
   soal: z.array(SoalSchema),
@@ -63,7 +78,12 @@ export async function exportBackup(): Promise<Backup> {
     version: 1,
     exportedAt: Date.now(),
     users: usersRepo.all(),
-    unitAkademik: unitAkademikRepo.all(),
+    fakultas: fakultasRepo.all(),
+    programStudi: programStudiRepo.all(),
+    rombel: rombelRepo.all(),
+    tahunAkademik: tahunAkademikRepo.all(),
+    semester: semesterRepo.all(),
+    mataKuliah: mataKuliahRepo.all(),
     modul: modulRepo.all(),
     topik: topikRepo.all(),
     soal: soalRepo.all(),
@@ -90,11 +110,9 @@ export async function downloadBackup(): Promise<void> {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function importBackup(raw: any): Promise<Backup> {
   if (raw && typeof raw === "object") {
     if ("groups" in raw && Array.isArray(raw.groups)) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       raw.unitAkademik = raw.groups.map((g: any) => ({
         id: g.id,
         nama: g.nama,
@@ -104,7 +122,6 @@ export async function importBackup(raw: any): Promise<Backup> {
       delete raw.groups;
     }
     if ("users" in raw && Array.isArray(raw.users)) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       raw.users = raw.users.map((u: any) => ({
         ...u,
         unitId: u.unitId ?? u.groupId ?? u.prodiId ?? null,
@@ -116,7 +133,12 @@ export async function importBackup(raw: any): Promise<Backup> {
   await importBackupServer({
     data: {
       users: data.users,
-      unitAkademik: data.unitAkademik,
+      fakultas: data.fakultas,
+      programStudi: data.programStudi,
+      rombel: data.rombel,
+      tahunAkademik: data.tahunAkademik,
+      semester: data.semester,
+      mataKuliah: data.mataKuliah,
       modul: data.modul,
       topik: data.topik,
       soal: data.soal,
@@ -141,7 +163,12 @@ export async function resetAllData(): Promise<void> {
 export function backupSummary(b: Backup) {
   return {
     users: b.users.length,
-    unitAkademik: b.unitAkademik.length,
+    fakultas: b.fakultas.length,
+    programStudi: b.programStudi.length,
+    rombel: b.rombel.length,
+    tahunAkademik: b.tahunAkademik.length,
+    semester: b.semester.length,
+    mataKuliah: b.mataKuliah.length,
     modul: b.modul.length,
     topik: b.topik.length,
     soal: b.soal.length,

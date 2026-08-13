@@ -41,7 +41,12 @@ export const getTodaysExamsServer = createServerFn({ method: "GET" }).handler(
 		const online = ujianList.filter((u) => u.mode === "online").map(mapUjian);
 		const offline = ujianList.filter((u) => u.mode === "offline").map(mapUjian);
 		
-		const groupNames = await prisma.unitAkademik.findMany({ select: { id: true, nama: true } });
+		const [rombels, prodis, fakultas] = await Promise.all([
+			prisma.rombel.findMany({ select: { id: true, nama: true } }),
+			prisma.programStudi.findMany({ select: { id: true, nama: true } }),
+			prisma.fakultas.findMany({ select: { id: true, nama: true } })
+		]);
+		const groupNames = [...rombels, ...prodis, ...fakultas];
 		const groupsMap = Object.fromEntries(groupNames.map((g: any) => [g.id, g.nama]));
 
 		

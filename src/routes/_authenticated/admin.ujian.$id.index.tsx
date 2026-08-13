@@ -1,9 +1,10 @@
 import { createFileRoute, Link, useParams, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ujianRepo, unitAkademikRepo, hydrateRepos, mataKuliahRepo, semesterRepo } from "@/lib/cbt/repos";
+import { ujianRepo, hydrateRepos, mataKuliahRepo, semesterRepo } from "@/lib/cbt/repos";
+import { getRombelList } from "@/lib/server/akademik/functions";
 
 import { uid } from "@/lib/cbt/storage";
-import type { Ujian, TopicSet } from "@/lib/cbt/types";
+import type { Ujian, TopicSet, Rombel } from "@/lib/cbt/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,11 +34,14 @@ import { fetchUjianByIdServer } from "@/lib/server/ujian/functions";
 
 export const Route = createFileRoute("/_authenticated/admin/ujian/$id/")({
   loader: async () => {
+    let groups: Rombel[] = [];
     try {
       await hydrateRepos();
+      groups = await getRombelList();
     } catch {
       // Fallback ke cache; jangan brick navigasi saat snapshot gagal.
     }
+    return { groups };
   },
   component: UjianEditor,
 });
@@ -45,6 +49,7 @@ export const Route = createFileRoute("/_authenticated/admin/ujian/$id/")({
 function UjianEditor() {
   const { id } = useParams({ from: "/_authenticated/admin/ujian/$id/" });
   const navigate = useNavigate();
+  const { groups } = Route.useLoaderData();
   const user = useAuthStore((s) => s.user);
   const initial = ujianRepo.byId(id);
   
@@ -175,15 +180,14 @@ function UjianEditor() {
   // because we are not mutating the ujian in place; the predicate is
   // checked on the read path only.)
 
-  const groups = unitAkademikRepo.all();
   const topiks = visibleTopiks(user);
   const moduls = visibleModuls(user);
   
   const sortedTopiks = [...topiks].sort((a, b) => {
     const mA = moduls.find((m) => m.id === a.modulId);
     const mB = moduls.find((m) => m.id === b.modulId);
-    const aIsMk = mA?.mataKuliahId === u?.mataKuliahId ? -1 : 1;
-    const bIsMk = mB?.mataKuliahId === u?.mataKuliahId ? -1 : 1;
+    const aIsMk = u?.mataKuliahId && mA?.mataKuliahIds?.includes(u.mataKuliahId) ? -1 : 1;
+    const bIsMk = u?.mataKuliahId && mB?.mataKuliahIds?.includes(u.mataKuliahId) ? -1 : 1;
     if (aIsMk !== bIsMk) return aIsMk - bIsMk;
     return a.nama.localeCompare(b.nama);
   });
@@ -376,7 +380,7 @@ function UjianEditor() {
                           <SelectContent>
                             {sortedTopiks.map((tk) => {
                               const mm = moduls.find((mm) => mm.id === tk.modulId);
-                              const isMatchMk = u.mataKuliahId && mm?.mataKuliahId === u.mataKuliahId;
+                              const isMatchMk = u.mataKuliahId && mm?.mataKuliahIds?.includes(u.mataKuliahId);
                               return (
                                 <SelectItem key={tk.id} value={tk.id}>
                                   {isMatchMk ? "★ " : ""} {mm?.nama} — {tk.nama}
@@ -532,7 +536,7 @@ function UjianEditor() {
               <div className="space-y-2">
                 <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Group / Angkatan yang Diizinkan (Kosong = Terbuka Semua)</Label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[160px] overflow-auto p-1">
-                  {groups.map((g) => (
+                  {groups?.map((g) => (
                     <label key={g.id} className="flex items-center gap-2.5 rounded-lg border border-slate-200/80 dark:border-slate-800 p-2.5 text-xs font-medium cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
                       <Checkbox
                         checked={u.groupIds.includes(g.id)}

@@ -34,15 +34,29 @@ enum StatusSesi {
   kedaluwarsa
 }
 
-model UnitAkademik {
-  id         String         @id
+model Fakultas {
+  id     String         @id
+  nama   String
+  prodis ProgramStudi[]
+}
+
+model ProgramStudi {
+  id         String       @id
   nama       String
-  tipe       String
-  parentId   String?
-  parent     UnitAkademik?  @relation("UnitToUnit", fields: [parentId], references: [id], onDelete: Cascade)
-  children   UnitAkademik[] @relation("UnitToUnit")
-  users      User[]
+  fakultasId String
+  fakultas   Fakultas     @relation(fields: [fakultasId], references: [id], onDelete: Cascade)
+  rombels    Rombel[]
   mataKuliah MataKuliah[]
+}
+
+model Rombel {
+  id              String        @id
+  nama            String
+  programStudiId  String
+  tahunAkademikId String
+  programStudi    ProgramStudi  @relation(fields: [programStudiId], references: [id], onDelete: Cascade)
+  tahunAkademik   TahunAkademik @relation(fields: [tahunAkademikId], references: [id], onDelete: Cascade)
+  users           User[]
 }
 
 model User {
@@ -51,13 +65,13 @@ model User {
   passwordHash    String
   namaLengkap     String
   role            Role
-  allowedTopikIds String        @default("[]")
-  unitId          String?
-  mataKuliahIds   String        @default("[]")
+  allowedTopikIds String           @default("[]")
+  rombelId        String?
   detail          String?
-  aktif           Boolean       @default(true)
+  aktif           Boolean          @default(true)
   createdAt       BigInt
-  unit            UnitAkademik? @relation(fields: [unitId], references: [id])
+  rombel          Rombel?          @relation(fields: [rombelId], references: [id], onDelete: SetNull)
+  mataKuliah      UserMataKuliah[]
   createdUjians   Ujian[]       @relation("UjianCreator")
   sesi            SesiUjian[]   @relation("SesiPeserta")
   tokenClaims     TokenClaim[]
@@ -78,12 +92,30 @@ model Session {
   @@index([userId])
 }
 
+model UserMataKuliah {
+  userId       String
+  mataKuliahId String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mataKuliah   MataKuliah @relation(fields: [mataKuliahId], references: [id], onDelete: Cascade)
+
+  @@id([userId, mataKuliahId])
+}
+
 model Modul {
-  id           String  @id
-  nama         String
-  aktif        Boolean @default(true)
-  mataKuliahId String?
-  topik        Topik[]
+  id         String            @id
+  nama       String
+  aktif      Boolean           @default(true)
+  mataKuliah ModulMataKuliah[]
+  topik      Topik[]
+}
+
+model ModulMataKuliah {
+  modulId      String
+  mataKuliahId String
+  modul        Modul      @relation(fields: [modulId], references: [id], onDelete: Cascade)
+  mataKuliah   MataKuliah @relation(fields: [mataKuliahId], references: [id], onDelete: Cascade)
+
+  @@id([modulId, mataKuliahId])
 }
 
 model Topik {
@@ -229,6 +261,7 @@ model TahunAkademik {
   nama     String
   aktif    Boolean    @default(false)
   semester Semester[]
+  rombels  Rombel[]
 }
 
 model Semester {
@@ -241,13 +274,15 @@ model Semester {
 }
 
 model MataKuliah {
-  id         String        @id
-  kode       String
-  nama       String
-  sks        Int           @default(2)
-  unitId     String?
-  unit       UnitAkademik? @relation(fields: [unitId], references: [id], onDelete: Cascade)
-  semesterId String?
-  semester   Semester?     @relation(fields: [semesterId], references: [id], onDelete: Cascade)
-  ujians     Ujian[]
+  id             String            @id
+  kode           String
+  nama           String
+  sks            Int               @default(2)
+  programStudiId String?
+  programStudi   ProgramStudi?     @relation(fields: [programStudiId], references: [id], onDelete: Cascade)
+  semesterId     String?
+  semester       Semester?         @relation(fields: [semesterId], references: [id], onDelete: Cascade)
+  ujians         Ujian[]
+  users          UserMataKuliah[]
+  moduls         ModulMataKuliah[]
 }

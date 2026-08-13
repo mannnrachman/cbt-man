@@ -1,275 +1,252 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { unitAkademikRepo } from "@/lib/cbt/repos";
-import { mutateUnitAkademikServer } from "@/lib/server/akademik/functions";
-import type { UnitAkademik } from "@/lib/cbt/types";
+import { useState, useEffect } from "react";
+import { getFakultasList, getProgramStudiList, getRombelList, mutateFakultasServer, mutateProgramStudiServer, mutateRombelServer } from "@/lib/server/akademik/functions";
+import type { Fakultas, ProgramStudi, Rombel } from "@/lib/cbt/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Edit2, Trash2, ChevronRight, ChevronDown, Folder, Building2, Library, Users } from "lucide-react";
+import { Plus, Edit2, Trash2, Building2, Library, Users } from "lucide-react";
 import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/_authenticated/admin/akademik/")({
-  component: UnitAkademikExplorer,
+  loader: async () => {
+    const [fakultas, prodi, rombel] = await Promise.all([
+      getFakultasList(),
+      getProgramStudiList(),
+      getRombelList(),
+    ]);
+    return { fakultas, prodi, rombel };
+  },
+  component: AkademikExplorer,
 });
 
-function getDescendantIds(targetId: string, units: UnitAkademik[]): Set<string> {
-  const set = new Set<string>();
-  const addChildren = (parentId: string) => {
-    for (const u of units) {
-      if (u.parentId === parentId && !set.has(u.id)) {
-        set.add(u.id);
-        addChildren(u.id);
-      }
-    }
-  };
-  addChildren(targetId);
-  return set;
-}
+function AkademikExplorer() {
+  const data = Route.useLoaderData();
+  const [fakultas, setFakultas] = useState<Fakultas[]>(data.fakultas);
+  const [prodi, setProdi] = useState<ProgramStudi[]>(data.prodi);
+  const [rombel, setRombel] = useState<Rombel[]>(data.rombel);
 
-function UnitAkademikExplorer() {
-  const [units, setUnits] = useState<UnitAkademik[]>(unitAkademikRepo.all());
-  const [search, setSearch] = useState("");
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
-
-  // Form State
-  const [editing, setEditing] = useState<UnitAkademik | null>(null);
-  const [form, setForm] = useState({ nama: "", tipe: "fakultas", parentId: "none" });
-
-  const toggleExpand = (id: string) => {
-    const next = new Set(expanded);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
-    setExpanded(next);
-  };
-
-  const getIcon = (tipe: string) => {
-    switch (tipe) {
-      case "fakultas": return <Building2 className="h-4 w-4 text-blue-500" />;
-      case "jurusan": return <Library className="h-4 w-4 text-purple-500" />;
-      case "prodi": return <Library className="h-4 w-4 text-indigo-500" />;
-      case "semester": return <Folder className="h-4 w-4 text-amber-500" />;
-      case "kelas": return <Users className="h-4 w-4 text-emerald-500" />;
-      default: return <Folder className="h-4 w-4 text-slate-500" />;
-    }
-  };
-
-  const resetForm = () => {
-    setEditing(null);
-    setForm({ nama: "", tipe: "fakultas", parentId: "none" });
-  };
-
-  const save = async () => {
-    if (!form.nama.trim()) {
-      toast.error("Nama unit wajib diisi!");
-      return;
-    }
-    const id = editing ? editing.id : `u_${Date.now()}`;
-    const payload: UnitAkademik = {
-      id,
-      nama: form.nama.trim(),
-      tipe: form.tipe as any,
-      parentId: form.parentId === "none" ? null : form.parentId,
-    };
-
-    const res = await mutateUnitAkademikServer({ data: { action: "upsert", payload } });
-    if (!res.ok) {
-      toast.error(res.error || "Gagal menyimpan unit ke server");
-      return;
-    }
-
-    unitAkademikRepo.upsert(payload);
-    setUnits([...unitAkademikRepo.all()]);
-    toast.success(editing ? "Unit Akademik diperbarui" : "Unit Akademik ditambahkan");
-    resetForm();
-  };
-
-  const remove = async (id: string) => {
-    const hasChildren = units.some((u: UnitAkademik) => u.parentId === id);
-    if (hasChildren) {
-      toast.error("Tidak dapat menghapus unit ini karena masih memiliki sub-unit di bawahnya.");
-      return;
-    }
-
-    if (!confirm("Hapus unit akademik ini?")) return;
-
-    const res = await mutateUnitAkademikServer({ data: { action: "remove", payload: { id } } });
-    if (!res.ok) {
-      toast.error(res.error || "Gagal menghapus unit");
-      return;
-    }
-
-    unitAkademikRepo.remove(id);
-    setUnits([...unitAkademikRepo.all()]);
-    toast.success("Unit Akademik dihapus");
-  };
-
-  const invalidParentIds = editing ? getDescendantIds(editing.id, units).add(editing.id) : new Set<string>();
-  const allowedParentUnits = units.filter((u: UnitAkademik) => !invalidParentIds.has(u.id));
-
-  const renderTree = (parentIds: string[] | null, level: number = 0) => {
-    const children = units
-      .filter((u: UnitAkademik) => (parentIds === null ? !u.parentId : parentIds.includes(u.parentId || "")))
-      .sort((a: UnitAkademik, b: UnitAkademik) => a.nama.localeCompare(b.nama));
-
-    if (children.length === 0) return null;
-
-    return (
-      <div className="flex flex-col">
-        {children.map((u: UnitAkademik) => {
-          const hasChildren = units.some((child: UnitAkademik) => child.parentId === u.id);
-          const isExpanded = expanded.has(u.id);
-
-          // Filtering
-          if (search && !u.nama.toLowerCase().includes(search.toLowerCase()) && !hasChildren) return null;
-
-          return (
-            <div key={u.id}>
-              <div
-                className={`flex items-center gap-2 rounded-md p-2 transition-colors hover:bg-accent/50 ${editing?.id === u.id ? "bg-accent" : ""}`}
-                style={{ paddingLeft: `${level * 1.5 + 0.5}rem` }}
-              >
-                <div
-                  className="flex h-6 w-6 cursor-pointer items-center justify-center rounded hover:bg-black/10 dark:hover:bg-white/10"
-                  onClick={() => toggleExpand(u.id)}
-                >
-                  {hasChildren ? (
-                    isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />
-                  ) : (
-                    <div className="h-4 w-4" />
-                  )}
-                </div>
-                {getIcon(u.tipe)}
-                <span className="flex-1 text-sm font-medium">{u.nama}</span>
-                <span className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground uppercase">{u.tipe}</span>
-                
-                <div className="flex items-center gap-1 opacity-50 hover:opacity-100">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7"
-                    onClick={() => {
-                      setEditing(u);
-                      setForm({ nama: u.nama, tipe: u.tipe, parentId: u.parentId || "none" });
-                    }}
-                  >
-                    <Edit2 className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => remove(u.id)}>
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-7 w-7" 
-                    title="Tambah Sub-Unit"
-                    onClick={() => {
-                      setEditing(null);
-                      setForm({ nama: "", tipe: "kelas", parentId: u.id });
-                      const next = new Set(expanded);
-                      next.add(u.id);
-                      setExpanded(next);
-                    }}
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-              </div>
-              {hasChildren && isExpanded && renderTree([u.id], level + 1)}
-            </div>
-          );
-        })}
-      </div>
-    );
+  const reload = async () => {
+    const [f, p, r] = await Promise.all([getFakultasList(), getProgramStudiList(), getRombelList()]);
+    setFakultas(f);
+    setProdi(p);
+    setRombel(r);
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <Card className="md:col-span-2">
-        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-4 sm:space-y-0 pb-4">
-          <CardTitle>Struktur Organisasi Akademik</CardTitle>
-          <Input
-            placeholder="Cari unit..."
-            className="max-w-xs"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              if (e.target.value) {
-                setExpanded(new Set(units.map((u: UnitAkademik) => u.id)));
-              } else {
-                setExpanded(new Set());
-              }
-            }}
-          />
-        </CardHeader>
-        <CardContent>
-          <div className="rounded-lg border bg-card p-2 min-h-[400px]">
-            {units.length === 0 ? (
-              <div className="flex h-[300px] flex-col items-center justify-center text-muted-foreground">
-                <Folder className="mb-2 h-10 w-10 opacity-20" />
-                <p>Belum ada data struktur akademik.</p>
-                <Button variant="link" onClick={() => setForm({ ...form, parentId: "none" })}>Buat Induk Pertama</Button>
-              </div>
-            ) : (
-              renderTree(null, 0)
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="space-y-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>{editing ? "Edit Unit" : "Tambah Unit Baru"}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-1.5">
-              <Label>Nama Unit</Label>
-              <Input
-                placeholder="Contoh: Fakultas Teknik"
-                value={form.nama}
-                onChange={(e) => setForm({ ...form, nama: e.target.value })}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Tipe Unit</Label>
-              <Select value={form.tipe} onValueChange={(val) => setForm({ ...form, tipe: val })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="fakultas">Fakultas</SelectItem>
-                  <SelectItem value="prodi">Program Studi / Jurusan</SelectItem>
-                  <SelectItem value="kelas">Kelas / Paralel (A, B, C)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label>Induk Unit (Parent)</Label>
-              <Select value={form.parentId} onValueChange={(val) => setForm({ ...form, parentId: val })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">-- Sebagai Induk (Root) --</SelectItem>
-                  {allowedParentUnits.map((u: UnitAkademik) => (
-                    <SelectItem key={u.id} value={u.id}>{u.nama} ({u.tipe})</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="flex gap-2 pt-2">
-              <Button onClick={save} className="flex-1">{editing ? "Simpan Perubahan" : "Tambahkan"}</Button>
-              {editing && <Button variant="outline" onClick={resetForm}>Batal</Button>}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold tracking-tight">Struktur Akademik</h1>
+      <Tabs defaultValue="fakultas">
+        <TabsList>
+          <TabsTrigger value="fakultas">Fakultas</TabsTrigger>
+          <TabsTrigger value="prodi">Program Studi</TabsTrigger>
+          <TabsTrigger value="rombel">Rombel</TabsTrigger>
+        </TabsList>
+        <TabsContent value="fakultas">
+          <FakultasTab data={fakultas} reload={reload} />
+        </TabsContent>
+        <TabsContent value="prodi">
+          <ProdiTab data={prodi} fakultas={fakultas} reload={reload} />
+        </TabsContent>
+        <TabsContent value="rombel">
+          <RombelTab data={rombel} prodi={prodi} reload={reload} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
 
+function FakultasTab({ data, reload }: { data: Fakultas[], reload: () => void }) {
+  const [form, setForm] = useState({ id: "", nama: "" });
+
+  const save = async () => {
+    if (!form.nama.trim()) return toast.error("Nama wajib diisi!");
+    const payload: Fakultas = { id: form.id || `f_${Date.now()}`, nama: form.nama.trim() };
+    const res = await mutateFakultasServer({ data: { action: "upsert", payload } });
+    if (!res.ok) return toast.error(res.error);
+    toast.success("Tersimpan");
+    setForm({ id: "", nama: "" });
+    reload();
+  };
+
+  const remove = async (id: string) => {
+    if (!confirm("Hapus?")) return;
+    const res = await mutateFakultasServer({ data: { action: "remove", payload: { id } } });
+    if (!res.ok) return toast.error(res.error);
+    toast.success("Terhapus");
+    reload();
+  };
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+      <Card className="md:col-span-2">
+        <CardHeader><CardTitle>Daftar Fakultas</CardTitle></CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {data.map(f => (
+              <div key={f.id} className="flex items-center justify-between p-2 border rounded">
+                <div className="flex items-center gap-2"><Building2 className="h-4 w-4" /> {f.nama}</div>
+                <div>
+                  <Button variant="ghost" size="icon" onClick={() => setForm(f)}><Edit2 className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => remove(f.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader><CardTitle>{form.id ? "Edit" : "Tambah"} Fakultas</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>Nama</Label>
+            <Input value={form.nama} onChange={e => setForm({ ...form, nama: e.target.value })} />
+          </div>
+          <div className="flex gap-2">
+            <Button onClick={save}>Simpan</Button>
+            {form.id && <Button variant="outline" onClick={() => setForm({ id: "", nama: "" })}>Batal</Button>}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function ProdiTab({ data, fakultas, reload }: { data: ProgramStudi[], fakultas: Fakultas[], reload: () => void }) {
+  const [form, setForm] = useState({ id: "", nama: "", fakultasId: "" });
+
+  const save = async () => {
+    if (!form.nama.trim() || !form.fakultasId) return toast.error("Semua field wajib diisi!");
+    const payload: ProgramStudi = { id: form.id || `p_${Date.now()}`, nama: form.nama.trim(), fakultasId: form.fakultasId };
+    const res = await mutateProgramStudiServer({ data: { action: "upsert", payload } });
+    if (!res.ok) return toast.error(res.error);
+    toast.success("Tersimpan");
+    setForm({ id: "", nama: "", fakultasId: "" });
+    reload();
+  };
+
+  const remove = async (id: string) => {
+    if (!confirm("Hapus?")) return;
+    const res = await mutateProgramStudiServer({ data: { action: "remove", payload: { id } } });
+    if (!res.ok) return toast.error(res.error);
+    toast.success("Terhapus");
+    reload();
+  };
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+      <Card className="md:col-span-2">
+        <CardHeader><CardTitle>Daftar Program Studi</CardTitle></CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {data.map(p => (
+              <div key={p.id} className="flex items-center justify-between p-2 border rounded">
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2"><Library className="h-4 w-4" /> {p.nama}</div>
+                  <div className="text-xs text-muted-foreground ml-6">Fakultas: {fakultas.find(f => f.id === p.fakultasId)?.nama || p.fakultasId}</div>
+                </div>
+                <div>
+                  <Button variant="ghost" size="icon" onClick={() => setForm(p)}><Edit2 className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => remove(p.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader><CardTitle>{form.id ? "Edit" : "Tambah"} Program Studi</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>Nama</Label>
+            <Input value={form.nama} onChange={e => setForm({ ...form, nama: e.target.value })} />
+          </div>
+          <div className="space-y-2">
+            <Label>Fakultas</Label>
+            <Select value={form.fakultasId} onValueChange={v => setForm({ ...form, fakultasId: v })}>
+              <SelectTrigger><SelectValue placeholder="Pilih..." /></SelectTrigger>
+              <SelectContent>
+                {fakultas.map(f => <SelectItem key={f.id} value={f.id}>{f.nama}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex gap-2">
+            <Button onClick={save}>Simpan</Button>
+            {form.id && <Button variant="outline" onClick={() => setForm({ id: "", nama: "", fakultasId: "" })}>Batal</Button>}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function RombelTab({ data, prodi, reload }: { data: Rombel[], prodi: ProgramStudi[], reload: () => void }) {
+  const [form, setForm] = useState({ id: "", nama: "", programStudiId: "" });
+
+  const save = async () => {
+    if (!form.nama.trim() || !form.programStudiId) return toast.error("Semua field wajib diisi!");
+    const payload = { id: form.id || `r_${Date.now()}`, nama: form.nama.trim(), programStudiId: form.programStudiId } as Rombel;
+    const res = await mutateRombelServer({ data: { action: "upsert", payload } });
+    if (!res.ok) return toast.error(res.error);
+    toast.success("Tersimpan");
+    setForm({ id: "", nama: "", programStudiId: "" });
+    reload();
+  };
+
+  const remove = async (id: string) => {
+    if (!confirm("Hapus?")) return;
+    const res = await mutateRombelServer({ data: { action: "remove", payload: { id } } });
+    if (!res.ok) return toast.error(res.error);
+    toast.success("Terhapus");
+    reload();
+  };
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+      <Card className="md:col-span-2">
+        <CardHeader><CardTitle>Daftar Rombel</CardTitle></CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {data.map(r => (
+              <div key={r.id} className="flex items-center justify-between p-2 border rounded">
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2"><Users className="h-4 w-4" /> {r.nama}</div>
+                  <div className="text-xs text-muted-foreground ml-6">Prodi: {prodi.find(p => p.id === r.programStudiId)?.nama || r.programStudiId}</div>
+                </div>
+                <div>
+                  <Button variant="ghost" size="icon" onClick={() => setForm(r)}><Edit2 className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => remove(r.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader><CardTitle>{form.id ? "Edit" : "Tambah"} Rombel</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>Nama</Label>
+            <Input value={form.nama} onChange={e => setForm({ ...form, nama: e.target.value })} />
+          </div>
+          <div className="space-y-2">
+            <Label>Program Studi</Label>
+            <Select value={form.programStudiId} onValueChange={v => setForm({ ...form, programStudiId: v })}>
+              <SelectTrigger><SelectValue placeholder="Pilih..." /></SelectTrigger>
+              <SelectContent>
+                {prodi.map(p => <SelectItem key={p.id} value={p.id}>{p.nama}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex gap-2">
+            <Button onClick={save}>Simpan</Button>
+            {form.id && <Button variant="outline" onClick={() => setForm({ id: "", nama: "", programStudiId: "" })}>Batal</Button>}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

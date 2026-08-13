@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { mataKuliahRepo, unitAkademikRepo, semesterRepo, tahunAkademikRepo } from "@/lib/cbt/repos";
-import { mutateMataKuliahServer } from "@/lib/server/akademik/functions";
+import { mataKuliahRepo, semesterRepo, tahunAkademikRepo } from "@/lib/cbt/repos";
+import { mutateMataKuliahServer, getProgramStudiList } from "@/lib/server/akademik/functions";
 import { uid } from "@/lib/cbt/storage";
 import type { MataKuliah } from "@/lib/cbt/types";
 
@@ -29,28 +29,32 @@ import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export const Route = createFileRoute("/_authenticated/admin/akademik/mata-kuliah")({
+  loader: async () => {
+    const prodiList = await getProgramStudiList();
+    return { prodiList };
+  },
   component: MataKuliahPage,
 });
 
 function MataKuliahPage() {
+  const { prodiList } = Route.useLoaderData();
   const [items, setItems] = useState<MataKuliah[]>(mataKuliahRepo.all());
   const [search, setSearch] = useState("");
-  const unitList = unitAkademikRepo.all();
   const semesterList = semesterRepo.all();
   const taList = tahunAkademikRepo.all();
   
   const [editing, setEditing] = useState<MataKuliah | null>(null);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ id: "", kode: "", nama: "", sks: 2, unitId: "", semesterId: "" });
+  const [form, setForm] = useState({ id: "", kode: "", nama: "", sks: 2, programStudiId: "", semesterId: "" });
 
   function handleAdd() {
-    setForm({ id: uid("mk_"), kode: "", nama: "", sks: 2, unitId: "", semesterId: "" });
+    setForm({ id: uid("mk_"), kode: "", nama: "", sks: 2, programStudiId: "", semesterId: "" });
     setEditing(null);
     setOpen(true);
   }
 
   function handleEdit(item: MataKuliah) {
-    setForm({ id: item.id, kode: item.kode, nama: item.nama, sks: item.sks, unitId: item.unitId || "", semesterId: item.semesterId || "" });
+    setForm({ id: item.id, kode: item.kode, nama: item.nama, sks: item.sks, programStudiId: item.programStudiId || "", semesterId: item.semesterId || "" });
     setEditing(item);
     setOpen(true);
   }
@@ -68,8 +72,8 @@ function MataKuliahPage() {
   }
 
   async function save() {
-    if (!form.nama.trim() || !form.kode.trim() || !form.unitId || !form.semesterId) {
-      toast.error("Kode, Nama, Unit, dan Semester wajib diisi");
+    if (!form.nama.trim() || !form.kode.trim() || !form.programStudiId || !form.semesterId) {
+      toast.error("Kode, Nama, Program Studi, dan Semester wajib diisi");
       return;
     }
     const targetKode = form.kode.trim().toUpperCase();
@@ -85,7 +89,7 @@ function MataKuliahPage() {
       kode: form.kode.trim(), 
       nama: form.nama.trim(), 
       sks: form.sks,
-      unitId: form.unitId,
+      programStudiId: form.programStudiId,
       semesterId: form.semesterId 
     };
     const res = await mutateMataKuliahServer({ data: { action: "upsert", payload } });
@@ -141,7 +145,7 @@ function MataKuliahPage() {
           </TableHeader>
           <TableBody>
             {filteredItems.map((item) => {
-              const unit = unitList.find((p) => p.id === item.unitId);
+              const unit = prodiList.find((p) => p.id === item.programStudiId);
               const semester = semesterList.find((s) => s.id === item.semesterId);
               const ta = taList.find((t) => t.id === semester?.tahunAkademikId);
 
@@ -228,13 +232,13 @@ function MataKuliahPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Unit Akademik</Label>
-              <Select value={form.unitId} onValueChange={(v) => setForm({ ...form, unitId: v })}>
+              <Label>Program Studi</Label>
+              <Select value={form.programStudiId} onValueChange={(v) => setForm({ ...form, programStudiId: v })}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Pilih Unit Akademik" />
+                  <SelectValue placeholder="Pilih Program Studi" />
                 </SelectTrigger>
                 <SelectContent>
-                  {unitList.map((p) => (
+                  {prodiList.map((p) => (
                     <SelectItem key={p.id} value={p.id}>
                       {p.nama}
                     </SelectItem>

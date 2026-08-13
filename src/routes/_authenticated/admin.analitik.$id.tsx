@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
-import { ujianRepo, sesiRepo, usersRepo, soalRepo, hydrateRepos, mataKuliahRepo, semesterRepo, unitAkademikRepo } from "@/lib/cbt/repos";
+import { ujianRepo, sesiRepo, usersRepo, soalRepo, hydrateRepos, mataKuliahRepo, semesterRepo } from "@/lib/cbt/repos";
+import { getRombelList } from "@/lib/server/akademik/functions";
 import { recomputeSkor } from "@/lib/cbt/exam";
 import { exportSheet, stripHtml } from "@/lib/cbt/excel";
 import { analisisButir, labelKesukaran, labelDiskriminasi } from "@/lib/cbt/analisis";
@@ -342,14 +343,14 @@ function ExamReportTab({ ujian, sesis }: { ujian: Ujian, sesis: SesiUjian[] }) {
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
   }
 
-  function exportRekapExcel() {
+  async function exportRekapExcel() {
     const users = usersRepo.all();
-    const units = unitAkademikRepo.all();
+    const units = await getRombelList();
     
     // --- SHEET 1: REKAP NILAI ---
     const rowsRekap = completed.map(s => {
       const u = users.find(x => x.id === s.pesertaId);
-      const g = units.find(x => x.id === u?.unitId);
+      const g = units.find(x => x.id === u?.rombelId);
       return [
         formatDateExcel(s.mulaiAt),
         ujian.nama,

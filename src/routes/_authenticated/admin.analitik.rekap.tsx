@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { sesiRepo, usersRepo, unitAkademikRepo, mataKuliahRepo, semesterRepo } from "@/lib/cbt/repos";
+import { sesiRepo, usersRepo, mataKuliahRepo, semesterRepo } from "@/lib/cbt/repos";
+import { getRombelList } from "@/lib/server/akademik/functions";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,14 +28,18 @@ import { useAuthStore } from "@/lib/cbt/auth-store";
 import { visibleUjians } from "@/lib/cbt/access";
 
 export const Route = createFileRoute("/_authenticated/admin/analitik/rekap")({
+  loader: async () => {
+    const units = await getRombelList();
+    return { units };
+  },
   component: RekapPage,
 });
 
 function RekapPage() {
+  const { units } = Route.useLoaderData();
   const user = useAuthStore((s) => s.user);
   const ujians = visibleUjians(user);
   const visibleUjianIds = new Set(ujians.map((u) => u.id));
-  const units = unitAkademikRepo.all();
   const users = usersRepo.all();
   const [ujianId, setUjianId] = useState<string>("all");
   const [unitId, setUnitId] = useState<string>("all");
@@ -47,7 +52,7 @@ function RekapPage() {
     if (!visibleUjianIds.has(s.ujianId)) return false;
     if (ujianId !== "all" && s.ujianId !== ujianId) return false;
     const u = users.find((x) => x.id === s.pesertaId);
-    if (unitId !== "all" && u?.unitId !== unitId) return false;
+    if (unitId !== "all" && u?.rombelId !== unitId) return false;
 
     if (dari && (s.selesaiAt ?? 0) < new Date(dari).getTime()) return false;
     if (sampai && (s.selesaiAt ?? 0) > new Date(sampai).getTime() + 86_400_000) return false;
@@ -59,7 +64,7 @@ function RekapPage() {
     const ex = ujians.find((x) => x.id === s.ujianId);
     const mk = ex?.mataKuliahId ? mataKuliahRepo.byId(ex.mataKuliahId) : null;
     const smt = ex?.semesterId ? semesterRepo.byId(ex.semesterId) : null;
-    const g = units.find((x) => x.id === u?.unitId);
+    const g = units.find((x) => x.id === u?.rombelId);
     const durasi = s.mulaiAt && s.selesaiAt ? Math.round((s.selesaiAt - s.mulaiAt) / 1000) : 0;
 
     function formatDateExcel(ms: number | undefined | null) {

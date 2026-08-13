@@ -7,7 +7,8 @@ import {
   getObjectURL,
   type FileMeta,
 } from "@/lib/cbt/files";
-import { unitAkademikRepo, soalRepo } from "@/lib/cbt/repos";
+import { soalRepo } from "@/lib/cbt/repos";
+import { getProgramStudiList } from "@/lib/server/akademik/functions";
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,13 +18,18 @@ import { Input } from "@/components/ui/input";
 import { AdminPage, AdminPageHeader } from "@/components/cbt/AdminPage";
 
 export const Route = createFileRoute("/_authenticated/admin/files")({
+  loader: async () => {
+    const jurusans = await getProgramStudiList();
+    return { jurusans };
+  },
   component: FilesPage,
 });
 
 function FilesPage() {
+  const { jurusans } = Route.useLoaderData();
   const user = useAuthStore((s) => s.user);
   const isSuper = user?.role === "super_admin";
-  const myJurusanId = user?.unitId;
+  const myJurusanId = user?.rombelId;
 
   const [files, setFiles] = useState<FileMeta[]>([]);
   const [urls, setUrls] = useState<Record<string, string>>({});
@@ -32,7 +38,6 @@ function FilesPage() {
   const [isUploading, setIsUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const jurusans = unitAkademikRepo.all().filter((u) => u.tipe === "jurusan");
   const myJurusan = jurusans.find(j => j.id === myJurusanId);
 
   // Pre-calculate Usage Map

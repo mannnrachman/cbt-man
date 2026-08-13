@@ -1,31 +1,31 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { getUsersList } from "@/lib/server/users/functions";
-import { getUnitAkademikList } from "@/lib/server/akademik/functions";
+import { getRombelList } from "@/lib/server/akademik/functions";
 import { getPublicBootConfigServer } from "@/lib/server/snapshot/functions";
 import { Card } from "@/components/ui/card";
 import { AdminPage, AdminPageHeader } from "@/components/cbt/AdminPage";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Printer } from "lucide-react";
-import type { User, UnitAkademik } from "@/lib/cbt/types";
+import type { User, Rombel } from "@/lib/cbt/types";
 
 export const Route = createFileRoute("/_authenticated/admin/peserta/kartu")({
   component: KartuPage,
   loader: async () => {
-    const [allUsers, units, config] = await Promise.all([
+    const [allUsers, rombels, config] = await Promise.all([
       getUsersList(),
-      getUnitAkademikList(),
+      getRombelList(),
       getPublicBootConfigServer(),
     ]);
-    return { allUsers, units, config };
+    return { allUsers, rombels, config };
   }
 });
 
 function KartuPage() {
-  const { allUsers, units, config } = Route.useLoaderData();
-  const [unitId, setUnitId] = useState<string>("all");
-  const peserta = (allUsers as User[]).filter((u: User) => u.role === "mahasiswa" && (unitId === "all" || u.unitId === unitId));
+  const { allUsers, rombels, config } = Route.useLoaderData();
+  const [rombelId, setRombelId] = useState<string>("all");
+  const peserta = (allUsers as User[]).filter((u: User) => u.role === "mahasiswa" && (rombelId === "all" || u.rombelId === rombelId));
 
   const appName = config?.appName || "CBT-MAN";
 
@@ -37,16 +37,14 @@ function KartuPage() {
           description='Catatan: password hanya bisa dicetak jika diketahui (default: username + "123"). Untuk akun lama, reset dulu password-nya.'
           action={
             <div className="flex gap-2">
-              <Select value={unitId} onValueChange={setUnitId}>
+              <Select value={rombelId} onValueChange={setRombelId}>
                 <SelectTrigger className="w-full sm:w-56"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Semua unit</SelectItem>
-                  {units.map((u) => {
-                    const parent = u.parentId ? units.find((x) => x.id === u.parentId) : undefined;
-                    const tipeLabel = u.tipe === "prodi" ? "Prodi" : u.tipe === "fakultas" ? "Fakultas" : "Kelas";
+                  <SelectItem value="all">Semua Rombel</SelectItem>
+                  {rombels.map((r: Rombel) => {
                     return (
-                      <SelectItem key={u.id} value={u.id}>
-                        [{tipeLabel}] {u.nama} {parent ? `(${parent.nama})` : ""}
+                      <SelectItem key={r.id} value={r.id}>
+                        {r.nama}
                       </SelectItem>
                     );
                   })}
@@ -60,8 +58,7 @@ function KartuPage() {
 
       <div className="grid grid-cols-2 gap-3 print:grid-cols-2 md:grid-cols-3">
         {peserta.map((p) => {
-          const u = units.find((x) => x.id === p.unitId);
-          const parentU = u?.parentId ? units.find((x) => x.id === u.parentId) : undefined;
+          const r = rombels.find((x: Rombel) => x.id === p.rombelId);
           return (
             <Card key={p.id} className="p-4 break-inside-avoid">
               <div className="mb-2 flex items-center gap-2 border-b pb-2 text-sm font-semibold">
@@ -73,11 +70,10 @@ function KartuPage() {
                 <div><span className="text-slate-500">Username:</span> <code>{p.username}</code></div>
                 <div><span className="text-slate-500">Password awal:</span> <code>{p.username}123</code></div>
                 <div>
-                  <span className="text-slate-500">Unit:</span>{" "}
-                  {u ? (
+                  <span className="text-slate-500">Kelas / Rombel:</span>{" "}
+                  {r ? (
                     <span className="font-medium">
-                      [{u.tipe === "prodi" ? "Prodi" : u.tipe === "fakultas" ? "Fakultas" : "Kelas"}] {u.nama}
-                      {parentU ? ` (${parentU.nama})` : ""}
+                      {r.nama}
                     </span>
                   ) : (
                     "-"
