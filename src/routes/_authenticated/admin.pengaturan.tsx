@@ -217,21 +217,24 @@ function PengaturanPage() {
                 <p className="text-xs text-slate-500 mt-4">Bersih, profesional, standar SaaS modern.</p>
               </button>
 
-              {/* Theme: Neobrutalism */}
+              {/* Theme: Neumorphism (Soft UI) */}
               <button 
-                onClick={() => setTheme("neobrutalism")}
-                aria-pressed={theme === "neobrutalism"}
-                className={`text-left p-4 rounded-none border-4 transition-all cursor-pointer ${theme === "neobrutalism" ? "border-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] bg-yellow-400/10" : "border-slate-200 dark:border-slate-800 hover:border-black bg-white dark:bg-slate-900"}`}
+                onClick={() => setTheme("neumorphism")}
+                aria-pressed={theme === "neumorphism"}
+                className={`text-left p-4 rounded-xl border-2 transition-all cursor-pointer ${theme === "neumorphism" ? "border-primary ring-2 ring-primary/20 bg-[#f0f3f8]" : "border-slate-200 dark:border-slate-800 hover:border-primary/50 bg-[#f0f3f8]/60 dark:bg-slate-900"}`}
               >
                 <div className="flex justify-between items-start mb-4">
-                  <div className="font-black uppercase tracking-wider text-slate-900 dark:text-white">Neobrutalism</div>
-                  {theme === "neobrutalism" && <CheckCircle2 className="h-5 w-5 text-black" />}
+                  <div>
+                    <div className="font-bold text-slate-900 dark:text-white">Neumorphism (Soft UI)</div>
+                    <span className="text-[10px] font-semibold text-primary uppercase tracking-wide">Soft Extruded Surfaces</span>
+                  </div>
+                  {theme === "neumorphism" && <CheckCircle2 className="h-5 w-5 text-primary" />}
                 </div>
-                <div className="h-20 bg-yellow-400 border-4 border-black p-2 shadow-[4px_4px_0_0_rgba(0,0,0,1)] flex flex-col gap-2">
-                  <div className="w-full h-3 bg-white border-2 border-black" />
-                  <div className="w-2/3 h-3 bg-black" />
+                <div className="h-20 rounded-xl bg-[#f0f3f8] border border-white/80 p-2.5 flex flex-col gap-2" style={{ boxShadow: "4px 4px 10px rgba(166, 180, 200, 0.6), -4px -4px 10px rgba(255, 255, 255, 0.9)" }}>
+                  <div className="w-full h-3.5 bg-[#f0f3f8] rounded-md border border-white/60" style={{ boxShadow: "inset 2px 2px 4px rgba(166, 180, 200, 0.4), inset -2px -2px 4px rgba(255, 255, 255, 0.8)" }} />
+                  <div className="w-2/3 h-3.5 bg-primary/20 rounded-md" style={{ boxShadow: "2px 2px 5px rgba(166, 180, 200, 0.4)" }} />
                 </div>
-                <p className="text-xs text-slate-500 mt-4 font-bold">Warna kontras, garis tegas, ekspresif.</p>
+                <p className="text-xs text-slate-500 mt-4">Estetika permukaan timbul lembut dengan bayangan ganda (*dual soft drop-shadow*).</p>
               </button>
 
             </div>

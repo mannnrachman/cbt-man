@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export type ThemeType = "default" | "neobrutalism";
+export type ThemeType = "default" | "neumorphism";
 export type FontType = "sn-pro" | "system";
 
 interface ThemeState {
@@ -35,7 +35,7 @@ export const useThemeStore = create<ThemeState>()(
       },
       toggleTheme: () =>
         set((state) => {
-          const newTheme = state.theme === "default" ? "neobrutalism" : "default";
+          const newTheme = state.theme === "default" ? "neumorphism" : "default";
           if (typeof document !== "undefined") {
             if (newTheme !== "default") {
               document.documentElement.setAttribute("data-theme", newTheme);
@@ -50,8 +50,9 @@ export const useThemeStore = create<ThemeState>()(
       name: "cbt-theme-storage",
       onRehydrateStorage: () => (state) => {
         if (state && typeof document !== "undefined") {
-          if (state.theme !== "default") {
-            document.documentElement.setAttribute("data-theme", state.theme);
+          const activeTheme = ((state.theme as string) === "neobrutalism" ? "neumorphism" : state.theme) as ThemeType;
+          if (activeTheme !== "default") {
+            document.documentElement.setAttribute("data-theme", activeTheme);
           } else {
             document.documentElement.removeAttribute("data-theme");
           }
