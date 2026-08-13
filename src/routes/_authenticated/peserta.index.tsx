@@ -74,13 +74,6 @@ function PesertaDashboard() {
 					{/* Header Section */}
 					<div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 relative z-10 animate-in fade-in slide-in-from-bottom-2 duration-700">
 						<div className="space-y-1.5">
-							<div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100/50 dark:bg-green-900/30 border border-green-200 dark:border-green-800/50 mb-2">
-								<span className="relative flex h-2 w-2">
-									<span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
-									<span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
-								</span>
-								<span className="text-xs font-bold text-green-700 dark:text-green-300 uppercase tracking-wider">Live System</span>
-							</div>
 							<h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight font-sans text-slate-900 dark:text-white flex items-center gap-3">
 								Halo, <span className="text-primary">{user.namaLengkap}</span>
 							</h1>
