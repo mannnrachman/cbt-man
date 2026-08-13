@@ -23,22 +23,22 @@ export function ExamCalculator() {
   const [showShift, setShowShift] = useState(false);
 
   const btnBase =
-    "cursor-pointer flex items-center justify-center font-bold rounded-lg shadow-sm border-b-[2px] active:border-b-0 active:translate-y-[2px] transition-all select-none focus:outline-none focus:ring-2 focus:ring-emerald-500/50";
+    "cursor-pointer flex items-center justify-center font-bold rounded-lg shadow-sm border-b-[2px] active:border-b-0 active:translate-y-[2px] transition-all select-none focus:outline-none focus:ring-2 focus:ring-slate-500/50";
   const numBtn = cn(
     btnBase,
     "h-8 sm:h-9 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 text-sm font-semibold",
   );
   const opBtn = cn(
     btnBase,
-    "h-8 sm:h-9 bg-emerald-600 dark:bg-emerald-700 text-white border-emerald-800 dark:border-emerald-900 hover:bg-emerald-500 text-base",
+    "h-8 sm:h-9 bg-indigo-600 dark:bg-indigo-700 text-white border-indigo-800 dark:border-indigo-900 hover:bg-indigo-500 text-base",
   );
   const sciBtn = cn(
     btnBase,
-    "h-7 sm:h-8 bg-slate-700 dark:bg-slate-800 text-emerald-400 border-slate-900 dark:border-slate-950 hover:bg-slate-600 text-[11px] font-mono",
+    "h-7 sm:h-8 bg-slate-700 dark:bg-slate-800 text-cyan-300 border-slate-900 dark:border-slate-950 hover:bg-slate-600 text-[11px] font-mono",
   );
   const memBtn = cn(
     btnBase,
-    "h-7 sm:h-8 bg-teal-800 dark:bg-teal-900 text-teal-200 border-teal-950 hover:bg-teal-700 text-[11px] font-mono",
+    "h-7 sm:h-8 bg-slate-800 text-slate-300 border-slate-900 hover:bg-slate-700 text-[11px] font-mono",
   );
   const acBtn = cn(
     btnBase,
@@ -50,7 +50,7 @@ export function ExamCalculator() {
   );
   const eqBtn = cn(
     btnBase,
-    "h-8 sm:h-9 bg-emerald-500 text-white border-emerald-700 hover:bg-emerald-400 text-lg font-black",
+    "h-8 sm:h-9 bg-blue-600 text-white border-blue-800 hover:bg-blue-500 text-lg font-black",
   );
 
   const digit = (value: string) => setState((current) => inputDigit(current, value));
@@ -71,7 +71,7 @@ export function ExamCalculator() {
       {/* Brand & Indicators */}
       <div className="flex justify-between items-center px-1">
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-black tracking-widest text-emerald-400 uppercase">
+          <span className="text-[11px] font-black tracking-widest text-slate-400 uppercase">
             CBT-MAN
           </span>
           <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-mono">
@@ -82,7 +82,7 @@ export function ExamCalculator() {
           <button
             type="button"
             onClick={() => setState(toggleAngleMode)}
-            className="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/50 font-bold hover:bg-emerald-900 cursor-pointer transition-colors"
+            className="px-2 py-0.5 rounded bg-slate-800 text-cyan-400 border border-slate-700 font-bold hover:bg-slate-700 cursor-pointer transition-colors"
           >
             {state.angleMode.toUpperCase()}
           </button>
@@ -99,7 +99,7 @@ export function ExamCalculator() {
         <output
           aria-live="polite"
           aria-label="Hasil kalkulator"
-          className="flex flex-col h-14 w-full items-end justify-between overflow-hidden rounded-lg bg-[#9eb88d] dark:bg-[#7e996c] px-3 py-1 text-right font-mono tracking-tight text-slate-950 shadow-inner"
+          className="flex flex-col h-14 w-full items-end justify-between overflow-hidden rounded-lg bg-[#b2c2a4] px-3 py-1 text-right font-mono tracking-tight text-slate-950 shadow-inner"
         >
           <div className="h-4 w-full text-[11px] text-slate-800/80 font-bold tracking-wider truncate">
             {state.accumulator !== null && state.operator
@@ -125,7 +125,7 @@ export function ExamCalculator() {
           2nd {showShift ? "ON" : ""}
         </button>
         <span className="text-[10px] text-slate-500 font-medium">
-          {showShift ? "Fungsi Invers / Sekunder" : "Fungsi Standar Medical"}
+          {showShift ? "Fungsi Invers / Sekunder" : "Fungsi Standar Scientific"}
         </span>
       </div>
 

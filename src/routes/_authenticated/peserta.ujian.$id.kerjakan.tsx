@@ -80,7 +80,7 @@ function AlatBantuUjian({ ujian }: { ujian: Ujian }) {
       )}
 
       {activeTab === "nilai" && ujian.allowNilaiNormal && (
-        <div className="p-2 sm:p-3 bg-emerald-50/40 border-2 border-emerald-200/60 rounded-2xl dark:bg-emerald-950/20 dark:border-emerald-900/50 max-h-80 overflow-x-auto overflow-y-auto animate-in zoom-in-95 fade-in duration-200 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-emerald-500/50 [&::-webkit-scrollbar-thumb]:rounded-full">
+        <div className="p-2 sm:p-3 bg-slate-50 border-2 border-slate-200 rounded-2xl dark:bg-slate-900/80 dark:border-slate-800 max-h-80 overflow-x-auto overflow-y-auto animate-in zoom-in-95 fade-in duration-200 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-400 dark:[&::-webkit-scrollbar-thumb]:bg-slate-600 [&::-webkit-scrollbar-thumb]:rounded-full">
           <NilaiNormalTable />
         </div>
       )}

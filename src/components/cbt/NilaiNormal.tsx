@@ -18,8 +18,8 @@ export function NilaiNormalTable() {
   return (
     <div className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
       {/* Table Container with Slim Custom Scrollbar */}
-      <div className="overflow-x-auto max-h-[60vh] overflow-y-auto [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-emerald-500/50 dark:[&::-webkit-scrollbar-thumb]:bg-emerald-600/50 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-slate-100 dark:[&::-webkit-scrollbar-track]:bg-slate-950">
-        <table className="w-full min-w-[500px] text-xs sm:text-sm text-left border-collapse">
+      <div className="overflow-x-auto max-h-[60vh] overflow-y-auto [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-300 dark:[&::-webkit-scrollbar-thumb]:bg-slate-700 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-slate-100 dark:[&::-webkit-scrollbar-track]:bg-slate-950">
+        <table className="w-full min-w-[480px] text-xs sm:text-sm text-left border-collapse">
           <thead className="text-[11px] uppercase tracking-wider font-extrabold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800/90 border-b border-slate-200 dark:border-slate-700 sticky top-0 backdrop-blur-md z-10">
             <tr>
               <th scope="col" className="px-3.5 py-3 text-left">
@@ -37,11 +37,11 @@ export function NilaiNormalTable() {
             {NILAI_NORMAL_DATA.map((item, idx) => (
               <tr
                 key={idx}
-                className="even:bg-slate-50/60 dark:even:bg-slate-800/20 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20 transition-colors"
+                className="even:bg-slate-50/60 dark:even:bg-slate-800/20 hover:bg-slate-100/70 dark:hover:bg-slate-800/50 transition-colors"
               >
                 <td className="px-3.5 py-2.5">
                   <div className="font-bold text-slate-900 dark:text-slate-100">{item.tes}</div>
-                  <span className="inline-block mt-0.5 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-800/40">
+                  <span className="inline-block mt-0.5 px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                     {item.kategori}
                   </span>
                 </td>
