@@ -82,33 +82,29 @@ export function LoginModal({ isOpen, onClose, redirectUrl }: LoginModalProps) {
         if (!open) onClose();
       }}
     >
-      <DialogContent className="sm:max-w-[420px] p-0 overflow-hidden border-0 bg-transparent shadow-2xl">
-        <div className="relative p-6 sm:p-8 bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] border border-white/40 dark:border-white/10 rounded-xl">
-          {/* Decorative glowing orb inside modal */}
-          <div className="absolute top-0 right-0 -mr-12 -mt-12 w-48 h-48 bg-green-500/20 rounded-full blur-[40px] pointer-events-none" />
-          <div className="absolute bottom-0 left-0 -ml-12 -mb-12 w-48 h-48 bg-yellow-500/20 rounded-full blur-[40px] pointer-events-none" />
-          
-          <DialogHeader className="text-center sm:text-center flex flex-col items-center relative z-10 space-y-4">
+      <DialogContent className="sm:max-w-[400px] p-0 overflow-hidden border-0 bg-transparent shadow-xl">
+        <div className="p-6 sm:p-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl">
+          <DialogHeader className="text-center sm:text-center flex flex-col items-center space-y-3">
             {appLogo ? (
-              <img src={appLogo} alt="Logo" className="h-16 max-w-[180px] object-contain drop-shadow-md" />
+              <img src={appLogo} alt="Logo" className="h-14 max-w-[160px] object-contain" />
             ) : (
-              <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-[#03A559] to-emerald-600 shadow-lg shadow-emerald-500/30">
-                <Sparkles className="h-7 w-7 text-white" />
+              <div className="mx-auto grid h-12 w-12 place-items-center rounded-xl bg-emerald-600 text-white shadow-sm">
+                <Sparkles className="h-6 w-6" />
               </div>
             )}
-            <div className="space-y-1.5">
-              <DialogTitle className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">Masuk ke {appName}</DialogTitle>
-              <DialogDescription className="text-center font-medium text-slate-500 dark:text-slate-400">{pesanLogin}</DialogDescription>
+            <div className="space-y-1">
+              <DialogTitle className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">Masuk ke {appName}</DialogTitle>
+              <DialogDescription className="text-center text-xs font-medium text-slate-500 dark:text-slate-400">{pesanLogin}</DialogDescription>
             </div>
           </DialogHeader>
 
-          <form onSubmit={onSubmit} className="space-y-5 mt-6 relative z-10">
-            <div className="space-y-4">
-              <div className="space-y-1.5 group">
-                <Label htmlFor="modal-u" className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider group-focus-within:text-green-600 dark:group-focus-within:text-green-400 transition-colors">Username</Label>
+          <form onSubmit={onSubmit} className="space-y-4 mt-5">
+            <div className="space-y-3.5">
+              <div className="space-y-1">
+                <Label htmlFor="modal-u" className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Username</Label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <User className="h-5 w-5 text-slate-400 group-focus-within:text-[#03A559] transition-colors" />
+                    <User className="h-4 w-4 text-slate-400" />
                   </div>
                   <Input
                     id="modal-u"
@@ -120,17 +116,17 @@ export function LoginModal({ isOpen, onClose, redirectUrl }: LoginModalProps) {
                     autoCapitalize="none"
                     autoCorrect="off"
                     spellCheck={false}
-                    className="pl-10 h-12 bg-slate-50 dark:bg-black/20 border-slate-200 dark:border-white/10 rounded-xl focus-visible:ring-[#03A559] focus-visible:border-[#03A559] transition-all font-medium placeholder:text-slate-400"
+                    className="pl-9 h-11 bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 rounded-xl focus-visible:ring-emerald-500 focus-visible:border-emerald-500 transition-colors font-medium text-sm placeholder:text-slate-400"
                     required
                   />
                 </div>
               </div>
               
-              <div className="space-y-1.5 group">
-                <Label htmlFor="modal-p" className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider group-focus-within:text-green-600 dark:group-focus-within:text-green-400 transition-colors">Password</Label>
+              <div className="space-y-1">
+                <Label htmlFor="modal-p" className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Password</Label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-slate-400 group-focus-within:text-[#03A559] transition-colors" />
+                    <Lock className="h-4 w-4 text-slate-400" />
                   </div>
                   <Input
                     id="modal-p"
@@ -139,7 +135,7 @@ export function LoginModal({ isOpen, onClose, redirectUrl }: LoginModalProps) {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
                     autoComplete="current-password"
-                    className="pl-10 h-12 bg-slate-50 dark:bg-black/20 border-slate-200 dark:border-white/10 rounded-xl focus-visible:ring-[#03A559] focus-visible:border-[#03A559] transition-all font-medium placeholder:text-slate-400 tracking-widest"
+                    className="pl-9 h-11 bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 rounded-xl focus-visible:ring-emerald-500 focus-visible:border-emerald-500 transition-colors font-medium text-sm placeholder:text-slate-400 tracking-widest"
                     required
                   />
                 </div>
@@ -148,7 +144,7 @@ export function LoginModal({ isOpen, onClose, redirectUrl }: LoginModalProps) {
 
             <Button 
               type="submit" 
-              className="w-full h-12 rounded-xl bg-[#03A559] hover:bg-[#028b4a] text-white font-semibold transition-all border border-[#028b4a]" 
+              className="w-full h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition-colors shadow-sm cursor-pointer border-0 mt-2"
               disabled={busy}
             >
               {busy ? (
@@ -159,7 +155,7 @@ export function LoginModal({ isOpen, onClose, redirectUrl }: LoginModalProps) {
               ) : (
                 <span className="flex items-center justify-center w-full gap-2">
                   Masuk Sekarang
-                  <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="h-4 w-4" />
                 </span>
               )}
             </Button>

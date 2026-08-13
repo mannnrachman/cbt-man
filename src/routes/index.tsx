@@ -534,14 +534,12 @@ function Landing() {
 					{/* Footer/Login Button Section */}
 					<div className="flex justify-center pt-2 relative z-10">
 						{activeTab === "online" ? (
-							<div className="relative group">
-								<button 
-									onClick={handleOpenLoginGeneral}
-									className="w-full sm:w-72 h-14 bg-[#03A559] hover:bg-[#028b4a] text-white font-semibold rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2 border border-[#028b4a]"
-								>
-									Mulai Ujian Online
-								</button>
-							</div>
+							<button
+								onClick={handleOpenLoginGeneral}
+								className="w-full sm:w-64 h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2 cursor-pointer"
+							>
+								Login Peserta
+							</button>
 						) : (
 							<div className="text-center text-sm font-medium text-slate-500 dark:text-slate-400 bg-white/50 dark:bg-black/20 backdrop-blur-sm px-6 py-4 rounded-xl border border-slate-200/50 dark:border-white/5">
 								Ujian offline dilaksanakan di ruang ujian yang ditentukan. Silakan hubungi pengawas ujian Anda.
