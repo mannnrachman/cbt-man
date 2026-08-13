@@ -1,13 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { getFakultasList, getProgramStudiList, getRombelList, mutateFakultasServer, mutateProgramStudiServer, mutateRombelServer } from "@/lib/server/akademik/functions";
+import { uid } from "@/lib/cbt/storage";
 import type { Fakultas, ProgramStudi, Rombel } from "@/lib/cbt/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Edit2, Trash2, Building2, Library, Users } from "lucide-react";
+import { Edit2, Trash2, Building2, Library, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -64,7 +65,7 @@ function FakultasTab({ data, reload }: { data: Fakultas[], reload: () => void })
 
   const save = async () => {
     if (!form.nama.trim()) return toast.error("Nama wajib diisi!");
-    const payload: Fakultas = { id: form.id || `f_${Date.now()}`, nama: form.nama.trim() };
+    const payload: Fakultas = { id: form.id || uid("f_"), nama: form.nama.trim() };
     const res = await mutateFakultasServer({ data: { action: "upsert", payload } });
     if (!res.ok) return toast.error(res.error);
     toast.success("Tersimpan");
@@ -120,7 +121,7 @@ function ProdiTab({ data, fakultas, reload }: { data: ProgramStudi[], fakultas: 
 
   const save = async () => {
     if (!form.nama.trim() || !form.fakultasId) return toast.error("Semua field wajib diisi!");
-    const payload: ProgramStudi = { id: form.id || `p_${Date.now()}`, nama: form.nama.trim(), fakultasId: form.fakultasId };
+    const payload: ProgramStudi = { id: form.id || uid("p_"), nama: form.nama.trim(), fakultasId: form.fakultasId };
     const res = await mutateProgramStudiServer({ data: { action: "upsert", payload } });
     if (!res.ok) return toast.error(res.error);
     toast.success("Tersimpan");
@@ -188,7 +189,7 @@ function RombelTab({ data, prodi, reload }: { data: Rombel[], prodi: ProgramStud
 
   const save = async () => {
     if (!form.nama.trim() || !form.programStudiId) return toast.error("Semua field wajib diisi!");
-    const payload = { id: form.id || `r_${Date.now()}`, nama: form.nama.trim(), programStudiId: form.programStudiId } as Rombel;
+    const payload = { id: form.id || uid("r_"), nama: form.nama.trim(), programStudiId: form.programStudiId };
     const res = await mutateRombelServer({ data: { action: "upsert", payload } });
     if (!res.ok) return toast.error(res.error);
     toast.success("Tersimpan");
