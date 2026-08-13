@@ -43,7 +43,7 @@ function AkademikExplorer() {
         <TabsList>
           <TabsTrigger value="fakultas">Fakultas</TabsTrigger>
           <TabsTrigger value="prodi">Program Studi</TabsTrigger>
-          <TabsTrigger value="rombel">Rombel</TabsTrigger>
+          <TabsTrigger value="rombel">Kelas</TabsTrigger>
         </TabsList>
         <TabsContent value="fakultas">
           <FakultasTab data={fakultas} reload={reload} />
@@ -207,7 +207,7 @@ function RombelTab({ data, prodi, reload }: { data: Rombel[], prodi: ProgramStud
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
       <Card className="md:col-span-2">
-        <CardHeader><CardTitle>Daftar Rombel</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Daftar Kelas</CardTitle></CardHeader>
         <CardContent>
           <div className="space-y-2">
             {data.map(r => (
@@ -226,7 +226,7 @@ function RombelTab({ data, prodi, reload }: { data: Rombel[], prodi: ProgramStud
         </CardContent>
       </Card>
       <Card>
-        <CardHeader><CardTitle>{form.id ? "Edit" : "Tambah"} Rombel</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{form.id ? "Edit" : "Tambah"} Kelas</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label>Nama</Label>
