@@ -1,4 +1,3 @@
-
 const NILAI_NORMAL_DATA = [
   { kategori: "Darah Rutin", tes: "Hemoglobin (Hb)", pria: "13.5 - 17.5 g/dL", wanita: "12.0 - 15.5 g/dL" },
   { kategori: "Darah Rutin", tes: "Leukosit (WBC)", pria: "4,500 - 11,000 /µL", wanita: "4,500 - 11,000 /µL" },
@@ -17,39 +16,41 @@ const NILAI_NORMAL_DATA = [
 
 export function NilaiNormalTable() {
   return (
-    <div className="flex flex-col gap-4">
-      <div className="bg-blue-50/50 p-3 rounded border border-blue-100 text-xs text-blue-800 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-200 leading-relaxed shadow-sm">
-        <p className="font-semibold mb-1">Rentang Referensi Nilai Normal (Dewasa)</p>
-        <p>
-          <strong>Sumber Dokumen:</strong> Pedoman Interpretasi Data Klinik Kemenkes RI (Versi 2.0).
-          <strong> Populasi:</strong> Dewasa, Non-Hamil. <strong>Metode:</strong> Standar ISO 15189.
-        </p>
-        <p className="mt-1 italic opacity-80">
-          *Disclaimer: Data di bawah ini murni ditujukan untuk keperluan simulasi ujian dan edukasi sistem CBT. Tidak boleh digunakan sebagai rujukan diagnosis atau penanganan medis di dunia nyata.
-        </p>
-      </div>
-
-      <div className="rounded-md border max-h-[60vh] overflow-auto relative">
-        <table className="w-full text-sm text-left">
-          <thead className="text-xs text-slate-700 uppercase bg-slate-100 dark:bg-slate-800 dark:text-slate-300 sticky top-0 shadow-sm">
+    <div className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
+      {/* Table Container with Slim Custom Scrollbar */}
+      <div className="overflow-x-auto max-h-[60vh] overflow-y-auto [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-emerald-500/50 dark:[&::-webkit-scrollbar-thumb]:bg-emerald-600/50 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-slate-100 dark:[&::-webkit-scrollbar-track]:bg-slate-950">
+        <table className="w-full min-w-[500px] text-xs sm:text-sm text-left border-collapse">
+          <thead className="text-[11px] uppercase tracking-wider font-extrabold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800/90 border-b border-slate-200 dark:border-slate-700 sticky top-0 backdrop-blur-md z-10">
             <tr>
-              <th scope="col" className="px-4 py-3">Pemeriksaan</th>
-              <th scope="col" className="px-4 py-3">Nilai Normal (Pria)</th>
-              <th scope="col" className="px-4 py-3">Nilai Normal (Wanita)</th>
+              <th scope="col" className="px-3.5 py-3 text-left">
+                Pemeriksaan
+              </th>
+              <th scope="col" className="px-3.5 py-3 text-left">
+                Nilai Normal (Pria)
+              </th>
+              <th scope="col" className="px-3.5 py-3 text-left">
+                Nilai Normal (Wanita)
+              </th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
             {NILAI_NORMAL_DATA.map((item, idx) => (
               <tr
                 key={idx}
-                className="bg-white border-b dark:bg-slate-900 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                className="even:bg-slate-50/60 dark:even:bg-slate-800/20 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20 transition-colors"
               >
-                <td className="px-4 py-3">
-                  <div className="font-semibold text-slate-900 dark:text-slate-100">{item.tes}</div>
-                  <div className="text-xs text-slate-500">{item.kategori}</div>
+                <td className="px-3.5 py-2.5">
+                  <div className="font-bold text-slate-900 dark:text-slate-100">{item.tes}</div>
+                  <span className="inline-block mt-0.5 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-800/40">
+                    {item.kategori}
+                  </span>
                 </td>
-                <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{item.pria}</td>
-                <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{item.wanita}</td>
+                <td className="px-3.5 py-2.5 text-slate-700 dark:text-slate-300 font-mono text-xs">
+                  {item.pria}
+                </td>
+                <td className="px-3.5 py-2.5 text-slate-700 dark:text-slate-300 font-mono text-xs">
+                  {item.wanita}
+                </td>
               </tr>
             ))}
           </tbody>
