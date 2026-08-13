@@ -4,11 +4,11 @@ Terima kasih atas minat Anda berkontribusi pada **CBT-MAN**, aplikasi Computer-B
 
 Dengan berkontribusi, Anda setuju menjaga komunikasi yang profesional, menghormati reviewer dan pengguna, serta tidak memasukkan data, kredensial, atau konten berhak cipta tanpa izin.
 
-> **Sebelum mengubah kode, agen AI wajib membaca [`AGENTS.md`](./AGENTS.md) lalu [`CLAUDE.md`](./CLAUDE.md).**
+> **Sebelum mengubah kode, agen AI dan kontributor wajib membaca [`AGENTS.md`](./AGENTS.md).**
 
 ## Sebelum Memulai
 
-1. Baca [`README.md`](./README.md), [`CLAUDE.md`](./CLAUDE.md), dan [template PR](./.github/PULL_REQUEST_TEMPLATE.md).
+1. Baca [`README.md`](./README.md), [`AGENTS.md`](./AGENTS.md), dan [template PR](./.github/PULL_REQUEST_TEMPLATE.md).
 2. Cari issue/PR yang **terbuka maupun tertutup** untuk memastikan pekerjaan tidak duplikat atau merupakan kelanjutan branch aggregate yang pernah ditolak.
 3. Pastikan ada masalah atau kebutuhan nyata: jelaskan perilaku saat ini, dampaknya, dan hasil yang diharapkan.
 4. Untuk perubahan arsitektur, domain Prisma, otorisasi, akses peserta, scoring, snapshot, token, atau session: buka issue/discussion dan sepakati desain terlebih dahulu.

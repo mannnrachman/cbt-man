@@ -84,7 +84,7 @@
 
 ## Checklist pengirim
 
-- [ ] Saya membaca `CONTRIBUTING.md`, `AGENTS.md`, dan `CLAUDE.md`.
+- [ ] Saya membaca `CONTRIBUTING.md` dan `AGENTS.md`.
 - [ ] Saya membaca seluruh template ini dan mengisi jawaban spesifik, bukan placeholder.
 - [ ] Saya siap menangani CI dan seluruh review thread pada head SHA terbaru.
 - [ ] Saya tidak meminta bypass CI, branch protection, atau merge sebelum review selesai.

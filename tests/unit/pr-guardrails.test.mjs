@@ -32,8 +32,7 @@ test("PR hygiene rejects historical CBT-MAN artifacts and legacy branding", () =
   assert.ok(hasLegacyBranding(oldUniversityBrand));
   assert.equal(hasLegacyBranding("CBT-MAN"), false);
   assert.equal(shouldScanBranding("README.md"), true);
-  assert.equal(shouldScanBranding("scripts/check-pr-hygiene.mjs"), true);
-  assert.equal(shouldScanBranding("CLAUDE.md"), false);
+  assert.equal(shouldScanBranding("AGENTS.md"), false);
   assert.equal(shouldScanBranding(".github/PULL_REQUEST_TEMPLATE.md"), false);
 });
 

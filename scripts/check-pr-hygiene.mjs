@@ -22,7 +22,6 @@ const LEGACY_BRANDING = new RegExp(
 );
 const BRANDING_POLICY_ALLOWLIST = new Set([
   "AGENTS.md",
-  "CLAUDE.md",
   "CONTRIBUTING.md",
   ".github/PULL_REQUEST_TEMPLATE.md",
 ]);
