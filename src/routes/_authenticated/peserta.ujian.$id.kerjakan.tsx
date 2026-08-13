@@ -74,13 +74,13 @@ function AlatBantuUjian({ ujian }: { ujian: Ujian }) {
       </div>
 
       {activeTab === "calc" && ujian.allowCalculator && (
-        <div className="p-2 sm:p-3 bg-slate-900/90 border-2 border-slate-700/80 rounded-2xl animate-in zoom-in-95 fade-in duration-200 max-h-[70vh] overflow-x-auto overflow-y-auto [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-600 [&::-webkit-scrollbar-thumb]:rounded-full">
+        <div className="animate-in zoom-in-95 fade-in duration-200 overflow-x-auto max-h-[75vh] overflow-y-auto [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-600 [&::-webkit-scrollbar-thumb]:rounded-full">
           <ExamCalculator />
         </div>
       )}
 
       {activeTab === "nilai" && ujian.allowNilaiNormal && (
-        <div className="p-2 sm:p-3 bg-slate-50 border-2 border-slate-200 rounded-2xl dark:bg-slate-900/80 dark:border-slate-800 max-h-80 overflow-x-auto overflow-y-auto animate-in zoom-in-95 fade-in duration-200 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-400 dark:[&::-webkit-scrollbar-thumb]:bg-slate-600 [&::-webkit-scrollbar-thumb]:rounded-full">
+        <div className="animate-in zoom-in-95 fade-in duration-200">
           <NilaiNormalTable />
         </div>
       )}
