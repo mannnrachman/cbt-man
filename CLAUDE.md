@@ -134,6 +134,29 @@ Jangan menyatakan PR siap merge hanya karena build/typecheck lulus. CI hijau tid
 - Semua reviewer finding harus diklasifikasikan: fixed, obsolete dengan bukti, atau refuted dengan alasan teknis. Jangan resolve thread tanpa bukti.
 - Sebelum merge, state dan CI harus dicek lagi pada head SHA yang sama.
 
+### Anti-Stale Base Branching Protocol
+
+You MUST strictly enforce the "Anti-Stale Base Branching Protocol" whenever you create a new Git branch or start working on a new feature/bugfix task.
+
+#### Mandatory Pre-Branching Execution Steps
+Before creating any new branch or making code changes, execute the following sequence:
+
+1. **Fetch Latest Remote State:**
+   Always sync the local repository with remote tracking branches first.
+   `git fetch origin`
+
+2. **Verify Base Freshness:**
+   Check if the base branch (e.g., `main` or `develop`) is up to date with `origin`.
+   - Never branch directly off an unverified local branch.
+   - Always derive new branches explicitly from updated remote tracking refs, e.g.:
+     `git checkout -b <feature-branch-name> origin/main`
+     OR checkout the base, pull, then create:
+     `git checkout main && git pull origin main && git checkout -b <feature-branch-name>`
+
+3. **Validation Rule (Hard Stop):**
+   - If the local base branch is behind `origin/<base-branch>` by 1 or more commits, DO NOT create the feature branch until `git pull` or `git fetch` is completed.
+   - NEVER create a feature branch off a temporary or outdated local topic branch unless explicitly requested by the user.
+
 ## Changelog
 
 Gunakan [`CHANGELOG.md`](./CHANGELOG.md). Tambahkan item ke `Unreleased` pada PR user-facing, security, data migration, atau developer workflow yang relevan. Jangan mencatat refactor internal murni kecuali mengubah perilaku yang perlu diketahui pengguna/maintainer.
