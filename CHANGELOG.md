@@ -13,9 +13,13 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Changed
 
+- Refactor terminologi UI dari Rombel menjadi Kelas pada Struktur Akademik (#103).
+
 ### Fixed
 
 ### Security
+
+- Perketat validasi server functions akademik menggunakan Zod discriminated union dan tambahkan relational integrity guard sebelum penghapusan data (#103).
 
 ### Deprecated
 
