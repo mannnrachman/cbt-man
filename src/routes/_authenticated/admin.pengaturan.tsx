@@ -194,14 +194,12 @@ function PengaturanPage() {
           </p>
         </div>
         <div role="region" aria-labelledby="tema-heading" className="lg:col-span-2 space-y-8">
-          
           {/* Pilihan Tema Visual */}
           <div className="space-y-3">
             <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Gaya Tema Visual</Label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              
               {/* Theme: Modern (Default) */}
-              <button 
+              <button
                 onClick={() => setTheme("default")}
                 aria-pressed={theme === "default"}
                 className={`text-left p-4 rounded-xl border-2 transition-all cursor-pointer ${theme === "default" ? "border-primary ring-2 ring-primary/20 bg-primary/5" : "border-slate-200 dark:border-slate-800 hover:border-primary/50 bg-white dark:bg-slate-900"}`}
@@ -218,7 +216,7 @@ function PengaturanPage() {
               </button>
 
               {/* Theme: Neumorphism (Soft UI) */}
-              <button 
+              <button
                 onClick={() => setTheme("neumorphism")}
                 aria-pressed={theme === "neumorphism"}
                 className={`text-left p-4 rounded-xl border-2 transition-all cursor-pointer ${theme === "neumorphism" ? "border-primary ring-2 ring-primary/20 bg-[#f0f3f8]" : "border-slate-200 dark:border-slate-800 hover:border-primary/50 bg-[#f0f3f8]/60 dark:bg-slate-900"}`}
@@ -236,7 +234,6 @@ function PengaturanPage() {
                 </div>
                 <p className="text-xs text-slate-500 mt-4">Estetika permukaan timbul lembut dengan bayangan ganda (*dual soft drop-shadow*).</p>
               </button>
-
             </div>
           </div>
 
@@ -244,9 +241,8 @@ function PengaturanPage() {
           <div className="space-y-3 pt-6 border-t border-slate-200 dark:border-slate-800/80">
             <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Pilihan Font & Tipografi</Label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              
               {/* Font: SN Pro */}
-              <button 
+              <button
                 onClick={() => setFont("sn-pro")}
                 aria-pressed={font === "sn-pro"}
                 className={`text-left p-4 rounded-xl border-2 transition-all cursor-pointer ${font === "sn-pro" ? "border-primary ring-2 ring-primary/20 bg-primary/5" : "border-slate-200 dark:border-slate-800 hover:border-primary/50 bg-white dark:bg-slate-900"}`}
@@ -266,7 +262,7 @@ function PengaturanPage() {
               </button>
 
               {/* Font: System Default */}
-              <button 
+              <button
                 onClick={() => setFont("system")}
                 aria-pressed={font === "system"}
                 className={`text-left p-4 rounded-xl border-2 transition-all cursor-pointer ${font === "system" ? "border-primary ring-2 ring-primary/20 bg-primary/5" : "border-slate-200 dark:border-slate-800 hover:border-primary/50 bg-white dark:bg-slate-900"}`}
