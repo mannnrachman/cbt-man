@@ -20,8 +20,11 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 ### Fixed
 
 - Perbaiki sintaks nilai arbitrer negatif Tailwind (`translate-y-[-0.5px]`, `top-[-40%]`) agar utilitas CSS ter-generate (diekstrak dari #98).
+- Pindahkan inisialisasi pembuatan sesi ujian ke server-side (`createSesiServer`) dan perbaiki stale cache snapshot sebelum navigasi ke ruang ujian peserta.
 
 ### Security
+
+- Terapkan penegakan otorisasi server lengkap pada pembuatan sesi ujian (validasi kepesertaan, rentang jadwal mulai/selesai, pembatasan rentang IP, dan validasi token).
 
 ### Deprecated
 
