@@ -15,7 +15,11 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Fixed
 
+- Pindahkan inisialisasi pembuatan sesi ujian ke server-side (createSesiServer) dan perbaiki masalah stale cache snapshot dengan invalidateReposCache() sebelum navigasi ke ruang ujian peserta.
+
 ### Security
+
+- Terapkan penegakan otorisasi server lengkap pada pembuatan sesi ujian (validasi kepesertaan, rentang jadwal mulai/selesai, pembatasan rentang IP, dan validasi token).
 
 ### Deprecated
 
