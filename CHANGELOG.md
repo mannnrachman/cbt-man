@@ -17,6 +17,8 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Security
 
+- Terapkan validasi Zod discriminated union yang ketat dan pengecekan integritas relasi sebelum penghapusan data induk akademik (UnitAkademik, TahunAkademik, Semester, MataKuliah) untuk mencegah orphaned records dan eksploitasi payload.
+
 ### Deprecated
 
 ### Removed
