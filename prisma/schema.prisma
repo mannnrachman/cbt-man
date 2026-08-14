@@ -61,6 +61,7 @@ model User {
   createdUjians   Ujian[]       @relation("UjianCreator")
   sesi            SesiUjian[]   @relation("SesiPeserta")
   sessions        Session[]     @relation("UserSessions")
+  tokenClaims     TokenClaim[]  @relation("PesertaTokenClaims")
 }
 
 /// Sesi login server-side. `id` = token opaque 256-bit (randomBytes hex),
@@ -144,6 +145,7 @@ model Ujian {
   createdAt        BigInt
   creator          User         @relation("UjianCreator", fields: [createdBy], references: [id])
   tokens           TokenUjian[]
+  tokenClaims      TokenClaim[]
   sesi             SesiUjian[]
 }
 
@@ -153,12 +155,26 @@ model TokenUjian {
   kode        String
   dipakaiOleh String?
   dipakaiAt   BigInt?
+  expireAt    BigInt?
   ujian       Ujian   @relation(fields: [ujianId], references: [id], onDelete: Cascade)
 
   // Token codes are scoped to an exam so two exams may independently
   // re-use the same short code. Uniqueness is enforced at the DB layer
   // so a stale client cache or a backup import can never persist duplicates.
   @@unique([ujianId, kode])
+  @@index([ujianId])
+}
+
+model TokenClaim {
+  id        String @id
+  ujianId   String
+  pesertaId String
+  kode      String
+  claimedAt BigInt
+  ujian     Ujian  @relation(fields: [ujianId], references: [id], onDelete: Cascade)
+  peserta   User   @relation("PesertaTokenClaims", fields: [pesertaId], references: [id], onDelete: Cascade)
+
+  @@unique([ujianId, pesertaId])
   @@index([ujianId])
 }
 
