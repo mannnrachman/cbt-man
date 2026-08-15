@@ -236,7 +236,7 @@ function MataKuliahPage() {
                 <SelectContent>
                   {unitList.map((p) => (
                     <SelectItem key={p.id} value={p.id}>
-                      {p.nama}
+                      {p.nama} {p.tipe === "prodi" ? "(Program Studi)" : p.tipe === "fakultas" ? "(Fakultas)" : ""}
                     </SelectItem>
                   ))}
                 </SelectContent>
