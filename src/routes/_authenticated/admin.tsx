@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import { configRepo, hydrateRepos } from "@/lib/cbt/repos";
+import { useThemeStore } from "@/lib/cbt/theme-store";
 import { type AppConfig, type NavKey, type Role } from "@/lib/cbt/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -223,6 +224,7 @@ function AdminLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const cfg = configRepo.get();
   const appName = cfg.appName;
+  const setAppTheme = useThemeStore((s) => s.setTheme);
 
   const [theme, setTheme] = useState("light");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -255,6 +257,7 @@ function AdminLayout() {
 
   const toggleTheme = () => {
     const next = theme === "light" ? "dark" : "light";
+    if (next === "dark") setAppTheme("default");
     setTheme(next);
     localStorage.setItem("theme", next);
     if (next === "dark") document.documentElement.classList.add("dark");

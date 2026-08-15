@@ -8,6 +8,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Added
 
+- Tambahkan pilihan font SN Pro atau font sistem serta tema Neumorphism pada halaman Pengaturan admin (diekstrak dari #104).
 - Tambahkan pedoman kontribusi, instruksi agen AI, dan template pull request untuk menjaga perubahan tetap fokus, tervalidasi, dan aman.
 - Tambahkan gate CI CBT-MAN untuk kontrak PR, hygiene/artifact/branding, integritas generated route tree, dan parity Prisma migration-schema.
 - Tingkatkan kalkulator ujian menjadi Kalkulator Ilmiah lengkap dengan fungsi trigonometri, logaritma, eksponensial, faktorial, memori kalkulator, dan unit test komprehensif.
@@ -17,6 +18,8 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 - Rapikan jarak heading ke navbar, perlebar kontainer halaman peserta/ujian, dan bersihkan mesh gradient berlebih pada portal peserta (diekstrak dari #97).
 
 ### Fixed
+
+- Perbaiki sintaks nilai arbitrer negatif Tailwind (`translate-y-[-0.5px]`, `top-[-40%]`) agar utilitas CSS ter-generate (diekstrak dari #98).
 
 ### Security
 

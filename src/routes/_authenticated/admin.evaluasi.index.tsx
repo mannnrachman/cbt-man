@@ -165,7 +165,7 @@ function EvaluasiList() {
                             <span className="font-mono">{ujian.id.substring(0, 8)}</span>
                             <span className="text-slate-300 dark:text-slate-700">•</span>
                             <span className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3 -translate-y-[0.5px]" /> {formatDate(ujian.beginAt)}
+                              <Calendar className="h-3 w-3 translate-y-[-0.5px]" /> {formatDate(ujian.beginAt)}
                             </span>
                           </div>
                         </div>
@@ -175,7 +175,7 @@ function EvaluasiList() {
                       <div className="hidden sm:flex sm:col-span-2 items-center">
                         {mk ? (
                           <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-[11px] font-bold text-slate-600 dark:text-slate-400 truncate max-w-full">
-                            <BookOpen className="h-3 w-3 shrink-0 -translate-y-[0.5px]" />
+                            <BookOpen className="h-3 w-3 shrink-0 translate-y-[-0.5px]" />
                             <span className="truncate">{mk.nama}</span>
                           </span>
                         ) : (

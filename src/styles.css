@@ -2,6 +2,48 @@
 @source "../src";
 @import "tw-animate-css";
 
+/* SN Pro Typeface (Supernotes / Open Font License) */
+@font-face {
+  font-family: "SN Pro";
+  src: url("/fonts/SNPro-Variable.woff2") format("woff2-variations"),
+       url("/fonts/SNPro-Regular.woff2") format("woff2");
+  font-weight: 200 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SN Pro";
+  src: url("/fonts/SNPro-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SN Pro";
+  src: url("/fonts/SNPro-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SN Pro";
+  src: url("/fonts/SNPro-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SN Pro";
+  src: url("/fonts/SNPro-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 /*
@@ -19,6 +61,9 @@
  */
 
 @theme inline {
+  --font-sans: var(--font-family-base, "SN Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+  --font-family-sans: var(--font-family-base, "SN Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+
   --shadow-neo: var(--neo-shadow);
   --border-width-neo: var(--neo-border-width);
   --color-neo-border: var(--neo-border-color);
@@ -75,6 +120,8 @@
 }
 
 :root {
+  --font-family-base: "SN Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
   /* Default Modern Theme values mapping to the 'neo' aliases */
   --neo-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
   --neo-border-width: 1px;
@@ -163,9 +210,13 @@
     border-color: var(--color-border);
   }
 
+  html,
   body {
+    font-family: var(--font-sans, "SN Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
     background-color: var(--color-background);
     color: var(--color-foreground);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   /* Jakub Krehel's Tactile Spring Feedback */
@@ -199,63 +250,82 @@
   }
 }
 
+[data-font='system'],
+[data-font='system'] body,
+[data-font='system'] input,
+[data-font='system'] button,
+[data-font='system'] select,
+[data-font='system'] textarea {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+[data-font='sn-pro'],
+[data-font='sn-pro'] body {
+  font-family: "SN Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+[data-theme='neumorphism'],
 [data-theme='neobrutalism'] {
-  /* Ubah variabel Shadcn inti (TAPI biarkan background tetap putih agar rapi seperti dashboard) */
-  --radius: 0px;
-  --primary: #a3e635; /* Lime green untuk tombol utama */
-  --primary-foreground: #000000;
-  --accent: #facc15; /* Yellow untuk highlight */
-  --accent-foreground: #000000;
-  --border: #000000;
-  --ring: #000000;
-  
-  /* Variabel mundur (backward compatibility) untuk dashboard lama */
-  --neo-shadow: 4px 4px 0 0 rgba(0,0,0,1);
-  --neo-border-width: 3px;
-  --neo-border-color: #000000;
-  --neo-bg: #facc15;
-  --neo-accent: #a3e635;
-  --neo-text: #000000;
-  --neo-radius: 0px;
-  --neo-hover: #ffffff;
+  --radius: 0.875rem;
+  --background: #f0f3f8;
+  --foreground: oklch(0.25 0.02 240);
+  --card: #f0f3f8;
+  --card-foreground: oklch(0.25 0.02 240);
+  --popover: #f0f3f8;
+  --popover-foreground: oklch(0.25 0.02 240);
+  --primary: #03a559;
+  --primary-foreground: #ffffff;
+  --secondary: #e2e8f0;
+  --secondary-foreground: oklch(0.25 0.02 240);
+  --muted: #e2e8f0;
+  --muted-foreground: oklch(0.48 0.02 240);
+  --accent: #e2e8f0;
+  --accent-foreground: oklch(0.25 0.02 240);
+  --border: #d5dce6;
+  --input: #e6ebf2;
+  --ring: #03a559;
+
+  --sidebar: #e8edf4;
+  --sidebar-foreground: oklch(0.25 0.02 240);
+  --sidebar-primary: #03a559;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #dee4ed;
+  --sidebar-accent-foreground: oklch(0.25 0.02 240);
+  --sidebar-border: #d5dce6;
+  --sidebar-ring: #03a559;
+
+  /* Neumorphism Shadow Variables */
+  --neo-shadow: 5px 5px 12px rgba(166, 180, 200, 0.55), -5px -5px 12px rgba(255, 255, 255, 0.9);
+  --neo-border-width: 1px;
+  --neo-border-color: rgba(255, 255, 255, 0.7);
+  --neo-bg: #f0f3f8;
+  --neo-accent: #03a559;
+  --neo-text: oklch(0.25 0.02 240);
+  --neo-radius: 0.875rem;
+  --neo-hover: #e6ebf2;
 }
 
-/* Membajak semua kelas utilitas Tailwind secara global saat Neobrutalism aktif */
-[data-theme='neobrutalism'] .neo-ready * {
-  border-color: #000000 !important;
+/* Global shadow & tactile overrides for Neumorphism */
+[data-theme='neumorphism'] .shadow,
+[data-theme='neumorphism'] .shadow-sm,
+[data-theme='neumorphism'] .shadow-md,
+[data-theme='neumorphism'] .shadow-lg,
+[data-theme='neumorphism'] .shadow-xl,
+[data-theme='neumorphism'] .shadow-sleek,
+[data-theme='neumorphism'] .shadow-popover-sleek {
+  box-shadow: 6px 6px 14px rgba(166, 180, 200, 0.5), -6px -6px 14px rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
 }
 
-[data-theme='neobrutalism'] .neo-ready .border { border-width: 3px !important; }
-[data-theme='neobrutalism'] .neo-ready .border-t { border-top-width: 3px !important; }
-[data-theme='neobrutalism'] .neo-ready .border-b { border-bottom-width: 3px !important; }
-[data-theme='neobrutalism'] .neo-ready .border-l { border-left-width: 3px !important; }
-[data-theme='neobrutalism'] .neo-ready .border-r { border-right-width: 3px !important; }
-
-[data-theme='neobrutalism'] .neo-ready .shadow,
-[data-theme='neobrutalism'] .neo-ready .shadow-sm,
-[data-theme='neobrutalism'] .neo-ready .shadow-md,
-[data-theme='neobrutalism'] .neo-ready .shadow-lg,
-[data-theme='neobrutalism'] .neo-ready .shadow-xl {
-  box-shadow: 4px 4px 0px 0px rgba(0,0,0,1) !important;
+[data-theme='neumorphism'] input:focus,
+[data-theme='neumorphism'] textarea:focus,
+[data-theme='neumorphism'] select:focus {
+  box-shadow: inset 2px 2px 5px rgba(166, 180, 200, 0.45), inset -2px -2px 5px rgba(255, 255, 255, 0.8), 0 0 0 2px rgba(3, 165, 89, 0.2) !important;
 }
 
-/* Tipografi Khas Neobrutalism (Font tebal & uppercase untuk tabel/badge) */
-[data-theme='neobrutalism'] .neo-ready th {
-  font-weight: 900 !important;
-  text-transform: uppercase !important;
-  color: #000000 !important;
-  letter-spacing: 0.05em;
-}
-
-[data-theme='neobrutalism'] .neo-ready td {
-  font-weight: 600 !important;
-  color: #000000 !important;
-}
-
-[data-theme='neobrutalism'] .neo-ready button {
-  font-weight: 800 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.025em;
+[data-theme='neumorphism'] button:not(:disabled):active,
+[data-theme='neumorphism'] [role="button"]:not(:disabled):active {
+  box-shadow: inset 3px 3px 6px rgba(166, 180, 200, 0.5), inset -3px -3px 6px rgba(255, 255, 255, 0.8) !important;
 }
 
 
