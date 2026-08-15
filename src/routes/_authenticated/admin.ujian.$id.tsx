@@ -1,10 +1,9 @@
 import { createFileRoute, Link, useParams, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ujianRepo, unitAkademikRepo, hydrateRepos, mataKuliahRepo, semesterRepo } from "@/lib/cbt/repos";
-
 import { uid } from "@/lib/cbt/storage";
 import type { Ujian, TopicSet } from "@/lib/cbt/types";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,9 +16,10 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Trash2, Save, Lock } from "lucide-react";
+import { Plus, Trash2, Save, Lock, ArrowLeft, Layers, ShieldCheck, Calculator, FileText, FileSignature, Settings2, Users } from "lucide-react";
 import { toast } from "sonner";
 import { RichEditor } from "@/components/cbt/RichEditor";
+import { TokenManager } from "@/components/cbt/TokenManager";
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import {
   allowedTopikIdSet,
@@ -41,6 +41,19 @@ export const Route = createFileRoute("/_authenticated/admin/ujian/$id")({
   component: UjianEditor,
 });
 
+function toLocalDatetimeString(ms?: number) {
+  if (!ms) return "";
+  const d = new Date(ms);
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function fromLocalDatetimeString(s: string) {
+  if (!s) return undefined;
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? undefined : d.getTime();
+}
+
 function UjianEditor() {
   const { id } = useParams({ from: "/_authenticated/admin/ujian/$id" });
   const navigate = useNavigate();
@@ -50,45 +63,15 @@ function UjianEditor() {
   const mkList = mataKuliahRepo.all();
   const smtList = semesterRepo.all();
 
-  // (Must-fix #2) Re-order guards so `ujianTouchesAllowed` runs BEFORE we
-  // initialize `useState` with the full ujian. If the snapshot already
-  // carries the ujian and it is out of scope, we must not store it in
-  // state — otherwise a subsequent re-render that races with a state
-  // reset could leak exam metadata into memory.
-  //
-  // (Must-fix #3) When the snapshot does NOT carry the ujian, we ask the
-  // server for a direct-URL fetch so we can distinguish three cases:
-  //   1. ujian exists and is fully in scope     -> normal editor
-  //   2. ujian exists but is partially out of scope -> lock screen
-  //   3. ujian does not exist                   -> "tidak ditemukan"
-  // The previous behaviour conflated 2 and 3, which was the must-fix.
-  //
-  // Important: `useAuthStore` may hydrate asynchronously, so `user` can
-  // be `null` on the very first render. We must NOT call
-  // `ujianTouchesAllowed` against a null user at render time — that
-  // would return `false` for every operator and trigger the lock
-  // screen even when the operator is allowed. Instead, wait for the
-  // auth store to settle (the route's `beforeLoad` already ensures a
-  // valid user; the only race is the first paint).
   const [authReady, setAuthReady] = useState(user != null);
   useEffect(() => {
     if (user != null) setAuthReady(true);
   }, [user]);
 
-  // When the auth store is not ready yet, we don't know whether the
-  // operator is allowed. We optimistically keep the ujian in state so
-  // the editor paints immediately; the `ujianTouchesAllowed` check
-  // will re-fire on the next render once `user` resolves. This avoids
-  // a flash of the lock screen for legitimate users.
-  const initialAllowed =
-    !authReady || !user || !initial
-      ? true // unknown / admin-like — keep the ujian in state for the first paint
-      : ujianTouchesAllowed(user, initial);
   const [u, setU] = useState<Ujian | null>(initial ?? null);
   const [loadingRemote, setLoadingRemote] = useState(initial === undefined);
   const [denied, setDenied] = useState(false);
-  // After the auth store hydrates, re-evaluate the access check. If the
-  // operator is out of scope, flip to the lock screen.
+
   useEffect(() => {
     if (!authReady || !user || !initial) return;
     if (!ujianTouchesAllowed(user, initial)) {
@@ -113,10 +96,8 @@ function UjianEditor() {
         } else if (result.error === "Forbidden") {
           setDenied(true);
         }
-        // "Not found" / "Unauthorized" fall through with u=null and denied=false.
       } catch {
-        // Network/server error: fall through to "tidak ditemukan" so the
-        // operator sees a stable empty state instead of a stuck spinner.
+        // Network/server error fallback
       } finally {
         if (!cancelled) setLoadingRemote(false);
       }
@@ -126,28 +107,23 @@ function UjianEditor() {
     };
   }, [id, initial, user]);
 
-  // Loading state while we resolve direct-URL exam existence.
   if (loadingRemote) {
-    return <div className="text-sm text-muted-foreground">Memuat…</div>;
+    return <div className="p-8 text-sm text-muted-foreground">Memuat paket ujian…</div>;
   }
 
-  // (Must-fix #2 + #3) Lock screen — fires for both "exists but blocked"
-  // and the edge case where the snapshot was empty but the server confirms
-  // the ujian exists out of scope.
   if (denied && !u) {
     return (
-      <div className="space-y-3 max-w-2xl">
-        <Link to="/admin/ujian" className="text-sm text-muted-foreground hover:underline">
-          ← Paket ujian
+      <div className="space-y-4 max-w-2xl p-6">
+        <Link to="/admin/ujian" className="text-sm text-muted-foreground hover:underline inline-flex items-center gap-1.5">
+          <ArrowLeft className="h-4 w-4" /> Kembali ke Manajemen Ujian
         </Link>
-        <div className="rounded-md border bg-muted/30 p-4 text-sm">
-          <div className="flex items-center gap-2 font-medium">
-            <Lock className="h-4 w-4" />
-            Anda tidak memiliki akses ke ujian ini.
+        <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-5 text-sm">
+          <div className="flex items-center gap-2 font-semibold text-destructive">
+            <Lock className="h-5 w-5" />
+            Akses Ditolak
           </div>
-          <p className="mt-1 text-muted-foreground">
-            Ujian ini menyentuh topik di luar cakupan <code>allowedTopikIds</code> Anda. Hubungi
-            admin jika menurut Anda ini keliru.
+          <p className="mt-2 text-muted-foreground leading-relaxed">
+            Anda tidak memiliki izin untuk mengelola atau melihat paket ujian ini karena topik berada di luar cakupan wewenang Anda.
           </p>
         </div>
       </div>
@@ -156,23 +132,14 @@ function UjianEditor() {
 
   if (!u) {
     return (
-      <div>
-        Ujian tidak ditemukan.{" "}
-        <Link to="/admin/ujian" className="text-primary">
-          Kembali
+      <div className="p-8 space-y-3">
+        <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Paket ujian tidak ditemukan.</p>
+        <Link to="/admin/ujian" className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1">
+          <ArrowLeft className="h-4 w-4" /> Kembali ke Daftar Ujian
         </Link>
       </div>
     );
   }
-
-  // If we reach this branch, either the snapshot already had the ujian
-  // and `ujianTouchesAllowed` returned true at construction time, or the
-  // server-side direct-URL fetch returned a fully in-scope ujian. The
-  // `ujianTouchesAllowed` guard is now hoisted above `useState`, so by
-  // construction `u` is touchable. (A subsequent state mutation of
-  // `user` cannot make a previously in-scope ujian become out-of-scope
-  // because we are not mutating the ujian in place; the predicate is
-  // checked on the read path only.)
 
   const groups = unitAkademikRepo.all();
   const topiks = visibleTopiks(user);
@@ -195,7 +162,7 @@ function UjianEditor() {
 
   function addTopicSet() {
     if (topiks.length === 0) {
-      toast.error("Buat topik dulu");
+      toast.error("Buat topik soal terlebih dahulu");
       return;
     }
     const ts: TopicSet = {
@@ -211,22 +178,19 @@ function UjianEditor() {
 
   async function save() {
     if (!u!.nama.trim()) {
-      toast.error("Nama wajib");
+      toast.error("Nama ujian wajib diisi");
       return;
     }
-    // Validasi server-side: pastikan semua topicSet masih dalam scope.
-    // Client-side guard di sini hanya untuk UX; authorizeMutation di server
-    // adalah pagar terakhir (lihat operatorCanTouchTopicSets).
     if (allowedSet) {
       const outOfScope = u!.topicSets.filter((ts) => !allowedSet.has(ts.topikId));
       if (outOfScope.length > 0) {
-        toast.error("Ada topic set di luar topik yang diizinkan");
+        toast.error("Ada topik set di luar wewenang Anda");
         return;
       }
     }
     ujianRepo.upsert(u!);
     await ujianRepo.flush();
-    toast.success("Disimpan");
+    toast.success("Perubahan ujian berhasil disimpan");
     navigate({ to: "/admin/ujian" });
   }
 
@@ -234,329 +198,459 @@ function UjianEditor() {
     if (!confirm(`Yakin ingin menghapus ujian "${u!.nama}" beserta seluruh data yang terkait?`)) return;
     ujianRepo.remove(u!.id);
     await ujianRepo.flush();
-    toast.success("Ujian dihapus");
+    toast.success("Ujian berhasil dihapus");
     navigate({ to: "/admin/ujian" });
   }
 
+  const totalSoal = u.topicSets.reduce((acc, ts) => acc + (Number(ts.jumlah) || 0), 0);
+
   return (
-    <div className="space-y-4 max-w-4xl">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 w-full max-w-[1600px] mx-auto pb-12">
+      {/* Header Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs">
         <div>
-          <Link to="/admin/ujian" className="text-sm text-muted-foreground hover:underline">
-            ← Paket ujian
+          <Link to="/admin/ujian" className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition-colors mb-1.5">
+            <ArrowLeft className="h-3.5 w-3.5" /> Kembali ke Manajemen Ujian
           </Link>
-          <h1 className="text-2xl font-semibold tracking-tight">Editor Ujian</h1>
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shrink-0">
+              <FileSignature className="h-5 w-5" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Editor Paket Ujian</h1>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{u.nama || "Ujian Baru"}</p>
+            </div>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" className="text-destructive border-destructive/30 hover:bg-destructive/10" onClick={hapus}>
-            <Trash2 className="mr-1 h-4 w-4" />
-            Hapus
+        <div className="flex items-center gap-2.5">
+          <Button variant="outline" className="text-destructive border-destructive/30 hover:bg-destructive/10 h-9 text-xs" onClick={hapus}>
+            <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+            Hapus Paket
           </Button>
-          <Button onClick={save}>
-            <Save className="mr-1 h-4 w-4" />
-            Simpan
+          <Button onClick={save} className="h-9 text-xs font-semibold shadow-xs">
+            <Save className="mr-1.5 h-3.5 w-3.5" />
+            Simpan Perubahan
           </Button>
         </div>
       </div>
 
-      <Card>
-        <CardContent className="space-y-4 p-4">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label>Nama</Label>
-              <Input value={u.nama} onChange={(e) => set("nama", e.target.value)} />
-            </div>
-            <div>
-              <Label>Durasi (menit)</Label>
-              <Input
-                type="number"
-                min={1}
-                value={u.durasiMenit}
-                onChange={(e) => set("durasiMenit", Number(e.target.value))}
-              />
-            </div>
-          </div>
-          <div>
-            <Label>Deskripsi / instruksi</Label>
-            <RichEditor value={u.deskripsi} onChange={(v) => set("deskripsi", v)} minHeight={80} />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label>Mata Kuliah (Opsional)</Label>
-              <Select value={u.mataKuliahId || "none"} onValueChange={(v) => set("mataKuliahId", v === "none" ? undefined : v)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Pilih Mata Kuliah" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">(Tanpa Mata Kuliah)</SelectItem>
-                  {mkList.map((mk) => (
-                    <SelectItem key={mk.id} value={mk.id}>{mk.nama}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Semester (Opsional)</Label>
-              <Select value={u.semesterId || "none"} onValueChange={(v) => set("semesterId", v === "none" ? undefined : v)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Pilih Semester" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">(Tanpa Semester)</SelectItem>
-                  {smtList.map((smt) => (
-                    <SelectItem key={smt.id} value={smt.id}>{smt.nama}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Main Grid Layout */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
 
-      <Card>
-        <CardContent className="p-4 space-y-3">
-          <h3 className="font-medium">Skoring</h3>
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <Label>Poin benar</Label>
-              <Input
-                type="number"
-                value={u.poinBenar}
-                onChange={(e) => set("poinBenar", Number(e.target.value))}
-              />
-            </div>
-            <div>
-              <Label>Poin salah</Label>
-              <Input
-                type="number"
-                value={u.poinSalah}
-                onChange={(e) => set("poinSalah", Number(e.target.value))}
-              />
-            </div>
-            <div>
-              <Label>Poin kosong</Label>
-              <Input
-                type="number"
-                value={u.poinKosong}
-                onChange={(e) => set("poinKosong", Number(e.target.value))}
-              />
-            </div>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Poin salah boleh negatif untuk negative marking.
-          </p>
-        </CardContent>
-      </Card>
+        {/* LEFT COLUMN: Informasi Utama, Topic Sets, Token (7 cols) */}
+        <div className="xl:col-span-7 space-y-6">
 
-      <Card>
-        <CardContent className="p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="font-medium">Topic Set (sumber soal)</h3>
-            <Button size="sm" variant="outline" onClick={addTopicSet}>
-              <Plus className="mr-1 h-4 w-4" />
-              Tambah
-            </Button>
-          </div>
-          {u.topicSets.map((ts, i) => {
-            const t = topiks.find((tk) => tk.id === ts.topikId);
-            const m = t ? moduls.find((mm) => mm.id === t.modulId) : null;
-            const inScope = isTopikAllowed(user, ts.topikId);
-            return (
-              <div key={ts.id} className="rounded border p-3 space-y-2">
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-                  <div className="col-span-2">
-                    <Label className="text-xs">Topik</Label>
-                    <Select
-                      value={ts.topikId}
-                      onValueChange={(v) =>
-                        set(
-                          "topicSets",
-                          u.topicSets.map((x, idx) => (idx === i ? { ...x, topikId: v } : x)),
-                        )
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {sortedTopiks.map((tk) => {
-                          const mm = moduls.find((mm) => mm.id === tk.modulId);
-                          const isMatchMk = u.mataKuliahId && mm?.mataKuliahId === u.mataKuliahId;
-                          return (
-                            <SelectItem key={tk.id} value={tk.id}>
-                              {isMatchMk ? "★ " : ""} {mm?.nama} — {tk.nama}
-                            </SelectItem>
-                          );
-                        })}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label className="text-xs">Jumlah</Label>
-                    <Input
-                      type="number"
-                      min={1}
-                      value={ts.jumlah}
-                      onChange={(e) =>
-                        set(
-                          "topicSets",
-                          u.topicSets.map((x, idx) =>
-                            idx === i ? { ...x, jumlah: Number(e.target.value) } : x,
-                          ),
-                        )
-                      }
-                    />
-                  </div>
-                  <div className="flex items-center gap-2 pt-5">
-                    <Checkbox
-                      checked={ts.acakSoal}
-                      onCheckedChange={(v) =>
-                        set(
-                          "topicSets",
-                          u.topicSets.map((x, idx) => (idx === i ? { ...x, acakSoal: !!v } : x)),
-                        )
-                      }
-                    />
-                    <Label className="text-xs">Acak soal</Label>
-                  </div>
-                  <div className="flex items-center gap-2 pt-5">
-                    <Checkbox
-                      checked={ts.acakJawaban}
-                      onCheckedChange={(v) =>
-                        set(
-                          "topicSets",
-                          u.topicSets.map((x, idx) => (idx === i ? { ...x, acakJawaban: !!v } : x)),
-                        )
-                      }
-                    />
-                    <Label className="text-xs">Acak jawaban</Label>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>
-                    {m?.nama} → {t?.nama}
-                    {!inScope && (
-                      <span className="ml-2 rounded bg-destructive/20 px-1.5 py-0.5 text-destructive">
-                        di luar scope
-                      </span>
-                    )}
-                  </span>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() =>
-                      set(
-                        "topicSets",
-                        u.topicSets.filter((_, idx) => idx !== i),
-                      )
-                    }
+          {/* Card 1: Informasi Utama */}
+          <Card className="border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
+            <CardHeader className="bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <CardTitle className="text-base flex items-center gap-2 text-slate-900 dark:text-slate-100 font-semibold">
+                <FileText className="h-4 w-4 text-primary" />
+                Informasi Utama
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-5 space-y-4">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium">Nama Paket Ujian *</Label>
+                <Input
+                  value={u.nama}
+                  onChange={(e) => set("nama", e.target.value)}
+                  placeholder="Contoh: Ujian Tengah Semester Farmakologi"
+                  className="font-medium"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium">Deskripsi / Petunjuk Ujian</Label>
+                <RichEditor
+                  value={u.deskripsi}
+                  onChange={(v) => set("deskripsi", v)}
+                  minHeight={100}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium">Mata Kuliah</Label>
+                  <Select
+                    value={u.mataKuliahId || "none"}
+                    onValueChange={(v) => set("mataKuliahId", v === "none" ? undefined : v)}
                   >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Pilih Mata Kuliah" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">(Tanpa Mata Kuliah)</SelectItem>
+                      {mkList.map((mk) => (
+                        <SelectItem key={mk.id} value={mk.id}>
+                          {mk.nama}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium">Semester</Label>
+                  <Select
+                    value={u.semesterId || "none"}
+                    onValueChange={(v) => set("semesterId", v === "none" ? undefined : v)}
+                  >
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Pilih Semester" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">(Tanpa Semester)</SelectItem>
+                      {smtList.map((smt) => (
+                        <SelectItem key={smt.id} value={smt.id}>
+                          {smt.nama}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
-            );
-          })}
-          {u.topicSets.length === 0 && (
-            <p className="text-sm text-muted-foreground">Belum ada topic set.</p>
-          )}
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
 
-      <Card>
-        <CardContent className="p-4 space-y-3">
-          <h3 className="font-medium">Akses peserta</h3>
-          <div className="space-y-1">
-            <Label className="text-xs">Group yang boleh ikut (kosong = semua)</Label>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {groups.map((g) => (
-                <label key={g.id} className="flex items-center gap-2 rounded border p-2 text-sm">
-                  <Checkbox
-                    checked={u.groupIds.includes(g.id)}
-                    onCheckedChange={(v) =>
-                      set(
-                        "groupIds",
-                        v ? [...u.groupIds, g.id] : u.groupIds.filter((x) => x !== g.id),
-                      )
-                    }
+          {/* Card 2: Komposisi Soal (Topic Sets) */}
+          <Card className="border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
+            <CardHeader className="bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800 pb-3 flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-base flex items-center gap-2 text-slate-900 dark:text-slate-100 font-semibold">
+                  <Layers className="h-4 w-4 text-primary" />
+                  Komposisi Soal & Topik
+                </CardTitle>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Total butir soal yang dirakit: <span className="font-bold text-foreground">{totalSoal} Soal</span>
+                </p>
+              </div>
+              <Button size="sm" onClick={addTopicSet} className="h-8 text-xs">
+                <Plus className="mr-1 h-3.5 w-3.5" />
+                Tambah Topik
+              </Button>
+            </CardHeader>
+            <CardContent className="p-5 space-y-3">
+              {u.topicSets.map((ts, i) => {
+                const t = topiks.find((tk) => tk.id === ts.topikId);
+                const m = t ? moduls.find((mm) => mm.id === t.modulId) : null;
+                const inScope = isTopikAllowed(user, ts.topikId);
+
+                return (
+                  <div key={ts.id} className="rounded-xl border border-slate-200 dark:border-slate-800 p-4 space-y-3 bg-slate-50/30 dark:bg-slate-900/30">
+                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+                      <div className="sm:col-span-8 space-y-1.5">
+                        <Label className="text-xs font-medium">Pilih Topik Soal</Label>
+                        <Select
+                          value={ts.topikId}
+                          onValueChange={(v) =>
+                            set(
+                              "topicSets",
+                              u.topicSets.map((x, idx) => (idx === i ? { ...x, topikId: v } : x)),
+                            )
+                          }
+                        >
+                          <SelectTrigger className="h-9 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {sortedTopiks.map((tk) => {
+                              const mm = moduls.find((mm) => mm.id === tk.modulId);
+                              const isMatchMk = u.mataKuliahId && mm?.mataKuliahId === u.mataKuliahId;
+                              return (
+                                <SelectItem key={tk.id} value={tk.id} className="text-xs">
+                                  {isMatchMk ? "★ " : ""}{mm?.nama} → {tk.nama}
+                                </SelectItem>
+                              );
+                            })}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="sm:col-span-3 space-y-1.5">
+                        <Label className="text-xs font-medium">Jumlah Soal</Label>
+                        <Input
+                          type="number"
+                          min={1}
+                          value={ts.jumlah}
+                          onChange={(e) =>
+                            set(
+                              "topicSets",
+                              u.topicSets.map((x, idx) =>
+                                idx === i ? { ...x, jumlah: Number(e.target.value) } : x,
+                              ),
+                            )
+                          }
+                          className="h-9 text-xs font-medium"
+                        />
+                      </div>
+
+                      <div className="sm:col-span-1 flex justify-end">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-9 w-9 text-slate-400 hover:text-destructive hover:bg-destructive/10"
+                          onClick={() =>
+                            set(
+                              "topicSets",
+                              u.topicSets.filter((_, idx) => idx !== i),
+                            )
+                          }
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
+                      <div className="flex items-center gap-4">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <Checkbox
+                            checked={ts.acakSoal}
+                            onCheckedChange={(v) =>
+                              set(
+                                "topicSets",
+                                u.topicSets.map((x, idx) => (idx === i ? { ...x, acakSoal: !!v } : x)),
+                              )
+                            }
+                          />
+                          <span className="text-xs text-slate-600 dark:text-slate-400">Acak Urutan Soal</span>
+                        </label>
+
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <Checkbox
+                            checked={ts.acakJawaban}
+                            onCheckedChange={(v) =>
+                              set(
+                                "topicSets",
+                                u.topicSets.map((x, idx) => (idx === i ? { ...x, acakJawaban: !!v } : x)),
+                              )
+                            }
+                          />
+                          <span className="text-xs text-slate-600 dark:text-slate-400">Acak Opsi Pilihan</span>
+                        </label>
+                      </div>
+
+                      <div className="text-slate-400 text-[11px]">
+                        Modul: <span className="text-slate-600 dark:text-slate-300 font-medium">{m?.nama || "-"}</span>
+                        {!inScope && (
+                          <span className="ml-2 px-1.5 py-0.5 rounded bg-destructive/10 text-destructive text-[10px] font-semibold">
+                            Di luar wewenang
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {u.topicSets.length === 0 && (
+                <div className="p-8 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl text-slate-500 text-xs">
+                  Belum ada topik soal yang ditambahkan. Klik tombol &ldquo;Tambah Topik&rdquo; di atas untuk memilih bank soal.
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Card 3: Kelola Token Terintegrasi */}
+          <TokenManager ujian={u} />
+        </div>
+
+        {/* RIGHT COLUMN: Konfigurasi, Keamanan, Target Peserta (5 cols) */}
+        <div className="xl:col-span-5 space-y-6">
+
+          {/* Card 4: Konfigurasi Waktu & Skoring */}
+          <Card className="border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
+            <CardHeader className="bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <CardTitle className="text-base flex items-center gap-2 text-slate-900 dark:text-slate-100 font-semibold">
+                <Settings2 className="h-4 w-4 text-primary" />
+                Jadwal & Skoring
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-5 space-y-4">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium">Durasi Ujian (Menit) *</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={u.durasiMenit}
+                  onChange={(e) => set("durasiMenit", Math.max(1, Number(e.target.value)))}
+                  className="h-9 font-medium"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium">Jadwal Mulai</Label>
+                  <Input
+                    type="datetime-local"
+                    value={toLocalDatetimeString(u.beginAt)}
+                    onChange={(e) => set("beginAt", fromLocalDatetimeString(e.target.value))}
+                    className="h-9 text-xs"
                   />
-                  {g.nama}
-                </label>
-              ))}
-            </div>
-          </div>
-          <div className="flex items-center justify-between rounded border p-2">
-            <div>
-              <Label>Token ujian wajib</Label>
-              <p className="text-xs text-muted-foreground">
-                Peserta harus input token sebelum mulai
-              </p>
-            </div>
-            <Switch checked={u.tokenAktif} onCheckedChange={(v) => set("tokenAktif", v)} />
-          </div>
-        </CardContent>
-      </Card>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium">Jadwal Selesai</Label>
+                  <Input
+                    type="datetime-local"
+                    value={toLocalDatetimeString(u.endAt)}
+                    onChange={(e) => set("endAt", fromLocalDatetimeString(e.target.value))}
+                    className="h-9 text-xs"
+                  />
+                </div>
+              </div>
 
-      <Card>
-        <CardContent className="space-y-3 p-4">
-          <h3 className="font-medium">Alat bantu ujian</h3>
-          <div className="flex items-center justify-between rounded border p-2">
-            <div>
-              <Label htmlFor="allow-calculator">Kalkulator ujian</Label>
-              <p className="text-xs text-muted-foreground">
-                Izinkan peserta membuka kalkulator selama ujian.
-              </p>
-            </div>
-            <Switch
-              id="allow-calculator"
-              checked={u.allowCalculator}
-              onCheckedChange={(value) => set("allowCalculator", value)}
-            />
-          </div>
-        </CardContent>
-      </Card>
+              <div className="pt-2">
+                <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Bobot Nilai Jawaban</Label>
+                <div className="grid grid-cols-3 gap-2 mt-1.5">
+                  <div className="space-y-1">
+                    <span className="text-[11px] text-slate-500">Poin Benar</span>
+                    <Input
+                      type="number"
+                      value={u.poinBenar}
+                      onChange={(e) => set("poinBenar", Number(e.target.value))}
+                      className="h-8 text-xs text-center font-bold text-emerald-600"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-[11px] text-slate-500">Poin Salah</span>
+                    <Input
+                      type="number"
+                      value={u.poinSalah}
+                      onChange={(e) => set("poinSalah", Number(e.target.value))}
+                      className="h-8 text-xs text-center font-bold text-rose-600"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-[11px] text-slate-500">Poin Kosong</span>
+                    <Input
+                      type="number"
+                      value={u.poinKosong}
+                      onChange={(e) => set("poinKosong", Number(e.target.value))}
+                      className="h-8 text-xs text-center font-bold text-slate-600"
+                    />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-      <Card>
-        <CardContent className="p-4 space-y-3">
-          <h3 className="font-medium">Tampilan hasil & anti-cheat</h3>
-          <div className="flex items-center justify-between rounded border p-2">
-            <Label>Tampilkan skor ke peserta setelah submit</Label>
-            <Switch checked={u.showResult} onCheckedChange={(v) => set("showResult", v)} />
-          </div>
-          <div className="flex items-center justify-between rounded border p-2">
-            <Label>Tampilkan pembahasan & detail jawaban</Label>
-            <Switch
-              checked={u.showResultDetail}
-              onCheckedChange={(v) => set("showResultDetail", v)}
-            />
-          </div>
-          <div className="flex items-center justify-between rounded border p-2">
-            <Label>Wajib fullscreen</Label>
-            <Switch
-              checked={u.fullscreenWajib}
-              onCheckedChange={(v) => set("fullscreenWajib", v)}
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label>Max pindah tab (sebelum auto-submit)</Label>
-              <Input
-                type="number"
-                min={0}
-                value={u.maxPindahTab}
-                onChange={(e) => set("maxPindahTab", Number(e.target.value))}
-              />
-            </div>
-            <div className="flex items-center gap-2 pt-6">
-              <Switch
-                checked={u.blokirShortcut}
-                onCheckedChange={(v) => set("blokirShortcut", v)}
-              />
-              <Label>Blokir copy/paste & klik kanan</Label>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          {/* Card 5: Fitur, Alat Bantu & Keamanan */}
+          <Card className="border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
+            <CardHeader className="bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <CardTitle className="text-base flex items-center gap-2 text-slate-900 dark:text-slate-100 font-semibold">
+                <ShieldCheck className="h-4 w-4 text-primary" />
+                Fitur & Keamanan Ujian
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-5 space-y-3.5">
+              <div className="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/40">
+                <div>
+                  <Label className="text-xs font-semibold cursor-pointer">Wajib Token Ujian</Label>
+                  <p className="text-[11px] text-muted-foreground">Peserta harus memasukkan token sebelum memulai</p>
+                </div>
+                <Switch checked={u.tokenAktif} onCheckedChange={(v) => set("tokenAktif", v)} />
+              </div>
+
+              <div className="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/40">
+                <div>
+                  <Label className="text-xs font-semibold cursor-pointer flex items-center gap-1.5">
+                    <Calculator className="h-3.5 w-3.5 text-primary" /> Kalkulator Ilmiah
+                  </Label>
+                  <p className="text-[11px] text-muted-foreground">Tampilkan tombol kalkulator ilmiah di layar ujian</p>
+                </div>
+                <Switch checked={u.allowCalculator} onCheckedChange={(v) => set("allowCalculator", v)} />
+              </div>
+
+              <div className="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/40">
+                <div>
+                  <Label className="text-xs font-semibold cursor-pointer flex items-center gap-1.5">
+                    <FileText className="h-3.5 w-3.5 text-primary" /> Tabel Nilai Normal
+                  </Label>
+                  <p className="text-[11px] text-muted-foreground">Tampilkan lembar rujukan nilai normal laboratorium</p>
+                </div>
+                <Switch checked={u.allowNilaiNormal} onCheckedChange={(v) => set("allowNilaiNormal", v)} />
+              </div>
+
+              <div className="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 dark:border-slate-800">
+                <div>
+                  <Label className="text-xs font-medium cursor-pointer">Tampilkan Skor Akhir</Label>
+                  <p className="text-[11px] text-muted-foreground">Peserta melihat skor langsung setelah submit</p>
+                </div>
+                <Switch checked={u.showResult} onCheckedChange={(v) => set("showResult", v)} />
+              </div>
+
+              <div className="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 dark:border-slate-800">
+                <div>
+                  <Label className="text-xs font-medium cursor-pointer">Tampilkan Kunci & Pembahasan</Label>
+                  <p className="text-[11px] text-muted-foreground">Peserta dapat meninjau rincian soal setelah ujian</p>
+                </div>
+                <Switch checked={u.showResultDetail} onCheckedChange={(v) => set("showResultDetail", v)} />
+              </div>
+
+              <div className="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 dark:border-slate-800">
+                <div>
+                  <Label className="text-xs font-medium cursor-pointer">Wajib Layar Penuh (Fullscreen)</Label>
+                  <p className="text-[11px] text-muted-foreground">Kunci browser ke mode layar penuh</p>
+                </div>
+                <Switch checked={u.fullscreenWajib} onCheckedChange={(v) => set("fullscreenWajib", v)} />
+              </div>
+
+              <div className="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 dark:border-slate-800">
+                <div>
+                  <Label className="text-xs font-medium cursor-pointer">Blokir Shortcut & Klik Kanan</Label>
+                  <p className="text-[11px] text-muted-foreground">Cegah copy, paste, dan inspeksi elemen</p>
+                </div>
+                <Switch checked={u.blokirShortcut} onCheckedChange={(v) => set("blokirShortcut", v)} />
+              </div>
+
+              <div className="p-2.5 rounded-lg border border-slate-100 dark:border-slate-800 space-y-1.5">
+                <Label className="text-xs font-medium">Batas Maksimal Pindah Tab</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={u.maxPindahTab}
+                  onChange={(e) => set("maxPindahTab", Number(e.target.value))}
+                  className="h-8 text-xs"
+                />
+                <p className="text-[10px] text-slate-400">Ujian otomatis disubmit paksa bila pelanggaran melampaui batas ini.</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Card 6: Target Peserta (Grup / Rombel) */}
+          <Card className="border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
+            <CardHeader className="bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <CardTitle className="text-base flex items-center gap-2 text-slate-900 dark:text-slate-100 font-semibold">
+                <Users className="h-4 w-4 text-primary" />
+                Target Peserta Ujian
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-5 space-y-2">
+              <p className="text-xs text-muted-foreground mb-2">
+                Pilih unit / kelas yang diizinkan mengikuti ujian (kosongkan jika terbuka untuk seluruh peserta):
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[220px] overflow-y-auto pr-1">
+                {groups.map((g) => (
+                  <label key={g.id} className="flex items-center gap-2 rounded-lg border border-slate-100 dark:border-slate-800 p-2 text-xs cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
+                    <Checkbox
+                      checked={u.groupIds.includes(g.id)}
+                      onCheckedChange={(v) =>
+                        set(
+                          "groupIds",
+                          v ? [...u.groupIds, g.id] : u.groupIds.filter((x) => x !== g.id),
+                        )
+                      }
+                    />
+                    <span className="truncate">{g.nama}</span>
+                  </label>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+        </div>
+
+      </div>
     </div>
   );
 }

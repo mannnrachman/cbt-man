@@ -155,6 +155,7 @@ export function mapUjian(
 		blokirShortcut: row.blokirShortcut,
 		mode: (row.mode ?? "online") as "online" | "offline",
 		allowCalculator: row.allowCalculator,
+		allowNilaiNormal: Boolean(row.allowNilaiNormal),
 		createdBy: row.createdBy,
 		createdAt: Number(row.createdAt),
 	};

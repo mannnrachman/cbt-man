@@ -59,6 +59,7 @@ function UjianList() {
       blokirShortcut: true,
       mode: "online",
       allowCalculator: false,
+      allowNilaiNormal: false,
       createdBy: user.id,
       createdAt: Date.now(),
     };
@@ -113,6 +114,9 @@ function UjianList() {
         <div className="flex items-center gap-2 shrink-0 ml-4">
           {type === "persiapan" && (
             <>
+              <Link to="/admin/ujian/$id" params={{ id: u.id }} hash="token" className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-colors">
+                <KeyRound className="h-3.5 w-3.5"/> Token
+              </Link>
               <Link to="/admin/ujian/$id/peserta" params={{ id: u.id }} className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-colors">
                 <Users className="h-3.5 w-3.5"/> Peserta
               </Link>
