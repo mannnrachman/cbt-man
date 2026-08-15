@@ -146,7 +146,7 @@ function FilesPage() {
               }}
             />
             <Button size="sm" onClick={() => inputRef.current?.click()} disabled={isUploading} className="h-9 font-semibold">
-              {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4 -translate-y-[0.5px]" />} 
+              {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4 translate-y-[-0.5px]" />}
               Upload File
             </Button>
           </>
@@ -172,13 +172,13 @@ function FilesPage() {
                 onClick={() => setSelectedFolder("all")}
                 className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300 ease-spring shrink-0 ${selectedFolder === "all" ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-md" : "bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-slate-400"}`}
               >
-                <Database className="h-4 w-4 -translate-y-[0.5px]" /> Semua File
+                <Database className="h-4 w-4 translate-y-[-0.5px]" /> Semua File
               </button>
               <button 
                 onClick={() => setSelectedFolder("global")}
                 className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300 ease-spring shrink-0 ${selectedFolder === "global" ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-md" : "bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-slate-400"}`}
               >
-                <Folder className="h-4 w-4 -translate-y-[0.5px]" /> Umum / Global
+                <Folder className="h-4 w-4 translate-y-[-0.5px]" /> Umum / Global
               </button>
               
               {jurusans.length > 0 && <div className="w-px h-6 bg-slate-200 dark:bg-slate-800 mx-2 shrink-0" />}
@@ -189,7 +189,7 @@ function FilesPage() {
                   onClick={() => setSelectedFolder(j.id)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300 ease-spring shrink-0 ${selectedFolder === j.id ? "bg-primary text-white shadow-md shadow-primary/20" : "bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-primary/30"}`}
                 >
-                  <Folder className="h-4 w-4 -translate-y-[0.5px]" /> {j.nama}
+                  <Folder className="h-4 w-4 translate-y-[-0.5px]" /> {j.nama}
                 </button>
               ))}
             </div>
@@ -207,7 +207,7 @@ function FilesPage() {
             Penyimpanan untuk {isSuper ? "kategori ini" : "program studi Anda"} masih kosong. Klik tombol Upload untuk menambahkan gambar atau audio.
           </p>
           <Button onClick={() => inputRef.current?.click()} variant="outline" className="shadow-sm transition-all duration-300 ease-spring hover:scale-[0.98]">
-            <Upload className="mr-2 h-4 w-4 -translate-y-[0.5px]" /> Mulai Upload
+            <Upload className="mr-2 h-4 w-4 translate-y-[-0.5px]" /> Mulai Upload
           </Button>
         </div>
       ) : (

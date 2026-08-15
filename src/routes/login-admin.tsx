@@ -74,9 +74,9 @@ function LoginAdminPage() {
 		<div className="min-h-screen relative flex flex-col items-center justify-center bg-slate-50 dark:bg-[#030712] overflow-hidden z-0 px-4 transition-colors duration-300">
 			{/* Modern Premium Aurora/Mesh Background */}
 			<div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-				<div className="absolute -top-[40%] -left-[20%] w-[70%] h-[70%] rounded-full bg-gradient-to-br from-green-500/20 to-emerald-600/20 dark:from-green-600/20 dark:to-emerald-800/20 blur-[120px]" />
-				<div className="absolute top-[20%] -right-[20%] w-[60%] h-[60%] rounded-full bg-gradient-to-bl from-blue-400/20 to-cyan-300/20 dark:from-blue-700/20 dark:to-cyan-900/20 blur-[100px]" />
-				<div className="absolute -bottom-[30%] left-[10%] w-[80%] h-[80%] rounded-full bg-gradient-to-tr from-yellow-500/20 to-amber-500/20 dark:from-yellow-700/20 dark:to-amber-900/20 blur-[150px]" />
+				<div className="absolute top-[-40%] left-[-20%] w-[70%] h-[70%] rounded-full bg-gradient-to-br from-green-500/20 to-emerald-600/20 dark:from-green-600/20 dark:to-emerald-800/20 blur-[120px]" />
+				<div className="absolute top-[20%] right-[-20%] w-[60%] h-[60%] rounded-full bg-gradient-to-bl from-blue-400/20 to-cyan-300/20 dark:from-blue-700/20 dark:to-cyan-900/20 blur-[100px]" />
+				<div className="absolute bottom-[-30%] left-[10%] w-[80%] h-[80%] rounded-full bg-gradient-to-tr from-yellow-500/20 to-amber-500/20 dark:from-yellow-700/20 dark:to-amber-900/20 blur-[150px]" />
 			</div>
 
 			<Link to="/" className="absolute top-6 left-6 flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors z-20 bg-white/50 dark:bg-black/20 backdrop-blur-md px-4 py-2 rounded-full border border-slate-200/50 dark:border-white/10 shadow-sm">

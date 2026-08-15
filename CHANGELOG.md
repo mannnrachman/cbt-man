@@ -15,6 +15,8 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Fixed
 
+- Perbaiki sintaks nilai arbitrer negatif Tailwind (`translate-y-[-0.5px]`, `top-[-40%]`) agar utilitas CSS ter-generate (diekstrak dari #98).
+
 ### Security
 
 ### Deprecated
