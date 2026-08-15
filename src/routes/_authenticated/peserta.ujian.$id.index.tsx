@@ -184,14 +184,10 @@ function PreUjianContent({
 
   return (
     <div className="relative min-h-[calc(100vh-4rem)] bg-slate-50/50 dark:bg-slate-950">
-      {/* Dynamic Background Elements */}
-      <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-blue-600/10 via-indigo-600/5 to-transparent dark:from-blue-500/10 dark:via-indigo-500/5 pointer-events-none" />
-      <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-500/20 dark:bg-blue-500/10 blur-[100px] rounded-full pointer-events-none" />
-      <div className="absolute top-40 -left-40 w-72 h-72 bg-indigo-500/20 dark:bg-indigo-500/10 blur-[80px] rounded-full pointer-events-none" />
 
-      <div className="relative max-w-4xl mx-auto px-4 py-8 sm:py-12 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 pb-8 sm:pb-12 space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-700">
         {/* Header Info */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           <Link to="/peserta" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group">
             <span className="group-hover:-translate-x-1 transition-transform mr-1">←</span> Kembali ke Daftar Ujian
           </Link>

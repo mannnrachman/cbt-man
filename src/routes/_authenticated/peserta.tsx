@@ -63,16 +63,8 @@ function PesertaLayout() {
 	return (
 		<div className={cn("relative flex flex-col bg-slate-50 dark:bg-[#030712] overflow-hidden z-0 transition-colors duration-300", isKerjakan ? "h-screen" : "min-h-screen")}>
 			
-			{/* Modern Premium Aurora/Mesh Background - Hidden when in exam engine */}
-			{!isKerjakan && (
-				<div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-					<div className="absolute -top-[40%] -left-[20%] w-[70%] h-[70%] rounded-full bg-gradient-to-br from-green-500/20 to-emerald-600/20 dark:from-green-600/20 dark:to-emerald-800/20 blur-[120px]" />
-					<div className="absolute top-[20%] -right-[20%] w-[60%] h-[60%] rounded-full bg-gradient-to-bl from-blue-400/20 to-cyan-300/20 dark:from-blue-700/20 dark:to-cyan-900/20 blur-[100px]" />
-					<div className="absolute -bottom-[30%] left-[10%] w-[80%] h-[80%] rounded-full bg-gradient-to-tr from-yellow-500/20 to-amber-500/20 dark:from-yellow-700/20 dark:to-amber-900/20 blur-[150px]" />
-				</div>
-			)}
 
-			<header className="w-full bg-white/40 dark:bg-black/20 backdrop-blur-md px-6 py-4 flex items-center justify-between relative z-20 font-sans border-b border-slate-200/50 dark:border-white/5 shadow-sm transition-colors shrink-0">
+			<header className="w-full bg-white/40 dark:bg-black/20 backdrop-blur-md px-6 py-3 flex items-center justify-between relative z-20 font-sans border-b border-slate-200/50 dark:border-white/5 shadow-sm transition-colors shrink-0">
 				<div className="flex items-center gap-3">
 					{appLogo ? (
 						<img src={appLogo} alt="Logo" className="h-8 max-w-[120px] object-contain drop-shadow-sm" />

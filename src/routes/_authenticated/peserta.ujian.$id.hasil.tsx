@@ -71,7 +71,7 @@ function HasilPeserta() {
 	});
 
 	return (
-		<div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 pb-24 pt-8 animate-in fade-in duration-500">
+		<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-20 pt-3 sm:pt-4 animate-in fade-in duration-500">
 			{/* Navigation */}
 			<div className="flex items-center">
 				<Link

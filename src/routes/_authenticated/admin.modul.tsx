@@ -253,7 +253,7 @@ function ModulPage() {
               <div key={m.id} className="group relative flex flex-col justify-between p-5 rounded-[20px] border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 hover:border-primary/40 dark:hover:border-primary/40 shadow-sm hover:shadow-sleek transition-all duration-300 ease-spring gap-4 overflow-hidden">
                 <div className="flex items-start gap-4">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 dark:bg-primary/10 text-primary group-hover:bg-primary/15 dark:group-hover:bg-primary/20 transition-colors duration-300 ease-spring">
-                    <FileText className="h-6 w-6 -translate-y-[0.5px]" />
+                    <FileText className="h-6 w-6 translate-y-[-0.5px]" />
                   </div>
                   <div className="flex-1 min-w-0 space-y-1.5 pt-1">
                     <Link to="/admin/modul/$id/topik" params={{ id: m.id }} className="text-base font-semibold text-slate-900 dark:text-slate-100 hover:text-primary dark:hover:text-primary transition-colors duration-300 ease-spring line-clamp-2 after:absolute after:inset-0">
@@ -277,8 +277,8 @@ function ModulPage() {
 
                 <div className="flex items-center justify-between mt-2 pt-4 border-t border-slate-100 dark:border-slate-800/60">
                   <div className="flex items-center gap-4 text-xs font-medium text-slate-500">
-                    <span className="flex items-center gap-1.5"><FileText className="w-4 h-4 text-slate-400 -translate-y-[0.5px]"/> {t.length} Topik</span>
-                    <span className="flex items-center gap-1.5"><ChevronRight className="w-4 h-4 text-slate-400 -translate-y-[0.5px]"/> {sCount} Soal</span>
+                    <span className="flex items-center gap-1.5"><FileText className="w-4 h-4 text-slate-400 translate-y-[-0.5px]"/> {t.length} Topik</span>
+                    <span className="flex items-center gap-1.5"><ChevronRight className="w-4 h-4 text-slate-400 translate-y-[-0.5px]"/> {sCount} Soal</span>
                   </div>
 
                   <div className="flex items-center gap-1 relative z-10">
