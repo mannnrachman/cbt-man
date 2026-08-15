@@ -136,7 +136,7 @@ function HasilPeserta() {
 						</div>
 						<div className="p-6 text-center">
 							<p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Durasi Pengerjaan</p>
-							<p className="text-2xl font-black text-blue-600 dark:text-blue-400">
+							<p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
 								{sesi.mulaiAt && sesi.selesaiAt ? Math.max(1, Math.round((sesi.selesaiAt - sesi.mulaiAt) / 60000)) : 0} <span className="text-sm font-bold text-slate-400">mnt</span>
 							</p>
 						</div>
@@ -229,7 +229,19 @@ function HasilPeserta() {
 												<div className="bg-slate-50 dark:bg-slate-950 rounded-2xl p-6 border border-slate-200 dark:border-slate-800">
 													<p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Jawaban Anda:</p>
 													<div className="prose prose-slate dark:prose-invert max-w-none prose-p:my-0 text-slate-700 dark:text-slate-300">
-														<RichView html={j.jawabanEssay || "<em>(Kosong)</em>"} />
+														<RichView
+															html={
+																j.jawabanEssay
+																	? j.jawabanEssay
+																			.replace(/&/g, "&amp;")
+																			.replace(/</g, "&lt;")
+																			.replace(/>/g, "&gt;")
+																			.replace(/"/g, "&quot;")
+																			.replace(/'/g, "&#39;")
+																			.replace(/\n/g, "<br />")
+																	: "<em>(Kosong)</em>"
+															}
+														/>
 													</div>
 												</div>
 											) : (
@@ -279,9 +291,9 @@ function HasilPeserta() {
 
 										{/* Explanations (Pembahasan) */}
 										{soal.pembahasan && (
-											<div className="mt-8 bg-blue-50/50 dark:bg-blue-950/20 rounded-2xl p-6 border border-blue-100 dark:border-blue-900/50 relative overflow-hidden">
-												<div className="absolute top-0 left-0 w-1 h-full bg-blue-400" />
-												<div className="flex items-center gap-2 mb-3 text-blue-700 dark:text-blue-400">
+											<div className="mt-8 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-2xl p-6 border border-emerald-100 dark:border-emerald-900/50 relative overflow-hidden">
+												<div className="absolute top-0 left-0 w-1 h-full bg-emerald-400" />
+												<div className="flex items-center gap-2 mb-3 text-emerald-700 dark:text-emerald-400">
 													<FileText className="w-5 h-5" />
 													<h4 className="font-bold uppercase tracking-widest text-sm">Pembahasan</h4>
 												</div>

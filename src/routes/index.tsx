@@ -547,9 +547,9 @@ function Landing() {
 							<div className="relative group">
 								<button 
 									onClick={handleOpenLoginGeneral}
-									className="w-full sm:w-72 h-14 bg-[#03A559] hover:bg-[#028b4a] text-white font-semibold rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2 border border-[#028b4a]"
+									className="w-full sm:w-72 h-14 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer border-0"
 								>
-									Mulai Ujian Online
+									Login Peserta
 								</button>
 							</div>
 						) : (
