@@ -84,7 +84,7 @@ function PengaturanPage() {
         </div>
         <div role="region" aria-labelledby="identitas-heading" className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
           <div className="p-6 space-y-6">
-            
+
             <div className="space-y-2.5">
               <Label className="text-slate-700 dark:text-slate-300 font-semibold">Nama Aplikasi</Label>
               <Input
@@ -112,12 +112,12 @@ function PengaturanPage() {
                       onChange={(e) => setCfg({ ...cfg, appLogo: e.target.value })}
                       className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 font-mono text-xs"
                     />
-                    <input 
-                      type="file" 
-                      accept="image/*" 
+                    <input
+                      type="file"
+                      accept="image/*"
                       className="hidden"
                       aria-hidden="true"
-                      ref={fileInputRef} 
+                      ref={fileInputRef}
                       onChange={handleLogoUpload}
                     />
                     <Button type="button" variant="secondary" onClick={() => fileInputRef.current?.click()} className="shrink-0 shadow-sm border-slate-200 dark:border-slate-700">
@@ -194,14 +194,14 @@ function PengaturanPage() {
           </p>
         </div>
         <div role="region" aria-labelledby="tema-heading" className="lg:col-span-2 space-y-8">
-          
+
           {/* Pilihan Tema Visual */}
           <div className="space-y-3">
             <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Gaya Tema Visual</Label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              
+
               {/* Theme: Modern (Default) */}
-              <button 
+              <button
                 onClick={() => setTheme("default")}
                 aria-pressed={theme === "default"}
                 className={`text-left p-4 rounded-xl border-2 transition-all cursor-pointer ${theme === "default" ? "border-primary ring-2 ring-primary/20 bg-primary/5" : "border-slate-200 dark:border-slate-800 hover:border-primary/50 bg-white dark:bg-slate-900"}`}
@@ -218,7 +218,7 @@ function PengaturanPage() {
               </button>
 
               {/* Theme: Neumorphism (Soft UI) */}
-              <button 
+              <button
                 onClick={() => setTheme("neumorphism")}
                 aria-pressed={theme === "neumorphism"}
                 className={`text-left p-4 rounded-xl border-2 transition-all cursor-pointer ${theme === "neumorphism" ? "border-primary ring-2 ring-primary/20 bg-[#f0f3f8]" : "border-slate-200 dark:border-slate-800 hover:border-primary/50 bg-[#f0f3f8]/60 dark:bg-slate-900"}`}
@@ -244,9 +244,9 @@ function PengaturanPage() {
           <div className="space-y-3 pt-6 border-t border-slate-200 dark:border-slate-800/80">
             <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Pilihan Font & Tipografi</Label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              
+
               {/* Font: SN Pro */}
-              <button 
+              <button
                 onClick={() => setFont("sn-pro")}
                 aria-pressed={font === "sn-pro"}
                 className={`text-left p-4 rounded-xl border-2 transition-all cursor-pointer ${font === "sn-pro" ? "border-primary ring-2 ring-primary/20 bg-primary/5" : "border-slate-200 dark:border-slate-800 hover:border-primary/50 bg-white dark:bg-slate-900"}`}
@@ -266,7 +266,7 @@ function PengaturanPage() {
               </button>
 
               {/* Font: System Default */}
-              <button 
+              <button
                 onClick={() => setFont("system")}
                 aria-pressed={font === "system"}
                 className={`text-left p-4 rounded-xl border-2 transition-all cursor-pointer ${font === "system" ? "border-primary ring-2 ring-primary/20 bg-primary/5" : "border-slate-200 dark:border-slate-800 hover:border-primary/50 bg-white dark:bg-slate-900"}`}
@@ -360,7 +360,7 @@ async function resizeImage(file: File, maxWidthOrHeight: number): Promise<string
         }
 
         ctx.drawImage(img, 0, 0, width, height);
-        
+
         // Use webp for better compression, fallback to png
         resolve(canvas.toDataURL("image/webp", 0.8));
       };
