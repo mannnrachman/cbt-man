@@ -267,29 +267,20 @@ export const generateExamTokensServer = createServerFn({ method: "POST" })
 
 		if (data.customKode) {
 			const code = data.customKode.trim().toUpperCase();
-			for (const uId of targetUjianIds) {
-				const existing = await prisma.tokenUjian.findFirst({
-					where: { ujianId: uId, kode: code },
-				});
-				if (existing) {
-					const updated = await prisma.tokenUjian.update({
-						where: { id: existing.id },
-						data: { expireAt },
-					});
-					if (uId === data.ujianId) created.push(mapToken(updated));
-				} else {
-					const row = await prisma.tokenUjian.create({
-						data: {
-							id: uid("tk_"),
-							ujianId: uId,
-							kode: code,
-							expireAt,
-						},
-					});
-					if (uId === data.ujianId) created.push(mapToken(row));
+			const tokens = await prisma.$transaction(async (tx) => {
+				const rows = [];
+				for (const ujianId of targetUjianIds) {
+					rows.push(
+						await tx.tokenUjian.upsert({
+							where: { ujianId_kode: { ujianId, kode: code } },
+							create: { id: uid("tk_"), ujianId, kode: code, expireAt },
+							update: { expireAt },
+						}),
+					);
 				}
-			}
-			return { ok: true as const, tokens: created };
+				return rows;
+			});
+			return { ok: true as const, tokens: tokens.filter((token) => token.ujianId === data.ujianId).map(mapToken) };
 		}
 
 		const length = data.length ?? DEFAULT_TOKEN_LENGTH;
