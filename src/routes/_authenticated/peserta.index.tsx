@@ -67,11 +67,9 @@ function PesertaDashboard() {
 	return (
 		<div className="min-h-[calc(100vh-64px)] relative flex flex-col overflow-hidden z-0 transition-colors duration-300">
 
-			<main className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:py-6 lg:px-12 relative z-10 w-full max-w-7xl mx-auto h-[calc(100vh-100px)]">
-				{/* Glassmorphism Main Panel */}
-				<div className="w-full h-full max-h-[850px] bg-white/60 dark:bg-[#0f172a]/60 backdrop-blur-3xl border border-white/40 dark:border-white/10 rounded-3xl shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.6)] p-6 sm:p-8 lg:py-6 lg:px-10 flex flex-col gap-4 sm:gap-6 relative z-10 transition-colors duration-300 overflow-hidden">
-					{/* Inner glow effect for the card */}
-					<div className="absolute inset-0 bg-gradient-to-b from-white/40 to-transparent dark:from-white/5 dark:to-transparent pointer-events-none rounded-3xl" />
+			<main className="flex-1 flex items-center justify-center px-4 pt-2 pb-4 sm:px-6 sm:pt-3 sm:pb-6 lg:pt-3 lg:pb-6 lg:px-12 relative z-10 w-full max-w-[1600px] mx-auto min-h-[calc(100vh-80px)]">
+				{/* Main Panel */}
+				<div className="w-full h-full max-h-[850px] bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-sm p-5 sm:p-6 lg:py-5 lg:px-8 flex flex-col gap-3 sm:gap-4 relative z-10 transition-colors duration-300 overflow-hidden">
 
 					{/* Header Section */}
 					<div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 relative z-10 animate-in fade-in slide-in-from-bottom-2 duration-700">
