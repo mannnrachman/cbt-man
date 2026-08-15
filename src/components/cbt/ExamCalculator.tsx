@@ -58,7 +58,7 @@ export function ExamCalculator() {
   const opBtn =
     "h-10 text-sm font-semibold bg-sky-50 text-sky-800 hover:bg-sky-100 dark:bg-sky-950/50 dark:text-sky-300 dark:hover:bg-sky-900/60 transition-colors";
   const delBtn =
-    "h-10 text-xs font-semibold bg-orange-50 text-orange-750 hover:bg-orange-100 dark:bg-orange-950/40 dark:text-orange-300 transition-colors";
+    "h-10 text-xs font-semibold bg-orange-50 text-orange-700 hover:bg-orange-100 dark:bg-orange-950/40 dark:text-orange-300 transition-colors";
   const acBtn =
     "h-10 text-xs font-semibold bg-rose-50 text-rose-700 hover:bg-rose-100 dark:bg-rose-950/40 dark:text-rose-300 font-bold transition-colors";
   const eqBtn = "h-10 text-sm font-bold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors";

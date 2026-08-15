@@ -84,6 +84,7 @@ test("calculator calculates powers, reciprocals, absolute value and negation", (
   assert.equal(applyUnary(digits(INITIAL_CALCULATOR_STATE, "42"), "negate").display, "-42");
 
   const negativeFortyTwo = applyUnary(digits(INITIAL_CALCULATOR_STATE, "42"), "negate");
+  assert.equal(inputDigit(negativeFortyTwo, "3").display, "-423");
   assert.equal(applyUnary(negativeFortyTwo, "abs").display, "42");
 });
 
@@ -148,9 +149,7 @@ test("calculator performs memory operations correctly", () => {
   state = memorySubtract(state);
   assert.equal(state.memory, 30);
 
-  state = INITIAL_CALCULATOR_STATE;
-  state.memory = 30;
-  state = memoryRecall(state);
+  state = memoryRecall({ ...INITIAL_CALCULATOR_STATE, memory: 30 });
   assert.equal(state.display, "30");
 
   state = memoryClear(state);

@@ -245,7 +245,7 @@ export function applyUnary(state: CalculatorState, operation: CalculatorUnary): 
 
   const display = result === null ? null : finiteDisplay(result);
   if (display === null) return errorState(state);
-  return { ...state, display, replaceDisplay: true };
+  return { ...state, display, replaceDisplay: operation === "negate" ? false : true };
 }
 
 export function inputConstant(state: CalculatorState, constant: CalculatorConstant): CalculatorState {
