@@ -3,18 +3,20 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { prisma } from "../db/prisma";
-import { 
-	requireCaller, 
+import {
+	requireCaller,
 	seedIfNeeded,
 	operatorHasAnyNav,
 	operatorCanTouchUjian,
-	pesertaCanTouchUjian
+	pesertaCanTouchUjian,
 } from "../db/auth";
 import type { SesiUjian, NavKey } from "@/lib/cbt/types";
 import { writeAuditLog } from "../db/audit";
 import { stringifyJson, toBigInt, toNumber, parseJson } from "../db/json";
 import { getRequestIP } from "@tanstack/start-server-core";
 import { ipInRanges } from "@/lib/cbt/cidr";
+import { gradeAnswers } from "@/lib/cbt/scoring";
+import { mapSoal, mapSesi, mapUjian } from "../repos/mappers";
 
 const OPERATOR_SESSION_KEYS: NavKey[] = [
 	"ujian",
@@ -23,6 +25,29 @@ const OPERATOR_SESSION_KEYS: NavKey[] = [
 	"laporan",
 	"leaderboard",
 ];
+
+// Authoritative server-side grading at submit time. The participant's client
+// also computes a provisional grade for instant display, but the persisted
+// score is always recomputed here from the DB soal/jawaban so a participant
+// can never dictate their own `skor`/`skorTotal` (the rules live in the shared
+// pure module src/lib/cbt/scoring.ts).
+async function gradeSesiServerSide(item: SesiUjian): Promise<SesiUjian> {
+	const ujianRow = await prisma.ujian.findUnique({ where: { id: item.ujianId } });
+	if (!ujianRow) return { ...item, skorTotal: undefined, maxSkor: undefined };
+	const soalRows = await prisma.soal.findMany({
+		where: { id: { in: item.soalIds } },
+		include: { jawaban: true },
+	});
+	const soalById = new Map(soalRows.map((r) => [r.id, mapSoal(r)]));
+	const { jawaban, skorTotal, maxSkor } = gradeAnswers(mapUjian(ujianRow), soalById, item.jawaban);
+	return {
+		...item,
+		jawaban,
+		skorTotal,
+		maxSkor,
+		selesaiAt: item.selesaiAt ?? Date.now(),
+	};
+}
 
 export const mutateSesiServer = createServerFn({ method: "POST" })
 	.validator(
@@ -36,9 +61,9 @@ export const mutateSesiServer = createServerFn({ method: "POST" })
 			await seedIfNeeded();
 			const caller = await requireCaller();
 			if (!caller) return { ok: false as const, error: "Forbidden" };
-			
+
 			const { action, payload } = data;
-			
+
 			if (caller.role === "admin_prodi" || caller.role === "evaluator") {
 				if (!(await operatorHasAnyNav(caller, OPERATOR_SESSION_KEYS)))
 					return { ok: false as const, error: "Forbidden" };
@@ -56,7 +81,7 @@ export const mutateSesiServer = createServerFn({ method: "POST" })
 				}
 			} else if (caller.role === "mahasiswa") {
 				if (action !== "upsert") return { ok: false as const, error: "Forbidden" };
-				
+
 				const item = payload as SesiUjian;
 				if (item.pesertaId !== caller.id)
 					return { ok: false as const, error: "Forbidden" };
@@ -150,54 +175,79 @@ export const mutateSesiServer = createServerFn({ method: "POST" })
 					});
 				} else {
 					const item = payload as SesiUjian;
-					
-					let sanitizedJawaban = item.jawaban;
+
+					// A participant must never dictate their own score or grader
+					// note. Strip any grading fields supplied by the client, then
+					// recompute the score authoritatively on the server at submit
+					// time so the persisted record matches the canonical rules.
+					let scoredItem = item;
 					if (caller.role === "mahasiswa") {
-						sanitizedJawaban = (item.jawaban || []).map((j: any) => ({
-							...j,
-							skor: undefined,
-							catatanGrader: undefined,
-						}));
+						scoredItem = {
+							...item,
+							jawaban: (item.jawaban || []).map((j: any) => ({
+								...j,
+								skor: undefined,
+								catatanGrader: undefined,
+							})),
+							skorTotal: undefined,
+							maxSkor: undefined,
+						};
+						if (scoredItem.status === "selesai") {
+							scoredItem = await gradeSesiServerSide(scoredItem);
+						}
 					}
 
-
+					const isMahasiswa = caller.role === "mahasiswa";
 					let updateData: any = {
-						ujianId: item.ujianId,
-						pesertaId: item.pesertaId,
-						status: item.status,
-						mulaiAt: toBigInt(item.mulaiAt),
-						selesaiAt: toBigInt(item.selesaiAt),
-						endsAt: toBigInt(item.endsAt),
-						soalIds: stringifyJson(item.soalIds),
-						jawabanOrder: stringifyJson(item.jawabanOrder),
-						jawaban: stringifyJson(sanitizedJawaban),
+						ujianId: scoredItem.ujianId,
+						pesertaId: scoredItem.pesertaId,
+						status: scoredItem.status,
+						mulaiAt: toBigInt(scoredItem.mulaiAt),
+						selesaiAt: toBigInt(scoredItem.selesaiAt),
+						endsAt: toBigInt(scoredItem.endsAt),
+						soalIds: stringifyJson(scoredItem.soalIds),
+						jawabanOrder: stringifyJson(scoredItem.jawabanOrder),
+						jawaban: stringifyJson(scoredItem.jawaban),
 
-						pelanggaran: item.pelanggaran,
-						skorTotal: item.skorTotal ?? null,
-						maxSkor: item.maxSkor ?? null,
-						gradedAt: toBigInt(item.gradedAt),
-						gradedBy: item.gradedBy ?? null,
-						createdAt: BigInt(item.createdAt),
+						pelanggaran: scoredItem.pelanggaran,
+						skorTotal: scoredItem.skorTotal ?? null,
+						maxSkor: scoredItem.maxSkor ?? null,
+						gradedAt: isMahasiswa ? null : toBigInt(scoredItem.gradedAt),
+						gradedBy: isMahasiswa ? null : (scoredItem.gradedBy ?? null),
+						createdAt: BigInt(scoredItem.createdAt),
 					};
-					const createData: any = { ...updateData, id: item.id };
+					const createData: any = { ...updateData, id: scoredItem.id };
 
+					if (isMahasiswa) {
+						// Re-check existing session state inside the transaction to eliminate the
+						// TOCTOU race condition where a supervisor's forceSubmit happens concurrently.
+						const existingInTx = await tx.sesiUjian.findUnique({
+							where: { id: scoredItem.id },
+							select: { status: true },
+						});
+						if (existingInTx && existingInTx.status === "selesai") {
+							// The exam has already been marked as finished; reject overwrite.
+							return;
+						}
 
-					if (caller.role === "mahasiswa") {
+						// Keep participant writes narrow: only fields a running
+						// session may legitimately change. skorTotal/maxSkor are
+						// server-computed above, so they are trusted.
 						updateData = {
-							status: item.status,
-							selesaiAt: toBigInt(item.selesaiAt),
-							jawaban: stringifyJson(sanitizedJawaban),
+							status: scoredItem.status,
+							selesaiAt: toBigInt(scoredItem.selesaiAt),
+							jawaban: stringifyJson(scoredItem.jawaban),
 
-							pelanggaran: item.pelanggaran,
+							pelanggaran: scoredItem.pelanggaran,
+							skorTotal: scoredItem.skorTotal ?? null,
+							maxSkor: scoredItem.maxSkor ?? null,
 						};
-						createData.skorTotal = null;
-						createData.maxSkor = null;
 						createData.gradedAt = null;
 						createData.gradedBy = null;
 					}
 
 					await tx.sesiUjian.upsert({
-						where: { id: item.id },
+						where: { id: scoredItem.id },
 						update: updateData,
 						create: createData,
 					});
@@ -218,14 +268,41 @@ export const actionLiveSesiServer = createServerFn({ method: "POST" })
 		try {
 			const caller = await requireCaller();
 			if (!caller || caller.role === "mahasiswa") return { ok: false as const, error: "Forbidden" };
-			const sesi = await prisma.sesiUjian.findUnique({ where: { id: data.sesiId }, select: { ujianId: true } });
+			const sesi = await prisma.sesiUjian.findUnique({
+				where: { id: data.sesiId },
+				select: { ujianId: true, status: true },
+			});
 			if (!sesi || (caller.role !== "super_admin" && !(await operatorCanTouchUjian(caller, sesi.ujianId)))) {
 				return { ok: false as const, error: "Forbidden" };
 			}
-			await prisma.sesiUjian.update({
-				where: { id: data.sesiId },
-				data: data.action === "forceSubmit" ? { status: "selesai", selesaiAt: BigInt(Date.now()) } : { pelanggaran: 0 },
-			});
+			if (data.action === "forceSubmit") {
+				if (sesi.status === "selesai") return { ok: true as const };
+				// Grade server-side so a forced submit stores the same authoritative score as a normal submit.
+				const row = await prisma.sesiUjian.findUnique({ where: { id: data.sesiId } });
+				if (row) {
+					const scored = await gradeSesiServerSide(mapSesi(row));
+					await prisma.sesiUjian.update({
+						where: { id: data.sesiId },
+						data: {
+							status: "selesai",
+							selesaiAt: BigInt(Date.now()),
+							jawaban: stringifyJson(scored.jawaban),
+							skorTotal: scored.skorTotal ?? null,
+							maxSkor: scored.maxSkor ?? null,
+						},
+					});
+				} else {
+					await prisma.sesiUjian.update({
+						where: { id: data.sesiId },
+						data: { status: "selesai", selesaiAt: BigInt(Date.now()) },
+					});
+				}
+			} else {
+				await prisma.sesiUjian.update({
+					where: { id: data.sesiId },
+					data: { pelanggaran: 0 },
+				});
+			}
 			void writeAuditLog({ userId: caller.id, userRole: caller.role, action: `sesi.${data.action}`, entity: "sesi", entityId: data.sesiId });
 			return { ok: true as const };
 		} catch (err) {
