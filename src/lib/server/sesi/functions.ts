@@ -33,7 +33,7 @@ const OPERATOR_SESSION_KEYS: NavKey[] = [
 // pure module src/lib/cbt/scoring.ts).
 async function gradeSesiServerSide(item: SesiUjian): Promise<SesiUjian> {
 	const ujianRow = await prisma.ujian.findUnique({ where: { id: item.ujianId } });
-	if (!ujianRow) return item;
+	if (!ujianRow) return { ...item, skorTotal: undefined, maxSkor: undefined };
 	const soalRows = await prisma.soal.findMany({
 		where: { id: { in: item.soalIds } },
 		include: { jawaban: true },
@@ -184,6 +184,8 @@ export const mutateSesiServer = createServerFn({ method: "POST" })
 								skor: undefined,
 								catatanGrader: undefined,
 							})),
+							skorTotal: undefined,
+							maxSkor: undefined,
 						};
 						if (scoredItem.status === "selesai") {
 							scoredItem = await gradeSesiServerSide(scoredItem);
@@ -261,11 +263,15 @@ export const actionLiveSesiServer = createServerFn({ method: "POST" })
 		try {
 			const caller = await requireCaller();
 			if (!caller || caller.role === "mahasiswa") return { ok: false as const, error: "Forbidden" };
-			const sesi = await prisma.sesiUjian.findUnique({ where: { id: data.sesiId }, select: { ujianId: true } });
+			const sesi = await prisma.sesiUjian.findUnique({
+				where: { id: data.sesiId },
+				select: { ujianId: true, status: true },
+			});
 			if (!sesi || (caller.role !== "super_admin" && !(await operatorCanTouchUjian(caller, sesi.ujianId)))) {
 				return { ok: false as const, error: "Forbidden" };
 			}
 			if (data.action === "forceSubmit") {
+				if (sesi.status === "selesai") return { ok: true as const };
 				// Grade server-side so a forced submit stores the same authoritative score as a normal submit.
 				const row = await prisma.sesiUjian.findUnique({ where: { id: data.sesiId } });
 				if (row) {
