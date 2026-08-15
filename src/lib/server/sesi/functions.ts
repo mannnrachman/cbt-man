@@ -423,6 +423,7 @@ export const createSesiServer = createServerFn({ method: "POST" })
 
 			return { ok: true as const, sesiId };
 		} catch (err) {
-			return { ok: false as const, error: err instanceof Error ? err.message : String(err) };
+			console.error("[createSesiServer]", err);
+			return { ok: false as const, error: "Gagal membuat sesi ujian." };
 		}
 	});
