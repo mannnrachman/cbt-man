@@ -136,10 +136,15 @@ export const mutateSesiServer = createServerFn({ method: "POST" })
 				if (!existing) {
 					const ujianData = await prisma.ujian.findUnique({ where: { id: item.ujianId }, select: { tokenAktif: true } });
 					if (ujianData?.tokenAktif) {
-						const claimed = await prisma.tokenUjian.findFirst({
-							where: { ujianId: item.ujianId, dipakaiOleh: caller.id },
+						const claimed = await prisma.tokenClaim.findUnique({
+							where: { ujianId_pesertaId: { ujianId: item.ujianId, pesertaId: caller.id } },
 						});
-						if (!claimed) {
+						const legacyClaimed = claimed
+							? true
+							: await prisma.tokenUjian.findFirst({
+									where: { ujianId: item.ujianId, dipakaiOleh: caller.id },
+								});
+						if (!claimed && !legacyClaimed) {
 							return { ok: false as const, error: "Akses ditolak: Anda belum mengklaim token untuk ujian ini." };
 						}
 					}

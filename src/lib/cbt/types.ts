@@ -161,8 +161,18 @@ export const TokenUjianSchema = z.object({
 	kode: z.string(),
 	dipakaiOleh: z.string().optional(),
 	dipakaiAt: z.number().optional(),
+	expireAt: z.number().optional(),
 });
 export type TokenUjian = z.infer<typeof TokenUjianSchema>;
+
+export const TokenClaimSchema = z.object({
+	id: z.string(),
+	ujianId: z.string(),
+	pesertaId: z.string(),
+	kode: z.string(),
+	claimedAt: z.number(),
+});
+export type TokenClaim = z.infer<typeof TokenClaimSchema>;
 
 // ---------------- Sesi & Hasil ----------------
 export const JawabanSesiSchema = z.object({

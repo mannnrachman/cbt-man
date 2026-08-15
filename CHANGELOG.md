@@ -12,6 +12,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 - Tambahkan pedoman kontribusi, instruksi agen AI, dan template pull request untuk menjaga perubahan tetap fokus, tervalidasi, dan aman.
 - Tambahkan gate CI CBT-MAN untuk kontrak PR, hygiene/artifact/branding, integritas generated route tree, dan parity Prisma migration-schema.
 - Tingkatkan kalkulator ujian menjadi Kalkulator Ilmiah lengkap dengan fungsi trigonometri, logaritma, eksponensial, faktorial, memori kalkulator, dan unit test komprehensif.
+- Tambahkan dukungan Master Token (kode kustom), pengaturan batas waktu kedaluwarsa token (expireAt), opsi penyebaran token ke semua ujian, dan tabel klaim token (TokenClaim).
 
 ### Changed
 
@@ -25,7 +26,8 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Security
 
-- Terapkan penegakan otorisasi server lengkap pada pembuatan sesi ujian (validasi kepesertaan, rentang jadwal mulai/selesai, pembatasan rentang IP, dan validasi token).
+- Terapkan penegakan otorisasi server lengkap pada pembuatan sesi ujian (validasi kepesertaan, jadwal, rentang IP, dan token claim).
+- Terapkan validasi klaim token atomik di sisi server menggunakan model TokenClaim untuk memastikan token yang dapat digunakan kembali tetap terikat aman pada otorisasi sesi.
 - Terapkan penilaian otoritatif di sisi server saat pengumpulan ujian dan tutup celah race condition (TOCTOU) agar autosave tidak menimpa sesi yang telah diselesaikan pengawas.
 
 ### Deprecated
