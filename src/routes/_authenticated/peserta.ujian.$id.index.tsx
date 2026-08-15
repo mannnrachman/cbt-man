@@ -1,8 +1,17 @@
 import { createFileRoute, Link, useParams, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { ujianRepo, sesiRepo, tokenRepo, hydrateRepos, claimExamToken, mataKuliahRepo, semesterRepo } from "@/lib/cbt/repos";
+import {
+  ujianRepo,
+  sesiRepo,
+  tokenRepo,
+  hydrateRepos,
+  invalidateReposCache,
+  claimExamToken,
+  createExamSession,
+  mataKuliahRepo,
+  semesterRepo,
+} from "@/lib/cbt/repos";
 import { useAuthStore } from "@/lib/cbt/auth-store";
-import { findOrCreateSesi, startSesi } from "@/lib/cbt/exam";
 import {
   getExamAvailabilityMessage,
   getExamAvailabilityStatus,
@@ -164,9 +173,14 @@ function PreUjianContent({
       }
     }
     try {
-      const sesi = findOrCreateSesi(ujian.id, user.id, user);
-      const started = sesi.status === "sedang" ? sesi : startSesi(sesi, ujian);
-      sesiRepo.upsert(started);
+      const createRes = await createExamSession(ujian.id);
+      if (!createRes.ok) {
+        toast.error(createRes.error);
+        return;
+      }
+
+      invalidateReposCache();
+      await hydrateRepos();
       navigate({ to: "/peserta/ujian/$id/kerjakan", params: { id: ujian.id } });
     } catch (err) {
       if (err instanceof PesertaNotAssignedToExamError) {

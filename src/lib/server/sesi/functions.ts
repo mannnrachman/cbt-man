@@ -16,6 +16,7 @@ import { stringifyJson, toBigInt, toNumber, parseJson } from "../db/json";
 import { getRequestIP } from "@tanstack/start-server-core";
 import { ipInRanges } from "@/lib/cbt/cidr";
 import { gradeAnswers } from "@/lib/cbt/scoring";
+import { uid } from "@/lib/cbt/storage";
 import { mapSoal, mapSesi, mapUjian } from "../repos/mappers";
 
 const OPERATOR_SESSION_KEYS: NavKey[] = [
@@ -345,3 +346,157 @@ export const getLiveOnlineSesis = createServerFn({ method: "GET" }).handler(
 		});
 	}
 );
+
+function shuffle<T>(arr: T[]): T[] {
+	const a = arr.slice();
+	for (let i = a.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[a[i], a[j]] = [a[j], a[i]];
+	}
+	return a;
+}
+
+export const createSesiServer = createServerFn({ method: "POST" })
+	.validator(z.object({ ujianId: z.string().min(1) }))
+	.handler(async ({ data }) => {
+		try {
+			await seedIfNeeded();
+			const caller = await requireCaller();
+			if (!caller || caller.role !== "mahasiswa") return { ok: false as const, error: "Forbidden" };
+
+			if (!(await pesertaCanTouchUjian(caller, data.ujianId))) {
+				return { ok: false as const, error: "Peserta tidak terdaftar pada ujian ini." };
+			}
+
+			const ujianRow = await prisma.ujian.findUnique({
+				where: { id: data.ujianId },
+			});
+			if (!ujianRow) return { ok: false as const, error: "Ujian tidak ditemukan." };
+
+			const ujian = mapUjian(ujianRow);
+
+			// 1. Idempotent resume: jika sudah ada sesi yang sedang berlangsung
+			const existing = await prisma.sesiUjian.findFirst({
+				where: { ujianId: ujian.id, pesertaId: caller.id, status: { not: "selesai" } },
+				select: { id: true },
+			});
+			if (existing) {
+				return { ok: true as const, sesiId: existing.id };
+			}
+
+			// 2. Jika sudah pernah selesai
+			const finished = await prisma.sesiUjian.findFirst({
+				where: { ujianId: ujian.id, pesertaId: caller.id, status: "selesai" },
+				select: { id: true },
+			});
+			if (finished) {
+				return { ok: false as const, error: "Ujian sudah selesai dikerjakan." };
+			}
+
+			// 3. Validasi jadwal
+			const now = Date.now();
+			if (ujian.beginAt !== undefined && now < ujian.beginAt) {
+				return { ok: false as const, error: "Ujian belum dimulai" };
+			}
+			if (ujian.endAt !== undefined && now > ujian.endAt) {
+				return { ok: false as const, error: "Ujian sudah berakhir" };
+			}
+
+			// 4. Validasi IP Range
+			if (ujian.ipRange) {
+				const ip = getRequestIP({ xForwardedFor: true }) ?? "unknown";
+				if (!ipInRanges(ip, ujian.ipRange)) {
+					return {
+						ok: false as const,
+						error: "Akses ditolak: IP Anda tidak diizinkan untuk ujian ini.",
+					};
+				}
+			}
+
+			// 5. Validasi Token
+			if (ujian.tokenAktif) {
+				const claimed = await prisma.tokenUjian.findFirst({
+					where: { ujianId: ujian.id, dipakaiOleh: caller.id },
+				});
+				if (!claimed) {
+					return {
+						ok: false as const,
+						error: "Akses ditolak: Anda belum mengklaim token untuk ujian ini.",
+					};
+				}
+			}
+
+			// 6. Pilih soal dari database
+			const allSoal = await prisma.soal.findMany({
+				where: {
+					topikId: { in: ujian.topicSets.map((ts) => ts.topikId) },
+				},
+				include: { jawaban: true },
+			});
+
+			const soalPools = new Map<string, typeof allSoal>();
+			for (const s of allSoal) {
+				if (!soalPools.has(s.topikId)) soalPools.set(s.topikId, []);
+				soalPools.get(s.topikId)!.push(s);
+			}
+
+			const soalTerpilih = [];
+			for (const ts of ujian.topicSets) {
+				let pool = soalPools.get(ts.topikId) || [];
+				if (ts.tipe) pool = pool.filter((s) => s.tipe === ts.tipe);
+				if (ts.kesulitan) pool = pool.filter((s) => s.kesulitan === ts.kesulitan);
+				const chosen = (ts.acakSoal ? shuffle(pool) : pool).slice(0, ts.jumlah);
+				if (chosen.length < ts.jumlah) {
+					return {
+						ok: false as const,
+						error: `Bank soal untuk topik terkait ujian "${ujian.nama}" belum cukup.`,
+					};
+				}
+				soalTerpilih.push(...chosen);
+			}
+
+			if (soalTerpilih.length === 0) {
+				return {
+					ok: false as const,
+					error: `Bank soal untuk ujian "${ujian.nama}" belum cukup atau tidak cocok dengan filter topik.`,
+				};
+			}
+
+			const jawabanOrder: Record<string, string[]> = {};
+			for (const s of soalTerpilih) {
+				const ids = s.jawaban.map((j) => j.id);
+				jawabanOrder[s.id] = ujian.topicSets.find((ts) => ts.topikId === s.topikId)?.acakJawaban
+					? shuffle(ids)
+					: ids;
+			}
+
+			const sesiId = uid("se_");
+
+			await prisma.sesiUjian.create({
+				data: {
+					id: sesiId,
+					ujianId: ujian.id,
+					pesertaId: caller.id,
+					status: "sedang",
+					mulaiAt: BigInt(now),
+					endsAt: BigInt(now + ujian.durasiMenit * 60_000),
+					soalIds: stringifyJson(soalTerpilih.map((s) => s.id)),
+					jawabanOrder: stringifyJson(jawabanOrder),
+					jawaban: stringifyJson(
+						soalTerpilih.map((s) => ({
+							soalId: s.id,
+							jawabanIds: [],
+							jawabanEssay: "",
+							ragu: false,
+						})),
+					),
+					createdAt: BigInt(now),
+				},
+			});
+
+			return { ok: true as const, sesiId };
+		} catch (err) {
+			console.error("[createSesiServer]", err);
+			return { ok: false as const, error: "Gagal membuat sesi ujian." };
+		}
+	});

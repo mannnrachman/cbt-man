@@ -3,7 +3,7 @@ import { getCbtSnapshot, getPublicBootConfigServer } from "@/lib/server/snapshot
 import { claimExamToken as claimExamTokenServer, saveConfigServer, mutateUjianServer, mutateTokenServer } from "@/lib/server/ujian/functions";
 import { mutateUserServer } from "@/lib/server/users/functions";
 import { mutateModulServer, mutateTopikServer, mutateSoalServer } from "@/lib/server/modul/functions";
-import { mutateSesiServer } from "@/lib/server/sesi/functions";
+import { mutateSesiServer, createSesiServer } from "@/lib/server/sesi/functions";
 import { getTodaysExamsServer } from "@/lib/server/exams";
 import { 
 	mutateUnitAkademikServer, 
@@ -153,6 +153,16 @@ export async function claimExamToken(
 	upsertArrayItem(next, result.token);
 	cache.token = next;
 	return { ok: true, token: result.token };
+}
+
+export async function createExamSession(
+	ujianId: string,
+): Promise<{ ok: true; sesiId: string } | { ok: false; error: string }> {
+	const result = await createSesiServer({ data: { ujianId } });
+	if (!result.ok) {
+		return { ok: false, error: result.error ?? "Gagal membuat sesi ujian" };
+	}
+	return { ok: true, sesiId: result.sesiId };
 }
 
 function upsertArrayItem<T extends { id: string }>(list: T[], item: T) {
