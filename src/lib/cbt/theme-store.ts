@@ -22,6 +22,7 @@ export const useThemeStore = create<ThemeState>()(
         if (typeof document !== "undefined") {
           if (theme !== "default") {
             document.documentElement.setAttribute("data-theme", theme);
+            document.documentElement.classList.remove("dark");
           } else {
             document.documentElement.removeAttribute("data-theme");
           }
@@ -39,6 +40,7 @@ export const useThemeStore = create<ThemeState>()(
           if (typeof document !== "undefined") {
             if (newTheme !== "default") {
               document.documentElement.setAttribute("data-theme", newTheme);
+              document.documentElement.classList.remove("dark");
             } else {
               document.documentElement.removeAttribute("data-theme");
             }
@@ -53,6 +55,7 @@ export const useThemeStore = create<ThemeState>()(
           const activeTheme = ((state.theme as string) === "neobrutalism" ? "neumorphism" : state.theme) as ThemeType;
           if (activeTheme !== "default") {
             document.documentElement.setAttribute("data-theme", activeTheme);
+            document.documentElement.classList.remove("dark");
           } else {
             document.documentElement.removeAttribute("data-theme");
           }
