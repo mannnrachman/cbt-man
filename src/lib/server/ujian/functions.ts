@@ -223,8 +223,11 @@ export const generateExamTokensServer = createServerFn({ method: "POST" })
 	.validator(
 		z.object({
 			ujianId: z.string().min(1),
-			jumlah: z.number().int().min(1).max(500),
-			length: z.number().int().min(8).max(32).optional(),
+			jumlah: z.number().int().min(1).max(500).default(10),
+			length: z.number().int().min(4).max(32).optional(),
+			customKode: z.string().trim().min(1).max(30).optional(),
+			expireAtMs: z.number().int().positive().optional(),
+			applyToAll: z.boolean().optional(),
 		}),
 	)
 	.handler(async ({ data }) => {
@@ -244,8 +247,43 @@ export const generateExamTokensServer = createServerFn({ method: "POST" })
 		const exam = await prisma.ujian.findUnique({ where: { id: data.ujianId } });
 		if (!exam) return { ok: false as const, error: "Ujian tidak ditemukan" };
 
-		const length = data.length ?? DEFAULT_TOKEN_LENGTH;
+		let targetUjianIds = [data.ujianId];
+		if (data.applyToAll) {
+			const allUjians = await prisma.ujian.findMany({ select: { id: true } });
+			if (caller.role === "super_admin") {
+				targetUjianIds = allUjians.map((u) => u.id);
+			} else {
+				targetUjianIds = [];
+				for (const u of allUjians) {
+					if (await operatorCanTouchUjian(caller, u.id)) {
+						targetUjianIds.push(u.id);
+					}
+				}
+			}
+		}
+
+		const expireAt = data.expireAtMs ? toBigInt(data.expireAtMs) : null;
 		const created: TokenUjian[] = [];
+
+		if (data.customKode) {
+			const code = data.customKode.trim().toUpperCase();
+			const tokens = await prisma.$transaction(async (tx) => {
+				const rows = [];
+				for (const ujianId of targetUjianIds) {
+					rows.push(
+						await tx.tokenUjian.upsert({
+							where: { ujianId_kode: { ujianId, kode: code } },
+							create: { id: uid("tk_"), ujianId, kode: code, expireAt },
+							update: { expireAt },
+						}),
+					);
+				}
+				return rows;
+			});
+			return { ok: true as const, tokens: tokens.filter((token) => token.ujianId === data.ujianId).map(mapToken) };
+		}
+
+		const length = data.length ?? DEFAULT_TOKEN_LENGTH;
 		let attempts = 0;
 		const maxAttempts = data.jumlah * (1 + MAX_TOKEN_COLLISION_RETRIES);
 
@@ -258,6 +296,7 @@ export const generateExamTokensServer = createServerFn({ method: "POST" })
 						id: uid("tk_"),
 						ujianId: data.ujianId,
 						kode: code,
+						expireAt,
 					},
 				});
 				created.push(mapToken(row));
@@ -280,11 +319,41 @@ export const generateExamTokensServer = createServerFn({ method: "POST" })
 		return { ok: true as const, tokens: created };
 	});
 
+export const deleteExamTokenServer = createServerFn({ method: "POST" })
+	.validator(z.object({ id: z.string().min(1) }))
+	.handler(async ({ data }) => {
+		try {
+			await seedIfNeeded();
+			const caller = await requireCaller();
+			if (!caller) return { ok: false as const, error: "Unauthorized" };
+			if (caller.role !== "super_admin" && caller.role !== "admin_prodi") {
+				return { ok: false as const, error: "Forbidden" };
+			}
+
+			const token = await prisma.tokenUjian.findUnique({
+				where: { id: data.id },
+				select: { ujianId: true },
+			});
+			if (!token) return { ok: false as const, error: "Token tidak ditemukan" };
+
+			if (caller.role === "admin_prodi") {
+				if (!(await operatorCanTouchUjian(caller, token.ujianId))) {
+					return { ok: false as const, error: "Forbidden" };
+				}
+			}
+
+			await prisma.tokenUjian.delete({ where: { id: data.id } });
+			return { ok: true as const };
+		} catch (err) {
+			return { ok: false as const, error: err instanceof Error ? err.message : String(err) };
+		}
+	});
+
 export const claimExamToken = createServerFn({ method: "POST" })
 	.validator(
 		z.object({
 			ujianId: z.string().min(1),
-			kode: z.string().min(1),
+			kode: z.string().trim().min(1).max(30),
 		}),
 	)
 	.handler(async ({ data }) => {
@@ -316,49 +385,57 @@ export const claimExamToken = createServerFn({ method: "POST" })
 		}
 
 		const kode = data.kode.trim().toUpperCase();
-		const dipakaiAt = Date.now();
+		const now = Date.now();
 
-		const result = await prisma.tokenUjian.updateMany({
+		const token = await prisma.tokenUjian.findFirst({
 			where: {
 				ujianId: data.ujianId,
 				kode,
-				OR: [{ dipakaiOleh: null }, { dipakaiOleh: caller.id }],
 			},
-			data: { dipakaiOleh: caller.id, dipakaiAt: toBigInt(dipakaiAt) },
 		});
 
-		if (result.count === 0) {
-			const existing = await prisma.tokenUjian.findFirst({
-				where: { ujianId: data.ujianId, kode },
-				select: { id: true },
+		if (!token) {
+			return { ok: false as const, error: "Token tidak valid untuk ujian ini" };
+		}
+
+		if (token.expireAt) {
+			const expireMs = Number(token.expireAt);
+			if (now > expireMs) {
+				return { ok: false as const, error: "Token sudah kedaluwarsa" };
+			}
+		}
+
+		// Reusable / Master token claim: atomic upsert to TokenClaim
+		await prisma.tokenClaim.upsert({
+			where: {
+				ujianId_pesertaId: { ujianId: data.ujianId, pesertaId: caller.id },
+			},
+			create: {
+				id: uid("tc_"),
+				ujianId: data.ujianId,
+				pesertaId: caller.id,
+				kode,
+				claimedAt: BigInt(now),
+			},
+			update: {
+				kode,
+				claimedAt: BigInt(now),
+			},
+		});
+
+		// Also update legacy single-use token field if not claimed by another
+		if (!token.dipakaiOleh || token.dipakaiOleh === caller.id) {
+			await prisma.tokenUjian.update({
+				where: { id: token.id },
+				data: { dipakaiOleh: caller.id, dipakaiAt: BigInt(now) },
 			});
-			if (!existing)
-				return {
-					ok: false as const,
-					error: "Token tidak valid untuk ujian ini",
-				};
-			return { ok: false as const, error: "Token sudah dipakai peserta lain" };
 		}
 
-		const claimedId = await prisma.tokenUjian.findFirst({
-			where: { ujianId: data.ujianId, kode },
-			select: { id: true },
-		});
-		if (!claimedId) {
-			return {
-				ok: false as const,
-				error: "Token tidak dapat diklaim, silakan coba lagi",
-			};
-		}
-		const token: TokenUjian = {
-			id: claimedId.id,
-			ujianId: data.ujianId,
-			kode,
-			dipakaiOleh: caller.id,
-			dipakaiAt,
-		};
 		clearRateLimit(caller.id, "claimToken");
-		return { ok: true as const, token };
+		return {
+			ok: true as const,
+			token: mapToken(token),
+		};
 	});
 
 export const fetchUjianByIdServer = createServerFn({ method: "POST" })

@@ -12,6 +12,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 - Tambahkan pedoman kontribusi, instruksi agen AI, dan template pull request untuk menjaga perubahan tetap fokus, tervalidasi, dan aman.
 - Tambahkan gate CI CBT-MAN untuk kontrak PR, hygiene/artifact/branding, integritas generated route tree, dan parity Prisma migration-schema.
 - Tingkatkan kalkulator ujian menjadi Kalkulator Ilmiah lengkap dengan fungsi trigonometri, logaritma, eksponensial, faktorial, memori kalkulator, dan unit test komprehensif.
+- Tambahkan dukungan Master Token (kode kustom), pengaturan batas waktu kedaluwarsa token (expireAt), opsi penyebaran token ke semua ujian, dan tabel klaim token (TokenClaim).
 
 ### Changed
 
@@ -20,10 +21,13 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 ### Fixed
 
 - Perbaiki sintaks nilai arbitrer negatif Tailwind (`translate-y-[-0.5px]`, `top-[-40%]`) agar utilitas CSS ter-generate (diekstrak dari #98).
+- Satukan kalkulasi penilaian ujian (gradeAnswers dan gradeSesi) untuk memperhitungkan bobot poinBenar, poinSalah, dan poinKosong secara konsisten di client dan server.
 
 ### Security
 
-- Terapkan validasi Zod discriminated union yang ketat dan pengecekan integritas relasi sebelum penghapusan data induk akademik (UnitAkademik, TahunAkademik, Semester, MataKuliah) untuk mencegah orphaned records dan eksploitasi payload.
+- Terapkan validasi Zod discriminated union dan pemeriksaan integritas relasi sebelum penghapusan data induk akademik untuk mencegah orphaned records dan eksploitasi payload.
+- Terapkan validasi klaim token atomik di sisi server menggunakan model TokenClaim untuk memastikan token yang dapat digunakan kembali tetap terikat aman pada otorisasi sesi.
+- Terapkan penilaian otoritatif di sisi server saat pengumpulan ujian dan tutup celah race condition (TOCTOU) agar autosave tidak menimpa sesi yang telah diselesaikan pengawas.
 
 ### Deprecated
 

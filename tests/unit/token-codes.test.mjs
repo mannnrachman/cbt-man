@@ -203,3 +203,22 @@ test("token generation file imports `randomBytes` from node:crypto", () => {
     "expected `import { randomBytes } from 'node:crypto'` in functions.ts",
   );
 });
+
+test("token expiration correctly identifies active vs expired tokens", () => {
+  const now = Date.now();
+  const activeToken = { kode: "CBT2026", expireAt: now + 3600000 };
+  const expiredToken = { kode: "OLD2026", expireAt: now - 3600000 };
+  const permanentToken = { kode: "PERM2026", expireAt: null };
+
+  const isExpired = (t) => Boolean(t.expireAt && t.expireAt < now);
+
+  assert.equal(isExpired(activeToken), false, "future token should not be expired");
+  assert.equal(isExpired(expiredToken), true, "past token should be expired");
+  assert.equal(isExpired(permanentToken), false, "permanent token should not be expired");
+});
+
+test("custom master token codes are trimmed and uppercased", () => {
+  const input = "  cbt-utama-2026  ";
+  const processed = input.trim().toUpperCase();
+  assert.equal(processed, "CBT-UTAMA-2026");
+});

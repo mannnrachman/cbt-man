@@ -2,6 +2,7 @@
 import { soalRepo, sesiRepo, ujianRepo } from "./repos";
 import type { SesiUjian, Soal, Ujian, User } from "./types";
 import { uid } from "./storage";
+import { gradeAnswers } from "./scoring";
 import { PesertaNotAssignedToExamError, isParticipantAssignedToExam } from "./access";
 
 function shuffle<T>(arr: T[]): T[] {
