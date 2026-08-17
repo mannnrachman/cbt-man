@@ -180,6 +180,10 @@ function RouteComponent() {
     const nextSesi = { ...sesi };
     nextSesi.jawaban = [...nextSesi.jawaban];
     nextSesi.jawaban[idx] = { ...nextSesi.jawaban[idx], ...partial };
+    // Keep the ref in sync synchronously: submit() reads sesiRef.current and
+    // must never finalize a session missing the very latest answer (the
+    // useEffect-based sync only runs after the next render commit).
+    sesiRef.current = nextSesi;
     setSesi(nextSesi);
 
     if (saveTimer.current) clearTimeout(saveTimer.current);

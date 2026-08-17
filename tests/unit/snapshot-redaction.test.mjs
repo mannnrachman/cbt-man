@@ -121,6 +121,17 @@ test("kerjakan no longer grades client-side and re-hydrates after submit", () =>
   assert.match(src, /await hydrateRepos\(\)/, "submit must re-hydrate the authoritative snapshot");
 });
 
+test("updateJawaban syncs sesiRef before setSesi so submit never finalizes stale answers", () => {
+  const src = read("src/routes/_authenticated/peserta.ujian.$id.kerjakan.tsx");
+  const fnIdx = src.indexOf("function updateJawaban(");
+  assert.ok(fnIdx > 0, "updateJawaban must exist");
+  const body = src.slice(fnIdx, fnIdx + 700);
+  const refIdx = body.indexOf("sesiRef.current = nextSesi");
+  const setIdx = body.indexOf("setSesi(nextSesi)");
+  assert.ok(refIdx > 0, "updateJawaban must update sesiRef.current synchronously");
+  assert.ok(setIdx > refIdx, "sesiRef must be updated before setSesi (ref is the submit-time source)");
+});
+
 test("hasil page only renders detail review behind showResult && showResultDetail", () => {
   const src = read("src/routes/_authenticated/peserta.ujian.$id.hasil.tsx");
   assert.match(src, /ujian\.showResult && ujian\.showResultDetail/);
