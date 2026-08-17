@@ -26,7 +26,14 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export const Route = createFileRoute("/_authenticated/admin/akademik/mata-kuliah")({
   component: MataKuliahPage,
@@ -38,10 +45,17 @@ function MataKuliahPage() {
   const unitList = unitAkademikRepo.all();
   const semesterList = semesterRepo.all();
   const taList = tahunAkademikRepo.all();
-  
+
   const [editing, setEditing] = useState<MataKuliah | null>(null);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ id: "", kode: "", nama: "", sks: 2, unitId: "", semesterId: "" });
+  const [form, setForm] = useState({
+    id: "",
+    kode: "",
+    nama: "",
+    sks: 2,
+    unitId: "",
+    semesterId: "",
+  });
 
   function handleAdd() {
     setForm({ id: uid("mk_"), kode: "", nama: "", sks: 2, unitId: "", semesterId: "" });
@@ -50,7 +64,14 @@ function MataKuliahPage() {
   }
 
   function handleEdit(item: MataKuliah) {
-    setForm({ id: item.id, kode: item.kode, nama: item.nama, sks: item.sks, unitId: item.unitId || "", semesterId: item.semesterId || "" });
+    setForm({
+      id: item.id,
+      kode: item.kode,
+      nama: item.nama,
+      sks: item.sks,
+      unitId: item.unitId || "",
+      semesterId: item.semesterId || "",
+    });
     setEditing(item);
     setOpen(true);
   }
@@ -74,19 +95,19 @@ function MataKuliahPage() {
     }
     const targetKode = form.kode.trim().toUpperCase();
     const isDuplicateKode = items.some(
-      (item) => item.kode.trim().toUpperCase() === targetKode && item.id !== form.id
+      (item) => item.kode.trim().toUpperCase() === targetKode && item.id !== form.id,
     );
     if (isDuplicateKode) {
       toast.error(`Kode Mata Kuliah "${targetKode}" sudah digunakan!`);
       return;
     }
-    const payload: MataKuliah = { 
-      id: form.id, 
-      kode: form.kode.trim(), 
-      nama: form.nama.trim(), 
+    const payload: MataKuliah = {
+      id: form.id,
+      kode: form.kode.trim(),
+      nama: form.nama.trim(),
       sks: form.sks,
       unitId: form.unitId,
-      semesterId: form.semesterId 
+      semesterId: form.semesterId,
     };
     const res = await mutateMataKuliahServer({ data: { action: "upsert", payload } });
     if (!res.ok) {
@@ -102,7 +123,7 @@ function MataKuliahPage() {
   const filteredItems = items.filter(
     (item) =>
       item.nama.toLowerCase().includes(search.toLowerCase()) ||
-      item.kode.toLowerCase().includes(search.toLowerCase())
+      item.kode.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
@@ -110,7 +131,9 @@ function MataKuliahPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-xl font-bold tracking-tight text-foreground">Daftar Mata Kuliah</h2>
-          <p className="text-sm text-muted-foreground">Kelola mata kuliah untuk penjadwalan ujian.</p>
+          <p className="text-sm text-muted-foreground">
+            Kelola mata kuliah untuk penjadwalan ujian.
+          </p>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <div className="relative flex-1 sm:w-64">
@@ -148,7 +171,10 @@ function MataKuliahPage() {
               return (
                 <TableRow key={item.id} className="group hover:bg-muted/30 transition-colors">
                   <TableCell>
-                    <Badge variant="outline" className="font-mono font-bold text-xs uppercase bg-muted/50 text-foreground border-border">
+                    <Badge
+                      variant="outline"
+                      className="font-mono font-bold text-xs uppercase bg-muted/50 text-foreground border-border"
+                    >
                       {item.kode}
                     </Badge>
                   </TableCell>
@@ -161,7 +187,9 @@ function MataKuliahPage() {
                   <TableCell className="text-xs text-muted-foreground">
                     <div className="space-y-0.5">
                       <div className="font-medium text-foreground">{unit?.nama ?? "-"}</div>
-                      <div>{semester?.nama ?? "-"} {ta ? `(${ta.nama})` : ""}</div>
+                      <div>
+                        {semester?.nama ?? "-"} {ta ? `(${ta.nama})` : ""}
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell className="text-center">
@@ -171,10 +199,22 @@ function MataKuliahPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => handleEdit(item)} aria-label={`Edit ${item.nama}`}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                        onClick={() => handleEdit(item)}
+                        aria-label={`Edit ${item.nama}`}
+                      >
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10" onClick={() => handleRemove(item.id)} aria-label={`Hapus ${item.nama}`}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                        onClick={() => handleRemove(item.id)}
+                        aria-label={`Hapus ${item.nama}`}
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -185,7 +225,9 @@ function MataKuliahPage() {
             {filteredItems.length === 0 && (
               <TableRow>
                 <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
-                  {search ? "Tidak ada mata kuliah yang sesuai dengan kata kunci." : "Belum ada data mata kuliah."}
+                  {search
+                    ? "Tidak ada mata kuliah yang sesuai dengan kata kunci."
+                    : "Belum ada data mata kuliah."}
                 </TableCell>
               </TableRow>
             )}
@@ -236,7 +278,12 @@ function MataKuliahPage() {
                 <SelectContent>
                   {unitList.map((p) => (
                     <SelectItem key={p.id} value={p.id}>
-                      {p.nama}
+                      {p.nama}{" "}
+                      {p.tipe === "prodi"
+                        ? "(Program Studi)"
+                        : p.tipe === "fakultas"
+                          ? "(Fakultas)"
+                          : ""}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -244,7 +291,10 @@ function MataKuliahPage() {
             </div>
             <div className="space-y-2">
               <Label>Semester</Label>
-              <Select value={form.semesterId} onValueChange={(v) => setForm({ ...form, semesterId: v })}>
+              <Select
+                value={form.semesterId}
+                onValueChange={(v) => setForm({ ...form, semesterId: v })}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Pilih Semester" />
                 </SelectTrigger>

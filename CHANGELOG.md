@@ -16,6 +16,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Changed
 
+- Sederhanakan pengelolaan struktur akademik admin menjadi tab Fakultas, Program Studi, dan Kelas/Rombel (diekstrak dari #118).
 - Rapikan jarak heading ke navbar, perlebar kontainer halaman peserta/ujian, dan bersihkan mesh gradient berlebih pada portal peserta (diekstrak dari #97).
 
 ### Fixed
