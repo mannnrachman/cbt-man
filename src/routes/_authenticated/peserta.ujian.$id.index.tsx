@@ -294,6 +294,12 @@ function PreUjianContent({
                       <span>Fungsi <strong>Copy, Paste, dan Klik Kanan</strong> dinonaktifkan secara sistem.</span>
                     </li>
                   )}
+                  {ujian.allowNilaiNormal && (
+                    <li className="flex items-start gap-3 bg-white/40 dark:bg-black/20 p-3 rounded-xl border border-emerald-100/50 dark:border-emerald-900/30">
+                      <div className="mt-0.5 w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                      <span>Tabel rujukan <strong>Nilai Normal Laboratorium</strong> tersedia selama ujian.</span>
+                    </li>
+                  )}
                   <li className="flex items-start gap-3 bg-white/40 dark:bg-black/20 p-3 rounded-xl border border-amber-100/50 dark:border-amber-900/30">
                     <div className="mt-0.5 w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
                     <span>Waktu berjalan mundur dan tidak dapat dihentikan setelah "Mulai".</span>

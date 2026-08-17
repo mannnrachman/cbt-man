@@ -513,6 +513,19 @@ function UjianEditor() {
               onCheckedChange={(value) => set("allowCalculator", value)}
             />
           </div>
+          <div className="flex items-center justify-between rounded border p-2">
+            <div>
+              <Label htmlFor="allow-nilai-normal">Tabel nilai normal</Label>
+              <p className="text-xs text-muted-foreground">
+                Izinkan peserta membuka tabel rujukan nilai normal laboratorium selama ujian.
+              </p>
+            </div>
+            <Switch
+              id="allow-nilai-normal"
+              checked={u.allowNilaiNormal}
+              onCheckedChange={(value) => set("allowNilaiNormal", value)}
+            />
+          </div>
         </CardContent>
       </Card>
 

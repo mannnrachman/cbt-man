@@ -4,7 +4,7 @@ import type { SesiUjian, Ujian } from "@/lib/cbt/types";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { LayoutGrid, X, ChevronLeft, ChevronRight, Flag, CheckCircle2, AlertCircle, Type, Clock, Calculator } from "lucide-react";
+import { LayoutGrid, X, ChevronLeft, ChevronRight, Flag, CheckCircle2, AlertCircle, Type, Clock, Calculator, FileText } from "lucide-react";
 import {
   createFileRoute,
   useNavigate,
@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { AudioPlayer } from "@/components/cbt/AudioPlayer";
 import { RichView } from "@/components/cbt/RichEditor";
 import { ExamCalculator } from "@/components/cbt/ExamCalculator";
+import { NilaiNormalTable } from "@/components/cbt/NilaiNormal";
 import {
   Dialog,
   DialogContent,
@@ -72,6 +73,27 @@ function CalculatorAction({ ujian }: { ujian: Ujian }) {
           <DialogTitle>Kalkulator Ujian</DialogTitle>
         </DialogHeader>
         <ExamCalculator />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function NilaiNormalAction({ ujian }: { ujian: Ujian }) {
+  if (!ujian.allowNilaiNormal) return null;
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm" className="mt-2 w-full">
+          <FileText className="mr-2 h-4 w-4" aria-hidden="true" />
+          Tabel Nilai Normal
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[90dvh] w-[calc(100%_-_2rem)] max-w-2xl overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Tabel Nilai Normal Laboratorium</DialogTitle>
+        </DialogHeader>
+        <NilaiNormalTable />
       </DialogContent>
     </Dialog>
   );
@@ -496,6 +518,7 @@ function RouteComponent() {
           <div className="p-6 border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
             <h3 className="font-extrabold text-slate-800 dark:text-slate-200 text-lg tracking-tight">Navigasi Soal</h3>
             <CalculatorAction ujian={ujian} />
+            <NilaiNormalAction ujian={ujian} />
 
             <div className="mt-4 flex flex-col gap-2">
               <div className="flex items-center gap-3 text-sm font-medium text-slate-600 dark:text-slate-400">
@@ -573,6 +596,7 @@ function RouteComponent() {
           <div className="flex-1 overflow-y-auto p-6">
             <div className="max-w-xl mx-auto">
               <CalculatorAction ujian={ujian} />
+              <NilaiNormalAction ujian={ujian} />
 
               <div className="flex justify-between items-center bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 mb-8 mt-6 shadow-sm">
                 <div className="flex flex-col items-center">

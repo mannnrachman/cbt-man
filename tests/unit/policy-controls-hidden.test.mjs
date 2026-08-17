@@ -60,3 +60,20 @@ test("no fake enforcement logic was introduced (V1 is hide-only)", () => {
     "settings page must not contain device/IP enforcement (deferred to V2)",
   );
 });
+
+test("nilai normal is persisted, default-off, and gated in admin + participant UI", () => {
+  const read = (path) => readFileSync(resolve(process.cwd(), path), "utf8");
+  const schema = read("prisma/schema.prisma");
+  const type = read("src/lib/cbt/types.ts");
+  const mapper = read("src/lib/server/repos/mappers.ts");
+  const editor = read("src/routes/_authenticated/admin.ujian.$id.tsx");
+  const preExam = read("src/routes/_authenticated/peserta.ujian.$id.index.tsx");
+  const exam = read("src/routes/_authenticated/peserta.ujian.$id.kerjakan.tsx");
+
+  assert.match(schema, /allowNilaiNormal\s+Boolean\s+@default\(false\)/, "schema must persist allowNilaiNormal defaulting to false");
+  assert.match(type, /allowNilaiNormal:\s*z\.boolean\(\)\.default\(false\)/, "UjianSchema must default allowNilaiNormal to false");
+  assert.match(mapper, /allowNilaiNormal:\s*Boolean\(row\.allowNilaiNormal\)/, "mapUjian must expose allowNilaiNormal");
+  assert.match(editor, /id="allow-nilai-normal"/, "admin editor must render the allowNilaiNormal switch");
+  assert.match(preExam, /ujian\.allowNilaiNormal/, "pre-exam notice must be gated by allowNilaiNormal");
+  assert.match(exam, /if \(!ujian\.allowNilaiNormal\) return null;/, "participant exam UI must gate the nilai normal dialog");
+});
