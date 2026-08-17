@@ -228,9 +228,14 @@ function HasilPeserta() {
 											{soal.tipe === "essay" ? (
 												<div className="bg-slate-50 dark:bg-slate-950 rounded-2xl p-6 border border-slate-200 dark:border-slate-800">
 													<p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Jawaban Anda:</p>
-													<div className="prose prose-slate dark:prose-invert max-w-none prose-p:my-0 text-slate-700 dark:text-slate-300">
-														<RichView html={j.jawabanEssay || "<em>(Kosong)</em>"} />
-													</div>
+													{/* jawabanEssay adalah plain text dari Textarea — render
+													    sebagai teks (bukan HTML) agar karakter <, &, dan baris
+													    baru tampil apa adanya dan tidak diparse sebagai markup. */}
+													{j.jawabanEssay?.trim() ? (
+														<p className="whitespace-pre-wrap text-slate-700 dark:text-slate-300">{j.jawabanEssay}</p>
+													) : (
+														<em className="text-slate-400">(Kosong)</em>
+													)}
 												</div>
 											) : (
 												<div className="space-y-3">

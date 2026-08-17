@@ -23,6 +23,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 ### Fixed
 
 - Perbaiki sintaks nilai arbitrer negatif Tailwind (`translate-y-[-0.5px]`, `top-[-40%]`) agar utilitas CSS ter-generate (diekstrak dari #98).
+- Perbaiki label tombol pembuka modal login landing menjadi "Login Peserta" dan render jawaban essay hasil ujian sebagai plain text (diekstrak dari #120).
 - Pindahkan inisialisasi pembuatan sesi ujian ke server-side (`createSesiServer`) dan perbaiki stale cache snapshot sebelum navigasi ke ruang ujian peserta.
 - Satukan kalkulasi penilaian ujian (gradeAnswers dan gradeSesi) untuk memperhitungkan bobot poinBenar, poinSalah, dan poinKosong secara konsisten di client dan server.
 
