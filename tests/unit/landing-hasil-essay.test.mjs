@@ -22,6 +22,7 @@ test("landing login-modal trigger is labeled Login Peserta", () => {
   const idx = src.indexOf("onClick={handleOpenLoginGeneral}");
   assert.ok(idx > 0, "landing must keep the login-modal trigger");
   const block = src.slice(idx - 400, idx + 900);
+  assert.match(block, /type="button"/, "login trigger must not submit a surrounding form");
   assert.match(block, /Login Peserta/, "button label must be Login Peserta");
   assert.ok(!/Mulai Ujian Online/.test(block), "misleading label must be gone");
 });
@@ -37,4 +38,10 @@ test("hasil renders jawabanEssay as plain text, not through RichView", () => {
     /whitespace-pre-wrap[^>]*>\{j\.jawabanEssay\}/,
     "jawabanEssay must render as escaped text preserving line breaks",
   );
+  assert.match(
+    src,
+    /j\.jawabanEssay\?\.trim\(\)\s*\?/,
+    "blank and whitespace-only essay answers must use the fallback branch",
+  );
+  assert.match(src, /<em[^>]*>\(Kosong\)<\/em>/, "empty essay fallback must remain visible");
 });
