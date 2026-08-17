@@ -3,8 +3,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { prisma } from "@/lib/server/db/prisma";
 
-import { mapUjian } from "@/lib/server/repos/mappers";
 import { seedIfNeeded } from "@/lib/server/db/auth";
+import type { PublicExamSchedule } from "@/lib/cbt/types";
 
 export const getTodaysExamsServer = createServerFn({ method: "GET" }).handler(
 	async () => {
@@ -38,9 +38,17 @@ export const getTodaysExamsServer = createServerFn({ method: "GET" }).handler(
 			orderBy: { beginAt: "asc" },
 		});
 
-		const online = ujianList.filter((u) => u.mode === "online").map(mapUjian);
-		const offline = ujianList.filter((u) => u.mode === "offline").map(mapUjian);
-		
+		const schedule = (row: (typeof ujianList)[number]): PublicExamSchedule => ({
+			id: row.id,
+			nama: row.nama,
+			beginAt: row.beginAt ? Number(row.beginAt) : undefined,
+			endAt: row.endAt ? Number(row.endAt) : undefined,
+			durasiMenit: row.durasiMenit,
+			groupIds: JSON.parse(row.groupIds) as string[],
+		});
+		const online = ujianList.filter((u) => u.mode === "online").map(schedule);
+		const offline = ujianList.filter((u) => u.mode === "offline").map(schedule);
+
 		const groupNames = await prisma.unitAkademik.findMany({ select: { id: true, nama: true } });
 		const groupsMap = Object.fromEntries(groupNames.map((g: any) => [g.id, g.nama]));
 

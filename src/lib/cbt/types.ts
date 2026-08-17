@@ -155,6 +155,20 @@ export const UjianSchema = z.object({
 });
 export type Ujian = z.infer<typeof UjianSchema>;
 
+/**
+ * Narrow public projection of an exam for the anonymous landing-page schedule.
+ * Never widen this with operational/scoring fields — the landing endpoint is
+ * reachable without authentication.
+ */
+export interface PublicExamSchedule {
+	id: string;
+	nama: string;
+	beginAt?: number;
+	endAt?: number;
+	durasiMenit: number;
+	groupIds: string[];
+}
+
 export const TokenUjianSchema = z.object({
 	id: z.string(),
 	ujianId: z.string(),

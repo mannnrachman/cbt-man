@@ -33,30 +33,14 @@ export const Route = createFileRoute(
   },
 });
 
-function gradeSesi(sesi: SesiUjian, ujian: Ujian) {
+// Finalize the session for submit. Scoring is authoritative on the server
+// (gradeSesiServerSide): answer keys are redacted from the participant
+// snapshot, so the client only marks the session finished and clamps the end
+// time to the exam duration.
+function finalizeSesi(sesi: SesiUjian, ujian: Ujian) {
   const currentSesi = JSON.parse(JSON.stringify(sesi)) as SesiUjian;
-  let score = 0;
-  for (let i = 0; i < currentSesi.soalIds.length; i++) {
-    const soalId = currentSesi.soalIds[i];
-    const soal = soalRepo.byId(soalId);
-    const j = currentSesi.jawaban[i];
-    if (!soal || !j) continue;
-
-    if (soal.tipe === "multi") {
-      const correctIds = soal.jawaban.filter((x) => x.benar).map((x) => x.id);
-      const isCorrect =
-        j.jawabanIds.length === correctIds.length &&
-        j.jawabanIds.every((id) => correctIds.includes(id));
-      if (isCorrect) score += ujian.poinBenar;
-    } else {
-      const correctOpt = soal.jawaban.find((x) => x.benar);
-      if (correctOpt && j.jawabanIds.includes(correctOpt.id)) {
-        score += ujian.poinBenar;
-      }
-    }
-  }
   currentSesi.status = "selesai";
-  currentSesi.skorTotal = score;
+  currentSesi.skorTotal = undefined;
   currentSesi.selesaiAt = Date.now();
   
   if (currentSesi.mulaiAt) {
@@ -245,13 +229,23 @@ function RouteComponent() {
         clearTimeout(saveTimer.current);
         saveTimer.current = null;
       }
-      const graded = gradeSesi(sesiRef.current, ujian);
-      sesiRepo.upsert(graded);
+      const finalized = finalizeSesi(sesiRef.current, ujian);
+      sesiRepo.upsert(finalized);
       const result = await sesiRepo.flush();
       if (!result.ok) {
         toast.error("Gagal menyimpan jawaban. Coba kumpulkan lagi.");
         submittingRef.current = false;
         return;
+      }
+      // Re-hydrate from the server so the hasil page reads the authoritative
+      // server-computed score and the post-submit snapshot (answer keys and
+      // pembahasan are only exposed after selesai when the exam allows it).
+      // Non-fatal: the submit already persisted; a fresh load re-fetches.
+      try {
+        invalidateReposCache();
+        await hydrateRepos();
+      } catch {
+        invalidateReposCache();
       }
       if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
       toast.success(

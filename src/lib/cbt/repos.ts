@@ -25,6 +25,7 @@ import type {
 	TahunAkademik,
 	Semester,
 	MataKuliah,
+	PublicExamSchedule,
 } from "./types";
 
 type Snapshot = Awaited<ReturnType<typeof getCbtSnapshot>>;
@@ -131,8 +132,8 @@ export async function loadPublicBootConfig(): Promise<PublicBootConfig> {
 }
 
 export interface TodaysExams {
-	online: Ujian[];
-	offline: Ujian[];
+	online: PublicExamSchedule[];
+	offline: PublicExamSchedule[];
 }
 
 export async function getTodaysExams(): Promise<TodaysExams> {

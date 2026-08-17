@@ -138,11 +138,7 @@ export function operatorSnapshot(rows: SnapshotRows, caller: UserRow): Snapshot 
 export function pesertaSnapshot(rows: SnapshotRows, caller: UserRow): Snapshot {
 	const ujian = rows.ujian.filter((item) => {
 		const groupIds = parseJson<string[]>(item.groupIds, []);
-		return (
-			groupIds.length === 0 ||
-			(!!caller.unitId && groupIds.includes(caller.unitId))
-
-		);
+		return groupIds.length === 0 || (!!caller.unitId && groupIds.includes(caller.unitId));
 	});
 	const ujianIds = new Set(ujian.map((item) => item.id));
 	const sesi = rows.sesi.filter(
@@ -151,19 +147,47 @@ export function pesertaSnapshot(rows: SnapshotRows, caller: UserRow): Snapshot {
 	const soalIds = new Set(
 		sesi.flatMap((item) => parseJson<string[]>(item.soalIds, [])),
 	);
-	const soal = rows.soal.filter((item) => soalIds.has(item.id));
+
+	// Answer keys (`benar`) and `pembahasan` are only exposed once the sesi is
+	// finished AND the exam publishes result detail. During the exam (or when
+	// results stay hidden) they are redacted server-side so the snapshot never
+	// leaks the key. Redaction wins when a soal is shared with a non-revealed
+	// sesi (e.g. the same bank soal reused by an ongoing exam).
+	const ujianById = new Map(ujian.map((item) => [item.id, item]));
+	const revealed = new Set<string>();
+	const withheld = new Set<string>();
+	for (const item of sesi) {
+		const u = ujianById.get(item.ujianId);
+		const canReveal =
+			item.status === "selesai" && !!u?.showResult && !!u.showResultDetail;
+		for (const id of parseJson<string[]>(item.soalIds, [])) {
+			(canReveal ? revealed : withheld).add(id);
+		}
+	}
+	for (const id of withheld) revealed.delete(id);
+
+	const soal = rows.soal
+		.filter((item) => soalIds.has(item.id))
+		.map((row) => {
+			const mapped = mapSoal(row);
+			if (revealed.has(row.id)) return mapped;
+			return {
+				...mapped,
+				jawaban: mapped.jawaban.map((j) => ({ ...j, benar: false })),
+				pembahasan: "",
+			};
+		});
 	const token = rows.token.filter((item) => ujianIds.has(item.ujianId));
 
 	return {
 		users: [publicUser(caller)],
 		unitAkademik: rows.unitAkademik as any,
-
 		tahunAkademik: [],
 		semester: [],
 		mataKuliah: [],
 		modul: [],
 		topik: [],
-		soal: soal.map(mapSoal),
+		soal,
 		ujian: ujian.map(mapUjian),
 		token: token.map(mapToken),
 		sesi: sesi.map(mapSesi),

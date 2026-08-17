@@ -149,22 +149,25 @@ function extractFileIds(html: string): string[] {
 
 // Issue #2: a peserta may read a file blob ONLY if that file could legitimately
 // appear in content the snapshot already exposes to them — i.e. the `deskripsi`
-// of an exam assigned to their group, or the `detail`/`pembahasan`/`audioFileId`
-// of a soal that is part of one of THEIR sesi for such an exam. This mirrors
-// `pesertaSnapshot` (repos/functions.ts) so authorization and visibility stay
-// consistent, and prevents a peserta from fetching arbitrary file ids.
+// of an exam assigned to their group, or the `detail`/`audioFileId` of a soal
+// that is part of one of THEIR sesi for such an exam. Files embedded in a
+// soal's `pembahasan` are only exposed once that sesi is finished AND the exam
+// publishes result detail. This mirrors `pesertaSnapshot`
+// (repos/snapshot.ts) so authorization and visibility stay consistent, and
+// prevents a peserta from fetching arbitrary file ids.
 async function pesertaCanAccessFile(
   caller: { id: string; role: string; unitId: string | null },
   fileId: string,
 ): Promise<boolean> {
   // Group-assigned exams: groupIds empty (open to all) OR includes the group.
   const ujianRows = await prisma.ujian.findMany({
-    select: { id: true, groupIds: true, deskripsi: true },
+    select: { id: true, groupIds: true, deskripsi: true, showResult: true, showResultDetail: true },
   });
   const assigned = ujianRows.filter((u) => {
     const groupIds = parseJson<string[]>(u.groupIds, []);
     return groupIds.length === 0 || (!!caller.unitId && groupIds.includes(caller.unitId));
   });
+  const assignedById = new Map(assigned.map((u) => [u.id, u]));
   const allowed = new Set<string>();
   for (const u of assigned) {
     for (const id of extractFileIds(u.deskripsi)) allowed.add(id);
@@ -172,21 +175,32 @@ async function pesertaCanAccessFile(
   if (allowed.has(fileId)) return true;
 
   // Soal referenced by the peserta's own sesi for those assigned exams.
-  const assignedIds = new Set(assigned.map((u) => u.id));
   const sesiRows = await prisma.sesiUjian.findMany({
     where: { pesertaId: caller.id },
-    select: { ujianId: true, soalIds: true },
+    select: { ujianId: true, soalIds: true, status: true },
   });
   const soalIds = new Set<string>();
+  // Pembahasan reveal policy, mirroring pesertaSnapshot: only finished sesi of
+  // exams that publish result detail reveal pembahasan; redaction wins when a
+  // soal is shared with a non-revealed sesi.
+  const revealed = new Set<string>();
+  const withheld = new Set<string>();
   for (const s of sesiRows) {
-    if (!assignedIds.has(s.ujianId)) continue;
-    for (const sid of parseJson<string[]>(s.soalIds, [])) soalIds.add(sid);
+    const ujian = assignedById.get(s.ujianId);
+    if (!ujian) continue;
+    const canReveal = s.status === "selesai" && ujian.showResult && ujian.showResultDetail;
+    for (const sid of parseJson<string[]>(s.soalIds, [])) {
+      soalIds.add(sid);
+      (canReveal ? revealed : withheld).add(sid);
+    }
   }
+  for (const id of withheld) revealed.delete(id);
   if (soalIds.size === 0) return false;
 
   const soalRows = await prisma.soal.findMany({
     where: { id: { in: [...soalIds] } },
     select: {
+      id: true,
       detail: true,
       pembahasan: true,
       audioFileId: true,
@@ -196,7 +210,9 @@ async function pesertaCanAccessFile(
   for (const soal of soalRows) {
     if (soal.audioFileId && soal.audioFileId === fileId) return true;
     for (const id of extractFileIds(soal.detail)) allowed.add(id);
-    for (const id of extractFileIds(soal.pembahasan)) allowed.add(id);
+    if (revealed.has(soal.id)) {
+      for (const id of extractFileIds(soal.pembahasan)) allowed.add(id);
+    }
     // Answer-option detail is rich text rendered to peserta via RichView
     // (kerjakan/hasil pages), so its embedded file:// images must be allowed.
     for (const j of soal.jawaban) {

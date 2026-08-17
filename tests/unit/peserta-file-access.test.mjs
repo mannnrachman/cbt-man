@@ -6,9 +6,12 @@
  *
  * `getStoredFileUrl` must scope a peserta to file ids referenced by exams they
  * can access: the `deskripsi` of a group-assigned exam, or the
- * `detail`/`pembahasan`/`audioFileId` of a soal in one of THEIR sesi for such
- * an exam. This models that decision logic (the production helper queries
- * Prisma; the algorithm is identical) and asserts the I/O matrix.
+ * `detail`/`audioFileId` of a soal in one of THEIR sesi for such an exam.
+ * Files embedded in a soal's `pembahasan` are additionally gated behind the
+ * result-visibility policy: they are only exposed once the sesi is finished
+ * AND the exam publishes result detail (mirroring `pesertaSnapshot`).
+ * This models that decision logic (the production helper queries Prisma; the
+ * algorithm is identical) and asserts the I/O matrix.
  *
  * Written as .mjs to match tests/unit/token-codes.test.mjs.
  */
@@ -33,23 +36,33 @@ function pesertaCanAccessFile(caller, fileId, db) {
     const g = u.groupIds ?? [];
     return g.length === 0 || (!!caller.groupId && g.includes(caller.groupId));
   });
+  const assignedById = new Map(assigned.map((u) => [u.id, u]));
   const allowed = new Set();
   for (const u of assigned) for (const id of extractFileIds(u.deskripsi ?? "")) allowed.add(id);
   if (allowed.has(fileId)) return true;
 
-  const assignedIds = new Set(assigned.map((u) => u.id));
   const soalIds = new Set();
+  const revealed = new Set();
+  const withheld = new Set();
   for (const s of db.sesi) {
     if (s.pesertaId !== caller.id) continue;
-    if (!assignedIds.has(s.ujianId)) continue;
-    for (const sid of s.soalIds ?? []) soalIds.add(sid);
+    const ujian = assignedById.get(s.ujianId);
+    if (!ujian) continue;
+    const canReveal = s.status === "selesai" && ujian.showResult && ujian.showResultDetail;
+    for (const sid of s.soalIds ?? []) {
+      soalIds.add(sid);
+      (canReveal ? revealed : withheld).add(sid);
+    }
   }
+  for (const id of withheld) revealed.delete(id);
   if (soalIds.size === 0) return false;
 
   for (const soal of db.soal.filter((x) => soalIds.has(x.id))) {
     if (soal.audioFileId && soal.audioFileId === fileId) return true;
     for (const id of extractFileIds(soal.detail ?? "")) allowed.add(id);
-    for (const id of extractFileIds(soal.pembahasan ?? "")) allowed.add(id);
+    if (revealed.has(soal.id)) {
+      for (const id of extractFileIds(soal.pembahasan ?? "")) allowed.add(id);
+    }
     for (const j of soal.jawaban ?? []) {
       for (const id of extractFileIds(j.detail ?? "")) allowed.add(id);
     }
@@ -62,10 +75,16 @@ const peserta = { id: "u_1", role: "mahasiswa", groupId: "g_1" };
 function baseDb() {
   return {
     ujian: [
-      { id: "uj_assigned", groupIds: ["g_1"], deskripsi: '<p>see <img src="file://f_desc"></p>' },
+      {
+        id: "uj_assigned",
+        groupIds: ["g_1"],
+        deskripsi: '<p>see <img src="file://f_desc"></p>',
+        showResult: true,
+        showResultDetail: true,
+      },
       { id: "uj_other", groupIds: ["g_2"], deskripsi: '<img src="file://f_other">' },
     ],
-    sesi: [{ pesertaId: "u_1", ujianId: "uj_assigned", soalIds: ["s_1"] }],
+    sesi: [{ pesertaId: "u_1", ujianId: "uj_assigned", soalIds: ["s_1"], status: "selesai" }],
     soal: [
       {
         id: "s_1",
@@ -86,8 +105,38 @@ test("allows a file referenced in a soal of the peserta's own sesi", () => {
   assert.equal(pesertaCanAccessFile(peserta, "f_soal", baseDb()), true);
 });
 
-test("allows a soal pembahasan file in the peserta's own sesi", () => {
+test("allows a soal pembahasan file once the sesi is finished and the exam publishes result detail", () => {
   assert.equal(pesertaCanAccessFile(peserta, "f_pemb", baseDb()), true);
+});
+
+test("denies a soal pembahasan file while the sesi is still in progress", () => {
+  const db = baseDb();
+  db.sesi[0].status = "berlangsung";
+  assert.equal(pesertaCanAccessFile(peserta, "f_pemb", db), false);
+  // Non-pembahasan soal files stay accessible during the exam.
+  assert.equal(pesertaCanAccessFile(peserta, "f_soal", db), true);
+  assert.equal(pesertaCanAccessFile(peserta, "f_opt", db), true);
+});
+
+test("denies a soal pembahasan file when the exam hides result detail", () => {
+  const db = baseDb();
+  db.ujian[0].showResultDetail = false;
+  assert.equal(pesertaCanAccessFile(peserta, "f_pemb", db), false);
+});
+
+test("denies a soal pembahasan file when the exam hides results entirely", () => {
+  const db = baseDb();
+  db.ujian[0].showResult = false;
+  assert.equal(pesertaCanAccessFile(peserta, "f_pemb", db), false);
+});
+
+test("redaction wins when the same soal is shared with an ongoing sesi", () => {
+  const db = baseDb();
+  db.ujian.push({ id: "uj_ongoing", groupIds: ["g_1"], deskripsi: "", showResult: true, showResultDetail: true });
+  db.sesi.push({ pesertaId: "u_1", ujianId: "uj_ongoing", soalIds: ["s_1"], status: "berlangsung" });
+  assert.equal(pesertaCanAccessFile(peserta, "f_pemb", db), false);
+  // The question body itself remains accessible for the ongoing exam.
+  assert.equal(pesertaCanAccessFile(peserta, "f_soal", db), true);
 });
 
 test("allows the audioFileId of a soal in the peserta's own sesi", () => {
