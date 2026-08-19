@@ -1,5 +1,5 @@
 import { useAuthStore } from "@/lib/cbt/auth-store";
-import { soalRepo, sesiRepo, ujianRepo, invalidateReposCache, hydrateRepos } from "@/lib/cbt/repos";
+import { soalRepo, sesiRepo, ujianRepo, invalidateReposCache, hydrateRepos, saveParticipantSession } from "@/lib/cbt/repos";
 import type { SesiUjian, Ujian } from "@/lib/cbt/types";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
@@ -33,29 +33,6 @@ export const Route = createFileRoute(
     return null;
   },
 });
-
-// Finalize the session for submit. Scoring is authoritative on the server
-// (gradeSesiServerSide): answer keys are redacted from the participant
-// snapshot, so the client only marks the session finished and clamps the end
-// time to the exam duration.
-function finalizeSesi(sesi: SesiUjian, ujian: Ujian) {
-  const currentSesi = JSON.parse(JSON.stringify(sesi)) as SesiUjian;
-  currentSesi.status = "selesai";
-  currentSesi.skorTotal = undefined;
-  currentSesi.selesaiAt = Date.now();
-  
-  if (currentSesi.mulaiAt) {
-    const maxDur = ujian.durasiMenit || 60;
-    const start = currentSesi.mulaiAt;
-    const now = Date.now();
-    const elapsedMinutes = (now - start) / 60000;
-    if (elapsedMinutes > maxDur + 5) {
-      currentSesi.selesaiAt = start + maxDur * 60000;
-    }
-  }
-
-  return currentSesi;
-}
 
 function CalculatorAction({ ujian }: { ujian: Ujian }) {
   if (!ujian.allowCalculator) return null;
@@ -183,8 +160,7 @@ function RouteComponent() {
 
     const handleBeforeUnload = () => {
       if (sesiRef.current) {
-        sesiRepo.upsert(sesiRef.current);
-        sesiRepo.flush();
+        void saveParticipantSession(sesiRef.current);
       }
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -210,8 +186,7 @@ function RouteComponent() {
 
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
-      sesiRepo.upsert(nextSesi);
-      sesiRepo.flush();
+      void saveParticipantSession(nextSesi);
     }, 2000);
   }
 
@@ -240,8 +215,7 @@ function RouteComponent() {
       clearTimeout(saveTimer.current);
       saveTimer.current = null;
       if (sesiRef.current) {
-        sesiRepo.upsert(sesiRef.current);
-        sesiRepo.flush().catch(() => {});
+        void saveParticipantSession(sesiRef.current);
       }
     }
     setIdx(newIdx);
@@ -255,9 +229,7 @@ function RouteComponent() {
         clearTimeout(saveTimer.current);
         saveTimer.current = null;
       }
-      const finalized = finalizeSesi(sesiRef.current, ujian);
-      sesiRepo.upsert(finalized);
-      const result = await sesiRepo.flush();
+      const result = await saveParticipantSession(sesiRef.current, true);
       if (!result.ok) {
         toast.error("Gagal menyimpan jawaban. Coba kumpulkan lagi.");
         submittingRef.current = false;

@@ -3,7 +3,7 @@ import { getCbtSnapshot, getPublicBootConfigServer } from "@/lib/server/snapshot
 import { claimExamToken as claimExamTokenServer, saveConfigServer, mutateUjianServer, mutateTokenServer } from "@/lib/server/ujian/functions";
 import { mutateUserServer } from "@/lib/server/users/functions";
 import { mutateModulServer, mutateTopikServer, mutateSoalServer } from "@/lib/server/modul/functions";
-import { mutateSesiServer, createSesiServer } from "@/lib/server/sesi/functions";
+import { mutateSesiServer, createSesiServer, saveParticipantSesiServer } from "@/lib/server/sesi/functions";
 import { getTodaysExamsServer } from "@/lib/server/exams";
 import { 
 	mutateUnitAkademikServer, 
@@ -164,6 +164,39 @@ export async function createExamSession(
 		return { ok: false, error: result.error ?? "Gagal membuat sesi ujian" };
 	}
 	return { ok: true, sesiId: result.sesiId };
+}
+
+let participantSessionPending: Promise<MutationResult> = Promise.resolve({ ok: true });
+
+export function saveParticipantSession(
+	sesi: SesiUjian,
+	submit = false,
+): Promise<MutationResult> {
+	const next = cache.sesi.slice();
+	upsertArrayItem(next, submit ? { ...sesi, status: "selesai" } : sesi);
+	cache.sesi = next;
+
+	const request = () =>
+		saveParticipantSesiServer({
+			data: {
+				sesiId: sesi.id,
+				action: submit ? "submit" : "save",
+				jawaban: sesi.jawaban.map(({ soalId, jawabanIds, jawabanEssay, ragu }) => ({
+					soalId,
+					jawabanIds,
+					jawabanEssay,
+					ragu,
+				})),
+			},
+		}).then((result) => {
+			if (!result.ok) {
+				notifyMutationFailure("jawaban ujian", result.error ?? "Unknown error");
+			}
+			return result;
+		});
+
+	participantSessionPending = participantSessionPending.then(request, request);
+	return participantSessionPending;
 }
 
 function upsertArrayItem<T extends { id: string }>(list: T[], item: T) {

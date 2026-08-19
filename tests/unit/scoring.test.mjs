@@ -106,9 +106,10 @@ test("gradeAnswers leaves unknown soal entries untouched", () => {
   assert.equal(maxSkor, 0);
 });
 
-test("session mutation strips participant scores and preserves completed force-submits", () => {
+test("participant session mutation accepts only answer fields and preserves completed force-submits", () => {
   const source = readFileSync(new URL("../../src/lib/server/sesi/functions.ts", import.meta.url), "utf8");
-  assert.match(source, /skorTotal: undefined,/);
-  assert.match(source, /maxSkor: undefined,/);
+  assert.match(source, /const participantAnswerSchema = z[\s\S]*?\.strict\(\)/);
+  assert.match(source, /if \(caller\.role === "mahasiswa"\)[\s\S]{0,100}Forbidden/);
+  assert.match(source, /where: \{ id: data\.sesiId, pesertaId: caller\.id, status: "sedang" \}/);
   assert.match(source, /if \(sesi\.status === "selesai"\) return \{ ok: true as const \}/);
 });

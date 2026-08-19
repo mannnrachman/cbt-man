@@ -112,12 +112,15 @@ test("snapshot.ts redacts benar and pembahasan server-side", () => {
   assert.match(body, /pembahasan: ""/);
 });
 
-test("kerjakan no longer grades client-side and re-hydrates after submit", () => {
+test("kerjakan submits through the narrow server action and re-hydrates authoritative results", () => {
   const src = read("src/routes/_authenticated/peserta.ujian.$id.kerjakan.tsx");
   assert.ok(!/function gradeSesi\(/.test(src), "client-side gradeSesi must be removed");
-  assert.match(src, /function finalizeSesi\(/, "finalizeSesi must finalize without scoring");
-  assert.match(src, /skorTotal\s*=\s*undefined/, "client must not compute skorTotal");
-  assert.match(src, /await sesiRepo\.flush\(\)/, "submit must flush to the server");
+  assert.ok(!/function finalizeSesi\(/.test(src), "client must not construct submitted session state");
+  assert.match(
+    src,
+    /await saveParticipantSession\(sesiRef\.current, true\)/,
+    "submit must use the narrow participant server action",
+  );
   assert.match(src, /await hydrateRepos\(\)/, "submit must re-hydrate the authoritative snapshot");
 });
 
