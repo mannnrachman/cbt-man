@@ -169,7 +169,7 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
       config: {
         appName: "CBT-MAN",
         appLogo: "",
-        appDeskripsi: "Sistem CBT Universitas",
+        appDeskripsi: "Sistem CBT-MAN",
         pesanLogin: "Silakan login menggunakan akun Anda.",
         mobileLock: false,
         multiDevice: false,
