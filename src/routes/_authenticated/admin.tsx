@@ -301,7 +301,7 @@ function AdminLayout() {
                 </Button>
               )}
             </div>
-            <nav aria-label="Navigasi administrasi" className="flex flex-col gap-3 p-3">
+            <nav aria-label="Navigasi administrasi" className="flex flex-col gap-5 p-3">
               {canAccessAdminPath(user, dashboardNavItem.to, cfg) && (
                 <SidebarLink item={dashboardNavItem} />
               )}
