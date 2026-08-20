@@ -42,6 +42,8 @@ test("admin layout reads the authenticated route context instead of nullable cli
 
   assert.match(adminLayout, /const \{ user \} = Route\.useRouteContext\(\)/);
   assert.doesNotMatch(adminLayout, /useAuthStore\(\(s\) => s\.user\)!/);
+  assert.match(adminLayout, /await logout\(\);\s*window\.location\.assign\("\/login-admin"\)/);
+  assert.doesNotMatch(adminLayout, /navigate\(\{ to: "\/login" \}\)/);
 });
 
 test("production session cookies default secure but allow explicit private-HTTP override", () => {

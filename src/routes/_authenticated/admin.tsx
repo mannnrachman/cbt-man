@@ -4,7 +4,6 @@ import {
   Outlet,
   redirect,
   Link,
-  useNavigate,
   useRouterState,
 } from "@tanstack/react-router";
 import { useAuthStore } from "@/lib/cbt/auth-store";
@@ -220,7 +219,6 @@ export const Route = createFileRoute("/_authenticated/admin")({
 function AdminLayout() {
   const { user } = Route.useRouteContext();
   const logout = useAuthStore((s) => s.logout);
-  const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const cfg = configRepo.get();
   const appName = cfg.appName;
@@ -303,7 +301,7 @@ function AdminLayout() {
                 </Button>
               )}
             </div>
-            <nav aria-label="Navigasi administrasi" className="flex flex-col gap-2 p-3">
+            <nav aria-label="Navigasi administrasi" className="flex flex-col gap-3 p-3">
               {canAccessAdminPath(user, dashboardNavItem.to, cfg) && (
                 <SidebarLink item={dashboardNavItem} />
               )}
@@ -390,7 +388,7 @@ function AdminLayout() {
                 className="h-9 text-xs font-medium border-slate-200 dark:border-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/50 hover:text-rose-600 dark:hover:text-rose-400 hover:border-rose-200 dark:hover:border-rose-900 transition-colors"
                 onClick={async () => {
                   await logout();
-                  navigate({ to: "/login" });
+                  window.location.assign("/login-admin");
                 }}
               >
                 <LogOut className="mr-1.5 h-3.5 w-3.5" /> <span className="hidden sm:inline">Keluar</span>
