@@ -1,0 +1,15 @@
+services:
+  cbt:
+    build: .
+    container_name: cbt-man
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: file:/app/data/cbt.db
+    volumes:
+      - cbt-data:/app/data
+    ports:
+      - "10.0.0.8:1215:8080"
+
+volumes:
+  cbt-data:
