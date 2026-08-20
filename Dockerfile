@@ -17,4 +17,4 @@ ENV NODE_ENV=production \
 
 EXPOSE 8080
 
-CMD ["sh", "-c", "npx prisma migrate deploy && npm run preview -- --host 0.0.0.0 --port 8080"]
+CMD ["sh", "-c", "npx prisma migrate deploy && if [ \"${SEED_DEMO:-false}\" = true ] && [ ! -f /app/data/.demo-seeded ]; then NODE_ENV=development npm run prisma:seed && touch /app/data/.demo-seeded; fi && npm run preview -- --host 0.0.0.0 --port 8080"]

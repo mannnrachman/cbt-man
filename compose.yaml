@@ -6,6 +6,7 @@ services:
     environment:
       NODE_ENV: production
       DATABASE_URL: file:/app/data/cbt.db
+      SEED_DEMO: "true"
     volumes:
       - cbt-data:/app/data
     ports:
