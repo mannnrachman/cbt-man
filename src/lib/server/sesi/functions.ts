@@ -186,14 +186,22 @@ export const mutateSesiServer = createServerFn({ method: "POST" })
 			// Do not audit `sesi` (was explicitly skipped in functions.ts)
 
 			let upsertItem: SesiUjian | undefined;
+			let existingStatus: SesiUjian["status"] | undefined;
 			if (action === "upsert") {
 				const item = payload as SesiUjian;
 				const existing = await prisma.sesiUjian.findUnique({ where: { id: item.id } });
-				upsertItem = existing
+				existingStatus = existing?.status;
+				const existingItem = existing ? mapSesi(existing) : undefined;
+				upsertItem = existingItem
 					? {
-							...mapSesi(existing),
+							...existingItem,
 							status: item.status,
-							jawaban: item.jawaban,
+							jawaban: existingItem.jawaban.map((answer) => {
+								const grading = item.jawaban.find((candidate) => candidate.soalId === answer.soalId);
+								return grading
+									? { ...answer, skor: grading.skor, catatanGrader: grading.catatanGrader }
+									: answer;
+							}),
 							pelanggaran: item.pelanggaran,
 						}
 					: item;
@@ -229,6 +237,9 @@ export const mutateSesiServer = createServerFn({ method: "POST" })
 					});
 				} else if (upsertItem) {
 					const existing = await tx.sesiUjian.findUnique({ where: { id: upsertItem.id } });
+					if (existingStatus !== "selesai" && existing?.status === "selesai") {
+						throw new Error("Sesi sudah diselesaikan oleh proses lain.");
+					}
 					if (existing?.status === "selesai" && upsertItem.status !== "selesai") {
 						throw new Error("Sesi yang sudah selesai tidak dapat dibuka kembali.");
 					}

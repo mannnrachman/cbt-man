@@ -115,5 +115,7 @@ test("participant session mutation accepts only answer fields and preserves comp
   assert.match(source, /await gradeSesiServerSide\(upsertItem\)/);
   assert.match(source, /gradedAt: Date\.now\(\)/);
   assert.match(source, /gradedBy: caller\.id/);
+  assert.match(source, /existingStatus !== "selesai" && existing\?\.status === "selesai"/);
   assert.match(source, /existing\?\.status === "selesai" && upsertItem\.status !== "selesai"/);
+  assert.match(source, /skor: grading\.skor, catatanGrader: grading\.catatanGrader/);
 });
