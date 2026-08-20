@@ -422,6 +422,11 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
     { id: uid("tk_"), ujianId: ujian[0].id, kode: "UAS-WEB-03" },
     { id: uid("tk_"), ujianId: ujian[2].id, kode: "KOMP-ALG-01", dipakaiOleh: peserta[4].id, dipakaiAt: ts - parseDurationMinutes(120) },
     { id: uid("tk_"), ujianId: ujian[2].id, kode: "KOMP-ALG-02" },
+    ...ujian.slice(3).map((exam, index) => ({
+      id: uid("tk_"),
+      ujianId: exam.id,
+      kode: `SIM-${String(index + 1).padStart(2, "0")}`,
+    })),
   ];
 
   const soalByTopik = Object.fromEntries(topik.map((item) => [item.id, soal.filter((entry) => entry.topikId === item.id)]));

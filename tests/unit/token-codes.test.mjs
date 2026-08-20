@@ -158,6 +158,13 @@ test("collision retry loop creates the requested count even with a duplicate-pro
 // AC: no `Math.random()` use in the token code path
 // ---------------------------------------------------------------------------
 
+test("demo simulation exams include matching access tokens", () => {
+  const seed = readFileSync(resolve(process.cwd(), "src/lib/server/db/seed-shared.mjs"), "utf8");
+
+  assert.match(seed, /\.\.\.ujian\.slice\(3\)\.map/);
+  assert.match(seed, /kode: `SIM-\$\{String\(index \+ 1\)\.padStart\(2, "0"\)\}`/);
+});
+
 test("no `Math.random()` is used in the token code generation files", () => {
   const candidates = [
     "src/lib/server/ujian/functions.ts",
