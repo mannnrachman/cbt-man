@@ -188,12 +188,18 @@ export function saveParticipantSession(
 					ragu,
 				})),
 			},
-		}).then((result) => {
-			if (!result.ok) {
-				notifyMutationFailure("jawaban ujian", result.error ?? "Unknown error");
-			}
-			return result;
-		});
+		})
+			.then((result) => {
+				if (!result.ok) {
+					notifyMutationFailure("jawaban ujian", result.error ?? "Unknown error");
+				}
+				return result;
+			})
+			.catch((error) => {
+				const message = error instanceof Error ? error.message : String(error);
+				notifyMutationFailure("jawaban ujian", message);
+				return { ok: false, error: message };
+			});
 
 	participantSessionPending = participantSessionPending.then(request, request);
 	return participantSessionPending;

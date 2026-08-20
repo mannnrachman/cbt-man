@@ -112,4 +112,8 @@ test("participant session mutation accepts only answer fields and preserves comp
   assert.match(source, /if \(caller\.role === "mahasiswa"\)[\s\S]{0,100}Forbidden/);
   assert.match(source, /where: \{ id: data\.sesiId, pesertaId: caller\.id, status: "sedang" \}/);
   assert.match(source, /if \(sesi\.status === "selesai"\) return \{ ok: true as const \}/);
+  assert.match(source, /await gradeSesiServerSide\(upsertItem\)/);
+  assert.match(source, /gradedAt: Date\.now\(\)/);
+  assert.match(source, /gradedBy: caller\.id/);
+  assert.match(source, /existing\?\.status === "selesai" && upsertItem\.status !== "selesai"/);
 });

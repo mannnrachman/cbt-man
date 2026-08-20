@@ -89,6 +89,12 @@ export const saveParticipantSesiServer = createServerFn({ method: "POST" })
 			if (sesiRow.status !== "sedang") {
 				return { ok: false as const, error: "Ujian sudah disubmit oleh pengawas" };
 			}
+			const now = Date.now();
+			const endsAt = toNumber(sesiRow.endsAt);
+			const examEndAt = toNumber(sesiRow.ujian.endAt);
+			if ((endsAt !== undefined && now > endsAt) || (examEndAt !== undefined && now > examEndAt)) {
+				return { ok: false as const, error: "Ujian sudah berakhir" };
+			}
 
 			if (sesiRow.ujian.ipRange) {
 				const ip = getRequestIP({ xForwardedFor: true }) ?? "unknown";
@@ -179,6 +185,29 @@ export const mutateSesiServer = createServerFn({ method: "POST" })
 
 			// Do not audit `sesi` (was explicitly skipped in functions.ts)
 
+			let upsertItem: SesiUjian | undefined;
+			if (action === "upsert") {
+				const item = payload as SesiUjian;
+				const existing = await prisma.sesiUjian.findUnique({ where: { id: item.id } });
+				upsertItem = existing
+					? {
+							...mapSesi(existing),
+							status: item.status,
+							jawaban: item.jawaban,
+							pelanggaran: item.pelanggaran,
+						}
+					: item;
+				if (upsertItem.status === "selesai") {
+					upsertItem = {
+						...(await gradeSesiServerSide(upsertItem)),
+						gradedAt: Date.now(),
+						gradedBy: caller.id,
+					};
+				} else {
+					upsertItem = { ...upsertItem, skorTotal: undefined, maxSkor: undefined };
+				}
+			}
+
 			await prisma.$transaction(async (tx) => {
 				if (action === "remove")
 					await tx.sesiUjian.delete({ where: { id: String(payload.id) } });
@@ -198,28 +227,36 @@ export const mutateSesiServer = createServerFn({ method: "POST" })
 							createdAt: BigInt(item.createdAt),
 						})),
 					});
-				} else {
-					const item = payload as SesiUjian;
-
+				} else if (upsertItem) {
+					const existing = await tx.sesiUjian.findUnique({ where: { id: upsertItem.id } });
+					if (existing?.status === "selesai" && upsertItem.status !== "selesai") {
+						throw new Error("Sesi yang sudah selesai tidak dapat dibuka kembali.");
+					}
+					const item =
+						existing?.status === "selesai"
+							? { ...upsertItem, status: "selesai" as const, selesaiAt: toNumber(existing.selesaiAt) }
+							: upsertItem;
 					const updateData: any = {
-						ujianId: item.ujianId,
-						pesertaId: item.pesertaId,
 						status: item.status,
-						mulaiAt: toBigInt(item.mulaiAt),
 						selesaiAt: toBigInt(item.selesaiAt),
-						endsAt: toBigInt(item.endsAt),
-						soalIds: stringifyJson(item.soalIds),
-						jawabanOrder: stringifyJson(item.jawabanOrder),
 						jawaban: stringifyJson(item.jawaban),
-
 						pelanggaran: item.pelanggaran,
 						skorTotal: item.skorTotal ?? null,
 						maxSkor: item.maxSkor ?? null,
 						gradedAt: toBigInt(item.gradedAt),
 						gradedBy: item.gradedBy ?? null,
+					};
+					const createData: any = {
+						...updateData,
+						id: item.id,
+						ujianId: item.ujianId,
+						pesertaId: item.pesertaId,
+						mulaiAt: toBigInt(item.mulaiAt),
+						endsAt: toBigInt(item.endsAt),
+						soalIds: stringifyJson(item.soalIds),
+						jawabanOrder: stringifyJson(item.jawabanOrder),
 						createdAt: BigInt(item.createdAt),
 					};
-					const createData: any = { ...updateData, id: item.id };
 
 					await tx.sesiUjian.upsert({
 						where: { id: item.id },

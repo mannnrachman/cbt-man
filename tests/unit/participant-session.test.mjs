@@ -77,4 +77,13 @@ test("participant route never writes through the generic session repository", ()
   assert.match(route, /saveParticipantSession\(sesiRef\.current, true\)/);
   assert.match(server, /if \(caller\.role === "mahasiswa"\)[\s\S]{0,100}Forbidden/);
   assert.match(server, /status: "sedang"/);
+  assert.match(server, /now > endsAt/);
+  assert.match(server, /now > examEndAt/);
+});
+
+test("participant transport failures rehydrate optimistic session state", () => {
+  const repos = readFileSync(new URL("../../src/lib/cbt/repos.ts", import.meta.url), "utf8");
+
+  assert.match(repos, /saveParticipantSesiServer\([\s\S]*?\.catch\(\(error\) =>/);
+  assert.match(repos, /notifyMutationFailure\("jawaban ujian", message\)/);
 });
