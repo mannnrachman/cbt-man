@@ -75,6 +75,9 @@ test("participant route never writes through the generic session repository", ()
 
   assert.doesNotMatch(route, /sesiRepo\.(upsert|flush)/);
   assert.match(route, /saveParticipantSession\(sesiRef\.current, true\)/);
+  assert.doesNotMatch(route, /\bconfirm\(/);
+  assert.match(route, /<Dialog open=\{showSubmitDialog\}/);
+  assert.match(route, /Ya, Kumpulkan/);
   assert.match(server, /if \(caller\.role === "mahasiswa"\)[\s\S]{0,100}Forbidden/);
   assert.match(server, /status: "sedang"/);
   assert.match(server, /now > endsAt/);

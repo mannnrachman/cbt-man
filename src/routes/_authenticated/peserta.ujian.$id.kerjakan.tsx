@@ -18,7 +18,10 @@ import { ExamCalculator } from "@/components/cbt/ExamCalculator";
 import { NilaiNormalTable } from "@/components/cbt/NilaiNormal";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -91,6 +94,7 @@ function RouteComponent() {
   const saveTimer = useRef<NodeJS.Timeout | null>(null);
 
   const [showList, setShowList] = useState(false);
+  const [showSubmitDialog, setShowSubmitDialog] = useState(false);
   const [fontSize, setFontSize] = useState<"sm" | "base" | "lg">("base");
 
   useEffect(() => {
@@ -473,9 +477,7 @@ function RouteComponent() {
                   size="lg"
                   variant="destructive"
                   className="w-full sm:w-auto h-14 px-8 rounded-xl font-black uppercase tracking-widest shadow-lg shadow-red-500/20 hover:shadow-red-500/40 transition-all hover:-translate-y-0.5"
-                  onClick={() => {
-                    if (confirm("Pastikan semua jawaban telah terisi dengan benar. Yakin kumpulkan ujian sekarang?")) void submit();
-                  }}
+                  onClick={() => setShowSubmitDialog(true)}
                 >
                   KUMPULKAN
                 </Button>
@@ -541,7 +543,7 @@ function RouteComponent() {
             <Button
               variant="destructive"
               className="w-full h-12 font-bold uppercase tracking-widest shadow-md"
-              onClick={() => { if (confirm("Yakin ingin mengumpulkan?")) void submit(); }}
+              onClick={() => setShowSubmitDialog(true)}
             >
               Akhiri Ujian
             </Button>
@@ -549,6 +551,37 @@ function RouteComponent() {
         </div>
 
       </div>
+
+      <Dialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
+        <DialogContent className="w-[calc(100%_-_2rem)] max-w-md overflow-hidden rounded-2xl border-0 p-0 shadow-2xl">
+          <div className="bg-gradient-to-br from-red-50 to-white p-6 dark:from-red-950/40 dark:to-slate-950">
+            <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-300">
+              <AlertCircle className="h-6 w-6" aria-hidden="true" />
+            </div>
+            <DialogHeader>
+              <DialogTitle className="text-xl">Kumpulkan ujian sekarang?</DialogTitle>
+              <DialogDescription className="pt-2 leading-relaxed">
+                Pastikan semua jawaban telah terisi dengan benar. Setelah dikumpulkan, jawaban tidak dapat diubah kembali.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="mt-6 gap-2 sm:space-x-0">
+              <DialogClose asChild>
+                <Button variant="outline" className="h-11 rounded-xl">Periksa Kembali</Button>
+              </DialogClose>
+              <Button
+                variant="destructive"
+                className="h-11 rounded-xl font-bold"
+                onClick={() => {
+                  setShowSubmitDialog(false);
+                  void submit();
+                }}
+              >
+                Ya, Kumpulkan
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* MOBILE LIST MODAL (Show when showList is true) */}
       {showList && (
@@ -616,7 +649,7 @@ function RouteComponent() {
                   className="w-full h-14 font-black text-lg uppercase tracking-widest shadow-lg"
                   onClick={() => {
                     setShowList(false);
-                    if (confirm("Kumpulkan sekarang?")) void submit();
+                    setShowSubmitDialog(true);
                   }}
                 >
                   Akhiri Ujian
