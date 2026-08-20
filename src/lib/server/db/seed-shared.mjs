@@ -570,7 +570,7 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
 
   const config = {
     appName: "CBT-MAN",
-    appDeskripsi: "Simulasi CBT Kampus dengan data dummy realistis untuk preview lokal.",
+    appDeskripsi: "Simulasi CBT-MAN dengan data dummy realistis untuk preview lokal.",
     pesanLogin: "Selamat datang di portal ujian Universitas Teknologi Nusantara. Gunakan akun demo sesuai peran untuk mencoba alur sistem.",
     mobileLock: false,
     multiDevice: false,
