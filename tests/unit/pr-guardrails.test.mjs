@@ -37,6 +37,14 @@ test("PR hygiene rejects historical CBT-MAN artifacts and legacy branding", () =
   assert.equal(shouldScanBranding(".github/PULL_REQUEST_TEMPLATE.md"), false);
 });
 
+test("production session cookies default secure but allow explicit private-HTTP override", () => {
+  const session = readFileSync("src/lib/server/db/session.ts", "utf8");
+  const compose = readFileSync("compose.yaml", "utf8");
+
+  assert.match(session, /SESSION_COOKIE_SECURE !== "false"/);
+  assert.match(compose, /SESSION_COOKIE_SECURE: "false"/);
+});
+
 test("migration normalizes only dangling optional relation IDs", () => {
   const sql = readFileSync(
     "prisma/migrations/20260810100000_fix_ujian_relation_constraints/migration.sql",

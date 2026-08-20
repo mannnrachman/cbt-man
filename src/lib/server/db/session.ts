@@ -18,8 +18,11 @@ export const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 hari
 const SESSION_TTL_SECONDS = Math.floor(SESSION_TTL_MS / 1000);
 
 function cookieAttributes(maxAgeSeconds: number): string {
-	// `Secure` hanya di production — dev (http://localhost) tidak bisa set cookie Secure.
-	const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
+	// Production defaults to Secure; private HTTP deployments must opt out explicitly.
+	const secure =
+		process.env.NODE_ENV === "production" && process.env.SESSION_COOKIE_SECURE !== "false"
+			? "; Secure"
+			: "";
 	return `; HttpOnly; SameSite=Lax; Path=/${secure}; Max-Age=${maxAgeSeconds}`;
 }
 
