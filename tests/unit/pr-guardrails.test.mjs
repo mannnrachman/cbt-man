@@ -37,6 +37,13 @@ test("PR hygiene rejects historical CBT-MAN artifacts and legacy branding", () =
   assert.equal(shouldScanBranding(".github/PULL_REQUEST_TEMPLATE.md"), false);
 });
 
+test("admin layout reads the authenticated route context instead of nullable client state", () => {
+  const adminLayout = readFileSync("src/routes/_authenticated/admin.tsx", "utf8");
+
+  assert.match(adminLayout, /const \{ user \} = Route\.useRouteContext\(\)/);
+  assert.doesNotMatch(adminLayout, /useAuthStore\(\(s\) => s\.user\)!/);
+});
+
 test("production session cookies default secure but allow explicit private-HTTP override", () => {
   const session = readFileSync("src/lib/server/db/session.ts", "utf8");
   const compose = readFileSync("compose.yaml", "utf8");

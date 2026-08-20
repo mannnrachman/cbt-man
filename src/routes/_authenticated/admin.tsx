@@ -218,7 +218,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
 });
 
 function AdminLayout() {
-  const user = useAuthStore((s) => s.user)!;
+  const { user } = Route.useRouteContext();
   const logout = useAuthStore((s) => s.logout);
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
