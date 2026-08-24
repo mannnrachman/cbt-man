@@ -635,6 +635,7 @@ export async function seedDatabase({ prisma, dataset, stringifyJson }) {
   await prisma.ujian.createMany({
     data: dataset.ujian.map((item) => ({
       ...item,
+      status: item.status ?? "published",
       beginAt: item.beginAt ? BigInt(item.beginAt) : null,
       endAt: item.endAt ? BigInt(item.endAt) : null,
       groupIds: stringifyJson(item.groupIds),
@@ -650,6 +651,16 @@ export async function seedDatabase({ prisma, dataset, stringifyJson }) {
       dipakaiAt: item.dipakaiAt ? BigInt(item.dipakaiAt) : null,
     })),
   });
+  const legacyClaims = dataset.token
+    .filter((item) => item.dipakaiOleh)
+    .map((item) => ({
+      id: `tc_legacy_${item.id}`,
+      ujianId: item.ujianId,
+      pesertaId: item.dipakaiOleh,
+      kode: item.kode,
+      claimedAt: BigInt(item.dipakaiAt ?? Date.now()),
+    }));
+  if (legacyClaims.length) await prisma.tokenClaim.createMany({ data: legacyClaims });
 
   await prisma.sesiUjian.createMany({
     data: dataset.sesi.map((item) => ({
@@ -658,6 +669,7 @@ export async function seedDatabase({ prisma, dataset, stringifyJson }) {
       selesaiAt: item.selesaiAt ? BigInt(item.selesaiAt) : null,
       endsAt: item.endsAt ? BigInt(item.endsAt) : null,
       soalIds: stringifyJson(item.soalIds),
+      soalSnapshot: stringifyJson(item.soalSnapshot ?? []),
       jawabanOrder: stringifyJson(item.jawabanOrder),
       jawaban: stringifyJson(item.jawaban),
       skorTotal: item.skorTotal ?? null,

@@ -30,6 +30,9 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Security
 
+- Tutup bypass status published melalui upsert, samakan otorisasi peserta pada fetch/file/snapshot, redaksi metadata nilai server-side, dan batasi submit terlambat dengan grace period.
+- Kunci perubahan kelas mata kuliah setelah ujian dipublikasikan/berjalan, serta jaga sinkronisasi kepemilikan mata kuliah antara modul dan topik.
+
 - Batasi autosave dan submit peserta ke mutation jawaban khusus yang memvalidasi sesi, soal, dan opsi dari database serta menolak full-record session upsert.
 - Terapkan validasi Zod discriminated union dan pemeriksaan integritas relasi sebelum penghapusan data induk akademik untuk mencegah orphaned records dan eksploitasi payload.
 - Terapkan penegakan otorisasi server lengkap pada pembuatan sesi ujian (validasi kepesertaan, jadwal, rentang IP, dan token claim).

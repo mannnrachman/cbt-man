@@ -67,12 +67,17 @@ export const mutateModulServer = createServerFn({ method: "POST" })
 				else if (action === "bulkSet") {
 					await tx.modul.deleteMany();
 					await tx.modul.createMany({ data: payload as Modul[] });
-				} else
+				} else {
 					await tx.modul.upsert({
 						where: { id: payload.id },
 						update: payload,
 						create: payload,
 					});
+					await tx.topik.updateMany({
+						where: { modulId: payload.id },
+						data: { mataKuliahId: payload.mataKuliahId ?? null },
+					});
+				}
 			});
 			return { ok: true as const };
 		} catch (err) {
