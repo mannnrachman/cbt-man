@@ -9,4 +9,6 @@ test("question mutation awaits the topic authorization result", () => {
   );
 
   assert.match(server, /if \(!\(await operatorCanTouchTopikId\(caller, item\.topikId\)\)\)/);
+  assert.match(server, /console\.error\("\[mutateSoalServer\]", err\)/);
+  assert.match(server, /error: "Gagal menyimpan soal"/);
 });

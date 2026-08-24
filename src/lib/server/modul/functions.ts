@@ -76,9 +76,10 @@ export const mutateModulServer = createServerFn({ method: "POST" })
 			});
 			return { ok: true as const };
 		} catch (err) {
+			console.error("[mutateSoalServer]", err);
 			return {
 				ok: false as const,
-				error: err instanceof Error ? err.message : String(err),
+				error: "Gagal menyimpan soal",
 			};
 		}
 	});
