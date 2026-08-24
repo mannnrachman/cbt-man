@@ -84,6 +84,7 @@ const navGroups: NavGroup[] = [
     icon: Landmark,
     items: [
       { to: "/admin/akademik", label: "Struktur Akademik", icon: Landmark },
+      { to: "/admin/akademik/kelas-mata-kuliah", label: "Kelas Mata Kuliah", icon: GraduationCap },
       { to: "/admin/users", label: "Pengelola Sistem", icon: Users },
       { to: "/admin/peserta", label: "Mahasiswa / Peserta", icon: GraduationCap, exact: true },
     ],

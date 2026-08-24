@@ -144,7 +144,7 @@ function PreUjianContent({
         toast.error("Masukkan token");
         return;
       }
-      // Atomic claim (Issue #9): must succeed before any session is created.
+      // TokenClaim on the server is the only authority for token access.
       // Two participants racing the same unused token cannot both win here.
       const claim = await claimExamToken(ujian.id, kode);
       if (!claim.ok) {

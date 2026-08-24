@@ -22,16 +22,12 @@ function PesertaUjian() {
   if (!ujian) return <div>Tidak ditemukan</div>;
   const users = usersRepo.all();
   const units = unitAkademikRepo.all();
-  const unitYangIkut = ujian.groupIds.includes("all")
-    ? units
-    : units.filter((u) => ujian.groupIds.includes(u.id));
+  const unitYangIkut = units.filter((u) => ujian.groupIds.includes(u.id));
 
   const peserta = users.filter(
     (u) =>
       u.role === "mahasiswa" &&
-      (ujian.groupIds.includes("all") ||
-        ujian.groupIds.length === 0 ||
-        ujian.groupIds.includes(u.unitId ?? "")) &&
+      ujian.groupIds.includes(u.unitId ?? "") &&
       (selectedUnit === "all" || u.unitId === selectedUnit) &&
       (u.namaLengkap.toLowerCase().includes(search.toLowerCase()) || 
        u.username.toLowerCase().includes(search.toLowerCase()))
@@ -50,7 +46,7 @@ function PesertaUjian() {
           </h1>
           <p className="text-sm text-muted-foreground">
             {peserta.length} peserta dari {unitYangIkut.length} unit
-            {ujian.groupIds.length === 0 && " (semua unit)"}
+            {ujian.groupIds.length === 0 && " (belum ditentukan)"}
           </p>
         </div>
         <Link to="/admin/peserta/kartu">
@@ -97,7 +93,7 @@ function PesertaUjian() {
               </span>
             ))}
             {ujian.groupIds.length === 0 && (
-              <span className="text-sm text-muted-foreground">Semua unit / publik</span>
+              <span className="text-sm text-muted-foreground">Belum ada unit peserta</span>
             )}
           </div>
         </CardContent>

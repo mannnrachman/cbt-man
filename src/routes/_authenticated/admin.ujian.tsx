@@ -5,7 +5,7 @@ import {
   useRouterState,
 } from "@tanstack/react-router";
 import { useState } from "react";
-import { ujianRepo, sesiRepo, mataKuliahRepo } from "@/lib/cbt/repos";
+import { ujianRepo, sesiRepo, mataKuliahRepo, penawaranRepo } from "@/lib/cbt/repos";
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import { uid } from "@/lib/cbt/storage";
 import type { Ujian } from "@/lib/cbt/types";
@@ -85,6 +85,7 @@ function UjianList() {
     const sesiCount = sesiRepo.all().filter((s) => s.ujianId === u.id).length;
     const soalCount = u.topicSets.reduce((a, b) => a + b.jumlah, 0);
     const mk = u.mataKuliahId ? mataKuliahRepo.byId(u.mataKuliahId) : null;
+    const kelas = u.penawaranId ? penawaranRepo.byId(u.penawaranId) : undefined;
 
     return (
       <div key={u.id} className="group flex flex-col gap-3 p-3 transition-colors bg-card border-b border-border/80 last:border-b-0 hover:bg-muted/40 sm:flex-row sm:items-center sm:justify-between sm:p-4">
@@ -106,6 +107,8 @@ function UjianList() {
             </Link>
             <div className="flex items-center gap-2 mt-1">
               {mk && <span className="text-[11px] font-medium px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 truncate max-w-[150px]">{mk.nama}</span>}
+              {kelas && <span className="text-[11px] font-medium px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300">Kelas {kelas.kodeKelas || "-"} · {kelas.pesertaIds.length} peserta</span>}
+              <span className={u.status === "published" ? "text-[11px] text-emerald-600" : "text-[11px] text-amber-600"}>{u.status === "published" ? "Published" : "Draft"}</span>
               <span className="text-[11px] text-slate-500">{soalCount} Soal • {u.durasiMenit} Menit</span>
               {sesiCount > 0 && <span className="text-[11px] font-medium text-slate-700 dark:text-slate-300">• {sesiCount} Peserta</span>}
             </div>

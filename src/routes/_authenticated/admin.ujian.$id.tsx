@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet, useParams, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ujianRepo, unitAkademikRepo, hydrateRepos, mataKuliahRepo, semesterRepo } from "@/lib/cbt/repos";
+import { ujianRepo, unitAkademikRepo, hydrateRepos, mataKuliahRepo, semesterRepo, penawaranRepo } from "@/lib/cbt/repos";
 
 import { uid } from "@/lib/cbt/storage";
 import type { Ujian, TopicSet } from "@/lib/cbt/types";
@@ -28,7 +28,20 @@ import {
   visibleModuls,
   visibleTopiks,
 } from "@/lib/cbt/access";
-import { fetchUjianByIdServer } from "@/lib/server/ujian/functions";
+import { fetchUjianByIdServer, mutateUjianServer } from "@/lib/server/ujian/functions";
+
+function toDateTimeLocal(value?: number) {
+  if (value === undefined) return "";
+  const date = new Date(value);
+  const pad = (part: number) => String(part).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function fromDateTimeLocal(value: string) {
+  if (!value) return undefined;
+  const timestamp = Date.parse(value);
+  return Number.isFinite(timestamp) ? timestamp : undefined;
+}
 
 export const Route = createFileRoute("/_authenticated/admin/ujian/$id")({
   loader: async () => {
@@ -56,6 +69,7 @@ function UjianEditor() {
   
   const mkList = mataKuliahRepo.all();
   const smtList = semesterRepo.all();
+  const penawaranList = penawaranRepo.all();
 
   // (Must-fix #2) Re-order guards so `ujianTouchesAllowed` runs BEFORE we
   // initialize `useState` with the full ujian. If the snapshot already
@@ -221,6 +235,18 @@ function UjianEditor() {
       toast.error("Nama wajib");
       return;
     }
+    if (!Number.isInteger(u!.durasiMenit) || u!.durasiMenit < 1) {
+      toast.error("Durasi harus minimal 1 menit");
+      return;
+    }
+    if (u!.beginAt !== undefined && u!.endAt !== undefined && u!.endAt <= u!.beginAt) {
+      toast.error("Waktu selesai harus setelah waktu mulai");
+      return;
+    }
+    if (u!.topicSets.some((ts) => !Number.isInteger(ts.jumlah) || ts.jumlah < 1)) {
+      toast.error("Jumlah soal pada setiap sumber harus minimal 1");
+      return;
+    }
     // Validasi server-side: pastikan semua topicSet masih dalam scope.
     // Client-side guard di sini hanya untuk UX; authorizeMutation di server
     // adalah pagar terakhir (lihat operatorCanTouchTopicSets).
@@ -235,6 +261,25 @@ function UjianEditor() {
     await ujianRepo.flush();
     toast.success("Disimpan");
     navigate({ to: "/admin/ujian" });
+  }
+
+  async function publish() {
+    ujianRepo.upsert(u!);
+    const saveResult = await ujianRepo.flush();
+    if (!saveResult.ok) {
+      toast.error(saveResult.error || "Gagal menyimpan draft");
+      return;
+    }
+    const result = await mutateUjianServer({ data: { action: "publish", payload: { id: u!.id } } });
+    if (!result.ok) {
+      toast.error(result.error);
+      return;
+    }
+    const published = { ...u!, status: "published" as const };
+    ujianRepo.upsert(published);
+    await ujianRepo.flush();
+    setU(published);
+    toast.success("Paket ujian dipublikasikan");
   }
 
   async function hapus() {
@@ -275,6 +320,11 @@ function UjianEditor() {
             <Trash2 className="mr-1 h-4 w-4" />
             Hapus
           </Button>
+          {u.status === "draft" && (
+            <Button variant="outline" onClick={publish}>
+              Publikasikan
+            </Button>
+          )}
           <Button onClick={save} className="h-9 text-xs font-semibold shadow-xs">
             <Save className="mr-1 h-4 w-4" />
             Simpan Perubahan
@@ -284,7 +334,7 @@ function UjianEditor() {
 
       <Card className="border-slate-200 dark:border-slate-800 shadow-xs">
         <CardContent className="space-y-4 p-4">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div>
               <Label>Nama</Label>
               <Input value={u.nama} onChange={(e) => set("nama", e.target.value)} />
@@ -306,7 +356,7 @@ function UjianEditor() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>Mata Kuliah (Opsional)</Label>
-              <Select value={u.mataKuliahId || "none"} onValueChange={(v) => set("mataKuliahId", v === "none" ? undefined : v)}>
+              <Select value={u.mataKuliahId || "none"} onValueChange={(v) => { set("mataKuliahId", v === "none" ? undefined : v); set("penawaranId", undefined); }}>
                 <SelectTrigger>
                   <SelectValue placeholder="Pilih Mata Kuliah" />
                 </SelectTrigger>
@@ -320,7 +370,7 @@ function UjianEditor() {
             </div>
             <div>
               <Label>Semester (Opsional)</Label>
-              <Select value={u.semesterId || "none"} onValueChange={(v) => set("semesterId", v === "none" ? undefined : v)}>
+              <Select value={u.semesterId || "none"} onValueChange={(v) => { set("semesterId", v === "none" ? undefined : v); set("penawaranId", undefined); }}>
                 <SelectTrigger>
                   <SelectValue placeholder="Pilih Semester" />
                 </SelectTrigger>
@@ -331,6 +381,62 @@ function UjianEditor() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div>
+              <Label>Kelas Mata Kuliah</Label>
+              <Select
+                value={u.penawaranId || "none"}
+                onValueChange={(v) => {
+                  const offering = penawaranList.find((item) => item.id === v);
+                  set("penawaranId", v === "none" ? undefined : v);
+                  if (offering) {
+                    set("mataKuliahId", offering.mataKuliahId);
+                    set("semesterId", offering.semesterId);
+                  }
+                }}
+              >
+                <SelectTrigger><SelectValue placeholder="Pilih kelas mata kuliah" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">(Belum dipilih)</SelectItem>
+                  {penawaranList.map((offering) => {
+                    const mk = mkList.find((item) => item.id === offering.mataKuliahId);
+                    const semester = smtList.find((item) => item.id === offering.semesterId);
+                    return <SelectItem key={offering.id} value={offering.id}>{mk?.nama ?? "Mata kuliah"} — {semester?.nama ?? "Tanpa semester"} {offering.kodeKelas}</SelectItem>;
+                  })}
+                </SelectContent>
+              </Select>
+              <p className="mt-1 text-xs text-muted-foreground">Wajib dipilih sebelum paket dipublikasikan.</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="space-y-3 p-4">
+          <div>
+            <h3 className="font-medium">Jadwal ujian</h3>
+            <p className="text-xs text-muted-foreground">
+              Peserta hanya dapat mulai di antara waktu mulai dan selesai. Jadwal wajib sebelum publikasi.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="ujian-begin-at">Mulai</Label>
+              <Input
+                id="ujian-begin-at"
+                type="datetime-local"
+                value={toDateTimeLocal(u.beginAt)}
+                onChange={(e) => set("beginAt", fromDateTimeLocal(e.target.value))}
+              />
+            </div>
+            <div>
+              <Label htmlFor="ujian-end-at">Selesai</Label>
+              <Input
+                id="ujian-end-at"
+                type="datetime-local"
+                value={toDateTimeLocal(u.endAt)}
+                onChange={(e) => set("endAt", fromDateTimeLocal(e.target.value))}
+              />
             </div>
           </div>
         </CardContent>
@@ -405,7 +511,11 @@ function UjianEditor() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {sortedTopiks.map((tk) => {
+                        {sortedTopiks.filter((tk) => {
+                          if (!u.mataKuliahId) return true;
+                          const mm = moduls.find((modul) => modul.id === tk.modulId);
+                          return mm?.mataKuliahId === u.mataKuliahId;
+                        }).map((tk) => {
                           const mm = moduls.find((mm) => mm.id === tk.modulId);
                           const isMatchMk = u.mataKuliahId && mm?.mataKuliahId === u.mataKuliahId;
                           return (
@@ -484,7 +594,7 @@ function UjianEditor() {
             );
           })}
           {u.topicSets.length === 0 && (
-            <p className="text-sm text-muted-foreground">Belum ada topic set.</p>
+            <p className="text-sm text-muted-foreground">Belum ada sumber soal. Tambahkan topik agar paket dapat digunakan.</p>
           )}
         </CardContent>
       </Card>
@@ -493,7 +603,7 @@ function UjianEditor() {
         <CardContent className="p-4 space-y-3">
           <h3 className="font-medium">Akses peserta</h3>
           <div className="space-y-1">
-            <Label className="text-xs">Group yang boleh ikut (kosong = semua)</Label>
+            <Label className="text-xs">Unit peserta (wajib dipilih sebelum publikasi)</Label>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {groups.map((g) => (
                 <label key={g.id} className="flex items-center gap-2 rounded border p-2 text-sm">
@@ -510,6 +620,9 @@ function UjianEditor() {
                 </label>
               ))}
             </div>
+            {u.groupIds.length === 0 && (
+              <p className="text-xs text-amber-600">Belum ada unit peserta. Paket tidak akan bisa diakses peserta.</p>
+            )}
           </div>
           <div className="flex items-center justify-between rounded border p-2">
             <div>
