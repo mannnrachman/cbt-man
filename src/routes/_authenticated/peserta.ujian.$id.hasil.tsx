@@ -4,7 +4,7 @@ import { AudioPlayer } from "@/components/cbt/AudioPlayer";
 import { RichView } from "@/components/cbt/RichEditor";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/lib/cbt/auth-store";
-import { sesiRepo, soalRepo, ujianRepo } from "@/lib/cbt/repos";
+import { sesiRepo, soalBySessionId, ujianRepo } from "@/lib/cbt/repos";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/peserta/ujian/$id/hasil")(
@@ -61,7 +61,7 @@ function HasilPeserta() {
 	
 	// Quick calculation for correct answers if it's multiple choice
 	sesi.jawaban.forEach((j) => {
-		const soal = soalRepo.byId(j.soalId);
+		const soal = soalBySessionId(sesi.id, j.soalId);
 		if (soal && soal.tipe !== "essay") {
 			const benarIds = soal.jawaban.filter((x) => x.benar).map((x) => x.id);
 			if (j.jawabanIds.length === benarIds.length && benarIds.every((id) => j.jawabanIds.includes(id))) {
@@ -154,7 +154,7 @@ function HasilPeserta() {
 
 					<div className="space-y-6">
 						{sesi.jawaban.map((j, i) => {
-							const soal = soalRepo.byId(j.soalId);
+							const soal = soalBySessionId(sesi.id, j.soalId);
 							
 							if (!soal) {
 								return (

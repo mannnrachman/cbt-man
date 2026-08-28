@@ -11,6 +11,7 @@ import {
 } from "@/lib/server/akademik/functions";
 import { mutatePenawaranMembershipServer } from "@/lib/server/akademik/functions";
 import { toast } from "sonner";
+import { participantQuestionId } from "./session-answers";
 import type {
 	AppConfig,
 
@@ -370,6 +371,10 @@ export const soalRepo = createRepo(
 	},
 );
 
+export function soalBySessionId(sessionId: string, soalId: string): Soal | undefined {
+	return soalRepo.byId(participantQuestionId(sessionId, soalId));
+}
+
 export const ujianRepo = createRepo(
 	"ujian",
 	() => cache.ujian,
@@ -378,16 +383,48 @@ export const ujianRepo = createRepo(
 	},
 );
 
+let penawaranMembershipPending: Promise<MutationResult> = Promise.resolve({ ok: true });
+
 export const penawaranRepo = {
-	all: () => cache.penawaran.slice(),
-	byId: (id: string) => cache.penawaran.find((item) => item.id === id),
+	all: () => cache.penawaran.map((item) => ({ ...item, pengampuIds: [...item.pengampuIds], pesertaIds: [...item.pesertaIds] })),
+	byId: (id: string) => {
+		const item = cache.penawaran.find((value) => value.id === id);
+		return item ? { ...item, pengampuIds: [...item.pengampuIds], pesertaIds: [...item.pesertaIds] } : undefined;
+	},
 	updateMembership(item: PenawaranMataKuliah): void {
+		const previous = cache.penawaran.find((value) => value.id === item.id);
+		if (!previous) {
+			notifyMutationFailure("penawaran", "Kelas mata kuliah tidak ditemukan.");
+			return;
+		}
+		const expectedPengampuIds = [...previous.pengampuIds];
+		const expectedPesertaIds = [...previous.pesertaIds];
 		upsertArrayItem(cache.penawaran, item);
-		void mutatePenawaranMembershipServer({
-			data: { id: item.id, pengampuIds: item.pengampuIds, pesertaIds: item.pesertaIds },
+		const request = () => mutatePenawaranMembershipServer({
+			data: {
+				id: item.id,
+				expectedPengampuIds,
+				expectedPesertaIds,
+				pengampuIds: item.pengampuIds,
+				pesertaIds: item.pesertaIds,
+			},
 		}).then((result) => {
-			if (!result.ok) notifyMutationFailure("penawaran", result.error ?? "Unknown error");
+			if (!result.ok) {
+				notifyMutationFailure("penawaran", result.error ?? "Unknown error");
+				return result;
+			}
+			const current = cache.penawaran.find((value) => value.id === item.id);
+			if (current && JSON.stringify(current.pengampuIds) === JSON.stringify(item.pengampuIds)
+				&& JSON.stringify(current.pesertaIds) === JSON.stringify(item.pesertaIds)) {
+				upsertArrayItem(cache.penawaran, result.penawaran);
+			}
+			return result;
+		}).catch((error) => {
+			const message = error instanceof Error ? error.message : String(error);
+			notifyMutationFailure("penawaran", message);
+			return { ok: false as const, error: message };
 		});
+		penawaranMembershipPending = penawaranMembershipPending.then(request, request);
 	},
 };
 

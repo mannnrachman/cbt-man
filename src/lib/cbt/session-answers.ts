@@ -2,6 +2,8 @@ import type { JawabanSesi, Soal } from "./types";
 
 type ParticipantAnswer = Pick<JawabanSesi, "soalId" | "jawabanIds" | "jawabanEssay" | "ragu">;
 
+export const participantQuestionId = (sessionId: string, soalId: string) => `${sessionId}:${soalId}`;
+
 export function validateParticipantAnswers(
   soalIds: string[],
   soalById: ReadonlyMap<string, Soal>,

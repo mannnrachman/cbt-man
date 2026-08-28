@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from "@/lib/server/db/prisma";
 import { parseJson } from "@/lib/server/db/json";
+import { participantQuestionId } from "@/lib/cbt/session-answers";
 import { 
 	Snapshot, 
 	SnapshotRows, 
@@ -103,11 +104,15 @@ export function operatorSnapshot(rows: SnapshotRows, caller: UserRow): Snapshot 
 	const soal = unrestricted
 		? rows.soal
 		: rows.soal.filter((item) => topikIds.has(item.topikId));
+	const penawaranById = new Map(rows.penawaran.map((item) => [item.id, item]));
 	const ujian = unrestricted
 		? rows.ujian
 		: rows.ujian.filter((item) => {
 			const topicMatch = parseJson<{ topikId: string }[]>(item.topicSets, []).some((set) => topikIds.has(set.topikId));
-			return topicMatch || (!!item.mataKuliahId && allowedMataKuliahIds.has(item.mataKuliahId));
+			const penawaran = item.penawaranId ? penawaranById.get(item.penawaranId) : undefined;
+			return topicMatch
+				|| (!!item.mataKuliahId && allowedMataKuliahIds.has(item.mataKuliahId))
+				|| (!!penawaran && allowedMataKuliahIds.has(penawaran.mataKuliahId));
 		});
 	const ujianIds = new Set(ujian.map((item) => item.id));
 	const sesi = rows.sesi.filter((item) => ujianIds.has(item.ujianId));
@@ -159,46 +164,22 @@ export function operatorSnapshot(rows: SnapshotRows, caller: UserRow): Snapshot 
 	const sesi = rows.sesi.filter(
 		(item) => item.pesertaId === caller.id && ujianIds.has(item.ujianId),
 	);
-	const soalIds = new Set(
-		sesi.flatMap((item) => parseJson<string[]>(item.soalIds, [])),
-	);
-
-	// Answer keys (`benar`) and `pembahasan` are only exposed once the sesi is
-	// finished AND the exam publishes result detail. During the exam (or when
-	// results stay hidden) they are redacted server-side so the snapshot never
-	// leaks the key. Redaction wins when a soal is shared with a non-revealed
-	// sesi (e.g. the same bank soal reused by an ongoing exam).
 	const ujianById = new Map(ujian.map((item) => [item.id, item]));
-	const revealed = new Set<string>();
-	const withheld = new Set<string>();
-	for (const item of sesi) {
-		const u = ujianById.get(item.ujianId);
-		const canReveal =
-			item.status === "selesai" && !!u?.showResult && !!u.showResultDetail;
-		for (const id of parseJson<string[]>(item.soalIds, [])) {
-			(canReveal ? revealed : withheld).add(id);
-		}
-	}
-	for (const id of withheld) revealed.delete(id);
-
-	const snapshotBySessionAndId = new Map(
-		sesi.flatMap((item) =>
-			parseJson<ReturnType<typeof mapSoal>[]>(item.soalSnapshot, [])
-				.map((soal) => [`${item.id}:${soal.id}`, soal] as const),
-		),
-	);
-	const soal = [...soalIds].flatMap((id) => {
-			const session = sesi.find((item) => parseJson<string[]>(item.soalIds, []).includes(id));
-			const snapshot = session ? snapshotBySessionAndId.get(`${session.id}:${id}`) : undefined;
+	const soal = sesi.flatMap((session) => {
+		const ujianRow = ujianById.get(session.ujianId);
+		const canReveal = session.status === "selesai" && !!ujianRow?.showResult && !!ujianRow.showResultDetail;
+		const snapshotById = new Map(
+			parseJson<ReturnType<typeof mapSoal>[]>(session.soalSnapshot, []).map((item) => [item.id, item]),
+		);
+		return parseJson<string[]>(session.soalIds, []).flatMap((id) => {
+			const snapshot = snapshotById.get(id);
 			const row = rows.soal.find((item) => item.id === id);
 			if (!snapshot && !row) return [];
-			const mapped = snapshot ?? mapSoal(row!);
-			if (revealed.has(id)) return mapped;
-			return {
-				...mapped,
-				jawaban: mapped.jawaban.map((j) => ({ ...j, benar: false })),
-				pembahasan: "",
-			};
+			const mapped = { ...(snapshot ?? mapSoal(row!)), id: participantQuestionId(session.id, id) };
+			return canReveal
+				? mapped
+				: { ...mapped, jawaban: mapped.jawaban.map((j) => ({ ...j, benar: false })), pembahasan: "" };
+		});
 	});
 	const sesiForParticipant = sesi.map((row) => {
 		const mapped = mapSesi(row);

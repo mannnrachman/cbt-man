@@ -78,6 +78,30 @@ export async function operatorCanTouchTopicSets(
 	return true;
 }
 
+export async function operatorCanTouchUjianInput(
+	caller: UserRow,
+	item: Pick<Ujian, "mataKuliahId" | "penawaranId" | "topicSets">,
+): Promise<boolean> {
+	if (allowedTopikIdsForCaller(caller) === null) return true;
+	if (!(await operatorCanTouchTopicSets(caller, item.topicSets))) return false;
+
+	let hasScopedInput = item.topicSets.length > 0;
+	const mataKuliahIds = parseJson<string[]>(caller.mataKuliahIds || "[]", []);
+	if (item.mataKuliahId) {
+		if (!mataKuliahIds.includes(item.mataKuliahId)) return false;
+		hasScopedInput = true;
+	}
+	if (item.penawaranId) {
+		const penawaran = await prisma.penawaranMataKuliah.findUnique({
+			where: { id: item.penawaranId },
+			select: { mataKuliahId: true },
+		});
+		if (!penawaran || !mataKuliahIds.includes(penawaran.mataKuliahId)) return false;
+		hasScopedInput = true;
+	}
+	return hasScopedInput;
+}
+
 export async function operatorCanTouchModul(
 	caller: UserRow,
 	modulId: string,
@@ -114,15 +138,15 @@ export async function operatorCanTouchUjian(
 ): Promise<boolean> {
 	const ujian = await prisma.ujian.findUnique({
 		where: { id: ujianId },
-		select: { topicSets: true, mataKuliahId: true },
+		select: { topicSets: true, mataKuliahId: true, penawaranId: true },
 	});
 	if (!ujian) return false;
-	
-	const mkIds = parseJson<string[]>(caller.mataKuliahIds || "[]", []);
-	if (ujian.mataKuliahId && mkIds.includes(ujian.mataKuliahId)) return true;
-
-	const topicSets = parseJson<Ujian["topicSets"]>(ujian.topicSets, []);
-	return await operatorCanTouchTopicSets(caller, topicSets);
+	return operatorCanTouchUjianInput(caller, {
+		...ujian,
+		mataKuliahId: ujian.mataKuliahId ?? undefined,
+		penawaranId: ujian.penawaranId ?? undefined,
+		topicSets: parseJson<Ujian["topicSets"]>(ujian.topicSets, []),
+	});
 }
 
 export async function pesertaCanTouchUjian(

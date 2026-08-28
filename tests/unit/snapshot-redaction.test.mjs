@@ -8,7 +8,7 @@
  * `pembahasan` to a participant while their sesi is still in progress, or when
  * the exam hides results / result detail. They are only exposed once the sesi
  * is `selesai` AND the exam sets `showResult && showResultDetail`. Redaction
- * wins when a soal is shared with a non-revealed sesi.
+ * is evaluated independently for each session when a question is reused.
  *
  * The behavioral matrix below models the exact policy implemented in
  * src/lib/server/repos/snapshot.ts; the static pins assert the production code
@@ -28,24 +28,21 @@ function read(rel) {
 /** Pure model of the reveal policy in pesertaSnapshot. */
 function snapshotSoalPolicy({ sesi, ujian, soal }) {
   const ujianById = new Map(ujian.map((u) => [u.id, u]));
-  const revealed = new Set();
-  const withheld = new Set();
-  for (const s of sesi) {
+  return sesi.flatMap((s) => {
     const u = ujianById.get(s.ujianId);
     const canReveal = s.status === "selesai" && !!u?.showResult && !!u.showResultDetail;
-    for (const id of s.soalIds) (canReveal ? revealed : withheld).add(id);
-  }
-  for (const id of withheld) revealed.delete(id);
-  return soal
-    .filter((row) => sesi.some((s) => s.soalIds.includes(row.id)))
-    .map((row) => {
-      if (revealed.has(row.id)) return row;
+    return s.soalIds.flatMap((id) => {
+      const row = soal.find((item) => item.id === id);
+      if (!row) return [];
+      const scoped = { ...row, id: `${s.id}:${id}` };
+      if (canReveal) return scoped;
       return {
-        ...row,
+        ...scoped,
         jawaban: row.jawaban.map((j) => ({ ...j, benar: false })),
         pembahasan: "",
       };
     });
+  });
 }
 
 const SOAL = {
@@ -61,7 +58,7 @@ const SOAL = {
 function base({ sesiStatus, showResult = true, showResultDetail = true }) {
   return {
     ujian: [{ id: "uj_1", showResult, showResultDetail }],
-    sesi: [{ ujianId: "uj_1", soalIds: ["s_1"], status: sesiStatus }],
+    sesi: [{ id: "se_1", ujianId: "uj_1", soalIds: ["s_1"], status: sesiStatus }],
     soal: [structuredClone(SOAL)],
   };
 }
@@ -93,13 +90,15 @@ test("keeps redaction when the exam hides results entirely", () => {
   assert.equal(soal.pembahasan, "");
 });
 
-test("redaction wins when the same soal is reused by an ongoing exam", () => {
+test("keeps reused question snapshots scoped to their originating session", () => {
   const db = base({ sesiStatus: "selesai" });
   db.ujian.push({ id: "uj_2", showResult: true, showResultDetail: true });
-  db.sesi.push({ ujianId: "uj_2", soalIds: ["s_1"], status: "berlangsung" });
-  const [soal] = snapshotSoalPolicy(db);
-  assert.ok(soal.jawaban.every((j) => j.benar === false));
-  assert.equal(soal.pembahasan, "");
+  db.sesi.push({ id: "se_2", ujianId: "uj_2", soalIds: ["s_1"], status: "berlangsung" });
+  const [revealed, redacted] = snapshotSoalPolicy(db);
+  assert.equal(revealed.id, "se_1:s_1");
+  assert.equal(revealed.jawaban[0].benar, true);
+  assert.equal(redacted.id, "se_2:s_1");
+  assert.ok(redacted.jawaban.every((j) => j.benar === false));
 });
 
 test("snapshot.ts redacts benar and pembahasan server-side", () => {
@@ -107,9 +106,11 @@ test("snapshot.ts redacts benar and pembahasan server-side", () => {
   const fnIdx = src.indexOf("export function pesertaSnapshot(");
   assert.ok(fnIdx > 0, "pesertaSnapshot must exist");
   const body = src.slice(fnIdx, fnIdx + 2500);
-  assert.match(body, /status === "selesai" && !!u\?\.showResult && !!u\.showResultDetail/);
+  assert.match(body, /status === "selesai" && !!ujianRow\?\.showResult && !!ujianRow\.showResultDetail/);
   assert.match(body, /benar: false/);
   assert.match(body, /pembahasan: ""/);
+  assert.match(body, /participantQuestionId\(session\.id, id\)/);
+  assert.doesNotMatch(body, /sesi\.find\(/);
 });
 
 test("participant snapshot never includes the exam token inventory", () => {
@@ -130,6 +131,15 @@ test("operator snapshot applies Mata Kuliah scope instead of treating empty topi
   assert.match(body, /allowedMataKuliahIds/);
   assert.match(body, /parsedAllowedTopikIds\.length === 0/);
   assert.match(body, /parsedMataKuliahIds\.length === 0/);
+  assert.match(body, /penawaranById\.get\(item\.penawaranId\)/);
+  assert.match(body, /allowedMataKuliahIds\.has\(penawaran\.mataKuliahId\)/);
+});
+
+test("participant pages resolve questions by session and question id", () => {
+  const kerjakan = read("src/routes/_authenticated/peserta.ujian.$id.kerjakan.tsx");
+  const hasil = read("src/routes/_authenticated/peserta.ujian.$id.hasil.tsx");
+  assert.match(kerjakan, /soalBySessionId\(sesi\.id, soalId\)/);
+  assert.match(hasil, /soalBySessionId\(sesi\.id, j\.soalId\)/);
 });
 
 test("question mutation awaits the server-side topic scope check", () => {

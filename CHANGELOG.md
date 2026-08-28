@@ -36,6 +36,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 - Terapkan validasi klaim token atomik di sisi server menggunakan model TokenClaim untuk memastikan token yang dapat digunakan kembali tetap terikat aman pada otorisasi sesi.
 - Terapkan penilaian otoritatif di sisi server saat pengumpulan ujian dan tutup celah race condition (TOCTOU) agar autosave tidak menimpa sesi yang telah diselesaikan pengawas.
 - Redaksi kunci jawaban (`benar`) dan `pembahasan` dari snapshot peserta serta akses file pembahasan sampai sesi selesai dan ujian mempublikasikan detail hasil; persempit DTO jadwal ujian publik di landing page (temuan review #120).
+- Perketat scope update paket ujian, pisahkan snapshot soal per sesi, dan tolak overwrite anggota kelas dari state klien yang stale (#132).
 
 ### Deprecated
 

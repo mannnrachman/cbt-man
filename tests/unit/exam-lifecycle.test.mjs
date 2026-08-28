@@ -82,3 +82,23 @@ test("course offerings are additive and legacy exams receive a compatibility off
   assert.match(migration, /po_legacy_/);
   assert.match(types, /penawaranId: z\.string\(\)\.optional\(\)/);
 });
+
+test("operator updates authorize both stored and requested exam scope", () => {
+  const server = read("src/lib/server/ujian/functions.ts");
+  const auth = read("src/lib/server/db/auth.ts");
+  assert.match(server, /if \(action === "bulkSet"\) return \{ ok: false as const, error: "Forbidden" \}/);
+  assert.match(server, /existing && !\(await operatorCanTouchUjian\(caller, item\.id\)\)/);
+  assert.match(server, /operatorCanTouchUjianInput\(caller, item\)/);
+  assert.match(auth, /hasScopedInput = item\.topicSets\.length > 0/);
+  assert.match(auth, /penawaranMataKuliah\.findUnique/);
+});
+
+test("offering membership writes are serialized and reject stale state", () => {
+  const client = read("src/lib/cbt/repos.ts");
+  const server = read("src/lib/server/akademik/functions.ts");
+  assert.match(client, /penawaranMembershipPending\.then\(request, request\)/);
+  assert.match(client, /upsertArrayItem\(cache\.penawaran, result\.penawaran\)/);
+  assert.match(server, /expectedPengampuIds/);
+  assert.match(server, /penawaranMataKuliah\.updateMany/);
+  assert.match(server, /updated\.count === 1/);
+});
