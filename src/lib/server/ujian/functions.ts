@@ -109,9 +109,20 @@ export const mutateUjianServer = createServerFn({ method: "POST" })
 				} else {
 					const item = payload as Ujian;
 					const existing = await prisma.ujian.findUnique({ where: { id: item.id }, select: { id: true } });
-					if (existing
-						? !(await operatorCanTouchUjian(caller, item.id))
-						: !(await operatorCanTouchTopicSets(caller, item.topicSets))) return { ok: false as const, error: "Forbidden" };
+					// Existing exam: authorize stored ownership/scope first so client-supplied
+					// topicSets cannot be used as proof of access to another exam.
+					if (existing && !(await operatorCanTouchUjian(caller, item.id))) {
+						return { ok: false as const, error: "Forbidden" };
+					}
+					// Always authorize the requested topicSets (create + update) so an
+					// in-scope operator cannot expand an exam with out-of-scope topics.
+					if (!(await operatorCanTouchTopicSets(caller, item.topicSets))) {
+						return { ok: false as const, error: "Forbidden" };
+					}
+					const mkIds = parseJson<string[]>(caller.mataKuliahIds || "[]", []);
+					if (item.mataKuliahId && mkIds.length > 0 && !mkIds.includes(item.mataKuliahId)) {
+						return { ok: false as const, error: "Forbidden" };
+					}
 				}
 			} else if (caller.role !== "super_admin") {
 				return { ok: false as const, error: "Forbidden" };

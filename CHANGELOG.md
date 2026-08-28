@@ -30,6 +30,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Security
 
+- Perketat upsert paket ujian: `admin_prodi` harus boleh menyentuh ujian tersimpan dan seluruh `topicSets`/mata kuliah yang diminta, agar payload klien tidak dapat memperluas scope topik di luar otorisasi.
 - Batasi autosave dan submit peserta ke mutation jawaban khusus yang memvalidasi sesi, soal, dan opsi dari database serta menolak full-record session upsert.
 - Terapkan validasi Zod discriminated union dan pemeriksaan integritas relasi sebelum penghapusan data induk akademik untuk mencegah orphaned records dan eksploitasi payload.
 - Terapkan penegakan otorisasi server lengkap pada pembuatan sesi ujian (validasi kepesertaan, jadwal, rentang IP, dan token claim).
