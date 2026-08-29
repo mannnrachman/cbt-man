@@ -3,6 +3,7 @@ import { parseJson } from "./json";
 import { validateSession, readSessionToken } from "./session";
 import type { NavKey, Ujian } from "@/lib/cbt/types";
 import type { UserRow } from "../repos/mappers";
+import { requestedUjianScopeAllowed } from "@/lib/cbt/ujian-scope";
 // @ts-expect-error -- seed helper is an untyped .mjs module
 
 import { createSeedDataset, seedDatabase } from "./seed-shared.mjs";
@@ -82,24 +83,26 @@ export async function operatorCanTouchUjianInput(
 	caller: UserRow,
 	item: Pick<Ujian, "mataKuliahId" | "penawaranId" | "topicSets">,
 ): Promise<boolean> {
-	if (allowedTopikIdsForCaller(caller) === null) return true;
-	if (!(await operatorCanTouchTopicSets(caller, item.topicSets))) return false;
-
-	let hasScopedInput = item.topicSets.length > 0;
+	const unrestricted = allowedTopikIdsForCaller(caller) === null;
+	const topicsAllowed = unrestricted || await operatorCanTouchTopicSets(caller, item.topicSets);
 	const mataKuliahIds = parseJson<string[]>(caller.mataKuliahIds || "[]", []);
-	if (item.mataKuliahId) {
-		if (!mataKuliahIds.includes(item.mataKuliahId)) return false;
-		hasScopedInput = true;
-	}
+	let penawaranMataKuliahId: string | undefined;
 	if (item.penawaranId) {
 		const penawaran = await prisma.penawaranMataKuliah.findUnique({
 			where: { id: item.penawaranId },
 			select: { mataKuliahId: true },
 		});
-		if (!penawaran || !mataKuliahIds.includes(penawaran.mataKuliahId)) return false;
-		hasScopedInput = true;
+		penawaranMataKuliahId = penawaran?.mataKuliahId;
 	}
-	return hasScopedInput;
+	return requestedUjianScopeAllowed({
+		unrestricted,
+		topicsPresent: item.topicSets.length > 0,
+		topicsAllowed,
+		allowedMataKuliahIds: new Set(mataKuliahIds),
+		mataKuliahId: item.mataKuliahId,
+		penawaranRequested: !!item.penawaranId,
+		penawaranMataKuliahId,
+	});
 }
 
 export async function operatorCanTouchModul(

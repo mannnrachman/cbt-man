@@ -277,7 +277,7 @@ function RouteComponent() {
   const currentSesi = sesi;
   const currentSoal = soal;
   const currentJawaban = j;
-  const optOrder = currentSesi.jawabanOrder[currentSoal.id] ?? currentSoal.jawaban.map((o) => o.id);
+  const optOrder = currentSesi.jawabanOrder[currentJawaban.soalId] ?? currentSoal.jawaban.map((o) => o.id);
 
   const mm = Math.floor(remaining / 60000);
   const ss = Math.floor((remaining % 60000) / 1000);

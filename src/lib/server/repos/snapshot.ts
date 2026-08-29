@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from "@/lib/server/db/prisma";
 import { parseJson } from "@/lib/server/db/json";
-import { participantQuestionId } from "@/lib/cbt/session-answers";
+import { participantSessionQuestions } from "@/lib/cbt/session-answers";
 import { 
 	Snapshot, 
 	SnapshotRows, 
@@ -164,27 +164,13 @@ export function operatorSnapshot(rows: SnapshotRows, caller: UserRow): Snapshot 
 	const sesi = rows.sesi.filter(
 		(item) => item.pesertaId === caller.id && ujianIds.has(item.ujianId),
 	);
-	const ujianById = new Map(ujian.map((item) => [item.id, item]));
-	const soal = sesi.flatMap((session) => {
-		const ujianRow = ujianById.get(session.ujianId);
-		const canReveal = session.status === "selesai" && !!ujianRow?.showResult && !!ujianRow.showResultDetail;
-		const snapshotById = new Map(
-			parseJson<ReturnType<typeof mapSoal>[]>(session.soalSnapshot, []).map((item) => [item.id, item]),
-		);
-		return parseJson<string[]>(session.soalIds, []).flatMap((id) => {
-			const snapshot = snapshotById.get(id);
-			const row = rows.soal.find((item) => item.id === id);
-			if (!snapshot && !row) return [];
-			const mapped = { ...(snapshot ?? mapSoal(row!)), id: participantQuestionId(session.id, id) };
-			return canReveal
-				? mapped
-				: { ...mapped, jawaban: mapped.jawaban.map((j) => ({ ...j, benar: false })), pembahasan: "" };
-		});
-	});
-	const sesiForParticipant = sesi.map((row) => {
-		const mapped = mapSesi(row);
-		const exam = ujianById.get(row.ujianId);
-		const canShowScore = row.status === "selesai" && !!exam?.showResult;
+	const mappedUjian = ujian.map(mapUjian);
+	const mappedSesi = sesi.map(mapSesi);
+	const ujianById = new Map(mappedUjian.map((item) => [item.id, item]));
+	const soal = participantSessionQuestions(mappedSesi, mappedUjian, rows.soal.map(mapSoal));
+	const sesiForParticipant = mappedSesi.map((mapped) => {
+		const exam = ujianById.get(mapped.ujianId);
+		const canShowScore = mapped.status === "selesai" && !!exam?.showResult;
 		const canShowDetail = canShowScore && !!exam?.showResultDetail;
 		return {
 			...mapped,
@@ -208,7 +194,7 @@ export function operatorSnapshot(rows: SnapshotRows, caller: UserRow): Snapshot 
 		modul: [],
 		topik: [],
 		soal,
-		ujian: ujian.map(mapUjian),
+		ujian: mappedUjian,
 		// Token codes are secrets shared out-of-band by the proctor. A participant
 		// may claim a code through the narrow claim action, but never receives the
 		// exam's token inventory in the general snapshot.

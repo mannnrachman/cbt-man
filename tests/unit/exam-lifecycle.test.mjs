@@ -1,6 +1,7 @@
 import { strict as assert } from "node:assert";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
+import { requestedUjianScopeAllowed } from "../../src/lib/cbt/ujian-scope.ts";
 
 function read(rel) {
   return readFileSync(new URL(`../../${rel}`, import.meta.url), "utf8");
@@ -89,8 +90,27 @@ test("operator updates authorize both stored and requested exam scope", () => {
   assert.match(server, /if \(action === "bulkSet"\) return \{ ok: false as const, error: "Forbidden" \}/);
   assert.match(server, /existing && !\(await operatorCanTouchUjian\(caller, item\.id\)\)/);
   assert.match(server, /operatorCanTouchUjianInput\(caller, item\)/);
-  assert.match(auth, /hasScopedInput = item\.topicSets\.length > 0/);
+  assert.match(auth, /requestedUjianScopeAllowed/);
   assert.match(auth, /penawaranMataKuliah\.findUnique/);
+
+  const allowed = new Set(["mk_allowed"]);
+  const check = (overrides = {}) =>
+    requestedUjianScopeAllowed({
+      unrestricted: false,
+      topicsPresent: false,
+      topicsAllowed: true,
+      allowedMataKuliahIds: allowed,
+      penawaranRequested: false,
+      ...overrides,
+    });
+  assert.equal(check(), false, "a restricted empty draft has no authorized scope");
+  assert.equal(check({ mataKuliahId: "mk_foreign" }), false, "foreign requested/stored course is rejected");
+  assert.equal(check({ mataKuliahId: "mk_allowed" }), true);
+  assert.equal(
+    check({ penawaranRequested: true, penawaranMataKuliahId: "mk_foreign" }),
+    false,
+    "foreign offering is rejected",
+  );
 });
 
 test("offering membership writes are serialized and reject stale state", () => {
