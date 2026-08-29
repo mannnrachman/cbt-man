@@ -81,9 +81,10 @@ export const mutateModulServer = createServerFn({ method: "POST" })
 			});
 			return { ok: true as const };
 		} catch (err) {
+			console.error("[mutateModulServer]", err);
 			return {
 				ok: false as const,
-				error: err instanceof Error ? err.message : String(err),
+				error: "Gagal menyimpan modul",
 			};
 		}
 	});
@@ -160,7 +161,9 @@ export const mutateSoalServer = createServerFn({ method: "POST" })
 					if (!(await operatorCanTouchSoal(caller, id))) return { ok: false as const, error: "Forbidden" };
 				} else {
 					const item = payload as Soal;
+					const existing = await prisma.soal.findUnique({ where: { id: item.id }, select: { topikId: true } });
 					if (!(await operatorCanTouchTopikId(caller, item.topikId))) return { ok: false as const, error: "Forbidden" };
+					if (existing && !(await operatorCanTouchTopikId(caller, existing.topikId))) return { ok: false as const, error: "Forbidden" };
 				}
 			} else if (caller.role !== "super_admin") {
 				return { ok: false as const, error: "Forbidden" };
@@ -227,9 +230,10 @@ export const mutateSoalServer = createServerFn({ method: "POST" })
 			});
 			return { ok: true as const };
 		} catch (err) {
+			console.error("[mutateSoalServer]", err);
 			return {
 				ok: false as const,
-				error: err instanceof Error ? err.message : String(err),
+				error: "Gagal menyimpan soal",
 			};
 		}
 	});

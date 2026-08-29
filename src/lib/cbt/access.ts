@@ -55,7 +55,8 @@ export function allowedTopikIdSet(user: User | null | undefined): Set<string> | 
 
 export function isTopikAllowed(user: User | null | undefined, topikId: string): boolean {
   if (isUnrestricted(user)) return true;
-  const set = new Set(user?.allowedTopikIds ?? []);
+  const set = allowedTopikIdSet(user);
+  if (!set) return true;
   if (set.has(topikId)) return true;
   
   // Periksa apakah topik ini berada di dalam modul mata kuliah user
@@ -121,14 +122,15 @@ export function ujianTouchesAllowed(user: User | null | undefined, ujian: Ujian)
   if (isUnrestricted(user)) return true;
   const mkSet = new Set(user?.mataKuliahIds ?? []);
   if (ujian.mataKuliahId && mkSet.has(ujian.mataKuliahId)) return true;
-  const set = new Set(user?.allowedTopikIds ?? []);
-  if (set.size === 0 && mkSet.size === 0) return true; // unrestricted (though handled above)
+  const set = allowedTopikIdSet(user);
+  if (!set) return true;
   return ujian.topicSets.length > 0 && ujian.topicSets.every((ts) => set.has(ts.topikId));
 }
 
 export function visibleUjians(user: User | null | undefined) {
   if (isUnrestricted(user)) return ujianRepo.all();
-  const set = new Set(user?.allowedTopikIds ?? []);
+  const set = allowedTopikIdSet(user);
+  if (!set) return ujianRepo.all();
   const mkSet = new Set(user?.mataKuliahIds ?? []);
   const all = ujianRepo.all();
   return all.filter((u) => 

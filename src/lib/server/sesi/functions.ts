@@ -305,6 +305,7 @@ export const mutateSesiServer = createServerFn({ method: "POST" })
 						mulaiAt: toBigInt(item.mulaiAt),
 						endsAt: toBigInt(item.endsAt),
 						soalIds: stringifyJson(item.soalIds),
+						soalSnapshot: stringifyJson(item.soalSnapshot),
 						jawabanOrder: stringifyJson(item.jawabanOrder),
 						createdAt: BigInt(item.createdAt),
 					};
