@@ -12,3 +12,10 @@ test("exam list exposes class assignment and lifecycle status", () => {
   assert.match(route, /kelas\.pesertaIds\.length/);
   assert.match(route, /u\.status === "published"/);
 });
+
+test("class workflow refreshes authoritative core data and uses guarded membership updates", () => {
+  const route = read("src/routes/_authenticated/admin.akademik.kelas-mata-kuliah.tsx");
+  assert.match(route, /await hydrateRepos\(\)/);
+  assert.match(route, /penawaranRepo\.updateMembership/);
+  assert.doesNotMatch(route, /penawaranRepo\.(?:upsert|remove)/);
+});

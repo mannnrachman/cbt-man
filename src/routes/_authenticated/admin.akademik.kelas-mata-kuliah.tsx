@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { mataKuliahRepo, penawaranRepo, semesterRepo, usersRepo } from "@/lib/cbt/repos";
+import { hydrateRepos, mataKuliahRepo, penawaranRepo, semesterRepo, usersRepo } from "@/lib/cbt/repos";
 import { mutatePenawaranMataKuliahServer } from "@/lib/server/akademik/functions";
 import { uid } from "@/lib/cbt/storage";
 import type { PenawaranMataKuliah } from "@/lib/cbt/types";
@@ -38,9 +38,12 @@ function KelasMataKuliahPage() {
 
   async function save() {
     if (!form.mataKuliahId) return toast.error("Mata kuliah wajib dipilih.");
+    const existing = penawaranRepo.byId(form.id);
     const result = await mutatePenawaranMataKuliahServer({ data: { action: "upsert", payload: form } });
     if (!result.ok) return toast.error(result.error);
-    penawaranRepo.upsert(form);
+    await hydrateRepos();
+    const saved = penawaranRepo.byId(form.id);
+    if (existing && saved) penawaranRepo.updateMembership({ ...saved, pengampuIds: form.pengampuIds, pesertaIds: form.pesertaIds });
     setItems(penawaranRepo.all());
     setOpen(false);
     toast.success("Kelas mata kuliah disimpan.");
@@ -50,7 +53,7 @@ function KelasMataKuliahPage() {
     if (!confirm("Hapus kelas mata kuliah ini?")) return;
     const result = await mutatePenawaranMataKuliahServer({ data: { action: "remove", payload: { id } } });
     if (!result.ok) return toast.error(result.error);
-    penawaranRepo.remove(id);
+    await hydrateRepos();
     setItems(penawaranRepo.all());
   }
 
