@@ -23,6 +23,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Fixed
 
+- Sinkronkan ulang data kelas setelah mutation server dan gunakan update keanggotaan yang terlindungi agar UI tidak menyimpan state lokal yang stale (#134).
 - Tolak `topicSets` legacy yang malformed sebelum remediation menulis data, gunakan ownership topik langsung, dan cegah update penawaran menimpa membership concurrent (#133).
 - Perbaiki sintaks nilai arbitrer negatif Tailwind (`translate-y-[-0.5px]`, `top-[-40%]`) agar utilitas CSS ter-generate (diekstrak dari #98).
 - Perbaiki label tombol pembuka modal login landing menjadi "Login Peserta" dan render jawaban essay hasil ujian sebagai plain text (diekstrak dari #120).
