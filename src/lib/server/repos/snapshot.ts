@@ -181,10 +181,15 @@ export function operatorSnapshot(rows: SnapshotRows, caller: UserRow): Snapshot 
 	}
 	for (const id of withheld) revealed.delete(id);
 
-	const snapshotSoal = sesi.flatMap((item) => parseJson<ReturnType<typeof mapSoal>[]>(item.soalSnapshot, []));
-	const snapshotById = new Map(snapshotSoal.map((item) => [item.id, item]));
+	const snapshotBySessionAndId = new Map(
+		sesi.flatMap((item) =>
+			parseJson<ReturnType<typeof mapSoal>[]>(item.soalSnapshot, [])
+				.map((soal) => [`${item.id}:${soal.id}`, soal] as const),
+		),
+	);
 	const soal = [...soalIds].flatMap((id) => {
-			const snapshot = snapshotById.get(id);
+			const session = sesi.find((item) => parseJson<string[]>(item.soalIds, []).includes(id));
+			const snapshot = session ? snapshotBySessionAndId.get(`${session.id}:${id}`) : undefined;
 			const row = rows.soal.find((item) => item.id === id);
 			if (!snapshot && !row) return [];
 			const mapped = snapshot ?? mapSoal(row!);

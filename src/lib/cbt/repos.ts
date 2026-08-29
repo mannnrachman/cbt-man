@@ -9,6 +9,7 @@ import {
 	mutateUnitAkademikServer, 
 	mutateTahunAkademikServer, mutateSemesterServer, mutateMataKuliahServer 
 } from "@/lib/server/akademik/functions";
+import { mutatePenawaranMembershipServer } from "@/lib/server/akademik/functions";
 import { toast } from "sonner";
 import type {
 	AppConfig,
@@ -241,6 +242,7 @@ function runEntityMutation(
 		case "tahunAkademik": mutationPromise = mutateTahunAkademikServer({ data: { action: action as any, payload } }); break;
 		case "semester": mutationPromise = mutateSemesterServer({ data: { action: action as any, payload } }); break;
 		case "mataKuliah": mutationPromise = mutateMataKuliahServer({ data: { action: action as any, payload } }); break;
+		case "penawaran": mutationPromise = Promise.resolve({ ok: false, error: "Gunakan updateMembership untuk penawaran." }); break;
 		default: mutationPromise = Promise.resolve({ ok: false, error: "Unknown entity" });
 	}
 
@@ -376,13 +378,18 @@ export const ujianRepo = createRepo(
 	},
 );
 
-export const penawaranRepo = createRepo(
-	"penawaran",
-	() => cache.penawaran,
-	(items) => {
-		cache.penawaran = items;
+export const penawaranRepo = {
+	all: () => cache.penawaran.slice(),
+	byId: (id: string) => cache.penawaran.find((item) => item.id === id),
+	updateMembership(item: PenawaranMataKuliah): void {
+		upsertArrayItem(cache.penawaran, item);
+		void mutatePenawaranMembershipServer({
+			data: { id: item.id, pengampuIds: item.pengampuIds, pesertaIds: item.pesertaIds },
+		}).then((result) => {
+			if (!result.ok) notifyMutationFailure("penawaran", result.error ?? "Unknown error");
+		});
 	},
-);
+};
 
 export const tokenRepo = createRepo(
 	"token",

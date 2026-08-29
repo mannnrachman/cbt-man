@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { prisma } from "../db/prisma";
 import { requireAdminResult } from "../db/auth";
-import type { User, UnitAkademik, Modul, Topik, Soal, Ujian, TokenUjian, TokenClaim, SesiUjian, AppConfig, PenawaranMataKuliah } from "@/lib/cbt/types";
+import type { User, UnitAkademik, MataKuliah, PenawaranMataKuliah, Modul, Topik, Soal, Ujian, TokenUjian, TokenClaim, SesiUjian, AppConfig } from "@/lib/cbt/types";
 
 import { stringifyJson, toBigInt } from "../db/json";
 
@@ -11,7 +11,7 @@ export const importBackupServer = createServerFn({ method: "POST" })
 		z.object({
 			users: z.array(z.any()),
 			unitAkademik: z.array(z.any()),
-
+			mataKuliah: z.array(z.any()),
 			modul: z.array(z.any()),
 			topik: z.array(z.any()),
 			soal: z.array(z.any()),
@@ -32,16 +32,18 @@ export const importBackupServer = createServerFn({ method: "POST" })
 			await tx.tokenUjian.deleteMany();
 			await tx.soal.deleteMany();
 			await tx.ujian.deleteMany();
-			await tx.penawaranMataKuliah.deleteMany();
 			await tx.topik.deleteMany();
 			await tx.modul.deleteMany();
+			await tx.penawaranMataKuliah.deleteMany();
+			await tx.mataKuliah.deleteMany();
 			await tx.user.deleteMany();
 			await tx.unitAkademik.deleteMany();
 			await tx.appConfig.deleteMany();
 
 			if (data.unitAkademik.length)
 				await tx.unitAkademik.createMany({ data: data.unitAkademik as UnitAkademik[] });
-
+			if (data.mataKuliah.length)
+				await tx.mataKuliah.createMany({ data: data.mataKuliah as MataKuliah[] });
 			if (data.modul.length)
 				await tx.modul.createMany({ data: data.modul as Modul[] });
 			if (data.topik.length)
@@ -200,6 +202,8 @@ export const resetAllDataServer = createServerFn({ method: "POST" }).handler(
 			await tx.ujian.deleteMany();
 			await tx.topik.deleteMany();
 			await tx.modul.deleteMany();
+			await tx.penawaranMataKuliah.deleteMany();
+			await tx.mataKuliah.deleteMany();
 			await tx.user.deleteMany();
 			await tx.unitAkademik.deleteMany();
 

@@ -27,7 +27,7 @@ try {
   const result = sessions.map((session) => {
     const questionIds = parseJson(session.soalIds, []);
     const answers = parseJson(session.jawaban, []);
-    const finished = Boolean(session.selesaiAt) || session.status === "finished";
+    const finished = Boolean(session.selesaiAt) || session.status === "selesai";
     return {
       id: session.id,
       ujianId: session.ujianId,
