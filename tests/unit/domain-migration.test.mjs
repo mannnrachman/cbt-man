@@ -42,7 +42,7 @@ test("domain scripts reject malformed or non-array exam topicSets before writes"
 
   const remediation = read("scripts/remediate-legacy-module-courses.mjs");
   assert.ok(
-    remediation.indexOf("validateExamTopicSets") < remediation.indexOf("for (const mapping"),
+    remediation.indexOf("validateExamTopicSets(await prisma.ujian.findMany") < remediation.indexOf("for (const mapping"),
     "all exams must be validated before remediation writes",
   );
 });
