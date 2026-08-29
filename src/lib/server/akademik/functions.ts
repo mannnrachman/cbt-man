@@ -7,6 +7,7 @@ import { requireCaller, seedIfNeeded } from "../db/auth";
 import { writeAuditLog } from "../db/audit";
 import type { UnitAkademik, TahunAkademik, Semester, MataKuliah, PenawaranMataKuliah } from "@/lib/cbt/types";
 import { mapPenawaran } from "../repos/mappers";
+import { compareAndSetMembership } from "@/lib/cbt/penawaran-membership";
 import {
 	UnitAkademikSchema,
 	TahunAkademikSchema,
@@ -352,6 +353,8 @@ export const getUnitAkademikList = createServerFn({ method: "GET" }).handler(
 export const mutatePenawaranMembershipServer = createServerFn({ method: "POST" })
 	.validator(z.object({
 		id: z.string().min(1),
+		expectedPengampuIds: z.array(z.string()),
+		expectedPesertaIds: z.array(z.string()),
 		pengampuIds: z.array(z.string()),
 		pesertaIds: z.array(z.string()),
 	}))
@@ -359,13 +362,23 @@ export const mutatePenawaranMembershipServer = createServerFn({ method: "POST" }
 		const caller = await requireSuperAdmin();
 		if (!caller) return { ok: false as const, error: "Akses ditolak: Hanya Super Admin yang diizinkan." };
 		try {
-			const row = await prisma.penawaranMataKuliah.update({
-				where: { id: data.id },
-				data: {
-					pengampuIds: JSON.stringify(data.pengampuIds),
-					pesertaIds: JSON.stringify(data.pesertaIds),
-				},
-			});
+			const row = await prisma.$transaction((tx) => compareAndSetMembership(
+				async () => (await tx.penawaranMataKuliah.updateMany({
+					where: {
+						id: data.id,
+						pengampuIds: JSON.stringify(data.expectedPengampuIds),
+						pesertaIds: JSON.stringify(data.expectedPesertaIds),
+					},
+					data: {
+						pengampuIds: JSON.stringify(data.pengampuIds),
+						pesertaIds: JSON.stringify(data.pesertaIds),
+					},
+				})).count,
+				() => tx.penawaranMataKuliah.findUnique({ where: { id: data.id } }),
+			));
+			if (!row) {
+				return { ok: false as const, error: "Data anggota telah berubah. Muat ulang lalu coba lagi." };
+			}
 			audit(caller, "penawaran", "membership", data);
 			return { ok: true as const, penawaran: mapPenawaran(row) };
 		} catch {

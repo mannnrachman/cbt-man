@@ -1,6 +1,8 @@
 import { strict as assert } from "node:assert";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
+import { requestedUjianScopeAllowed } from "../../src/lib/cbt/ujian-scope.ts";
+import { compareAndSetMembership } from "../../src/lib/cbt/penawaran-membership.ts";
 
 function read(rel) {
   return readFileSync(new URL(`../../${rel}`, import.meta.url), "utf8");
@@ -81,4 +83,58 @@ test("course offerings are additive and legacy exams receive a compatibility off
   assert.match(migration, /CREATE TABLE "PenawaranMataKuliah"/);
   assert.match(migration, /po_legacy_/);
   assert.match(types, /penawaranId: z\.string\(\)\.optional\(\)/);
+});
+
+test("operator updates authorize both stored and requested exam scope", () => {
+  const server = read("src/lib/server/ujian/functions.ts");
+  const auth = read("src/lib/server/db/auth.ts");
+  assert.match(server, /if \(action === "bulkSet"\) return \{ ok: false as const, error: "Forbidden" \}/);
+  assert.match(server, /existing && !\(await operatorCanTouchUjian\(caller, item\.id\)\)/);
+  assert.match(server, /operatorCanTouchUjianInput\(caller, item\)/);
+  assert.match(auth, /requestedUjianScopeAllowed/);
+  assert.match(auth, /penawaranMataKuliah\.findUnique/);
+
+  const allowed = new Set(["mk_allowed"]);
+  const check = (overrides = {}) =>
+    requestedUjianScopeAllowed({
+      unrestricted: false,
+      topicsPresent: false,
+      topicsAllowed: true,
+      allowedMataKuliahIds: allowed,
+      penawaranRequested: false,
+      ...overrides,
+    });
+  assert.equal(check(), false, "a restricted empty draft has no authorized scope");
+  assert.equal(check({ mataKuliahId: "mk_foreign" }), false, "foreign requested/stored course is rejected");
+  assert.equal(check({ mataKuliahId: "mk_allowed" }), true);
+  assert.equal(
+    check({ penawaranRequested: true, penawaranMataKuliahId: "mk_foreign" }),
+    false,
+    "foreign offering is rejected",
+  );
+});
+
+test("offering membership writes are serialized and reject stale state", async () => {
+  const client = read("src/lib/cbt/repos.ts");
+  const server = read("src/lib/server/akademik/functions.ts");
+  assert.match(client, /penawaranMembershipPending\.then\(request, request\)/);
+  assert.match(client, /upsertArrayItem\(cache\.penawaran, result\.penawaran\)/);
+  assert.match(server, /expectedPengampuIds/);
+  assert.match(server, /penawaranMataKuliah\.updateMany/);
+  assert.match(server, /compareAndSetMembership/);
+
+  let reads = 0;
+  const stale = await compareAndSetMembership(
+    async () => 0,
+    async () => {
+      reads++;
+      return { id: "po_1" };
+    },
+  );
+  assert.equal(stale, null);
+  assert.equal(reads, 0, "stale writes must not reconcile an unaccepted state");
+  assert.deepEqual(
+    await compareAndSetMembership(async () => 1, async () => ({ id: "po_1" })),
+    { id: "po_1" },
+  );
 });

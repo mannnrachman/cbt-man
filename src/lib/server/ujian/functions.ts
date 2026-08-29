@@ -9,7 +9,7 @@ import {
 	seedIfNeeded,
 	operatorHasNav,
 	operatorCanTouchUjian,
-	operatorCanTouchTopicSets,
+	operatorCanTouchUjianInput,
 	pesertaCanTouchUjian,
 } from "../db/auth";
 import type { Ujian, TokenUjian } from "@/lib/cbt/types";
@@ -103,15 +103,17 @@ export const mutateUjianServer = createServerFn({ method: "POST" })
 			if (caller.role === "admin_prodi") {
 				if (!(await operatorHasNav(caller, "ujian")))
 					return { ok: false as const, error: "Forbidden" };
+				if (action === "bulkSet") return { ok: false as const, error: "Forbidden" };
 				if (action === "remove" || action === "publish") {
 					const id = String((payload as { id?: string }).id ?? "");
 					if (!(await operatorCanTouchUjian(caller, id))) return { ok: false as const, error: "Forbidden" };
 				} else {
 					const item = payload as Ujian;
 					const existing = await prisma.ujian.findUnique({ where: { id: item.id }, select: { id: true } });
-					if (existing
-						? !(await operatorCanTouchUjian(caller, item.id))
-						: !(await operatorCanTouchTopicSets(caller, item.topicSets))) return { ok: false as const, error: "Forbidden" };
+					if ((existing && !(await operatorCanTouchUjian(caller, item.id)))
+						|| !(await operatorCanTouchUjianInput(caller, item))) {
+						return { ok: false as const, error: "Forbidden" };
+					}
 				}
 			} else if (caller.role !== "super_admin") {
 				return { ok: false as const, error: "Forbidden" };

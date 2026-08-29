@@ -1,6 +1,34 @@
-import type { JawabanSesi, Soal } from "./types";
+import type { JawabanSesi, SesiUjian, Soal, Ujian } from "./types";
 
 type ParticipantAnswer = Pick<JawabanSesi, "soalId" | "jawabanIds" | "jawabanEssay" | "ragu">;
+
+export const participantQuestionId = (sessionId: string, soalId: string) => `${sessionId}:${soalId}`;
+
+export function participantSessionQuestions(
+  sessions: SesiUjian[],
+  exams: Ujian[],
+  currentQuestions: Soal[],
+): Soal[] {
+  const examById = new Map(exams.map((item) => [item.id, item]));
+  const currentById = new Map(currentQuestions.map((item) => [item.id, item]));
+  return sessions.flatMap((session) => {
+    const exam = examById.get(session.ujianId);
+    const canReveal = session.status === "selesai" && !!exam?.showResult && !!exam.showResultDetail;
+    const snapshotById = new Map(session.soalSnapshot.map((item) => [item.id, item]));
+    return session.soalIds.flatMap((id) => {
+      const source = snapshotById.get(id) ?? currentById.get(id);
+      if (!source) return [];
+      const scoped = { ...source, id: participantQuestionId(session.id, id) };
+      return canReveal
+        ? scoped
+        : {
+            ...scoped,
+            jawaban: scoped.jawaban.map((item) => ({ ...item, benar: false })),
+            pembahasan: "",
+          };
+    });
+  });
+}
 
 export function validateParticipantAnswers(
   soalIds: string[],
