@@ -1,7 +1,7 @@
 # SDD — Workflow Akademik, Bank Soal, dan Ujian CBT-MAN
 
-Status: Proposed  
-Tanggal: 2026-08-23  
+Status: Proposed
+Tanggal: 2026-08-23
 Sumber kajian: Council domain, correctness, migration-risk, dan chair review
 
 ## 1. Keputusan
@@ -285,4 +285,3 @@ Keputusan berikut harus dijawab sebelum Fase 3 selesai:
 - Tidak mencampur redesign UI, schema, authorization, import, dan backup dalam satu perubahan.
 - Tidak mendukung ujian lintas mata kuliah sebelum ada requirement dan SDD khusus.
 - Tidak mengubah data orphan dengan tebakan otomatis.
-
