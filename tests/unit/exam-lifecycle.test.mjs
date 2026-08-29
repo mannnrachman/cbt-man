@@ -2,6 +2,7 @@ import { strict as assert } from "node:assert";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import { requestedUjianScopeAllowed } from "../../src/lib/cbt/ujian-scope.ts";
+import { compareAndSetMembership } from "../../src/lib/cbt/penawaran-membership.ts";
 
 function read(rel) {
   return readFileSync(new URL(`../../${rel}`, import.meta.url), "utf8");
@@ -113,12 +114,27 @@ test("operator updates authorize both stored and requested exam scope", () => {
   );
 });
 
-test("offering membership writes are serialized and reject stale state", () => {
+test("offering membership writes are serialized and reject stale state", async () => {
   const client = read("src/lib/cbt/repos.ts");
   const server = read("src/lib/server/akademik/functions.ts");
   assert.match(client, /penawaranMembershipPending\.then\(request, request\)/);
   assert.match(client, /upsertArrayItem\(cache\.penawaran, result\.penawaran\)/);
   assert.match(server, /expectedPengampuIds/);
   assert.match(server, /penawaranMataKuliah\.updateMany/);
-  assert.match(server, /updated\.count === 1/);
+  assert.match(server, /compareAndSetMembership/);
+
+  let reads = 0;
+  const stale = await compareAndSetMembership(
+    async () => 0,
+    async () => {
+      reads++;
+      return { id: "po_1" };
+    },
+  );
+  assert.equal(stale, null);
+  assert.equal(reads, 0, "stale writes must not reconcile an unaccepted state");
+  assert.deepEqual(
+    await compareAndSetMembership(async () => 1, async () => ({ id: "po_1" })),
+    { id: "po_1" },
+  );
 });

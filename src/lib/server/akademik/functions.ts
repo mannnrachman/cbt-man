@@ -7,6 +7,7 @@ import { requireCaller, seedIfNeeded } from "../db/auth";
 import { writeAuditLog } from "../db/audit";
 import type { UnitAkademik, TahunAkademik, Semester, MataKuliah } from "@/lib/cbt/types";
 import { mapPenawaran } from "../repos/mappers";
+import { compareAndSetMembership } from "@/lib/cbt/penawaran-membership";
 import {
 	UnitAkademikSchema,
 	TahunAkademikSchema,
@@ -304,8 +305,8 @@ export const mutatePenawaranMembershipServer = createServerFn({ method: "POST" }
 		const caller = await requireSuperAdmin();
 		if (!caller) return { ok: false as const, error: "Akses ditolak: Hanya Super Admin yang diizinkan." };
 		try {
-			const row = await prisma.$transaction(async (tx) => {
-				const updated = await tx.penawaranMataKuliah.updateMany({
+			const row = await prisma.$transaction((tx) => compareAndSetMembership(
+				async () => (await tx.penawaranMataKuliah.updateMany({
 					where: {
 						id: data.id,
 						pengampuIds: JSON.stringify(data.expectedPengampuIds),
@@ -315,11 +316,9 @@ export const mutatePenawaranMembershipServer = createServerFn({ method: "POST" }
 						pengampuIds: JSON.stringify(data.pengampuIds),
 						pesertaIds: JSON.stringify(data.pesertaIds),
 					},
-				});
-				return updated.count === 1
-					? tx.penawaranMataKuliah.findUnique({ where: { id: data.id } })
-					: null;
-			});
+				})).count,
+				() => tx.penawaranMataKuliah.findUnique({ where: { id: data.id } }),
+			));
 			if (!row) {
 				return { ok: false as const, error: "Data anggota telah berubah. Muat ulang lalu coba lagi." };
 			}
