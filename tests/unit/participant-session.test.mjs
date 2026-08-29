@@ -91,3 +91,20 @@ test("participant transport failures rehydrate optimistic session state", () => 
   assert.match(repos, /saveParticipantSesiServer\([\s\S]*?\.catch\(\(error\) =>/);
   assert.match(repos, /notifyMutationFailure\("jawaban ujian", message\)/);
 });
+
+test("participant polling reads only the current session state", () => {
+  const route = readFileSync(
+    new URL("../../src/routes/_authenticated/peserta.ujian.$id.kerjakan.tsx", import.meta.url),
+    "utf8",
+  );
+  const server = readFileSync(
+    new URL("../../src/lib/server/sesi/functions.ts", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(route, /getParticipantSessionState\(sesi\.id\)/);
+  assert.match(server, /getParticipantSesiStateServer/);
+  assert.match(server, /select: \{ id: true, ujianId: true, pesertaId: true, status: true, endsAt: true \}/);
+  assert.match(server, /sesi\.pesertaId !== caller\.id/);
+  assert.match(server, /pesertaCanTouchUjian\(caller, sesi\.ujianId\)/);
+});

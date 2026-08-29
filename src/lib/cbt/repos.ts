@@ -3,7 +3,7 @@ import { getCbtSnapshot, getPublicBootConfigServer } from "@/lib/server/snapshot
 import { claimExamToken as claimExamTokenServer, saveConfigServer, mutateUjianServer, mutateTokenServer } from "@/lib/server/ujian/functions";
 import { mutateUserServer } from "@/lib/server/users/functions";
 import { mutateModulServer, mutateTopikServer, mutateSoalServer } from "@/lib/server/modul/functions";
-import { mutateSesiServer, createSesiServer, saveParticipantSesiServer } from "@/lib/server/sesi/functions";
+import { mutateSesiServer, createSesiServer, getParticipantSesiStateServer, saveParticipantSesiServer } from "@/lib/server/sesi/functions";
 import { getTodaysExamsServer } from "@/lib/server/exams";
 import { 
 	mutateUnitAkademikServer, 
@@ -169,6 +169,10 @@ export async function createExamSession(
 		return { ok: false, error: result.error ?? "Gagal membuat sesi ujian" };
 	}
 	return { ok: true, sesiId: result.sesiId };
+}
+
+export function getParticipantSessionState(sesiId: string) {
+	return getParticipantSesiStateServer({ data: { sesiId } });
 }
 
 let participantSessionPending: Promise<MutationResult> = Promise.resolve({ ok: true });

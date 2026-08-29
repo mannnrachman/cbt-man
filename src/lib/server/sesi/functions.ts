@@ -66,6 +66,32 @@ const participantAnswerSchema = z
 	})
 	.strict();
 
+export const getParticipantSesiStateServer = createServerFn({ method: "GET" })
+	.validator(z.object({ sesiId: z.string().min(1) }))
+	.handler(async ({ data }) => {
+		const caller = await requireCaller();
+		if (!caller || caller.role !== "mahasiswa") {
+			return { ok: false as const, error: "Forbidden" };
+		}
+
+		const sesi = await prisma.sesiUjian.findUnique({
+			where: { id: data.sesiId },
+			select: { id: true, ujianId: true, pesertaId: true, status: true, endsAt: true },
+		});
+		if (
+			!sesi ||
+			sesi.pesertaId !== caller.id ||
+			!(await pesertaCanTouchUjian(caller, sesi.ujianId))
+		) {
+			return { ok: false as const, error: "Forbidden" };
+		}
+
+		return {
+			ok: true as const,
+			sesi: { id: sesi.id, status: sesi.status, endsAt: toNumber(sesi.endsAt) },
+		};
+	});
+
 export const saveParticipantSesiServer = createServerFn({ method: "POST" })
 	.validator(
 		z.object({

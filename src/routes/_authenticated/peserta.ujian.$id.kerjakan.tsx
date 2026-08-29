@@ -1,5 +1,5 @@
 import { useAuthStore } from "@/lib/cbt/auth-store";
-import { soalRepo, sesiRepo, ujianRepo, invalidateReposCache, hydrateRepos, saveParticipantSession } from "@/lib/cbt/repos";
+import { soalRepo, sesiRepo, ujianRepo, getParticipantSessionState, invalidateReposCache, hydrateRepos, saveParticipantSession } from "@/lib/cbt/repos";
 import type { SesiUjian, Ujian } from "@/lib/cbt/types";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
@@ -142,18 +142,19 @@ function RouteComponent() {
 
     const pollInterval = setInterval(async () => {
       try {
-        await hydrateRepos();
-        const latestSesi = sesiRepo.byId(sesi.id);
-        if (latestSesi) {
-          if (latestSesi.status === "selesai") {
+        const result = await getParticipantSessionState(sesi.id);
+        if (result.ok) {
+          if (result.sesi.status === "selesai") {
+            invalidateReposCache();
+            await hydrateRepos();
             toast.warning("Ujian telah dihentikan oleh pengawas.");
             navigate({
               to: "/peserta/ujian/$id/hasil",
               params: { id: ujian.id },
             });
-          } else if (latestSesi.endsAt && sesiRef.current && latestSesi.endsAt !== sesiRef.current.endsAt) {
+          } else if (result.sesi.endsAt && sesiRef.current && result.sesi.endsAt !== sesiRef.current.endsAt) {
             // Safely merge endsAt without wiping local un-flushed answers
-            setSesi(prev => prev ? { ...prev, endsAt: latestSesi.endsAt } : prev);
+            setSesi(prev => prev ? { ...prev, endsAt: result.sesi.endsAt } : prev);
             toast.info("Waktu ujian Anda telah diperbarui oleh pengawas.");
           }
         }
