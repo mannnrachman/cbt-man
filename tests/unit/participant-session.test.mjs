@@ -107,4 +107,6 @@ test("participant polling reads only the current session state", () => {
   assert.match(server, /select: \{ id: true, ujianId: true, pesertaId: true, status: true, endsAt: true \}/);
   assert.match(server, /sesi\.pesertaId !== caller\.id/);
   assert.match(server, /pesertaCanTouchUjian\(caller, sesi\.ujianId\)/);
+  assert.match(route, /if \(pollInFlight\) return/);
+  assert.match(route, /pollInFlight = false/);
 });

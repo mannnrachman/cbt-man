@@ -140,7 +140,10 @@ function RouteComponent() {
       }
     }, 1000);
 
+    let pollInFlight = false;
     const pollInterval = setInterval(async () => {
+      if (pollInFlight) return;
+      pollInFlight = true;
       try {
         const result = await getParticipantSessionState(sesi.id);
         if (result.ok) {
@@ -160,6 +163,8 @@ function RouteComponent() {
         }
       } catch (e) {
         // silent error fallback
+      } finally {
+        pollInFlight = false;
       }
     }, 10000);
 
