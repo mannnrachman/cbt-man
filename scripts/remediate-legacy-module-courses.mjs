@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { validateExamTopicSets } from "./domain-json.mjs";
 
 const prisma = new PrismaClient();
 const apply = process.argv.includes("--apply");
@@ -14,6 +15,10 @@ function normalize(value) {
 }
 
 try {
+  const legacyExams = validateExamTopicSets(await prisma.ujian.findMany({
+    select: { id: true, nama: true, topicSets: true, mataKuliahId: true, status: true },
+  }));
+
   for (const mapping of mappings) {
     const module = await prisma.modul.findFirst({ where: { nama: mapping.moduleName, mataKuliahId: null } });
     if (!module) {
@@ -40,15 +45,12 @@ try {
     console.log(`${mapping.moduleName}: ${apply ? "ditautkan" : "siap ditautkan"} ke ${course.nama} (${course.id})`);
   }
 
-  const legacyExams = await prisma.ujian.findMany({
-    select: { id: true, nama: true, topicSets: true, mataKuliahId: true, status: true },
-  });
   for (const exam of legacyExams) {
-    const sourceIds = JSON.parse(exam.topicSets || "[]").map((item) => item?.topikId).filter(Boolean);
+    const sourceIds = exam.sourceIds;
     const sourceTopics = sourceIds.length
       ? await prisma.topik.findMany({ where: { id: { in: sourceIds } }, include: { modul: true } })
       : [];
-    const courseIds = [...new Set(sourceTopics.map((topic) => topic.modul.mataKuliahId).filter(Boolean))];
+    const courseIds = [...new Set(sourceTopics.map((topic) => topic.mataKuliahId ?? topic.modul.mataKuliahId).filter(Boolean))];
     if (courseIds.length !== 1 || sourceTopics.length !== new Set(sourceIds).size) continue;
     const course = await prisma.mataKuliah.findUnique({ where: { id: courseIds[0] }, select: { id: true, nama: true } });
     if (!course) continue;

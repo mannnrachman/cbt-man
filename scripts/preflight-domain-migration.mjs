@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { parseJsonArray } from "./domain-json.mjs";
 
 const prisma = new PrismaClient();
 
@@ -85,7 +86,11 @@ try {
   }
 
   for (const exam of exams) {
-    const sets = parseJson(exam.topicSets, []);
+    const sets = parseJsonArray(exam.topicSets);
+    if (!sets) {
+      add(findings, "blocking", "invalid_exam_topic_sets", `Paket ${exam.nama} memiliki topicSets yang bukan JSON array valid.`, [exam.id]);
+      continue;
+    }
     const ids = sets.map((item) => item?.topikId).filter(Boolean);
     const duplicateIds = [...new Set(ids.filter((id, index) => ids.indexOf(id) !== index))];
     if (duplicateIds.length) add(findings, "blocking", "duplicate_exam_source", `Paket ${exam.nama} memiliki sumber topik duplikat.`, [exam.id, ...duplicateIds]);

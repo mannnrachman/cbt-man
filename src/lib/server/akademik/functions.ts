@@ -308,7 +308,7 @@ export const mutatePenawaranMataKuliahServer = createServerFn({ method: "POST" }
 				}
 				await prisma.penawaranMataKuliah.upsert({
 					where: { id: item.id },
-					update: { mataKuliahId: item.mataKuliahId, semesterId: item.semesterId ?? null, kodeKelas: item.kodeKelas.trim(), pengampuIds: JSON.stringify(item.pengampuIds), pesertaIds: JSON.stringify(item.pesertaIds) },
+					update: { mataKuliahId: item.mataKuliahId, semesterId: item.semesterId ?? null, kodeKelas: item.kodeKelas.trim() },
 					create: { id: item.id, mataKuliahId: item.mataKuliahId, semesterId: item.semesterId ?? null, kodeKelas: item.kodeKelas.trim(), pengampuIds: JSON.stringify(item.pengampuIds), pesertaIds: JSON.stringify(item.pesertaIds), createdAt: BigInt(item.createdAt) },
 				});
 			} else {
