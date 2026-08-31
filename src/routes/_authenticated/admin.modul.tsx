@@ -158,8 +158,8 @@ function ModulPage() {
   return (
     <AdminPage className="">
       <AdminPageHeader
-        title="Bank Soal (Modul)"
-        description="Pusat penyimpanan referensi soal-soal ujian berdasarkan mata kuliah."
+        title="Bank Soal"
+        description="Mata Kuliah → Modul → Topik → Soal. Kelola soal sebelum dimasukkan ke paket ujian."
         action={
           canEdit && (
             <div className="flex items-center gap-2">

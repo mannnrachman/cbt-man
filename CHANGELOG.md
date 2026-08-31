@@ -23,7 +23,9 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Fixed
 
-- Kurangi polling ruang ujian peserta menjadi pembacaan status sesi sempit tanpa memuat snapshot seluruh database, dan cegah respons polling stale menurunkan deadline.
+- Kurangi polling ruang ujian peserta menjadi pembacaan status sesi sempit tanpa memuat snapshot seluruh database, dan cegah respons polling stale menurunkan deadline (#137).
+- Sinkronkan ulang data kelas setelah mutation server dan gunakan update keanggotaan yang terlindungi agar UI tidak menyimpan state lokal yang stale (#134).
+- Tolak `topicSets` legacy yang malformed sebelum remediation menulis data, gunakan ownership topik langsung, dan cegah update penawaran menimpa membership concurrent (#133).
 - Perbaiki sintaks nilai arbitrer negatif Tailwind (`translate-y-[-0.5px]`, `top-[-40%]`) agar utilitas CSS ter-generate (diekstrak dari #98).
 - Perbaiki label tombol pembuka modal login landing menjadi "Login Peserta" dan render jawaban essay hasil ujian sebagai plain text (diekstrak dari #120).
 - Pindahkan inisialisasi pembuatan sesi ujian ke server-side (`createSesiServer`) dan perbaiki stale cache snapshot sebelum navigasi ke ruang ujian peserta.
@@ -31,12 +33,16 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Security
 
+- Tutup bypass status published melalui upsert, samakan otorisasi peserta pada fetch/file/snapshot, redaksi metadata nilai server-side, dan batasi submit terlambat dengan grace period.
+- Kunci perubahan kelas mata kuliah setelah ujian dipublikasikan/berjalan, serta jaga sinkronisasi kepemilikan mata kuliah antara modul dan topik.
+
 - Batasi autosave dan submit peserta ke mutation jawaban khusus yang memvalidasi sesi, soal, dan opsi dari database serta menolak full-record session upsert.
 - Terapkan validasi Zod discriminated union dan pemeriksaan integritas relasi sebelum penghapusan data induk akademik untuk mencegah orphaned records dan eksploitasi payload.
 - Terapkan penegakan otorisasi server lengkap pada pembuatan sesi ujian (validasi kepesertaan, jadwal, rentang IP, dan token claim).
 - Terapkan validasi klaim token atomik di sisi server menggunakan model TokenClaim untuk memastikan token yang dapat digunakan kembali tetap terikat aman pada otorisasi sesi.
 - Terapkan penilaian otoritatif di sisi server saat pengumpulan ujian dan tutup celah race condition (TOCTOU) agar autosave tidak menimpa sesi yang telah diselesaikan pengawas.
 - Redaksi kunci jawaban (`benar`) dan `pembahasan` dari snapshot peserta serta akses file pembahasan sampai sesi selesai dan ujian mempublikasikan detail hasil; persempit DTO jadwal ujian publik di landing page (temuan review #120).
+- Perketat scope update paket ujian, pisahkan snapshot soal per sesi, dan tolak overwrite anggota kelas dari state klien yang stale (#132).
 
 ### Deprecated
 

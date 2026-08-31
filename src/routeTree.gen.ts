@@ -45,6 +45,7 @@ import { Route as AuthenticatedAdminAnalitikIdRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminAkademikTahunAkademikRouteImport } from './routes/_authenticated/admin.akademik.tahun-akademik'
 import { Route as AuthenticatedAdminAkademikSemesterRouteImport } from './routes/_authenticated/admin.akademik.semester'
 import { Route as AuthenticatedAdminAkademikMataKuliahRouteImport } from './routes/_authenticated/admin.akademik.mata-kuliah'
+import { Route as AuthenticatedAdminAkademikKelasMataKuliahRouteImport } from './routes/_authenticated/admin.akademik.kelas-mata-kuliah'
 import { Route as AuthenticatedPesertaUjianIdIndexRouteImport } from './routes/_authenticated/peserta.ujian.$id.index'
 import { Route as AuthenticatedPesertaUjianIdKerjakanRouteImport } from './routes/_authenticated/peserta.ujian.$id.kerjakan'
 import { Route as AuthenticatedPesertaUjianIdHasilRouteImport } from './routes/_authenticated/peserta.ujian.$id.hasil'
@@ -256,6 +257,12 @@ const AuthenticatedAdminAkademikMataKuliahRoute =
     path: '/mata-kuliah',
     getParentRoute: () => AuthenticatedAdminAkademikRoute,
   } as any)
+const AuthenticatedAdminAkademikKelasMataKuliahRoute =
+  AuthenticatedAdminAkademikKelasMataKuliahRouteImport.update({
+    id: '/kelas-mata-kuliah',
+    path: '/kelas-mata-kuliah',
+    getParentRoute: () => AuthenticatedAdminAkademikRoute,
+  } as any)
 const AuthenticatedPesertaUjianIdIndexRoute =
   AuthenticatedPesertaUjianIdIndexRouteImport.update({
     id: '/ujian/$id/',
@@ -322,6 +329,7 @@ export interface FileRoutesByFullPath {
   '/api/files/$id': typeof ApiFilesIdRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/peserta/': typeof AuthenticatedPesertaIndexRoute
+  '/admin/akademik/kelas-mata-kuliah': typeof AuthenticatedAdminAkademikKelasMataKuliahRoute
   '/admin/akademik/mata-kuliah': typeof AuthenticatedAdminAkademikMataKuliahRoute
   '/admin/akademik/semester': typeof AuthenticatedAdminAkademikSemesterRoute
   '/admin/akademik/tahun-akademik': typeof AuthenticatedAdminAkademikTahunAkademikRoute
@@ -364,6 +372,7 @@ export interface FileRoutesByTo {
   '/api/files/$id': typeof ApiFilesIdRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/peserta': typeof AuthenticatedPesertaIndexRoute
+  '/admin/akademik/kelas-mata-kuliah': typeof AuthenticatedAdminAkademikKelasMataKuliahRoute
   '/admin/akademik/mata-kuliah': typeof AuthenticatedAdminAkademikMataKuliahRoute
   '/admin/akademik/semester': typeof AuthenticatedAdminAkademikSemesterRoute
   '/admin/akademik/tahun-akademik': typeof AuthenticatedAdminAkademikTahunAkademikRoute
@@ -411,6 +420,7 @@ export interface FileRoutesById {
   '/api/files/$id': typeof ApiFilesIdRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/peserta/': typeof AuthenticatedPesertaIndexRoute
+  '/_authenticated/admin/akademik/kelas-mata-kuliah': typeof AuthenticatedAdminAkademikKelasMataKuliahRoute
   '/_authenticated/admin/akademik/mata-kuliah': typeof AuthenticatedAdminAkademikMataKuliahRoute
   '/_authenticated/admin/akademik/semester': typeof AuthenticatedAdminAkademikSemesterRoute
   '/_authenticated/admin/akademik/tahun-akademik': typeof AuthenticatedAdminAkademikTahunAkademikRoute
@@ -458,6 +468,7 @@ export interface FileRouteTypes {
     | '/api/files/$id'
     | '/admin/'
     | '/peserta/'
+    | '/admin/akademik/kelas-mata-kuliah'
     | '/admin/akademik/mata-kuliah'
     | '/admin/akademik/semester'
     | '/admin/akademik/tahun-akademik'
@@ -500,6 +511,7 @@ export interface FileRouteTypes {
     | '/api/files/$id'
     | '/admin'
     | '/peserta'
+    | '/admin/akademik/kelas-mata-kuliah'
     | '/admin/akademik/mata-kuliah'
     | '/admin/akademik/semester'
     | '/admin/akademik/tahun-akademik'
@@ -546,6 +558,7 @@ export interface FileRouteTypes {
     | '/api/files/$id'
     | '/_authenticated/admin/'
     | '/_authenticated/peserta/'
+    | '/_authenticated/admin/akademik/kelas-mata-kuliah'
     | '/_authenticated/admin/akademik/mata-kuliah'
     | '/_authenticated/admin/akademik/semester'
     | '/_authenticated/admin/akademik/tahun-akademik'
@@ -837,6 +850,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAkademikMataKuliahRouteImport
       parentRoute: typeof AuthenticatedAdminAkademikRoute
     }
+    '/_authenticated/admin/akademik/kelas-mata-kuliah': {
+      id: '/_authenticated/admin/akademik/kelas-mata-kuliah'
+      path: '/kelas-mata-kuliah'
+      fullPath: '/admin/akademik/kelas-mata-kuliah'
+      preLoaderRoute: typeof AuthenticatedAdminAkademikKelasMataKuliahRouteImport
+      parentRoute: typeof AuthenticatedAdminAkademikRoute
+    }
     '/_authenticated/peserta/ujian/$id/': {
       id: '/_authenticated/peserta/ujian/$id/'
       path: '/ujian/$id'
@@ -897,6 +917,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAdminAkademikRouteChildren {
+  AuthenticatedAdminAkademikKelasMataKuliahRoute: typeof AuthenticatedAdminAkademikKelasMataKuliahRoute
   AuthenticatedAdminAkademikMataKuliahRoute: typeof AuthenticatedAdminAkademikMataKuliahRoute
   AuthenticatedAdminAkademikSemesterRoute: typeof AuthenticatedAdminAkademikSemesterRoute
   AuthenticatedAdminAkademikTahunAkademikRoute: typeof AuthenticatedAdminAkademikTahunAkademikRoute
@@ -905,6 +926,8 @@ interface AuthenticatedAdminAkademikRouteChildren {
 
 const AuthenticatedAdminAkademikRouteChildren: AuthenticatedAdminAkademikRouteChildren =
   {
+    AuthenticatedAdminAkademikKelasMataKuliahRoute:
+      AuthenticatedAdminAkademikKelasMataKuliahRoute,
     AuthenticatedAdminAkademikMataKuliahRoute:
       AuthenticatedAdminAkademikMataKuliahRoute,
     AuthenticatedAdminAkademikSemesterRoute:

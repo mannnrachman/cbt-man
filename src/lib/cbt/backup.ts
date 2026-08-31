@@ -27,10 +27,11 @@ import {
   SoalSchema,
   UjianSchema,
   TokenUjianSchema,
+  TokenClaimSchema,
   SesiUjianSchema,
   ConfigSchema,
 } from "./types";
-import { importBackupServer, resetAllDataServer } from "@/lib/server/backup/functions";
+import { exportTokenClaimsServer, importBackupServer, resetAllDataServer } from "@/lib/server/backup/functions";
 import { exportFilesServer, importFilesServer } from "@/lib/server/files/functions";
 
 const FileBackupSchema = z.object({
@@ -56,6 +57,7 @@ export const BackupSchema = z.object({
   soal: z.array(SoalSchema),
   ujian: z.array(UjianSchema),
   token: z.array(TokenUjianSchema),
+  tokenClaims: z.array(TokenClaimSchema).default([]),
   sesi: z.array(SesiUjianSchema),
   config: ConfigSchema,
   files: z.array(FileBackupSchema).optional(),
@@ -64,6 +66,7 @@ export type Backup = z.infer<typeof BackupSchema>;
 
 export async function exportBackup(): Promise<Backup> {
   const files = await exportFilesServer();
+  const tokenClaims = await exportTokenClaimsServer();
   return {
     app: "cbtman",
     version: 1,
@@ -77,6 +80,7 @@ export async function exportBackup(): Promise<Backup> {
     soal: soalRepo.all(),
     ujian: ujianRepo.all(),
     token: tokenRepo.all(),
+    tokenClaims: tokenClaims.map((item) => ({ ...item, claimedAt: Number(item.claimedAt) })),
     sesi: sesiRepo.all(),
     config: configRepo.get(),
     files,
@@ -118,6 +122,10 @@ export async function importBackup(raw: any): Promise<Backup> {
         unitId: u.unitId ?? u.groupId ?? u.prodiId ?? null,
       }));
     }
+    if ("ujian" in raw && Array.isArray(raw.ujian)) {
+      // Backups created before the lifecycle field represent executable exams.
+      raw.ujian = raw.ujian.map((u: any) => ({ ...u, status: u.status ?? "published" }));
+    }
   }
 
   const data = BackupSchema.parse(raw);
@@ -132,6 +140,7 @@ export async function importBackup(raw: any): Promise<Backup> {
       soal: data.soal,
       ujian: data.ujian,
       token: data.token,
+      tokenClaims: data.tokenClaims,
       sesi: data.sesi,
       config: data.config,
     },

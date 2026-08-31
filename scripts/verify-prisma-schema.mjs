@@ -9,6 +9,8 @@ const database = join(directory, "fresh.db");
 const env = {
   ...process.env,
   DATABASE_URL: `file:${database}`,
+  // Keep the Rust schema engine's diagnostics enabled in restricted CI
+  // runners; otherwise a failed engine can surface as an empty error.
   RUST_LOG: "trace",
 };
 

@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { prisma } from "../db/prisma";
 import { requireAdminResult } from "../db/auth";
-import type { User, UnitAkademik, MataKuliah, PenawaranMataKuliah, Modul, Topik, Soal, Ujian, TokenUjian, SesiUjian, AppConfig } from "@/lib/cbt/types";
+import type { User, UnitAkademik, MataKuliah, PenawaranMataKuliah, Modul, Topik, Soal, Ujian, TokenUjian, TokenClaim, SesiUjian, AppConfig } from "@/lib/cbt/types";
 
 import { stringifyJson, toBigInt } from "../db/json";
 
@@ -12,13 +12,13 @@ export const importBackupServer = createServerFn({ method: "POST" })
 			users: z.array(z.any()),
 			unitAkademik: z.array(z.any()),
 			mataKuliah: z.array(z.any()),
-			penawaran: z.array(z.any()),
-
 			modul: z.array(z.any()),
 			topik: z.array(z.any()),
 			soal: z.array(z.any()),
 			ujian: z.array(z.any()),
+			penawaran: z.array(z.any()).default([]),
 			token: z.array(z.any()),
+			tokenClaims: z.array(z.any()).default([]),
 			sesi: z.array(z.any()),
 			config: z.any(),
 		}),
@@ -44,21 +44,22 @@ export const importBackupServer = createServerFn({ method: "POST" })
 				await tx.unitAkademik.createMany({ data: data.unitAkademik as UnitAkademik[] });
 			if (data.mataKuliah.length)
 				await tx.mataKuliah.createMany({ data: data.mataKuliah as MataKuliah[] });
+			if (data.modul.length)
+				await tx.modul.createMany({ data: data.modul as Modul[] });
+			if (data.topik.length)
+				await tx.topik.createMany({ data: data.topik as Topik[] });
 			if (data.penawaran.length)
 				await tx.penawaranMataKuliah.createMany({
 					data: (data.penawaran as PenawaranMataKuliah[]).map((item) => ({
-						...item,
+						id: item.id,
+						mataKuliahId: item.mataKuliahId,
 						semesterId: item.semesterId ?? null,
+						kodeKelas: item.kodeKelas,
 						pengampuIds: stringifyJson(item.pengampuIds),
 						pesertaIds: stringifyJson(item.pesertaIds),
 						createdAt: BigInt(item.createdAt),
 					})),
 				});
-
-			if (data.modul.length)
-				await tx.modul.createMany({ data: data.modul as Modul[] });
-			if (data.topik.length)
-				await tx.topik.createMany({ data: data.topik as Topik[] });
 			for (const item of data.users as User[]) {
 				await tx.user.create({
 					data: {
@@ -92,6 +93,7 @@ export const importBackupServer = createServerFn({ method: "POST" })
 				await tx.ujian.create({
 					data: {
 						...item,
+						status: item.status ?? "published",
 						beginAt: toBigInt(item.beginAt),
 						endAt: toBigInt(item.endAt),
 						groupIds: stringifyJson(item.groupIds),
@@ -128,6 +130,17 @@ export const importBackupServer = createServerFn({ method: "POST" })
 						})),
 					});
 				}
+				const claims = data.tokenClaims.length ? [] : [...new Map(incoming
+					.filter((item) => item.dipakaiOleh)
+					.map((item) => ({
+						id: `tc_legacy_${item.id}`,
+						ujianId: item.ujianId,
+						pesertaId: item.dipakaiOleh!,
+						kode: item.kode,
+						claimedAt: toBigInt(item.dipakaiAt) ?? BigInt(Date.now()),
+					}))
+					.map((claim) => [`${claim.ujianId}::${claim.pesertaId}`, claim] as const)).values()];
+				if (claims.length) await tx.tokenClaim.createMany({ data: claims });
 			}
 			if (data.sesi.length) {
 				await tx.sesiUjian.createMany({
@@ -146,6 +159,17 @@ export const importBackupServer = createServerFn({ method: "POST" })
 					})),
 				});
 			}
+			if (data.tokenClaims.length) {
+				await tx.tokenClaim.createMany({
+					data: (data.tokenClaims as TokenClaim[]).map((item) => ({
+						id: item.id,
+						ujianId: item.ujianId,
+						pesertaId: item.pesertaId,
+						kode: item.kode,
+						claimedAt: BigInt(item.claimedAt),
+					})),
+				});
+			}
 			await tx.appConfig.create({
 				data: {
 					id: "app",
@@ -157,6 +181,14 @@ export const importBackupServer = createServerFn({ method: "POST" })
 
 		return { ok: true as const };
 	});
+
+export const exportTokenClaimsServer = createServerFn({ method: "GET" }).handler(async () => {
+	const auth = await requireAdminResult();
+	if (!auth.ok) throw new Error(auth.error);
+	return prisma.tokenClaim.findMany({
+		select: { id: true, ujianId: true, pesertaId: true, kode: true, claimedAt: true },
+	});
+});
 
 export const resetAllDataServer = createServerFn({ method: "POST" }).handler(
 	async () => {

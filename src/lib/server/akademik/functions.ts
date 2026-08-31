@@ -5,13 +5,15 @@ import { z } from "zod";
 import { prisma } from "../db/prisma";
 import { requireCaller, seedIfNeeded } from "../db/auth";
 import { writeAuditLog } from "../db/audit";
-import type { UnitAkademik, TahunAkademik, Semester, MataKuliah } from "@/lib/cbt/types";
+import type { UnitAkademik, TahunAkademik, Semester, MataKuliah, PenawaranMataKuliah } from "@/lib/cbt/types";
 import { mapPenawaran } from "../repos/mappers";
+import { compareAndSetMembership } from "@/lib/cbt/penawaran-membership";
 import {
 	UnitAkademikSchema,
 	TahunAkademikSchema,
 	SemesterSchema,
 	MataKuliahSchema,
+	PenawaranMataKuliahSchema,
 } from "@/lib/cbt/types";
 
 function audit(caller: any, entity: string, action: string, payload: any) {
@@ -278,6 +280,62 @@ export const mutateMataKuliahServer = createServerFn({ method: "POST" })
 		}
 	});
 
+const MutatePenawaranSchema = z.discriminatedUnion("action", [
+	 z.object({ action: z.literal("upsert"), payload: PenawaranMataKuliahSchema }),
+	 z.object({ action: z.literal("remove"), payload: z.object({ id: z.string().min(1) }) }),
+]);
+
+export const mutatePenawaranMataKuliahServer = createServerFn({ method: "POST" })
+	.validator((d: unknown) => MutatePenawaranSchema.parse(d))
+	.handler(async ({ data }) => {
+		try {
+			const caller = await requireSuperAdmin();
+			if (!caller) return { ok: false as const, error: "Akses ditolak: Hanya Super Admin yang diizinkan." };
+			if (data.action === "upsert") {
+				const item = data.payload as PenawaranMataKuliah;
+				const lockedExam = await prisma.ujian.findFirst({
+					where: {
+						penawaranId: item.id,
+						OR: [{ status: "published" }, { sesi: { some: { status: "sedang" } } }],
+					},
+					select: { id: true },
+				});
+				if (lockedExam) return { ok: false as const, error: "Kelas tidak dapat diubah karena sudah dipublikasikan atau sedang berjalan." };
+				const mataKuliah = await prisma.mataKuliah.findUnique({ where: { id: item.mataKuliahId }, select: { id: true } });
+				if (!mataKuliah) return { ok: false as const, error: "Mata Kuliah tidak ditemukan." };
+				if (item.semesterId) {
+					const semester = await prisma.semester.findUnique({ where: { id: item.semesterId }, select: { id: true } });
+					if (!semester) return { ok: false as const, error: "Semester tidak ditemukan." };
+				}
+				await prisma.penawaranMataKuliah.upsert({
+					where: { id: item.id },
+					update: { mataKuliahId: item.mataKuliahId, semesterId: item.semesterId ?? null, kodeKelas: item.kodeKelas.trim() },
+					create: { id: item.id, mataKuliahId: item.mataKuliahId, semesterId: item.semesterId ?? null, kodeKelas: item.kodeKelas.trim(), pengampuIds: JSON.stringify(item.pengampuIds), pesertaIds: JSON.stringify(item.pesertaIds), createdAt: BigInt(item.createdAt) },
+				});
+			} else {
+				const used = await prisma.ujian.count({ where: { penawaranId: data.payload.id } });
+				if (used) return { ok: false as const, error: "Penawaran tidak dapat dihapus karena masih digunakan paket ujian." };
+				await prisma.penawaranMataKuliah.delete({ where: { id: data.payload.id } });
+			}
+			audit(caller, "penawaranMataKuliah", data.action, data.payload);
+			return { ok: true as const };
+		} catch (error) {
+			console.error("[mutatePenawaranMataKuliahServer]", error);
+			return { ok: false as const, error: "Gagal memproses penawaran mata kuliah." };
+		}
+	});
+
+export const getPenawaranMataKuliahList = createServerFn({ method: "GET" }).handler(async () => {
+	try {
+		const caller = await requireSuperAdmin();
+		if (!caller) return { ok: false as const, error: "Forbidden" };
+		const rows = await prisma.penawaranMataKuliah.findMany({ orderBy: { createdAt: "asc" } });
+		return { ok: true as const, items: rows.map((row) => ({ id: row.id, mataKuliahId: row.mataKuliahId, semesterId: row.semesterId ?? undefined, kodeKelas: row.kodeKelas, pengampuIds: JSON.parse(row.pengampuIds || "[]"), pesertaIds: JSON.parse(row.pesertaIds || "[]"), createdAt: Number(row.createdAt) })) };
+	} catch {
+		return { ok: false as const, error: "Gagal memuat penawaran mata kuliah." };
+	}
+});
+
 export const getUnitAkademikList = createServerFn({ method: "GET" }).handler(
 	async (): Promise<UnitAkademik[]> => {
 		const caller = await requireCaller();
@@ -295,6 +353,8 @@ export const getUnitAkademikList = createServerFn({ method: "GET" }).handler(
 export const mutatePenawaranMembershipServer = createServerFn({ method: "POST" })
 	.validator(z.object({
 		id: z.string().min(1),
+		expectedPengampuIds: z.array(z.string()),
+		expectedPesertaIds: z.array(z.string()),
 		pengampuIds: z.array(z.string()),
 		pesertaIds: z.array(z.string()),
 	}))
@@ -302,13 +362,23 @@ export const mutatePenawaranMembershipServer = createServerFn({ method: "POST" }
 		const caller = await requireSuperAdmin();
 		if (!caller) return { ok: false as const, error: "Akses ditolak: Hanya Super Admin yang diizinkan." };
 		try {
-			const row = await prisma.penawaranMataKuliah.update({
-				where: { id: data.id },
-				data: {
-					pengampuIds: JSON.stringify(data.pengampuIds),
-					pesertaIds: JSON.stringify(data.pesertaIds),
-				},
-			});
+			const row = await prisma.$transaction((tx) => compareAndSetMembership(
+				async () => (await tx.penawaranMataKuliah.updateMany({
+					where: {
+						id: data.id,
+						pengampuIds: JSON.stringify(data.expectedPengampuIds),
+						pesertaIds: JSON.stringify(data.expectedPesertaIds),
+					},
+					data: {
+						pengampuIds: JSON.stringify(data.pengampuIds),
+						pesertaIds: JSON.stringify(data.pesertaIds),
+					},
+				})).count,
+				() => tx.penawaranMataKuliah.findUnique({ where: { id: data.id } }),
+			));
+			if (!row) {
+				return { ok: false as const, error: "Data anggota telah berubah. Muat ulang lalu coba lagi." };
+			}
 			audit(caller, "penawaran", "membership", data);
 			return { ok: true as const, penawaran: mapPenawaran(row) };
 		} catch {

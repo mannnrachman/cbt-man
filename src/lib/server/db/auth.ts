@@ -3,6 +3,7 @@ import { parseJson } from "./json";
 import { validateSession, readSessionToken } from "./session";
 import type { NavKey, Ujian } from "@/lib/cbt/types";
 import type { UserRow } from "../repos/mappers";
+import { requestedUjianScopeAllowed } from "@/lib/cbt/ujian-scope";
 // @ts-expect-error -- seed helper is an untyped .mjs module
 
 import { createSeedDataset, seedDatabase } from "./seed-shared.mjs";
@@ -78,6 +79,32 @@ export async function operatorCanTouchTopicSets(
 	return true;
 }
 
+export async function operatorCanTouchUjianInput(
+	caller: UserRow,
+	item: Pick<Ujian, "mataKuliahId" | "penawaranId" | "topicSets">,
+): Promise<boolean> {
+	const unrestricted = allowedTopikIdsForCaller(caller) === null;
+	const topicsAllowed = unrestricted || await operatorCanTouchTopicSets(caller, item.topicSets);
+	const mataKuliahIds = parseJson<string[]>(caller.mataKuliahIds || "[]", []);
+	let penawaranMataKuliahId: string | undefined;
+	if (item.penawaranId) {
+		const penawaran = await prisma.penawaranMataKuliah.findUnique({
+			where: { id: item.penawaranId },
+			select: { mataKuliahId: true },
+		});
+		penawaranMataKuliahId = penawaran?.mataKuliahId;
+	}
+	return requestedUjianScopeAllowed({
+		unrestricted,
+		topicsPresent: item.topicSets.length > 0,
+		topicsAllowed,
+		allowedMataKuliahIds: new Set(mataKuliahIds),
+		mataKuliahId: item.mataKuliahId,
+		penawaranRequested: !!item.penawaranId,
+		penawaranMataKuliahId,
+	});
+}
+
 export async function operatorCanTouchModul(
 	caller: UserRow,
 	modulId: string,
@@ -114,15 +141,15 @@ export async function operatorCanTouchUjian(
 ): Promise<boolean> {
 	const ujian = await prisma.ujian.findUnique({
 		where: { id: ujianId },
-		select: { topicSets: true, mataKuliahId: true },
+		select: { topicSets: true, mataKuliahId: true, penawaranId: true },
 	});
 	if (!ujian) return false;
-	
-	const mkIds = parseJson<string[]>(caller.mataKuliahIds || "[]", []);
-	if (ujian.mataKuliahId && mkIds.includes(ujian.mataKuliahId)) return true;
-
-	const topicSets = parseJson<Ujian["topicSets"]>(ujian.topicSets, []);
-	return await operatorCanTouchTopicSets(caller, topicSets);
+	return operatorCanTouchUjianInput(caller, {
+		...ujian,
+		mataKuliahId: ujian.mataKuliahId ?? undefined,
+		penawaranId: ujian.penawaranId ?? undefined,
+		topicSets: parseJson<Ujian["topicSets"]>(ujian.topicSets, []),
+	});
 }
 
 export async function pesertaCanTouchUjian(

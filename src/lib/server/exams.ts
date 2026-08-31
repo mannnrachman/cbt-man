@@ -15,7 +15,8 @@ export const getTodaysExamsServer = createServerFn({ method: "GET" }).handler(
 		endOfDay.setHours(23, 59, 59, 999);
 
 		const ujianList = await prisma.ujian.findMany({
-			where: {
+					where: {
+						status: "published",
 				OR: [
 					{
 						beginAt: {

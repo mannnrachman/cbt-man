@@ -196,13 +196,14 @@ const articlesMap: Record<string, DocArticle> = {
         <section id="struktur-hierarki" data-heading="struktur-hierarki" className="space-y-3">
           <h2 className="text-lg font-bold text-foreground tracking-tight">Struktur Hierarki Soal</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Bank soal menggunakan susunan berjenjang: <Strong>Modul → Topik → Soal</Strong>.
+            Bank soal menggunakan susunan berjenjang: <Strong>Mata Kuliah → Modul → Topik → Soal</Strong>.
           </p>
           <Card className="border-border bg-muted/40 p-4 text-xs font-mono space-y-1.5 shadow-none rounded-xl">
-            <div className="text-foreground font-semibold">📦 Modul (Mata Kuliah / Subjek Utama)</div>
-            <div className="pl-4 text-muted-foreground">└─ 📂 Topik 1 (Bab / Pokok Bahasan)</div>
-            <div className="pl-8 text-muted-foreground/70">├─ ❓ Soal #1 (Pilihan Ganda)</div>
-            <div className="pl-8 text-muted-foreground/70">└─ ❓ Soal #2 (Essay)</div>
+            <div className="text-foreground font-semibold">📚 Mata Kuliah (Subjek Utama)</div>
+            <div className="pl-4 text-muted-foreground">└─ 📦 Modul</div>
+            <div className="pl-8 text-muted-foreground">└─ 📂 Topik (Bab / Pokok Bahasan)</div>
+            <div className="pl-12 text-muted-foreground/70">├─ ❓ Soal #1 (Pilihan Ganda)</div>
+            <div className="pl-12 text-muted-foreground/70">└─ ❓ Soal #2 (Essay)</div>
           </Card>
         </section>
 
