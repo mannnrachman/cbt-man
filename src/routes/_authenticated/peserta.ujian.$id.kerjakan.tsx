@@ -130,8 +130,12 @@ function RouteComponent() {
     sesiRef.current = sesi;
   }, [sesi]);
 
+  const activeSesiId = sesi?.id;
+  const activeSesiStatus = sesi?.status;
+  const activeUjianId = ujian?.id;
+
   useEffect(() => {
-    if (!sesi || !ujian || sesi.status === "selesai") return;
+    if (!activeSesiId || !activeUjianId || activeSesiStatus === "selesai") return;
     const interval = setInterval(() => {
       const n = Date.now();
       setNow(n);
@@ -147,7 +151,7 @@ function RouteComponent() {
       if (pollInFlight) return;
       pollInFlight = true;
       try {
-        const result = await getParticipantSessionState(sesi.id);
+        const result = await getParticipantSessionState(activeSesiId);
         if (!pollingActive) return;
         if (result.ok) {
           setPollingError(false);
@@ -158,7 +162,7 @@ function RouteComponent() {
             toast.warning("Ujian telah dihentikan oleh pengawas.");
             navigate({
               to: "/peserta/ujian/$id/hasil",
-              params: { id: ujian.id },
+              params: { id: activeUjianId },
             });
           } else if (result.sesi.endsAt && sesiRef.current && result.sesi.endsAt !== sesiRef.current.endsAt) {
             // Safely merge endsAt without wiping local un-flushed answers
@@ -189,7 +193,7 @@ function RouteComponent() {
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sesi, ujian, endsAt]);
+  }, [activeSesiId, activeSesiStatus, activeUjianId, endsAt]);
 
   function updateJawaban(partial: Partial<SesiUjian["jawaban"][0]>) {
     if (!sesi) return;
