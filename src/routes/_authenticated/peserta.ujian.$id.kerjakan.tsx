@@ -1,5 +1,5 @@
 import { useAuthStore } from "@/lib/cbt/auth-store";
-import { soalRepo, sesiRepo, ujianRepo, invalidateReposCache, hydrateRepos, saveParticipantSession } from "@/lib/cbt/repos";
+import { soalBySessionId, sesiRepo, ujianRepo, invalidateReposCache, hydrateRepos, saveParticipantSession } from "@/lib/cbt/repos";
 import type { SesiUjian, Ujian } from "@/lib/cbt/types";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
@@ -269,7 +269,7 @@ function RouteComponent() {
   if (!sesi) return <div className="p-8 text-center font-medium">Sesi tidak valid.</div>;
 
   const soalId = sesi.soalIds[idx];
-  const soal = soalId ? soalRepo.byId(soalId) : undefined;
+  const soal = soalId ? soalBySessionId(sesi.id, soalId) : undefined;
   const j = sesi.jawaban[idx];
 
   if (!soal || !j) return <div className="p-8 text-center font-medium">Soal bermasalah.</div>;
@@ -277,7 +277,7 @@ function RouteComponent() {
   const currentSesi = sesi;
   const currentSoal = soal;
   const currentJawaban = j;
-  const optOrder = currentSesi.jawabanOrder[currentSoal.id] ?? currentSoal.jawaban.map((o) => o.id);
+  const optOrder = currentSesi.jawabanOrder[currentJawaban.soalId] ?? currentSoal.jawaban.map((o) => o.id);
 
   const mm = Math.floor(remaining / 60000);
   const ss = Math.floor((remaining % 60000) / 1000);
