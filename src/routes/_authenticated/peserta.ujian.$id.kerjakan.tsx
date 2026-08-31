@@ -142,16 +142,19 @@ function RouteComponent() {
     }, 1000);
 
     let pollInFlight = false;
+    let pollingActive = true;
     const pollInterval = setInterval(async () => {
       if (pollInFlight) return;
       pollInFlight = true;
       try {
         const result = await getParticipantSessionState(sesi.id);
+        if (!pollingActive) return;
         if (result.ok) {
           setPollingError(false);
           if (result.sesi.status === "selesai") {
             invalidateReposCache();
             await hydrateRepos();
+            if (!pollingActive) return;
             toast.warning("Ujian telah dihentikan oleh pengawas.");
             navigate({
               to: "/peserta/ujian/$id/hasil",
@@ -166,7 +169,7 @@ function RouteComponent() {
           setPollingError(true);
         }
       } catch {
-        setPollingError(true);
+        if (pollingActive) setPollingError(true);
       } finally {
         pollInFlight = false;
       }
@@ -180,6 +183,7 @@ function RouteComponent() {
     window.addEventListener("beforeunload", handleBeforeUnload);
 
     return () => {
+      pollingActive = false;
       clearInterval(interval);
       clearInterval(pollInterval);
       window.removeEventListener("beforeunload", handleBeforeUnload);
