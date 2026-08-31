@@ -90,6 +90,7 @@ function RouteComponent() {
 
   const [idx, setIdx] = useState(0);
   const [now, setNow] = useState(Date.now());
+  const [pollingError, setPollingError] = useState(false);
   const submittingRef = useRef(false);
   const saveTimer = useRef<NodeJS.Timeout | null>(null);
 
@@ -147,6 +148,7 @@ function RouteComponent() {
       try {
         const result = await getParticipantSessionState(sesi.id);
         if (result.ok) {
+          setPollingError(false);
           if (result.sesi.status === "selesai") {
             invalidateReposCache();
             await hydrateRepos();
@@ -160,9 +162,11 @@ function RouteComponent() {
             setSesi(prev => prev ? { ...prev, endsAt: result.sesi.endsAt } : prev);
             toast.info("Waktu ujian Anda telah diperbarui oleh pengawas.");
           }
+        } else {
+          setPollingError(true);
         }
-      } catch (e) {
-        // silent error fallback
+      } catch {
+        setPollingError(true);
       } finally {
         pollInFlight = false;
       }
@@ -340,6 +344,12 @@ function RouteComponent() {
                   {String(mm).padStart(2, "0")}:{String(ss).padStart(2, "0")}
                 </span>
               </div>
+
+              {pollingError && (
+                <p role="status" className="max-w-[9rem] text-right text-[11px] font-medium leading-tight text-amber-600 dark:text-amber-400 sm:text-xs">
+                  Sinkronisasi tertunda — mencoba lagi.
+                </p>
+              )}
 
               <Button variant="outline" size="icon" className="md:hidden w-10 h-10 rounded-xl border-slate-200 dark:border-slate-700" onClick={() => setShowList(true)}>
                 <LayoutGrid className="w-5 h-5 text-slate-600 dark:text-slate-400" />
