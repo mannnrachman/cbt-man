@@ -241,7 +241,7 @@ export const mutateSoalServer = createServerFn({ method: "POST" })
 export const getModulsList = createServerFn({ method: "GET" }).handler(
 	async () => {
 		const caller = await requireCaller();
-		if (!caller || caller.role === "mahasiswa") return [];
+		if (!caller || caller.role !== "super_admin") return [];
 		return prisma.modul.findMany();
 	}
 );
@@ -249,7 +249,7 @@ export const getModulsList = createServerFn({ method: "GET" }).handler(
 export const getTopiksList = createServerFn({ method: "GET" }).handler(
 	async () => {
 		const caller = await requireCaller();
-		if (!caller || caller.role === "mahasiswa") return [];
+		if (!caller || caller.role !== "super_admin") return [];
 		return prisma.topik.findMany();
 	}
 );
