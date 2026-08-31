@@ -13,6 +13,11 @@ test("exam list exposes class assignment and lifecycle status", () => {
   assert.match(route, /u\.status === "published"/);
 });
 
+test("unused broad exam-list server endpoint stays removed", () => {
+  const server = read("src/lib/server/ujian/functions.ts");
+  assert.doesNotMatch(server, /export const getUjiansList/);
+});
+
 test("class workflow refreshes authoritative core data and uses guarded membership updates", () => {
   const route = read("src/routes/_authenticated/admin.akademik.kelas-mata-kuliah.tsx");
   assert.match(route, /await hydrateRepos\(\)/);
