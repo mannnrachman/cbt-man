@@ -1,3 +1,14 @@
+export function parseOperatorScope(value: string): string[] | null {
+  try {
+    const parsed: unknown = JSON.parse(value);
+    return Array.isArray(parsed) && parsed.every((item) => typeof item === "string")
+      ? parsed
+      : null;
+  } catch {
+    return null;
+  }
+}
+
 export function requestedUjianScopeAllowed(input: {
   unrestricted: boolean;
   topicsPresent: boolean;

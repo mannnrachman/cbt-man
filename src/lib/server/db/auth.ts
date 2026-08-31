@@ -3,7 +3,7 @@ import { parseJson } from "./json";
 import { validateSession, readSessionToken } from "./session";
 import type { NavKey, Ujian } from "@/lib/cbt/types";
 import type { UserRow } from "../repos/mappers";
-import { requestedUjianScopeAllowed } from "@/lib/cbt/ujian-scope";
+import { parseOperatorScope, requestedUjianScopeAllowed } from "@/lib/cbt/ujian-scope";
 // @ts-expect-error -- seed helper is an untyped .mjs module
 
 import { createSeedDataset, seedDatabase } from "./seed-shared.mjs";
@@ -25,8 +25,9 @@ const OPERATOR_SESSION_KEYS: NavKey[] = [
 export function allowedTopikIdsForCaller(caller: UserRow): Set<string> | null {
 	if (caller.role === "super_admin") return null;
 	if (caller.role !== "admin_prodi" && caller.role !== "evaluator") return new Set();
-	const topikIds = parseJson<string[]>(caller.allowedTopikIds, []);
-	const mkIds = parseJson<string[]>(caller.mataKuliahIds || "[]", []);
+	const topikIds = parseOperatorScope(caller.allowedTopikIds);
+	const mkIds = parseOperatorScope(caller.mataKuliahIds);
+	if (!topikIds || !mkIds) return new Set();
 	if (topikIds.length === 0 && mkIds.length === 0) return null; // unrestricted
 	return new Set(topikIds);
 }
@@ -57,7 +58,7 @@ export async function operatorCanTouchTopikId(caller: UserRow, topikId: string):
 	if (allowed === null) return true;
 	if (allowed.has(topikId)) return true;
 
-	const mkIds = parseJson<string[]>(caller.mataKuliahIds || "[]", []);
+	const mkIds = parseOperatorScope(caller.mataKuliahIds) ?? [];
 	if (mkIds.length > 0) {
 		const topik = await prisma.topik.findUnique({
 			where: { id: topikId },
@@ -85,7 +86,7 @@ export async function operatorCanTouchUjianInput(
 ): Promise<boolean> {
 	const unrestricted = allowedTopikIdsForCaller(caller) === null;
 	const topicsAllowed = unrestricted || await operatorCanTouchTopicSets(caller, item.topicSets);
-	const mataKuliahIds = parseJson<string[]>(caller.mataKuliahIds || "[]", []);
+	const mataKuliahIds = parseOperatorScope(caller.mataKuliahIds) ?? [];
 	let penawaranMataKuliahId: string | undefined;
 	if (item.penawaranId) {
 		const penawaran = await prisma.penawaranMataKuliah.findUnique({
@@ -112,7 +113,7 @@ export async function operatorCanTouchModul(
 	const allowed = allowedTopikIdsForCaller(caller);
 	if (allowed === null) return true;
 	
-	const mkIds = parseJson<string[]>(caller.mataKuliahIds || "[]", []);
+	const mkIds = parseOperatorScope(caller.mataKuliahIds) ?? [];
 	if (mkIds.length > 0) {
 		const modul = await prisma.modul.findUnique({ where: { id: modulId } });
 		if (modul?.mataKuliahId && mkIds.includes(modul.mataKuliahId)) return true;

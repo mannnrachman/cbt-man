@@ -33,6 +33,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Security
 
+- Tolak akses operator ketika data scope topik atau mata kuliah rusak atau bukan array string, alih-alih memperlakukannya sebagai akses tanpa batas.
 - Tutup bypass status published melalui upsert, samakan otorisasi peserta pada fetch/file/snapshot, redaksi metadata nilai server-side, dan batasi submit terlambat dengan grace period.
 - Kunci perubahan kelas mata kuliah setelah ujian dipublikasikan/berjalan, serta jaga sinkronisasi kepemilikan mata kuliah antara modul dan topik.
 

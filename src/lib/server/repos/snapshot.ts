@@ -2,6 +2,7 @@
 import { prisma } from "@/lib/server/db/prisma";
 import { parseJson } from "@/lib/server/db/json";
 import { participantSessionQuestions } from "@/lib/cbt/session-answers";
+import { parseOperatorScope } from "@/lib/cbt/ujian-scope";
 import { 
 	Snapshot, 
 	SnapshotRows, 
@@ -71,16 +72,8 @@ export function adminSnapshot(rows: SnapshotRows): Snapshot {
 }
 
 export function operatorSnapshot(rows: SnapshotRows, caller: UserRow): Snapshot {
-	const parseScope = (value: string) => {
-		try {
-			const parsed = JSON.parse(value || "[]");
-			return Array.isArray(parsed) && parsed.every((item) => typeof item === "string") ? parsed : null;
-		} catch {
-			return null;
-		}
-	};
-	const parsedAllowedTopikIds = parseScope(caller.allowedTopikIds);
-	const parsedMataKuliahIds = parseScope(caller.mataKuliahIds);
+	const parsedAllowedTopikIds = parseOperatorScope(caller.allowedTopikIds);
+	const parsedMataKuliahIds = parseOperatorScope(caller.mataKuliahIds);
 	const unrestricted =
 		parsedAllowedTopikIds !== null &&
 		parsedMataKuliahIds !== null &&

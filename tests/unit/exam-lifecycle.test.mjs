@@ -1,7 +1,7 @@
 import { strict as assert } from "node:assert";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
-import { requestedUjianScopeAllowed } from "../../src/lib/cbt/ujian-scope.ts";
+import { parseOperatorScope, requestedUjianScopeAllowed } from "../../src/lib/cbt/ujian-scope.ts";
 import { compareAndSetMembership } from "../../src/lib/cbt/penawaran-membership.ts";
 
 function read(rel) {
@@ -112,6 +112,19 @@ test("operator updates authorize both stored and requested exam scope", () => {
     false,
     "foreign offering is rejected",
   );
+});
+
+test("operator scope parsing fails closed for malformed or non-string arrays", () => {
+  assert.deepEqual(parseOperatorScope("[]"), []);
+  assert.deepEqual(parseOperatorScope('["mk_1"]'), ["mk_1"]);
+  assert.equal(parseOperatorScope("{"), null);
+  assert.equal(parseOperatorScope('{"id":"mk_1"}'), null);
+  assert.equal(parseOperatorScope('"mk_1"'), null);
+  assert.equal(parseOperatorScope('["mk_1", 2]'), null);
+
+  const auth = read("src/lib/server/db/auth.ts");
+  assert.match(auth, /parseOperatorScope\(caller\.allowedTopikIds\)/);
+  assert.match(auth, /if \(!topikIds \|\| !mkIds\) return new Set\(\)/);
 });
 
 test("offering membership writes are serialized and reject stale state", async () => {
