@@ -46,6 +46,11 @@ test("admin layout reads the authenticated route context instead of nullable cli
   assert.doesNotMatch(adminLayout, /navigate\(\{ to: "\/login" \}\)/);
 });
 
+test("admin demo credentials are development-only", () => {
+  const login = readFileSync("src/routes/login-admin.tsx", "utf8");
+  assert.match(login, /import\.meta\.env\.DEV && <div[^>]*>[\s\S]{0,500}Kredensial Demo/);
+});
+
 test("admin exam parent renders child token routes through Outlet", () => {
   const examRoute = readFileSync("src/routes/_authenticated/admin.ujian.$id.tsx", "utf8");
 

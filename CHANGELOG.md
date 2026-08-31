@@ -33,6 +33,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Security
 
+- Sembunyikan kredensial akun demo dari halaman login admin pada build production.
 - Tutup bypass status published melalui upsert, samakan otorisasi peserta pada fetch/file/snapshot, redaksi metadata nilai server-side, dan batasi submit terlambat dengan grace period.
 - Kunci perubahan kelas mata kuliah setelah ujian dipublikasikan/berjalan, serta jaga sinkronisasi kepemilikan mata kuliah antara modul dan topik.
 

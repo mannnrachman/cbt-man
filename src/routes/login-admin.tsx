@@ -171,7 +171,7 @@ function LoginAdminPage() {
 					</form>
 					
 					{/* Demo Accounts List (For Development Only) */}
-					<div className="mt-8 pt-6 border-t border-slate-200/50 dark:border-white/10">
+					{import.meta.env.DEV && <div className="mt-8 pt-6 border-t border-slate-200/50 dark:border-white/10">
 						<p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 text-center">Kredensial Demo</p>
 						<div className="grid grid-cols-2 gap-3">
 							<div className="bg-slate-50/50 dark:bg-black/20 p-2.5 rounded-lg border border-slate-200/50 dark:border-white/5 flex flex-col gap-1 items-center">
@@ -183,7 +183,7 @@ function LoginAdminPage() {
 								<code className="text-[10px] bg-white dark:bg-slate-800 px-2 py-0.5 rounded text-[#03A559] dark:text-green-400 shadow-sm border border-slate-100 dark:border-white/5">evaluator1 / evaluator123</code>
 							</div>
 						</div>
-					</div>
+					</div>}
 
 				</div>
 			</div>
