@@ -3,7 +3,7 @@ import { parseJson } from "./json";
 import { validateSession, readSessionToken } from "./session";
 import type { NavKey, Ujian } from "@/lib/cbt/types";
 import type { UserRow } from "../repos/mappers";
-import { requestedUjianScopeAllowed } from "@/lib/cbt/ujian-scope";
+import { resolveOperatorScopes, requestedUjianScopeAllowed } from "@/lib/cbt/ujian-scope";
 // @ts-expect-error -- seed helper is an untyped .mjs module
 
 import { createSeedDataset, seedDatabase } from "./seed-shared.mjs";
@@ -25,10 +25,10 @@ const OPERATOR_SESSION_KEYS: NavKey[] = [
 export function allowedTopikIdsForCaller(caller: UserRow): Set<string> | null {
 	if (caller.role === "super_admin") return null;
 	if (caller.role !== "admin_prodi" && caller.role !== "evaluator") return new Set();
-	const topikIds = parseJson<string[]>(caller.allowedTopikIds, []);
-	const mkIds = parseJson<string[]>(caller.mataKuliahIds || "[]", []);
-	if (topikIds.length === 0 && mkIds.length === 0) return null; // unrestricted
-	return new Set(topikIds);
+	const scope = resolveOperatorScopes(caller.allowedTopikIds, caller.mataKuliahIds);
+	if (scope.status === "denied") return new Set();
+	if (scope.status === "unrestricted") return null;
+	return new Set(scope.topikIds);
 }
 
 export async function operatorAccessKeys(role: string): Promise<Set<NavKey>> {
@@ -53,18 +53,20 @@ export async function operatorHasAnyNav(
 }
 
 export async function operatorCanTouchTopikId(caller: UserRow, topikId: string): Promise<boolean> {
-	const allowed = allowedTopikIdsForCaller(caller);
-	if (allowed === null) return true;
-	if (allowed.has(topikId)) return true;
+	if (caller.role === "super_admin") return true;
+	if (caller.role !== "admin_prodi" && caller.role !== "evaluator") return false;
+	const scope = resolveOperatorScopes(caller.allowedTopikIds, caller.mataKuliahIds);
+	if (scope.status === "denied") return false;
+	if (scope.status === "unrestricted") return true;
+	if (scope.topikIds.includes(topikId)) return true;
 
-	const mkIds = parseJson<string[]>(caller.mataKuliahIds || "[]", []);
-	if (mkIds.length > 0) {
+	if (scope.mataKuliahIds.length > 0) {
 		const topik = await prisma.topik.findUnique({
 			where: { id: topikId },
 			include: { modul: true },
 		});
 		const mataKuliahId = topik?.mataKuliahId ?? topik?.modul?.mataKuliahId;
-		if (mataKuliahId && mkIds.includes(mataKuliahId)) return true;
+		if (mataKuliahId && scope.mataKuliahIds.includes(mataKuliahId)) return true;
 	}
 	return false;
 }
@@ -83,9 +85,13 @@ export async function operatorCanTouchUjianInput(
 	caller: UserRow,
 	item: Pick<Ujian, "mataKuliahId" | "penawaranId" | "topicSets">,
 ): Promise<boolean> {
-	const unrestricted = allowedTopikIdsForCaller(caller) === null;
+	if (caller.role === "super_admin") return true;
+	if (caller.role !== "admin_prodi" && caller.role !== "evaluator") return false;
+	const scope = resolveOperatorScopes(caller.allowedTopikIds, caller.mataKuliahIds);
+	if (scope.status === "denied") return false;
+	const unrestricted = scope.status === "unrestricted";
 	const topicsAllowed = unrestricted || await operatorCanTouchTopicSets(caller, item.topicSets);
-	const mataKuliahIds = parseJson<string[]>(caller.mataKuliahIds || "[]", []);
+	const mataKuliahIds = scope.status === "scoped" ? scope.mataKuliahIds : [];
 	let penawaranMataKuliahId: string | undefined;
 	if (item.penawaranId) {
 		const penawaran = await prisma.penawaranMataKuliah.findUnique({
@@ -109,17 +115,19 @@ export async function operatorCanTouchModul(
 	caller: UserRow,
 	modulId: string,
 ): Promise<boolean> {
-	const allowed = allowedTopikIdsForCaller(caller);
-	if (allowed === null) return true;
-	
-	const mkIds = parseJson<string[]>(caller.mataKuliahIds || "[]", []);
-	if (mkIds.length > 0) {
+	if (caller.role === "super_admin") return true;
+	if (caller.role !== "admin_prodi" && caller.role !== "evaluator") return false;
+	const scope = resolveOperatorScopes(caller.allowedTopikIds, caller.mataKuliahIds);
+	if (scope.status === "denied") return false;
+	if (scope.status === "unrestricted") return true;
+
+	if (scope.mataKuliahIds.length > 0) {
 		const modul = await prisma.modul.findUnique({ where: { id: modulId } });
-		if (modul?.mataKuliahId && mkIds.includes(modul.mataKuliahId)) return true;
+		if (modul?.mataKuliahId && scope.mataKuliahIds.includes(modul.mataKuliahId)) return true;
 	}
 
 	const count = await prisma.topik.count({
-		where: { modulId, id: { in: [...allowed] } },
+		where: { modulId, id: { in: scope.topikIds } },
 	});
 	return count > 0;
 }

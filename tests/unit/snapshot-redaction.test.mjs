@@ -119,8 +119,10 @@ test("operator snapshot applies Mata Kuliah scope instead of treating empty topi
   const body = snapshot.slice(fnIdx, snapshot.indexOf("export function pesertaSnapshot(", fnIdx));
   assert.match(body, /caller\.mataKuliahIds/);
   assert.match(body, /allowedMataKuliahIds/);
-  assert.match(body, /parsedAllowedTopikIds\.length === 0/);
-  assert.match(body, /parsedMataKuliahIds\.length === 0/);
+  assert.match(body, /resolveOperatorScopes\(caller\.allowedTopikIds, caller\.mataKuliahIds\)/);
+  assert.match(body, /scope\.status === "unrestricted"/);
+  assert.match(body, /scope\.status === "scoped" \? scope\.topikIds : \[\]/);
+  assert.match(body, /scope\.status === "scoped" \? scope\.mataKuliahIds : \[\]/);
   assert.match(body, /penawaranById\.get\(item\.penawaranId\)/);
   assert.match(body, /allowedMataKuliahIds\.has\(penawaran\.mataKuliahId\)/);
 });

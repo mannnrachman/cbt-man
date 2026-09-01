@@ -13,7 +13,7 @@ import {
 import type { SesiUjian, NavKey } from "@/lib/cbt/types";
 import { writeAuditLog } from "../db/audit";
 import { stringifyJson, toBigInt, toNumber, parseJson } from "../db/json";
-import { getRequestIP } from "@tanstack/start-server-core";
+import { getRequestIP, setResponseHeader } from "@tanstack/start-server-core";
 import { ipInRanges } from "@/lib/cbt/cidr";
 import { gradeAnswers } from "@/lib/cbt/scoring";
 import { validateParticipantAnswers } from "@/lib/cbt/session-answers";
@@ -69,6 +69,7 @@ const participantAnswerSchema = z
 export const getParticipantSesiStateServer = createServerFn({ method: "GET" })
 	.validator(z.object({ sesiId: z.string().min(1) }))
 	.handler(async ({ data }) => {
+		setResponseHeader("Cache-Control", "private, no-store");
 		const caller = await requireCaller();
 		if (!caller || caller.role !== "mahasiswa") {
 			return { ok: false as const, error: "Forbidden" };

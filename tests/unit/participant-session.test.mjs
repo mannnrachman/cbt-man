@@ -102,11 +102,19 @@ test("participant polling reads only the current session state", () => {
     "utf8",
   );
 
-  assert.match(route, /getParticipantSessionState\(sesi\.id\)/);
+  assert.match(route, /getParticipantSessionState\(activeSesiId\)/);
   assert.match(server, /getParticipantSesiStateServer/);
   assert.match(server, /select: \{ id: true, ujianId: true, pesertaId: true, status: true, endsAt: true \}/);
   assert.match(server, /sesi\.pesertaId !== caller\.id/);
   assert.match(server, /pesertaCanTouchUjian\(caller, sesi\.ujianId\)/);
   assert.match(route, /if \(pollInFlight\) return/);
   assert.match(route, /pollInFlight = false/);
+  assert.match(route, /if \(!pollingActive\) return/);
+  assert.match(route, /pollingActive = false/);
+  assert.match(route, /\[activeSesiId, activeSesiStatus, activeUjianId, endsAt\]/);
+  assert.doesNotMatch(route, /\}, \[sesi, ujian, endsAt\]\);/);
+  assert.match(route, /setPollingError\(true\)/);
+  assert.match(route, /setPollingError\(false\)/);
+  assert.match(route, /Sinkronisasi tertunda/);
+  assert.match(server, /setResponseHeader\("Cache-Control", "private, no-store"\)/);
 });
