@@ -23,6 +23,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Fixed
 
+- Jaga polling sesi tetap berjalan saat jawaban berubah, tampilkan status pemulihan saat polling gagal, dan cegah respons spesifik pengguna disimpan oleh cache (#138).
 - Kurangi polling ruang ujian peserta menjadi pembacaan status sesi sempit tanpa memuat snapshot seluruh database, dan cegah respons polling stale menurunkan deadline (#137).
 - Sinkronkan ulang data kelas setelah mutation server dan gunakan update keanggotaan yang terlindungi agar UI tidak menyimpan state lokal yang stale (#134).
 - Tolak `topicSets` legacy yang malformed sebelum remediation menulis data, gunakan ownership topik langsung, dan cegah update penawaran menimpa membership concurrent (#133).
@@ -33,7 +34,11 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Security
 
+<<<<<<< HEAD
 - Batasi endpoint daftar modul dan topik untuk pengaturan role hanya kepada super admin.
+=======
+- Tolak akses operator ketika data scope topik atau mata kuliah rusak atau bukan array string, alih-alih memperlakukannya sebagai akses tanpa batas.
+>>>>>>> upstream/main
 - Tutup bypass status published melalui upsert, samakan otorisasi peserta pada fetch/file/snapshot, redaksi metadata nilai server-side, dan batasi submit terlambat dengan grace period.
 - Kunci perubahan kelas mata kuliah setelah ujian dipublikasikan/berjalan, serta jaga sinkronisasi kepemilikan mata kuliah antara modul dan topik.
 

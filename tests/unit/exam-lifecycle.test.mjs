@@ -1,7 +1,7 @@
 import { strict as assert } from "node:assert";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
-import { requestedUjianScopeAllowed } from "../../src/lib/cbt/ujian-scope.ts";
+import { parseOperatorScope, resolveOperatorScopes, requestedUjianScopeAllowed } from "../../src/lib/cbt/ujian-scope.ts";
 import { compareAndSetMembership } from "../../src/lib/cbt/penawaran-membership.ts";
 
 function read(rel) {
@@ -112,6 +112,37 @@ test("operator updates authorize both stored and requested exam scope", () => {
     false,
     "foreign offering is rejected",
   );
+});
+
+test("operator scope parsing fails closed for malformed or non-string arrays", () => {
+  assert.deepEqual(parseOperatorScope("[]"), []);
+  assert.deepEqual(parseOperatorScope('["mk_1"]'), ["mk_1"]);
+  assert.equal(parseOperatorScope("{"), null);
+  assert.equal(parseOperatorScope('{"id":"mk_1"}'), null);
+  assert.equal(parseOperatorScope('"mk_1"'), null);
+  assert.equal(parseOperatorScope('["mk_1", 2]'), null);
+
+  assert.deepEqual(resolveOperatorScopes("[]", "[]"), { status: "unrestricted" });
+  assert.deepEqual(resolveOperatorScopes('["t1"]', '["mk_1"]'), {
+    status: "scoped",
+    topikIds: ["t1"],
+    mataKuliahIds: ["mk_1"],
+  });
+  // Either field malformed → deny both (no partial course fallback).
+  assert.deepEqual(resolveOperatorScopes("{", '["mk_1"]'), { status: "denied" });
+  assert.deepEqual(resolveOperatorScopes('["t1"]', "{"), { status: "denied" });
+  assert.deepEqual(resolveOperatorScopes('{"id":"t1"}', "[]"), { status: "denied" });
+  assert.deepEqual(resolveOperatorScopes("[]", '["mk_1", 2]'), { status: "denied" });
+
+  const auth = read("src/lib/server/db/auth.ts");
+  assert.match(auth, /resolveOperatorScopes\(caller\.allowedTopikIds, caller\.mataKuliahIds\)/);
+  assert.match(auth, /if \(scope\.status === "denied"\) return false/);
+  assert.match(auth, /if \(scope\.status === "denied"\) return new Set\(\)/);
+
+  const snapshot = read("src/lib/server/repos/snapshot.ts");
+  assert.match(snapshot, /resolveOperatorScopes\(caller\.allowedTopikIds, caller\.mataKuliahIds\)/);
+  assert.match(snapshot, /scope\.status === "scoped" \? scope\.topikIds : \[\]/);
+  assert.match(snapshot, /scope\.status === "scoped" \? scope\.mataKuliahIds : \[\]/);
 });
 
 test("offering membership writes are serialized and reject stale state", async () => {
