@@ -250,7 +250,7 @@ function FilesPage() {
                   
                   {/* Hover overlay actions */}
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-out flex items-center justify-center gap-2.5 backdrop-blur-[2px] pointer-events-none group-hover:pointer-events-auto">
-                    <Button 
+                    {isSuper && <Button
                       size="icon" 
                       variant="secondary" 
                       className="h-9 w-9 rounded-full shadow-sm scale-75 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-300 ease-spring delay-75 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30"
@@ -275,7 +275,7 @@ function FilesPage() {
                       title="Hapus Permanen"
                     >
                       <Trash2 className="h-4 w-4" />
-                    </Button>
+                    </Button>}
                     <Button 
                       size="icon" 
                       variant="secondary"
