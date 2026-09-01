@@ -34,6 +34,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Security
 
+- Wajibkan `ADMIN_PASSWORD` saat seed production agar akun admin tidak dibuat dengan password acak yang tidak dapat dipulihkan operator.
 - Sembunyikan kredensial akun demo dari halaman login admin pada build production (#143).
 - Hapus endpoint daftar ujian penuh yang tidak digunakan agar tidak menjadi permukaan baca di luar scope operator (#142).
 - Perbarui SheetJS ke 0.20.3 untuk menutup prototype pollution dan ReDoS saat membaca file Excel buatan khusus (#141).

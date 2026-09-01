@@ -45,6 +45,9 @@ npm run build
 
 ## Akun Demo
 
+> Akun berikut hanya untuk development/demo. Pada production dengan database kosong, set
+> `ADMIN_PASSWORD` sebelum aplikasi dimulai; proses seed akan berhenti bila nilainya kosong.
+
 | Peran | Username | Password |
 |-------|----------|----------|
 | Admin | `admin` | `admin123` |
