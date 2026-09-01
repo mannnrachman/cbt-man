@@ -2,7 +2,7 @@
 import { prisma } from "@/lib/server/db/prisma";
 import { parseJson } from "@/lib/server/db/json";
 import { participantSessionQuestions } from "@/lib/cbt/session-answers";
-import { parseOperatorScope } from "@/lib/cbt/ujian-scope";
+import { resolveOperatorScopes } from "@/lib/cbt/ujian-scope";
 import { 
 	Snapshot, 
 	SnapshotRows, 
@@ -72,15 +72,11 @@ export function adminSnapshot(rows: SnapshotRows): Snapshot {
 }
 
 export function operatorSnapshot(rows: SnapshotRows, caller: UserRow): Snapshot {
-	const parsedAllowedTopikIds = parseOperatorScope(caller.allowedTopikIds);
-	const parsedMataKuliahIds = parseOperatorScope(caller.mataKuliahIds);
-	const unrestricted =
-		parsedAllowedTopikIds !== null &&
-		parsedMataKuliahIds !== null &&
-		parsedAllowedTopikIds.length === 0 &&
-		parsedMataKuliahIds.length === 0;
-	const allowedTopikIds = new Set(parsedAllowedTopikIds || []);
-	const allowedMataKuliahIds = new Set(parsedMataKuliahIds || []);
+	const scope = resolveOperatorScopes(caller.allowedTopikIds, caller.mataKuliahIds);
+	const unrestricted = scope.status === "unrestricted";
+	// Invalid scope clears both sets — never apply one scope while the other is malformed.
+	const allowedTopikIds = new Set(scope.status === "scoped" ? scope.topikIds : []);
+	const allowedMataKuliahIds = new Set(scope.status === "scoped" ? scope.mataKuliahIds : []);
 	const modulById = new Map(rows.modul.map((item) => [item.id, item]));
 	const topik = unrestricted
 		? rows.topik
