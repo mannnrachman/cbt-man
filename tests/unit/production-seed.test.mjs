@@ -2,7 +2,7 @@ import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import { createSeedDataset } from "../../src/lib/server/db/seed-shared.mjs";
 
-test("production seed requires and uses ADMIN_PASSWORD", async () => {
+test("seed uses the production secret and documented development password", async () => {
   const previousNodeEnv = process.env.NODE_ENV;
   const previousAdminPassword = process.env.ADMIN_PASSWORD;
 
@@ -23,6 +23,15 @@ test("production seed requires and uses ADMIN_PASSWORD", async () => {
     });
 
     assert.equal(dataset.users[0].passwordHash, "hash:configured-secret");
+
+    process.env.NODE_ENV = "development";
+    const developmentDataset = await createSeedDataset({
+      uid: (prefix = "") => `${prefix}id`,
+      now: 1,
+      hashPassword: async (password) => `hash:${password}`,
+    });
+
+    assert.equal(developmentDataset.users[0].passwordHash, "hash:admin123");
   } finally {
     if (previousNodeEnv === undefined) delete process.env.NODE_ENV;
     else process.env.NODE_ENV = previousNodeEnv;

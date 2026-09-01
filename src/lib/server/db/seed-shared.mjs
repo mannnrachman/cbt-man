@@ -141,7 +141,7 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
     { id: uid("u_"), nama: "Bisnis Digital", tipe: "prodi", parentId: null },
   ];
 
-  const adminPassword = process.env.ADMIN_PASSWORD || "admin123";
+  const adminPassword = process.env.NODE_ENV === "production" ? process.env.ADMIN_PASSWORD : "admin123";
 
   const admin = {
     id: uid("u_"),
