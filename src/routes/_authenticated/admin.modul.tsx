@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import { visibleModuls, allowedTopikIdSet, isUnrestricted } from "@/lib/cbt/access";
+import { filterModuls } from "@/lib/cbt/modul-filter.mjs";
 import { AdminPage, AdminPageHeader, AdminPageContent } from "@/components/cbt/AdminPage";
 
 export const Route = createFileRoute("/_authenticated/admin/modul")({
@@ -53,9 +54,7 @@ function ModulPage() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const importRef = useRef<HTMLInputElement>(null);
 
-  const shown = moduls.filter(
-    (m) => !query || m.nama.toLowerCase().includes(query.toLowerCase()),
-  );
+  const shown = filterModuls(moduls, query);
 
   function add() {
     if (!canEdit) return;
