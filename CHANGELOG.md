@@ -18,7 +18,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Changed
 
-- Perjelas form pembuatan modul bank soal agar terpisah dari pencarian dan memiliki label aksi yang jelas (#147).
+- Perjelas form pembuatan modul bank soal dan sederhanakan toolbar menjadi search bar saja (#147).
 - Perbarui header dan layout editor paket ujian admin agar menggunakan ruang layar lebih luas serta menampilkan ringkasan total soal; tambahkan akses Kelola Token untuk semua status ujian, render nested route token, dan rapikan halaman token (#130).
 - Sederhanakan pengelolaan struktur akademik admin menjadi tab Fakultas, Program Studi, dan Kelas/Rombel (diekstrak dari #118).
 - Rapikan jarak heading ke navbar, perlebar kontainer halaman peserta/ujian, dan bersihkan mesh gradient berlebih pada portal peserta (diekstrak dari #97).

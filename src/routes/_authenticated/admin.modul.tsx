@@ -49,23 +49,13 @@ function ModulPage() {
   const [nama, setNama] = useState("");
   const [mkId, setMkId] = useState<string>("none");
   const [query, setQuery] = useState("");
-  const [filterMk, setFilterMk] = useState("all");
   const [editingModul, setEditingModul] = useState<Modul | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const importRef = useRef<HTMLInputElement>(null);
 
-  const shown = moduls.filter(m => {
-    const isQueryMatch = !query || m.nama.toLowerCase().includes(query.toLowerCase());
-    if (!isQueryMatch) return false;
-
-    // A module is orphaned if it has no mataKuliahId or if the referenced mataKuliah no longer exists.
-    const isOrphan = !m.mataKuliahId || !mkList.some(mk => mk.id === m.mataKuliahId);
-
-    if (filterMk === "orphan") return isOrphan;
-    if (filterMk !== "all" && m.mataKuliahId !== filterMk) return false;
-    
-    return true;
-  });
+  const shown = moduls.filter(
+    (m) => !query || m.nama.toLowerCase().includes(query.toLowerCase()),
+  );
 
   function add() {
     if (!canEdit) return;
@@ -185,73 +175,57 @@ function ModulPage() {
         }
       />
 
-      {/* Search & Filter */}
-      <div className="flex flex-col gap-4">
-        <div className="flex w-full flex-col gap-3 sm:flex-row">
-          <div className="relative flex-1 sm:max-w-xs">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Cari modul..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="h-9 pl-9"
-            />
-          </div>
-          <Select value={filterMk} onValueChange={setFilterMk}>
-            <SelectTrigger className="w-full sm:w-56">
-              <SelectValue placeholder="Semua Mata Kuliah" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Semua Mata Kuliah</SelectItem>
-              <SelectItem value="orphan">⚠️ Tanpa Mata Kuliah</SelectItem>
-              {mkList.map((m) => (
-                <SelectItem key={m.id} value={m.id}>{m.nama}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {canEdit && (
-          <AdminPageContent className="p-4">
-            <div className="mb-4">
-              <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Buat Modul Baru</h2>
-              <p className="mt-1 text-xs text-muted-foreground">Tambahkan modul dan hubungkan dengan mata kuliah.</p>
-            </div>
-            <form
-              onSubmit={(e) => { e.preventDefault(); add(); }}
-              className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end"
-            >
-              <div className="space-y-1.5">
-                <Label htmlFor="new-module-name">Nama Modul</Label>
-                <Input
-                  id="new-module-name"
-                  value={nama}
-                  onChange={(e) => setNama(e.target.value)}
-                  placeholder="Contoh: Modul Pemrograman Dasar"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="new-module-course">Mata Kuliah</Label>
-                <Select value={mkId} onValueChange={setMkId}>
-                  <SelectTrigger id="new-module-course">
-                    <SelectValue placeholder="Pilih Mata Kuliah" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none" disabled>Pilih Mata Kuliah</SelectItem>
-                    {mkList.map(m => (
-                      <SelectItem key={m.id} value={m.id}>{m.nama}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button type="submit" disabled={!nama.trim() || mkId === "none"}>
-                <Plus className="mr-2 h-4 w-4" />
-                Buat Modul
-              </Button>
-            </form>
-          </AdminPageContent>
-        )}
+      {/* Search */}
+      <div className="relative w-full max-w-md">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder="Cari modul..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="h-9 pl-9"
+        />
       </div>
+
+      {canEdit && (
+        <AdminPageContent className="p-4">
+          <div className="mb-4">
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Buat Modul Baru</h2>
+            <p className="mt-1 text-xs text-muted-foreground">Tambahkan modul dan hubungkan dengan mata kuliah.</p>
+          </div>
+          <form
+            onSubmit={(e) => { e.preventDefault(); add(); }}
+            className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end"
+          >
+            <div className="space-y-1.5">
+              <Label htmlFor="new-module-name">Nama Modul</Label>
+              <Input
+                id="new-module-name"
+                value={nama}
+                onChange={(e) => setNama(e.target.value)}
+                placeholder="Contoh: Modul Pemrograman Dasar"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="new-module-course">Mata Kuliah</Label>
+              <Select value={mkId} onValueChange={setMkId}>
+                <SelectTrigger id="new-module-course">
+                  <SelectValue placeholder="Pilih Mata Kuliah" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none" disabled>Pilih Mata Kuliah</SelectItem>
+                  {mkList.map(m => (
+                    <SelectItem key={m.id} value={m.id}>{m.nama}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button type="submit" disabled={!nama.trim() || mkId === "none"}>
+              <Plus className="mr-2 h-4 w-4" />
+              Buat Modul
+            </Button>
+          </form>
+        </AdminPageContent>
+      )}
 
       <AdminPageContent className="bg-transparent border-0 p-0 shadow-none">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
