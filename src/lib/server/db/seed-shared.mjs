@@ -1,5 +1,3 @@
-import crypto from "crypto";
-
 const DEFAULT_ROLE_ACCESS = {
   admin_prodi: [
     "dashboard",
@@ -132,6 +130,10 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
   const ts = now ?? Date.now();
   const schoolName = "Universitas Teknologi Nusantara";
 
+  if (process.env.NODE_ENV === "production" && !process.env.ADMIN_PASSWORD) {
+    throw new Error("ADMIN_PASSWORD is required when NODE_ENV=production");
+  }
+
   const unitAkademik = [
     { id: uid("u_"), nama: "Teknik Informatika", tipe: "prodi", parentId: null },
     { id: uid("u_"), nama: "Sistem Informasi", tipe: "prodi", parentId: null },
@@ -139,10 +141,7 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
     { id: uid("u_"), nama: "Bisnis Digital", tipe: "prodi", parentId: null },
   ];
 
-  const adminPassword = process.env.ADMIN_PASSWORD || (process.env.NODE_ENV === "production" ? crypto.randomBytes(8).toString("hex") : "admin123");
-  if (process.env.NODE_ENV === "production" && !process.env.ADMIN_PASSWORD) {
-    console.warn(`[WARNING] No ADMIN_PASSWORD provided in production! A random password was generated.`);
-  }
+  const adminPassword = process.env.NODE_ENV === "production" ? process.env.ADMIN_PASSWORD : "admin123";
 
   const admin = {
     id: uid("u_"),
