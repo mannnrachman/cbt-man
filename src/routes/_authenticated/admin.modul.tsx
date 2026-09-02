@@ -185,9 +185,9 @@ function ModulPage() {
         }
       />
 
-      {/* Toolbar & Add New */}
-      <div className="flex flex-col sm:flex-row gap-4 items-end mb-6">
-        <div className="flex-1 w-full flex flex-col sm:flex-row gap-3">
+      {/* Search & Filter */}
+      <div className="flex flex-col gap-4">
+        <div className="flex w-full flex-col gap-3 sm:flex-row">
           <div className="relative flex-1 sm:max-w-xs">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -210,33 +210,46 @@ function ModulPage() {
             </SelectContent>
           </Select>
         </div>
-        
+
         {canEdit && (
-          <form
-            onSubmit={(e) => { e.preventDefault(); add(); }}
-            className="flex gap-2 w-full sm:w-auto shrink-0 items-center"
-          >
-            <Select value={mkId} onValueChange={setMkId}>
-              <SelectTrigger className="w-36 sm:w-44">
-                <SelectValue placeholder="Pilih Mata Kuliah *" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none" disabled>Pilih Mata Kuliah *</SelectItem>
-                {mkList.map(m => (
-                  <SelectItem key={m.id} value={m.id}>{m.nama}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Input
-              value={nama}
-              onChange={(e) => setNama(e.target.value)}
-              placeholder="Nama Modul Baru"
-              className="w-full sm:w-48"
-            />
-            <Button type="submit" size="icon" disabled={!nama.trim() || mkId === "none"} className="shrink-0">
-              <Plus className="h-4 w-4" />
-            </Button>
-          </form>
+          <AdminPageContent className="p-4">
+            <div className="mb-4">
+              <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Buat Modul Baru</h2>
+              <p className="mt-1 text-xs text-muted-foreground">Tambahkan modul dan hubungkan dengan mata kuliah.</p>
+            </div>
+            <form
+              onSubmit={(e) => { e.preventDefault(); add(); }}
+              className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end"
+            >
+              <div className="space-y-1.5">
+                <Label htmlFor="new-module-name">Nama Modul</Label>
+                <Input
+                  id="new-module-name"
+                  value={nama}
+                  onChange={(e) => setNama(e.target.value)}
+                  placeholder="Contoh: Modul Pemrograman Dasar"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="new-module-course">Mata Kuliah</Label>
+                <Select value={mkId} onValueChange={setMkId}>
+                  <SelectTrigger id="new-module-course">
+                    <SelectValue placeholder="Pilih Mata Kuliah" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none" disabled>Pilih Mata Kuliah</SelectItem>
+                    {mkList.map(m => (
+                      <SelectItem key={m.id} value={m.id}>{m.nama}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button type="submit" disabled={!nama.trim() || mkId === "none"}>
+                <Plus className="mr-2 h-4 w-4" />
+                Buat Modul
+              </Button>
+            </form>
+          </AdminPageContent>
         )}
       </div>
 
