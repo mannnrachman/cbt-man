@@ -8,7 +8,23 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Added
 
-- Tambahkan cuplikan layar landing, login, dasbor admin, paket ujian, bank soal, dan portal peserta pada README.
+### Changed
+
+### Fixed
+
+### Security
+
+### Deprecated
+
+### Removed
+
+## [0.1.0] - 2026-09-10
+
+Rilis awal: snapshot bertanda dari `main`, bukan klaim siap produksi. Issue audit #150–#156 masih terbuka.
+
+### Added
+
+- Tambahkan cuplikan layar landing, login, dasbor admin, paket ujian, bank soal, dan portal peserta pada README (#157).
 - Tambahkan aturan satu PR aktif per kontributor dan penggunaan CodeRabbit pada head final untuk mengurangi fragmentasi review (#146).
 - Tambahkan pilihan font SN Pro atau font sistem serta tema Neumorphism pada halaman Pengaturan admin (diekstrak dari #104).
 - Tambahkan pedoman kontribusi, instruksi agen AI, dan template pull request untuk menjaga perubahan tetap fokus, tervalidasi, dan aman.
@@ -66,3 +82,6 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 - Gunakan kalimat singkat, berorientasi dampak, dan sertakan nomor PR/issue bila tersedia: `- Perbaiki ... (#123)`.
 - Jangan mencatat formatting/refactor internal murni kecuali perilaku atau risiko operasional ikut berubah.
 - Saat membuat rilis, pindahkan item `Unreleased` ke heading versi bertanggal, misalnya `## [1.2.0] - 2026-08-09`.
+
+[Unreleased]: https://github.com/mannnrachman/cbt-man/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/mannnrachman/cbt-man/releases/tag/v0.1.0
