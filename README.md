@@ -7,6 +7,20 @@
 
 > Didedikasikan untuk pendidikan. Open source under lisensi MIT.
 
+## Tampilan
+
+Cuplikan dari data demo lokal. Gambar memakai tautan relatif sesuai [sintaks gambar GitHub](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#images).
+
+| Landing | Login peserta |
+| --- | --- |
+| ![Jadwal ujian hari ini di halaman depan CBT-MAN](docs/screenshots/01-landing.png) | ![Modal login peserta](docs/screenshots/02-login-peserta.png) |
+| **Login staf** | **Dasbor admin** |
+| ![Halaman login staf CBT-MAN](docs/screenshots/03-login-admin.png) | ![Dasbor administrasi dengan ringkasan ujian dan pengawasan live](docs/screenshots/04-admin-dashboard.png) |
+| **Paket ujian** | **Bank soal** |
+| ![Daftar paket ujian admin beserta status dan token](docs/screenshots/05-admin-ujian.png) | ![Bank soal admin dengan modul Algoritma, Basis Data, dan Pemrograman Web](docs/screenshots/06-admin-modul.png) |
+
+![Portal peserta dengan daftar ujian yang dapat dikerjakan](docs/screenshots/07-peserta-portal.png)
+
 ---
 
 ## Kapabilitas
