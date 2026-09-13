@@ -10,6 +10,8 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Changed
 
+- Bekukan acceptance baseline `v0.1.1` di PRD dan tasks: yang sudah diterima vs yang sengaja belum masuk (#154).
+
 ### Fixed
 
 ### Security
