@@ -8,6 +8,8 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Added
 
+- Tambahkan smoke Playwright landing publik di CI setelah build (#154).
+
 ### Changed
 
 - Catat kontrak kolom JSON `String` untuk v0.1.x; normalisasi ditunda ke migrasi additive (#155).
