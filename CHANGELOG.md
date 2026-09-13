@@ -14,6 +14,8 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Fixed
 
+- Muat snapshot mahasiswa tanpa seluruh bank soal: hanya soal+jawaban yang dirujuk sesi peserta (#155).
+
 ### Security
 
 - Tolak unggah file tersimpan di atas 10 MB setelah decode, sebelum ditulis ke disk (#150).
