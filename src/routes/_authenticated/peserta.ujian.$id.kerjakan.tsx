@@ -135,6 +135,23 @@ function RouteComponent() {
   const activeUjianId = ujian?.id;
 
   useEffect(() => {
+    if (!ujian?.blokirShortcut || activeSesiStatus !== "sedang") return;
+    const blockShortcut = (event: Event) => {
+      event.preventDefault();
+    };
+    document.addEventListener("copy", blockShortcut);
+    document.addEventListener("cut", blockShortcut);
+    document.addEventListener("paste", blockShortcut);
+    document.addEventListener("contextmenu", blockShortcut);
+    return () => {
+      document.removeEventListener("copy", blockShortcut);
+      document.removeEventListener("cut", blockShortcut);
+      document.removeEventListener("paste", blockShortcut);
+      document.removeEventListener("contextmenu", blockShortcut);
+    };
+  }, [ujian?.blokirShortcut, activeSesiStatus]);
+
+  useEffect(() => {
     if (!activeSesiId || !activeUjianId || activeSesiStatus === "selesai") return;
     const interval = setInterval(() => {
       const n = Date.now();
