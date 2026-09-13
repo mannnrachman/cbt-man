@@ -17,6 +17,16 @@
 
 ---
 
+## Baseline yang diterima (v0.1.1)
+
+Checklist Juli 2026 di bawah **bukan** acceptance baseline. Beberapa kotak `[ ]` sudah masuk `main` sampai tag `v0.1.1` (`ec042ba`): auth server, klaim token, throttle login 5/10 menit, scope file operator, batch monitor, blokir clipboard, audit/restore, SQLite sekarang / PostgreSQL kemudian.
+
+Yang **bukan** baseline: snapshot lazy penuh (F-06, sisa admin), normalisasi JSON (F-18), Playwright (F-10), alarm/force-logout ujian (F-22/F-24/F-25), hop PostgreSQL, pengukuran WAL, kuota unggah.
+
+Ini bukan klaim siap produksi atau v1.0.0. Rincian: bagian baseline di `docs/prd.md`.
+
+---
+
 ## Fase 0 — Persiapan
 
 - [x] 🔴 Buat branch `v2-dev` dari `main`

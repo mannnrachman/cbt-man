@@ -6,6 +6,31 @@
 
 ---
 
+## Baseline yang diterima (v0.1.1)
+
+Tag `v0.1.1` (`ec042ba`) menandai snapshot `main` yang diterima. Catatan ini membekukan **acceptance baseline**, bukan rewrite dokumen di bawah, dan **bukan** klaim siap produksi atau rilis v1.0.0. Target hidrasi lazy serta kriteria di bagian 4.6, 5, dan 7 tetap rencana v2, bukan perilaku yang sudah diterima.
+
+**Diterima sampai v0.1.1**
+
+- Auth di server (role, ownership, scope)
+- Klaim token
+- Baca file operator ter-scope jurusan dan topik
+- Throttle login gagal: 5 percobaan / 10 menit
+- Blokir clipboard pada halaman kerjakan saat `blokirShortcut`
+- Batch pemeriksaan scope operator pada monitor live
+- Persistensi: SQLite single-node sekarang; PostgreSQL kemudian
+- Jejak audit dan alur restore/reset
+
+**Bukan baseline**
+
+- Snapshot lazy penuh (F-06, sisa admin)
+- Normalisasi JSON (F-18)
+- Playwright (menunggu F-10)
+- Alarm / force-logout ujian (F-22 / F-24 / F-25)
+- Hop PostgreSQL, pengukuran WAL, kuota unggah
+
+---
+
 ## 1. Latar Belakang & Konteks
 
 CBT-MAN (Computer-Based Test Manager) adalah aplikasi ujian berbasis komputer untuk lembaga pendidikan Indonesia. Versi pertama (v1) telah berhasil diimplementasikan dengan fitur inti: bank soal terstruktur, manajemen ujian, penilaian otomatis & manual, analisis butir soal, dan pengelolaan peserta.
