@@ -11,7 +11,7 @@ import {
 	pesertaCanTouchUjian,
 } from "../db/auth";
 import type { SesiUjian, NavKey } from "@/lib/cbt/types";
-import { requireAuditLog, writeAuditLog } from "../db/audit";
+import { requireAuditLog } from "../db/audit";
 import { deleteSessionsForUser } from "../db/session";
 import { stringifyJson, toBigInt, toNumber, parseJson } from "../db/json";
 import { getRequestIP, setResponseHeader } from "@tanstack/start-server-core";
@@ -245,6 +245,15 @@ export const reportExamViolation = createServerFn({ method: "POST" })
 				return { ok: false as const, error: "Sesi tidak aktif." };
 			}
 
+			await requireAuditLog({
+				userId: caller.id,
+				userRole: caller.role,
+				action: "sesi.examViolation",
+				entity: "sesi",
+				entityId: data.sesiId,
+				details: JSON.stringify({ reason: "leave" }),
+			});
+
 			const incremented = await prisma.sesiUjian.updateMany({
 				where: { id: data.sesiId, pesertaId: caller.id, status: "sedang" },
 				data: { pelanggaran: { increment: 1 } },
@@ -260,15 +269,6 @@ export const reportExamViolation = createServerFn({ method: "POST" })
 			const pelanggaran = updated?.pelanggaran ?? sesiRow.pelanggaran + 1;
 			const maxPindahTab = sesiRow.ujian.maxPindahTab;
 			const locked = maxPindahTab === 0 || pelanggaran > maxPindahTab;
-
-			await writeAuditLog({
-				userId: caller.id,
-				userRole: caller.role,
-				action: "sesi.examViolation",
-				entity: "sesi",
-				entityId: data.sesiId,
-				details: JSON.stringify({ reason: "leave", pelanggaran, maxPindahTab, locked }),
-			});
 
 			if (!locked) {
 				return { ok: true as const, locked: false, pelanggaran };

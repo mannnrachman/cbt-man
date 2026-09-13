@@ -20,6 +20,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Security
 
+- Catat pindah tab di kerjakan, kunci sesi setelah `maxPindahTab`, cabut session, dan audit tanpa isi jawaban (#156).
 - Tolak unggah file tersimpan di atas 10 MB setelah decode, sebelum ditulis ke disk (#150).
 
 ### Deprecated

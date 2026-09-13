@@ -27,6 +27,7 @@ test("reportExamViolation requires the caller and revokes sessions on lock", () 
   const body = server.slice(start, start + 2800);
 
   assert.match(body, /requireCaller\(\)/);
+  assert.match(body, /requireAuditLog\(/);
   assert.match(body, /caller\.role !== "mahasiswa"/);
   assert.match(body, /deleteSessionsForUser\(caller\.id\)/);
   assert.match(body, /closeSedangSesiWithServerGrade/);
