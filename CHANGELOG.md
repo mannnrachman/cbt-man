@@ -10,6 +10,8 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Changed
 
+- Catat keputusan persistensi: SQLite single-node untuk production sekarang; target client/server berikutnya PostgreSQL, bukan MySQL (#159).
+
 ### Fixed
 
 - Batalkan copy, cut, paste, dan menu klik kanan di halaman kerjakan saat sesi `sedang` dan `blokirShortcut` aktif (#156).
