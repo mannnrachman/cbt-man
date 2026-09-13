@@ -249,7 +249,7 @@ Ini bukan klaim siap produksi atau v1.0.0. Rincian: bagian baseline di `docs/prd
 - [ ] 🔴 Unit test `rate-limit.ts` (lihat Fase 2.2)
 - [ ] 🔴 Unit test `hash.ts` — termasuk `timingSafeEqual`
 - [ ] 🟡 Unit test `ip-check.ts` — semua kasus CIDR
-- [ ] 🟡 Unit test `exam.ts` — `gradeSesi` dengan soal essay, multi-benar, dan soal tanpa jawaban
+- [x] 🟡 Unit test `scoring.ts` — `gradeAnswers` / `recomputeSkor` dengan soal essay, multi-benar, dan soal tanpa jawaban
 - [ ] 🟡 Unit test `analisis.ts` — dengan distribusi skor ekstrem (semua benar / semua salah)
 
 ### 9.2 Integration Test (baru)

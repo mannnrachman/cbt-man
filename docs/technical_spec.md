@@ -491,7 +491,7 @@ function notifyMutationFailure(entity, error, snapshot) {
 Tambah unit test untuk:
 - `rate-limit.ts` — sliding window counter
 - `ip-check.ts` — CIDR matching
-- `exam.ts` — `gradeSesi`, `recomputeSkor`, `buildSesi` dengan edge case
+- `scoring.ts` — `gradeAnswers`, `recomputeSkor` dengan essay, multi-benar, dan soal tanpa jawaban
 - `analisis.ts` — `analisisButir` dengan berbagai distribusi skor
 
 ### 12.2 Integration Test (baru)

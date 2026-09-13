@@ -7,26 +7,6 @@
 import type { User, Ujian } from "./types";
 import { topikRepo, soalRepo, modulRepo, ujianRepo, penawaranRepo } from "./repos";
 
-/**
- * Thrown when a participant tries to start or resume a session for an
- * exam that is not assigned to their group. The pre-exam route also
- * guards against this in the UI; server session creation re-checks via
- * `pesertaCanTouchUjian` so direct calls and stale client state cannot
- * bypass the policy.
- */
-export class PesertaNotAssignedToExamError extends Error {
-  readonly code = "PESERTA_NOT_ASSIGNED_TO_EXAM";
-  readonly ujianId: string;
-  readonly pesertaId: string;
-
-  constructor(message: string, context: { ujianId: string; pesertaId: string }) {
-    super(message);
-    this.name = "PesertaNotAssignedToExamError";
-    this.ujianId = context.ujianId;
-    this.pesertaId = context.pesertaId;
-  }
-}
-
 export function isUnrestricted(user: User | null | undefined): boolean {
   if (!user) return false;
   if (user.role === "super_admin") return true;

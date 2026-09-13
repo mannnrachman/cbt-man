@@ -16,7 +16,7 @@ import {
   getExamAvailabilityStatus,
   isExamAvailable,
 } from "@/lib/cbt/availability";
-import { isParticipantAssignedToExam, PesertaNotAssignedToExamError } from "@/lib/cbt/access";
+import { isParticipantAssignedToExam } from "@/lib/cbt/access";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -171,12 +171,7 @@ function PreUjianContent({
       invalidateReposCache();
       await hydrateRepos();
       navigate({ to: "/peserta/ujian/$id/kerjakan", params: { id: ujian.id } });
-    } catch (err) {
-      if (err instanceof PesertaNotAssignedToExamError) {
-        toast.error("Anda tidak terdaftar pada ujian ini");
-        navigate({ to: "/peserta" });
-        return;
-      }
+    } catch {
       toast.error("Gagal memulai ujian. Silakan coba lagi.");
       return;
     }

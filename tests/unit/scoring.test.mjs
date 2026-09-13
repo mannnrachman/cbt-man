@@ -157,6 +157,16 @@ test("evaluasi and analitik recompute totals from scoring.ts, not a client grade
   assert.doesNotMatch(analitik, /gradeSesi/);
   assert.ok(!existsSync(new URL("../../src/lib/cbt/exam.ts", import.meta.url)));
   assert.ok(!existsSync(new URL("../../src/lib/cbt/grading.ts", import.meta.url)));
+  const preExam = readFileSync(
+    new URL("../../src/routes/_authenticated/peserta.ujian.$id.index.tsx", import.meta.url),
+    "utf8",
+  );
+  const access = readFileSync(
+    new URL("../../src/lib/cbt/access.ts", import.meta.url),
+    "utf8",
+  );
+  assert.doesNotMatch(preExam, /PesertaNotAssignedToExamError/);
+  assert.doesNotMatch(access, /class PesertaNotAssignedToExamError/);
 });
 
 test("participant session mutation accepts only answer fields and preserves completed force-submits", () => {
