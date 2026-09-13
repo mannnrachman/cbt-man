@@ -41,7 +41,7 @@ Cuplikan dari data demo lokal. Gambar memakai tautan relatif sesuai [sintaks gam
 
 ## Persistensi
 
-Production saat ini memakai **SQLite single-node** (volume Compose, `DATABASE_URL=file:/app/data/cbt.db`).
+Production saat ini memakai **SQLite single-node** (volume Compose, `DATABASE_URL=file:/app/data/cbt.db`). Runtime Prisma mengaktifkan `PRAGMA journal_mode=WAL` dan `PRAGMA busy_timeout=5000` pada URL `file:`.
 
 Jika kelak meninggalkan SQLite (HA, lebih dari satu replica, atau database jaringan), target client/server adalah **PostgreSQL saja**, bukan MySQL. Alasan: Prisma native arrays, `jsonb`, dan MVCC sesuai pola tulis ujian.
 
