@@ -10,25 +10,55 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Changed
 
-- Catat keputusan persistensi: SQLite single-node untuk production sekarang; target client/server berikutnya PostgreSQL, bukan MySQL (#159).
-
 ### Fixed
-
-- Batalkan copy, cut, paste, dan menu klik kanan di halaman kerjakan saat sesi `sedang` dan `blokirShortcut` aktif (#156).
-- Batch pemeriksaan scope operator pada monitor live sekali per ujian unik, bukan per sesi aktif (#155).
-- Abaikan `.zed/`, `scratch/`, dan `data/uploads/` di working tree, dan cabut media lokal yang sempat ter-commit (#154).
-- Kembalikan potongan sesi cache (dan UI bila belum ada edit baru) segera setelah autosave peserta gagal, tanpa menunggu hydrate penuh (#151).
-- Ganti konfirmasi destruktif admin dari `confirm()` native ke dialog bersama yang dapat diakses, dan tambahkan `aria-label` pada toolbar ikon RichEditor (#151).
-- Jangan hapus cookie logout bila sesi server gagal dihapus; audit mutation pengguna wajib; baca media tidak diblokir lock restore; cleanup folder restore bersifat best-effort (#153).
-- Catat keberhasilan restore/reset dalam transaksi yang sama dan batasi respons readiness publik tanpa detail dependensi (#153).
-- Jadikan restore database dan media satu alur yang tervalidasi, menghapus media stale, dan mengembalikan folder lama saat promosi gagal (#153).
-- Lindungi mutation audit, token, sesi, pengguna, akademik, modul, dan ujian dengan audit precondition yang eksplisit (#153).
 
 ### Security
 
-- Terapkan scope jurusan dan topik/mata kuliah pada pembacaan file langsung operator, sama seperti daftar file dan operasi server lain (#150).
-- Batasi login gagal menjadi 5 percobaan per 10 menit dan hanya catat kegagalan, bukan percobaan yang masih dicek atau yang berhasil (#152).
-- Pertahankan metadata `jurusanId` saat backup/restore, serialisasi operasi file, dan cadangkan ekstensi `.json` untuk metadata internal (#153).
+### Deprecated
+
+### Removed
+
+## [0.1.1] - 2026-09-13
+
+Patch snapshot setelah antrian audit #150–#156 dan keputusan mesin #159 merapat ke `main`. Ini **bukan** klaim siap produksi.
+
+Yang dikerjakan sejak `v0.1.0`:
+
+- **#153 / #160** — jejak audit, restore/reset satu alur, readiness tanpa membocorkan dependensi, metadata `jurusanId` pada backup.
+- **#151 / #163** — dialog konfirmasi admin yang dapat diakses; `aria-label` pada toolbar ikon RichEditor (F-17).
+- **#152 / #164** — ambang login gagal 5 percobaan / 10 menit; kuota hanya bertambah setelah gagal (F-03).
+- **#150 / #165** — baca file langsung operator ter-scope jurusan dan topik/mata kuliah (F-08).
+- **#151 / #166** — rollback cache (dan UI bila belum ada edit baru) segera setelah autosave peserta gagal (F-14).
+- **#154 / #167** — ignore `.zed/`, `scratch/`, `data/uploads/`; cabut media lokal yang sempat ter-commit (F-01).
+- **#155 / #168** — monitor live menyelesaikan `operatorCanTouchUjian` sekali per ujian unik (F-15).
+- **#156 / #169** — batalkan copy/cut/paste/klik kanan di halaman kerjakan bila `blokirShortcut` (F-23).
+- **#159 / #170** — README: SQLite single-node sekarang; target berikutnya PostgreSQL, bukan MySQL.
+
+Sengaja belum masuk: snapshot penuh (F-06), normalisasi JSON (F-18), Playwright (F-10), freeze PRD (F-21), alarm/force-logout ujian (F-22/F-24/F-25), hop PostgreSQL, pengukuran WAL, dan beberapa batas upload/audit dependensi.
+
+### Added
+
+### Changed
+
+- Catat keputusan persistensi: SQLite single-node untuk production sekarang; target client/server berikutnya PostgreSQL, bukan MySQL (#159, #170).
+
+### Fixed
+
+- Batalkan copy, cut, paste, dan menu klik kanan di halaman kerjakan saat sesi `sedang` dan `blokirShortcut` aktif (#156, #169).
+- Batch pemeriksaan scope operator pada monitor live sekali per ujian unik, bukan per sesi aktif (#155, #168).
+- Abaikan `.zed/`, `scratch/`, dan `data/uploads/` di working tree, dan cabut media lokal yang sempat ter-commit (#154, #167).
+- Kembalikan potongan sesi cache (dan UI bila belum ada edit baru) segera setelah autosave peserta gagal, tanpa menunggu hydrate penuh (#151, #166).
+- Ganti konfirmasi destruktif admin dari `confirm()` native ke dialog bersama yang dapat diakses, dan tambahkan `aria-label` pada toolbar ikon RichEditor (#151, #163).
+- Jangan hapus cookie logout bila sesi server gagal dihapus; audit mutation pengguna wajib; baca media tidak diblokir lock restore; cleanup folder restore bersifat best-effort (#153, #160).
+- Catat keberhasilan restore/reset dalam transaksi yang sama dan batasi respons readiness publik tanpa detail dependensi (#153, #160).
+- Jadikan restore database dan media satu alur yang tervalidasi, menghapus media stale, dan mengembalikan folder lama saat promosi gagal (#153, #160).
+- Lindungi mutation audit, token, sesi, pengguna, akademik, modul, dan ujian dengan audit precondition yang eksplisit (#153, #160).
+
+### Security
+
+- Terapkan scope jurusan dan topik/mata kuliah pada pembacaan file langsung operator, sama seperti daftar file dan operasi server lain (#150, #165).
+- Batasi login gagal menjadi 5 percobaan per 10 menit dan hanya catat kegagalan, bukan percobaan yang masih dicek atau yang berhasil (#152, #164).
+- Pertahankan metadata `jurusanId` saat backup/restore, serialisasi operasi file, dan cadangkan ekstensi `.json` untuk metadata internal (#153, #160).
 
 ### Deprecated
 
@@ -99,5 +129,6 @@ Rilis awal: snapshot bertanda dari `main`, bukan klaim siap produksi. Issue audi
 - Jangan mencatat formatting/refactor internal murni kecuali perilaku atau risiko operasional ikut berubah.
 - Saat membuat rilis, pindahkan item `Unreleased` ke heading versi bertanggal, misalnya `## [1.2.0] - 2026-08-09`.
 
-[Unreleased]: https://github.com/mannnrachman/cbt-man/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/mannnrachman/cbt-man/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/mannnrachman/cbt-man/releases/tag/v0.1.1
 [0.1.0]: https://github.com/mannnrachman/cbt-man/releases/tag/v0.1.0
