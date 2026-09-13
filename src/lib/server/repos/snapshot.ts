@@ -193,7 +193,76 @@ export function operatorSnapshot(rows: SnapshotRows, caller: UserRow): Snapshot 
 	};
 }
 
+export async function loadPesertaSnapshotRows(caller: UserRow): Promise<SnapshotRows> {
+	const [publishedUjian, unitAkademik, sesiRows, config] = await Promise.all([
+		prisma.ujian.findMany({
+			where: { status: "published" },
+			orderBy: { createdAt: "asc" },
+		}),
+		prisma.unitAkademik.findMany({ orderBy: { nama: "asc" } }),
+		prisma.sesiUjian.findMany({
+			where: { pesertaId: caller.id },
+			orderBy: { createdAt: "asc" },
+		}),
+		prisma.appConfig.findUnique({ where: { id: "app" } }),
+	]);
+
+	const penawaranIds = [
+		...new Set(
+			publishedUjian
+				.map((item) => item.penawaranId)
+				.filter((id): id is string => !!id),
+		),
+	];
+	const penawaran = (
+		penawaranIds.length
+			? await prisma.penawaranMataKuliah.findMany({
+					where: { id: { in: penawaranIds } },
+					orderBy: { createdAt: "asc" },
+				})
+			: []
+	).map(mapPenawaran);
+
+	const ujian = publishedUjian.filter((item) => {
+		const groupIds = parseJson<string[]>(item.groupIds, []);
+		const offering = item.penawaranId
+			? penawaran.find((value) => value.id === item.penawaranId)
+			: undefined;
+		return item.status === "published" && (!!offering?.pesertaIds.includes(caller.id) || (!!caller.unitId && groupIds.includes(caller.unitId)));
+	});
+	const ujianIds = new Set(ujian.map((item) => item.id));
+	const sesi = sesiRows.filter((item) => ujianIds.has(item.ujianId));
+	const soalIds = [...new Set(sesi.flatMap((item) => parseJson<string[]>(item.soalIds, [])))];
+	const soal =
+		soalIds.length === 0
+			? []
+			: await prisma.soal.findMany({
+					where: { id: { in: soalIds } },
+					include: { jawaban: true },
+					orderBy: { createdAt: "asc" },
+				});
+
+	return {
+		users: [caller],
+		unitAkademik: unitAkademik as any,
+		tahunAkademik: [],
+		semester: [],
+		mataKuliah: [],
+		penawaran,
+		modul: [],
+		topik: [],
+		soal,
+		ujian,
+		token: [],
+		sesi,
+		config,
+	};
+}
+
 export async function buildSnapshotForUser(caller: UserRow): Promise<Snapshot> {
+	if (caller.role === "mahasiswa") {
+		return pesertaSnapshot(await loadPesertaSnapshotRows(caller), caller);
+	}
 	const rows = await loadSnapshotRows();
 	if (caller.role === "super_admin") return adminSnapshot(rows);
 	if (caller.role === "admin_prodi" || caller.role === "evaluator") return operatorSnapshot(rows, caller);

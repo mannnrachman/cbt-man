@@ -176,3 +176,31 @@ test("public landing schedule endpoint uses a narrow DTO, not the full Ujian map
     assert.ok(!src.includes(leak), `public schedule DTO must NOT expose ${leak}`);
   }
 });
+
+test("mahasiswa snapshot construction does not load every soal", () => {
+  const src = read("src/lib/server/repos/snapshot.ts");
+  const buildIdx = src.indexOf("export async function buildSnapshotForUser");
+  assert.ok(buildIdx > 0, "buildSnapshotForUser must exist");
+  const buildBody = src.slice(buildIdx);
+  assert.match(buildBody, /caller\.role === "mahasiswa"/);
+  assert.match(buildBody, /loadPesertaSnapshotRows\(caller\)/);
+  assert.match(buildBody, /loadSnapshotRows\(\)/);
+
+  const loaderIdx = src.indexOf("function loadPesertaSnapshotRows");
+  assert.ok(loaderIdx > 0, "loadPesertaSnapshotRows must exist");
+  const loaderBody = src.slice(loaderIdx, buildIdx);
+  assert.match(loaderBody, /pesertaId:\s*caller\.id/);
+  assert.match(loaderBody, /parseJson<\s*string\[\]\s*>\(\s*\w+\.soalIds/);
+  assert.match(loaderBody, /prisma\.soal\.findMany/);
+  assert.match(loaderBody, /id:\s*\{\s*in:\s*soalIds\s*\}/);
+  assert.doesNotMatch(
+    loaderBody,
+    /prisma\.soal\.findMany\(\s*\{\s*include:\s*\{\s*jawaban:\s*true\s*\}/,
+    "peserta loader must not findMany the entire soal bank",
+  );
+  assert.match(
+    loaderBody,
+    /offering\?\.pesertaIds\.includes\(caller\.id\)/,
+    "peserta loader must keep the same assignment predicate as pesertaSnapshot",
+  );
+});
