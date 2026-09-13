@@ -10,6 +10,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Changed
 
+- Catat kontrak kolom JSON `String` untuk v0.1.x; normalisasi ditunda ke migrasi additive (#155).
 - Bekukan acceptance baseline `v0.1.1` di PRD dan tasks: yang sudah diterima vs yang sengaja belum masuk (#154).
 
 ### Fixed
