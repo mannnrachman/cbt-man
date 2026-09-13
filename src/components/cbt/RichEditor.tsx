@@ -227,7 +227,7 @@ export function RichEditor({
           { i: Sigma, t: "Rumus matematika", c: insertMath },
           { i: Eraser, t: "Bersihkan format", c: () => exec("removeFormat") },
         ].map(({ i: Icon, t, c }, i) => (
-          <Button key={i} type="button" variant="ghost" size="sm" title={t} onClick={c}>
+          <Button key={i} type="button" variant="ghost" size="sm" title={t} aria-label={t} onClick={c}>
             <Icon className="h-4 w-4" />
           </Button>
         ))}

@@ -16,6 +16,7 @@ import { useAuthStore } from "@/lib/cbt/auth-store";
 import { visibleModuls, allowedTopikIdSet, isUnrestricted } from "@/lib/cbt/access";
 import { filterModuls } from "@/lib/cbt/modul-filter.mjs";
 import { AdminPage, AdminPageHeader, AdminPageContent } from "@/components/cbt/AdminPage";
+import { useConfirmDialog } from "@/components/cbt/ConfirmDialog";
 
 export const Route = createFileRoute("/_authenticated/admin/modul")({
   component: ModulRoute,
@@ -42,6 +43,7 @@ function ModulRoute() {
 }
 
 function ModulPage() {
+  const { confirm, dialog } = useConfirmDialog();
   const user = useAuthStore((s) => s.user);
   const canEdit = isUnrestricted(user);
   const [moduls, setModuls] = useState<Modul[]>(visibleModuls(user));
@@ -73,14 +75,14 @@ function ModulPage() {
     toast.success("Modul ditambahkan");
   }
 
-  function remove(id: string) {
+  async function remove(id: string) {
     if (!canEdit) return;
     const topiks = topikRepo.all().filter((t) => t.modulId === id);
     if (topiks.length) {
       toast.error("Hapus topik di dalam modul ini dulu");
       return;
     }
-    if (!confirm("Hapus modul ini?")) return;
+    if (!(await confirm({ title: "Hapus modul", description: "Hapus modul ini?", confirmLabel: "Hapus" }))) return;
     modulRepo.remove(id);
     setModuls(visibleModuls(user));
     toast.success("Modul dihapus");
@@ -304,6 +306,7 @@ function ModulPage() {
         mkList={mkList}
         onSaved={() => setModuls(visibleModuls(user))}
       />
+      {dialog}
     </AdminPage>
   );
 }

@@ -29,6 +29,7 @@ import {
   visibleTopiks,
 } from "@/lib/cbt/access";
 import { fetchUjianByIdServer, mutateUjianServer } from "@/lib/server/ujian/functions";
+import { useConfirmDialog } from "@/components/cbt/ConfirmDialog";
 
 function toDateTimeLocal(value?: number) {
   if (value === undefined) return "";
@@ -62,6 +63,7 @@ function UjianEditorRoute() {
 }
 
 function UjianEditor() {
+  const { confirm, dialog } = useConfirmDialog();
   const { id } = useParams({ from: "/_authenticated/admin/ujian/$id" });
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
@@ -283,7 +285,7 @@ function UjianEditor() {
   }
 
   async function hapus() {
-    if (!confirm(`Yakin ingin menghapus ujian "${u!.nama}" beserta seluruh data yang terkait?`)) return;
+    if (!(await confirm({ title: "Hapus ujian", description: `Yakin ingin menghapus ujian "${u!.nama}" beserta seluruh data yang terkait?`, confirmLabel: "Hapus" }))) return;
     ujianRepo.remove(u!.id);
     await ujianRepo.flush();
     toast.success("Ujian dihapus");
@@ -709,6 +711,7 @@ function UjianEditor() {
           </div>
         </CardContent>
       </Card>
+      {dialog}
     </div>
   );
 }

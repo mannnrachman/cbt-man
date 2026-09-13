@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { AdminPage, AdminPageHeader, AdminPageContent } from "@/components/cbt/AdminPage";
+import { useConfirmDialog } from "@/components/cbt/ConfirmDialog";
 
 
 export const Route = createFileRoute("/_authenticated/admin/peserta/online")({
@@ -26,6 +27,7 @@ function fmtSisa(ms: number): string {
   type LiveSession = Awaited<ReturnType<typeof getLiveOnlineSesis>>[number];
 
 function OnlinePage() {
+  const { confirm, dialog } = useConfirmDialog();
   const { rawSesis } = Route.useLoaderData();
   const router = useRouter();
 
@@ -46,7 +48,7 @@ function OnlinePage() {
   }, [router]);
 
   async function handleForceSubmit(session: LiveSession) {
-    if (!confirm(`Paksa kumpulkan ujian untuk ${session.user?.namaLengkap ?? "Peserta"}? Sesi ini akan ditutup secara permanen.`)) return;
+    if (!(await confirm({ title: "Paksa kumpulkan ujian", description: `Paksa kumpulkan ujian untuk ${session.user?.namaLengkap ?? "Peserta"}? Sesi ini akan ditutup secara permanen.`, confirmLabel: "Kumpulkan" }))) return;
     try {
       const res = await actionLiveSesiServer({
         data: { sesiId: session.id, action: "forceSubmit" },
@@ -63,7 +65,7 @@ function OnlinePage() {
   }
 
   async function handleResetPelanggaran(session: LiveSession) {
-    if (!confirm(`Reset jumlah pelanggaran untuk ${session.user?.namaLengkap ?? "Peserta"} menjadi 0?`)) return;
+    if (!(await confirm({ title: "Reset pelanggaran", description: `Reset jumlah pelanggaran untuk ${session.user?.namaLengkap ?? "Peserta"} menjadi 0?`, confirmLabel: "Reset", destructive: false }))) return;
     try {
       const res = await actionLiveSesiServer({
         data: { sesiId: session.id, action: "resetPelanggaran" },
@@ -231,6 +233,7 @@ function OnlinePage() {
             )}
           </div>
       </AdminPageContent>
+      {dialog}
     </AdminPage>
 
   );

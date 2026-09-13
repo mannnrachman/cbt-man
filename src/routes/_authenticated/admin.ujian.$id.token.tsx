@@ -12,12 +12,14 @@ import { Plus, Trash2, Copy, Lock, KeyRound, Clock, CheckCircle2, AlertCircle } 
 import { toast } from "sonner";
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import { ujianTouchesAllowed } from "@/lib/cbt/access";
+import { useConfirmDialog } from "@/components/cbt/ConfirmDialog";
 
 export const Route = createFileRoute("/_authenticated/admin/ujian/$id/token")({
   component: TokenPage,
 });
 
 function TokenPage() {
+  const { confirm, dialog } = useConfirmDialog();
   const { id } = useParams({ from: "/_authenticated/admin/ujian/$id/token" });
   const user = useAuthStore((s) => s.user);
   const initialUjian = ujianRepo.byId(id);
@@ -116,7 +118,7 @@ function TokenPage() {
   }
 
   async function hapusToken(tokenId: string) {
-    if (!confirm("Hapus token ini?")) return;
+    if (!(await confirm({ title: "Hapus token", description: "Hapus token ini?", confirmLabel: "Hapus" }))) return;
     try {
       const res = await deleteExamTokenServer({ data: { id: tokenId } });
       if (!res.ok) {
@@ -366,6 +368,7 @@ function TokenPage() {
           </table>
         </CardContent>
       </Card>
+      {dialog}
     </div>
   );
 }

@@ -13,12 +13,14 @@ import { Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useConfirmDialog } from "@/components/cbt/ConfirmDialog";
 
 export const Route = createFileRoute("/_authenticated/admin/akademik/kelas-mata-kuliah")({
   component: KelasMataKuliahPage,
 });
 
 function KelasMataKuliahPage() {
+  const { confirm, dialog } = useConfirmDialog();
   const [items, setItems] = useState<PenawaranMataKuliah[]>(penawaranRepo.all());
   const mataKuliah = mataKuliahRepo.all();
   const semester = semesterRepo.all();
@@ -50,7 +52,7 @@ function KelasMataKuliahPage() {
   }
 
   async function remove(id: string) {
-    if (!confirm("Hapus kelas mata kuliah ini?")) return;
+    if (!(await confirm({ title: "Hapus kelas mata kuliah", description: "Hapus kelas mata kuliah ini?", confirmLabel: "Hapus" }))) return;
     const result = await mutatePenawaranMataKuliahServer({ data: { action: "remove", payload: { id } } });
     if (!result.ok) return toast.error(result.error);
     await hydrateRepos();
@@ -90,6 +92,7 @@ function KelasMataKuliahPage() {
           <DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>Batal</Button><Button onClick={save}>Simpan</Button></DialogFooter>
         </DialogContent>
       </Dialog>
+      {dialog}
     </div>
   );
 }

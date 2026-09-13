@@ -12,6 +12,7 @@ import { Trash2, Pencil, Save, X, BookOpen, Clock, FileText, ChevronRight, Check
 import { useState, useEffect } from "react";
 import { RichView } from "@/components/cbt/RichEditor";
 import { toast } from "sonner";
+import { useConfirmDialog } from "@/components/cbt/ConfirmDialog";
 import {
   BarChart as RechartsBarChart,
   Bar,
@@ -106,6 +107,7 @@ function HasilUjian() {
 }
 
 function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: SesiUjian[], refresh: () => void }) {
+  const { confirm, dialog } = useConfirmDialog();
   const users = usersRepo.all();
   const [openId, setOpenId] = useState<string | null>(null);
   const [editIdx, setEditIdx] = useState<number | null>(null);
@@ -189,8 +191,8 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
                         <Button size="sm" variant={isOpen ? "default" : "outline"} disabled={savingKey !== null} onClick={() => { setOpenId(isOpen ? null : s.id); setEditIdx(null); }}>
                           {isOpen ? "Tutup Lembar" : "Koreksi Lembar"}
                         </Button>
-                        <Button size="sm" variant="ghost" disabled={savingKey !== null} className="text-destructive hover:bg-destructive/10" onClick={async () => {
-                          if (!confirm("Hapus sesi ujian ini secara permanen?")) return;
+                        <Button size="sm" variant="ghost" disabled={savingKey !== null} className="text-destructive hover:bg-destructive/10" aria-label="Hapus sesi ujian" onClick={async () => {
+                          if (!(await confirm({ title: "Hapus sesi ujian", description: "Hapus sesi ujian ini secara permanen?", confirmLabel: "Hapus" }))) return;
                           sesiRepo.remove(s.id);
                           const result = await sesiRepo.flush();
                           if (result.ok) refresh();
@@ -305,6 +307,7 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
             </div>
           );
         })()}
+      {dialog}
     </>
   );
 }

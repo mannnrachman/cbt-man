@@ -15,12 +15,14 @@ import { Upload, Trash2, FolderOpen, FileAudio, File as FileIcon, Search, Copy, 
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { AdminPage, AdminPageHeader } from "@/components/cbt/AdminPage";
+import { useConfirmDialog } from "@/components/cbt/ConfirmDialog";
 
 export const Route = createFileRoute("/_authenticated/admin/files")({
   component: FilesPage,
 });
 
 function FilesPage() {
+  const { confirm, dialog } = useConfirmDialog();
   const user = useAuthStore((s) => s.user);
   const isSuper = user?.role === "super_admin";
   const myJurusanId = user?.unitId;
@@ -259,7 +261,7 @@ function FilesPage() {
                           toast.error(`Aksi Ditolak: File ini sedang digunakan di ${usage} soal. Hapus dari soal terlebih dahulu sebelum menghapus file.`);
                           return;
                         }
-                        if (!confirm(`Hapus file ${f.name} secara permanen?`)) return;
+                        if (!(await confirm({ title: "Hapus file", description: `Hapus file ${f.name} secara permanen?`, confirmLabel: "Hapus" }))) return;
                         try {
                           await deleteFile(f.id);
                           toast.success("File berhasil dihapus");
@@ -273,6 +275,7 @@ function FilesPage() {
                         }
                       }}
                       title="Hapus Permanen"
+                      aria-label="Hapus Permanen"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>}
@@ -314,6 +317,7 @@ function FilesPage() {
           })}
         </div>
       )}
+      {dialog}
     </AdminPage>
   );
 }

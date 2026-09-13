@@ -18,6 +18,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Pencil, Trash2, Plus, Printer, Upload, Users as UsersIcon, Activity, Search, Loader2, ChevronLeft, ChevronRight, FileX } from "lucide-react";
 import { toast } from "sonner";
+import { useConfirmDialog } from "@/components/cbt/ConfirmDialog";
 
 export const Route = createFileRoute("/_authenticated/admin/peserta/")({
   component: PesertaPage,
@@ -33,6 +34,7 @@ export const Route = createFileRoute("/_authenticated/admin/peserta/")({
 type PesertaWithPwd = User & { _initialPassword?: string };
 
 function PesertaPage() {
+  const { confirm, dialog } = useConfirmDialog();
   const { allUsers, allUnits } = Route.useLoaderData();
   const router = useRouter();
   
@@ -58,7 +60,7 @@ function PesertaPage() {
   }
 
   async function handleBulkDelete() {
-    if (!confirm(`Hapus ${selectedIds.length} peserta terpilih secara permanen?`)) return;
+    if (!(await confirm({ title: "Hapus peserta", description: `Hapus ${selectedIds.length} peserta terpilih secara permanen?`, confirmLabel: "Hapus" }))) return;
     const res = await mutateUserServer({ data: { action: "bulkRemove", payload: { ids: selectedIds } } });
     if (res.ok) {
       toast.success(`${selectedIds.length} peserta berhasil dihapus`);
@@ -352,6 +354,7 @@ function PesertaPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {dialog}
     </AdminPage>
   );
 }

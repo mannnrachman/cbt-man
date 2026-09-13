@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { RichEditor, RichView } from "@/components/cbt/RichEditor";
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import { isTopikAllowed, visibleTopiks } from "@/lib/cbt/access";
+import { useConfirmDialog } from "@/components/cbt/ConfirmDialog";
 
 export const Route = createFileRoute("/_authenticated/admin/topik/$id/soal")({
   component: SoalPage,
@@ -25,6 +26,7 @@ const TIPE_LABEL: Record<TipeSoal, string> = {
 const KES_LABEL: Record<Kesulitan, string> = { mudah: "Mudah", sedang: "Sedang", sulit: "Sulit" };
 
 function SoalPage() {
+  const { confirm, dialog } = useConfirmDialog();
   const { id: topikId } = useParams({ from: "/_authenticated/admin/topik/$id/soal" });
   const topik = topikRepo.byId(topikId);
   const modul = topik ? modulRepo.byId(topik.modulId) : null;
@@ -58,12 +60,12 @@ function SoalPage() {
     setSoals(soalRepo.all().filter((s) => s.topikId === topikId)); 
     setSelectedIds([]);
   }
-  function remove(id: string) {
-    if (!confirm("Hapus soal?")) return;
+  async function remove(id: string) {
+    if (!(await confirm({ title: "Hapus soal", description: "Hapus soal?", confirmLabel: "Hapus" }))) return;
     soalRepo.remove(id); refresh();
   }
   async function handleBulkDelete() {
-    if (!confirm(`Hapus ${selectedIds.length} soal terpilih secara permanen?`)) return;
+    if (!(await confirm({ title: "Hapus soal terpilih", description: `Hapus ${selectedIds.length} soal terpilih secara permanen?`, confirmLabel: "Hapus" }))) return;
     selectedIds.forEach((id) => soalRepo.remove(id));
     const res = await soalRepo.flush();
     if (res.ok) {
@@ -357,6 +359,7 @@ function SoalPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {dialog}
       </div>
     </div>
   );

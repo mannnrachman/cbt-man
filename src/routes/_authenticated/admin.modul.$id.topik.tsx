@@ -11,12 +11,14 @@ import { Plus, Trash2, ChevronRight, Lock, BookOpen, Layers, Pencil } from "luci
 import { toast } from "sonner";
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import { allowedTopikIdSet, isUnrestricted } from "@/lib/cbt/access";
+import { useConfirmDialog } from "@/components/cbt/ConfirmDialog";
 
 export const Route = createFileRoute("/_authenticated/admin/modul/$id/topik")({
   component: TopikPage,
 });
 
 function TopikPage() {
+  const { confirm, dialog } = useConfirmDialog();
   const { id: modulId } = useParams({ from: "/_authenticated/admin/modul/$id/topik" });
   const user = useAuthStore((s) => s.user);
   const canEdit = isUnrestricted(user);
@@ -44,10 +46,10 @@ function TopikPage() {
     setNama(""); setTopiks(filterMine(topikRepo.all())); toast.success("Topik ditambahkan");
   }
 
-  function remove(id: string) {
+  async function remove(id: string) {
     if (!canEdit) return;
     if (soalRepo.all().some((s) => s.topikId === id)) { toast.error("Hapus soal di topik ini dulu"); return; }
-    if (!confirm("Hapus topik?")) return;
+    if (!(await confirm({ title: "Hapus topik", description: "Hapus topik?", confirmLabel: "Hapus" }))) return;
     topikRepo.remove(id); setTopiks(filterMine(topikRepo.all()));
     toast.success("Topik dihapus");
   }
@@ -179,6 +181,7 @@ function TopikPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {dialog}
     </div>
   );
 }

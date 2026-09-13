@@ -34,12 +34,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useConfirmDialog } from "@/components/cbt/ConfirmDialog";
 
 export const Route = createFileRoute("/_authenticated/admin/akademik/mata-kuliah")({
   component: MataKuliahPage,
 });
 
 function MataKuliahPage() {
+  const { confirm, dialog } = useConfirmDialog();
   const [items, setItems] = useState<MataKuliah[]>(mataKuliahRepo.all());
   const [search, setSearch] = useState("");
   const unitList = unitAkademikRepo.all();
@@ -77,7 +79,7 @@ function MataKuliahPage() {
   }
 
   async function handleRemove(id: string) {
-    if (!confirm("Hapus mata kuliah ini?")) return;
+    if (!(await confirm({ title: "Hapus mata kuliah", description: "Hapus mata kuliah ini?", confirmLabel: "Hapus" }))) return;
     const res = await mutateMataKuliahServer({ data: { action: "remove", payload: { id } } });
     if (!res.ok) {
       toast.error(res.error || "Gagal menghapus");
@@ -319,6 +321,7 @@ function MataKuliahPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {dialog}
     </div>
   );
 }

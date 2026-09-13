@@ -21,12 +21,14 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useConfirmDialog } from "@/components/cbt/ConfirmDialog";
 
 export const Route = createFileRoute("/_authenticated/admin/akademik/tahun-akademik")({
   component: TahunAkademikPage,
 });
 
 function TahunAkademikPage() {
+  const { confirm, dialog } = useConfirmDialog();
   const [items, setItems] = useState<TahunAkademik[]>(tahunAkademikRepo.all());
   const [editing, setEditing] = useState<TahunAkademik | null>(null);
   const [open, setOpen] = useState(false);
@@ -45,7 +47,7 @@ function TahunAkademikPage() {
   }
 
   async function handleRemove(id: string) {
-    if (!confirm("Hapus tahun akademik ini?")) return;
+    if (!(await confirm({ title: "Hapus tahun akademik", description: "Hapus tahun akademik ini?", confirmLabel: "Hapus" }))) return;
     const res = await mutateTahunAkademikServer({ data: { action: "remove", payload: { id } } });
     if (!res.ok) {
       toast.error(res.error || "Gagal menghapus");
@@ -174,6 +176,7 @@ function TahunAkademikPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {dialog}
     </div>
   );
 }

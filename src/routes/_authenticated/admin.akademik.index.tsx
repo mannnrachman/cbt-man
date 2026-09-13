@@ -17,6 +17,7 @@ import {
 import { Plus, Edit2, Trash2, Building2, Library, Users, Search, FolderTree } from "lucide-react";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useConfirmDialog } from "@/components/cbt/ConfirmDialog";
 
 export const Route = createFileRoute("/_authenticated/admin/akademik/")({
   component: UnitAkademikExplorer,
@@ -90,6 +91,7 @@ function UnitAkademikExplorer() {
 
 // ---------------- 1. TAB FAKULTAS ----------------
 function FakultasSection({ data, onUpdated }: { data: UnitAkademik[]; onUpdated: () => void }) {
+  const { confirm, dialog } = useConfirmDialog();
   const [form, setForm] = useState<{ id: string; nama: string }>({ id: "", nama: "" });
   const [search, setSearch] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -125,7 +127,7 @@ function FakultasSection({ data, onUpdated }: { data: UnitAkademik[]; onUpdated:
   };
 
   const remove = async (id: string) => {
-    if (!confirm("Hapus Fakultas ini?")) return;
+    if (!(await confirm({ title: "Hapus fakultas", description: "Hapus Fakultas ini?", confirmLabel: "Hapus" }))) return;
     const res = await mutateUnitAkademikServer({ data: { action: "remove", payload: { id } } });
     if (!res.ok) {
       toast.error(res.error || "Gagal menghapus fakultas");
@@ -238,6 +240,7 @@ function FakultasSection({ data, onUpdated }: { data: UnitAkademik[]; onUpdated:
           </div>
         </CardContent>
       </Card>
+      {dialog}
     </div>
   );
 }
@@ -252,6 +255,7 @@ function ProdiSection({
   fakultas: UnitAkademik[];
   onUpdated: () => void;
 }) {
+  const { confirm, dialog } = useConfirmDialog();
   const [form, setForm] = useState<{ id: string; nama: string; fakultasId: string }>({
     id: "",
     nama: "",
@@ -295,7 +299,7 @@ function ProdiSection({
   };
 
   const remove = async (id: string) => {
-    if (!confirm("Hapus Program Studi ini?")) return;
+    if (!(await confirm({ title: "Hapus program studi", description: "Hapus Program Studi ini?", confirmLabel: "Hapus" }))) return;
     const res = await mutateUnitAkademikServer({ data: { action: "remove", payload: { id } } });
     if (!res.ok) {
       toast.error(res.error || "Gagal menghapus program studi");
@@ -439,6 +443,7 @@ function ProdiSection({
           </div>
         </CardContent>
       </Card>
+      {dialog}
     </div>
   );
 }
@@ -453,6 +458,7 @@ function KelasSection({
   prodi: UnitAkademik[];
   onUpdated: () => void;
 }) {
+  const { confirm, dialog } = useConfirmDialog();
   const [form, setForm] = useState<{ id: string; nama: string; prodiId: string }>({
     id: "",
     nama: "",
@@ -496,7 +502,7 @@ function KelasSection({
   };
 
   const remove = async (id: string) => {
-    if (!confirm("Hapus Kelas ini?")) return;
+    if (!(await confirm({ title: "Hapus kelas", description: "Hapus Kelas ini?", confirmLabel: "Hapus" }))) return;
     const res = await mutateUnitAkademikServer({ data: { action: "remove", payload: { id } } });
     if (!res.ok) {
       toast.error(res.error || "Gagal menghapus kelas");
@@ -640,6 +646,7 @@ function KelasSection({
           </div>
         </CardContent>
       </Card>
+      {dialog}
     </div>
   );
 }

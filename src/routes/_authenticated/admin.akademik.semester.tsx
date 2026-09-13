@@ -27,12 +27,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useConfirmDialog } from "@/components/cbt/ConfirmDialog";
 
 export const Route = createFileRoute("/_authenticated/admin/akademik/semester")({
   component: SemesterPage,
 });
 
 function SemesterPage() {
+  const { confirm, dialog } = useConfirmDialog();
   const [items, setItems] = useState<Semester[]>(semesterRepo.all());
   const taList = tahunAkademikRepo.all();
   const [editing, setEditing] = useState<Semester | null>(null);
@@ -53,7 +55,7 @@ function SemesterPage() {
   }
 
   async function handleRemove(id: string) {
-    if (!confirm("Hapus semester ini?")) return;
+    if (!(await confirm({ title: "Hapus semester", description: "Hapus semester ini?", confirmLabel: "Hapus" }))) return;
     const res = await mutateSemesterServer({ data: { action: "remove", payload: { id } } });
     if (!res.ok) {
       toast.error(res.error || "Gagal menghapus");
@@ -189,6 +191,7 @@ function SemesterPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {dialog}
     </div>
   );
 }
