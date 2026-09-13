@@ -12,6 +12,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Fixed
 
+- Abaikan `.zed/`, `scratch/`, dan `data/uploads/` di working tree, dan cabut media lokal yang sempat ter-commit (#154).
 - Kembalikan potongan sesi cache (dan UI bila belum ada edit baru) segera setelah autosave peserta gagal, tanpa menunggu hydrate penuh (#151).
 - Ganti konfirmasi destruktif admin dari `confirm()` native ke dialog bersama yang dapat diakses, dan tambahkan `aria-label` pada toolbar ikon RichEditor (#151).
 - Jangan hapus cookie logout bila sesi server gagal dihapus; audit mutation pengguna wajib; baca media tidak diblokir lock restore; cleanup folder restore bersifat best-effort (#153).
