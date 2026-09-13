@@ -36,6 +36,11 @@ coverage/
 Thumbs.db
 .vscode/
 .idea/
+.zed/
+
+# local drafts / runtime uploads
+scratch/
+data/uploads/
 
 # local tool state
 *.pid

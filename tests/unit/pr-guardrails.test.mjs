@@ -37,6 +37,12 @@ test("PR hygiene rejects historical CBT-MAN artifacts and legacy branding", () =
   assert.equal(shouldScanBranding(".github/PULL_REQUEST_TEMPLATE.md"), false);
 });
 
+test(".gitignore ignores local editor state and upload data", () => {
+  const gitignore = readFileSync(".gitignore", "utf8");
+  assert.match(gitignore, /^\.zed\/$/m);
+  assert.match(gitignore, /^data\/uploads\/$/m);
+});
+
 test("admin layout reads the authenticated route context instead of nullable client state", () => {
   const adminLayout = readFileSync("src/routes/_authenticated/admin.tsx", "utf8");
 
