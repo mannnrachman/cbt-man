@@ -5,7 +5,7 @@ import { getRequestHeaders } from "@tanstack/start-server-core";
 // ponytail: Spec mentions sliding window, but fixed window is used here intentionally. It requires far less memory/CPU. Upgrade path: use Redis + sliding window if absolutely necessary.
 // Max 5 attempts per 10 minutes per key (IP or username).
 
-const MAX_ATTEMPTS = 15;
+const MAX_ATTEMPTS = 5;
 const WINDOW_MS = 10 * 60 * 1000; // 10 minutes
 const MAX_KEYS = 5000; // Cap map size to prevent memory leaks
 
@@ -39,9 +39,24 @@ function getWindow(key: string, now: number): Bucket {
 	return bucket;
 }
 
+function limitedResult(bucket: Bucket, now: number): {
+	ok: false;
+	error: string;
+	retryAfter: number;
+} {
+	const oldest = bucket[0];
+	const retryAfter = Math.max(1, Math.ceil((oldest + WINDOW_MS - now) / 1000));
+	return {
+		ok: false,
+		error: `Terlalu banyak percobaan. Coba lagi dalam ${retryAfter} detik.`,
+		retryAfter,
+	};
+}
+
 export function checkRateLimit(
 	identifier: string,
 	prefix: string,
+	options?: { record?: boolean },
 ): {
 	ok: boolean;
 	error?: string;
@@ -52,17 +67,22 @@ export function checkRateLimit(
 	const bucket = getWindow(key, now);
 
 	if (bucket.length >= MAX_ATTEMPTS) {
-		const oldest = bucket[0];
-		const retryAfter = Math.max(1, Math.ceil((oldest + WINDOW_MS - now) / 1000));
-		return {
-			ok: false,
-			error: `Terlalu banyak percobaan. Coba lagi dalam ${retryAfter} detik.`,
-			retryAfter,
-		};
+		return limitedResult(bucket, now);
 	}
 
-	bucket.push(now);
+	if (options?.record !== false) {
+		bucket.push(now);
+	}
 	return { ok: true };
+}
+
+export function recordRateLimit(identifier: string, prefix: string): void {
+	const key = `${prefix}:${identifier}`;
+	const now = Date.now();
+	const bucket = getWindow(key, now);
+	if (bucket.length < MAX_ATTEMPTS) {
+		bucket.push(now);
+	}
 }
 
 export function clearRateLimit(identifier: string, prefix: string): void {

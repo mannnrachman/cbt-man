@@ -20,6 +20,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Security
 
+- Batasi login gagal menjadi 5 percobaan per 10 menit dan hanya catat kegagalan, bukan percobaan yang masih dicek atau yang berhasil (#152).
 - Pertahankan metadata `jurusanId` saat backup/restore, serialisasi operasi file, dan cadangkan ekstensi `.json` untuk metadata internal (#153).
 
 ### Deprecated
