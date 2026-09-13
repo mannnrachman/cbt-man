@@ -8,22 +8,50 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Added
 
-- Tambahkan smoke Playwright landing publik di CI setelah build (#154).
-
 ### Changed
-
-- Catat kontrak kolom JSON `String` untuk v0.1.x; normalisasi ditunda ke migrasi additive (#155).
-- Bekukan acceptance baseline `v0.1.1` di PRD dan tasks: yang sudah diterima vs yang sengaja belum masuk (#154).
 
 ### Fixed
 
-- Aktifkan SQLite `WAL` dan `busy_timeout=5000` pada Prisma jika `DATABASE_URL` berawalan `file:` (#159).
-- Muat snapshot mahasiswa tanpa seluruh bank soal: hanya soal+jawaban yang dirujuk sesi peserta (#155).
+### Security
+
+### Deprecated
+
+### Removed
+
+## [0.1.2] - 2026-09-13
+
+Patch setelah sisa F-06, F-10, F-16, F-18, F-21, F-22, dan WAL merapat ke `main`. Ini **bukan** klaim siap produksi.
+
+Yang dikerjakan sejak `v0.1.1`:
+
+- **#154 / #172** — freeze acceptance baseline `v0.1.1` di PRD dan tasks (F-21).
+- **#150 / #173** — tolak unggah file tersimpan di atas 10 MB (F-16).
+- **#155 / #174** — snapshot mahasiswa tanpa seluruh bank soal (F-06).
+- **#159 / #175** — SQLite `WAL` dan `busy_timeout=5000` (bukan hop PostgreSQL).
+- **#155 / #176** — kontrak kolom JSON `String` untuk v0.1.x (F-18).
+- **#156 / #177** — kunci sesi setelah pindah tab, cabut session, audit tanpa isi jawaban (F-22 / F-24 / F-25).
+- **#154 / #178** — smoke Playwright landing publik di CI (F-10).
+
+Sengaja belum masuk: hop PostgreSQL, lazy snapshot admin/operator, F-02 `npm audit`, F-12 `z.any()`, F-11 seed Dockerfile.
+
+### Added
+
+- Tambahkan smoke Playwright landing publik di CI setelah build (#154, #178).
+
+### Changed
+
+- Catat kontrak kolom JSON `String` untuk v0.1.x; normalisasi ditunda ke migrasi additive (#155, #176).
+- Bekukan acceptance baseline `v0.1.1` di PRD dan tasks: yang sudah diterima vs yang sengaja belum masuk (#154, #172).
+
+### Fixed
+
+- Aktifkan SQLite `WAL` dan `busy_timeout=5000` pada Prisma jika `DATABASE_URL` berawalan `file:` (#159, #175).
+- Muat snapshot mahasiswa tanpa seluruh bank soal: hanya soal+jawaban yang dirujuk sesi peserta (#155, #174).
 
 ### Security
 
-- Catat pindah tab di kerjakan, kunci sesi setelah `maxPindahTab`, cabut session, dan audit tanpa isi jawaban (#156).
-- Tolak unggah file tersimpan di atas 10 MB setelah decode, sebelum ditulis ke disk (#150).
+- Catat pindah tab di kerjakan, kunci sesi setelah `maxPindahTab`, cabut session, dan audit tanpa isi jawaban (#156, #177).
+- Tolak unggah file tersimpan di atas 10 MB setelah decode, sebelum ditulis ke disk (#150, #173).
 
 ### Deprecated
 
@@ -140,6 +168,7 @@ Rilis awal: snapshot bertanda dari `main`, bukan klaim siap produksi. Issue audi
 - Jangan mencatat formatting/refactor internal murni kecuali perilaku atau risiko operasional ikut berubah.
 - Saat membuat rilis, pindahkan item `Unreleased` ke heading versi bertanggal, misalnya `## [1.2.0] - 2026-08-09`.
 
-[Unreleased]: https://github.com/mannnrachman/cbt-man/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/mannnrachman/cbt-man/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/mannnrachman/cbt-man/releases/tag/v0.1.2
 [0.1.1]: https://github.com/mannnrachman/cbt-man/releases/tag/v0.1.1
 [0.1.0]: https://github.com/mannnrachman/cbt-man/releases/tag/v0.1.0
