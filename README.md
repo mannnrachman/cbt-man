@@ -47,6 +47,10 @@ Jika kelak meninggalkan SQLite (HA, lebih dari satu replica, atau database jarin
 
 Jangan ganti `provider` sekarang — belum ada bukti concurrent-write / `SQLITE_BUSY`. Normalisasi kolom JSON adalah pekerjaan terpisah (#155).
 
+### Kolom JSON String (v0.1.x)
+
+Untuk v0.1.x kolom berikut tetap `String` berisi JSON, bukan relasi atau tipe Prisma `Json`: scope pengguna (`User.allowedTopikIds`, `User.mataKuliahIds`), `Ujian.topicSets`, serta `SesiUjian.jawaban` / `soalSnapshot`. Normalisasi ke tabel join atau `Json` adalah PR migrasi additive kemudian (F-18 / #155), bukan slice ini. `docs/tasks.md` Fase 3 tetap unchecked sampai PR itu.
+
 ## Memulai
 
 ```bash
