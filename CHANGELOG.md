@@ -12,6 +12,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Fixed
 
+- Batalkan copy, cut, paste, dan menu klik kanan di halaman kerjakan saat sesi `sedang` dan `blokirShortcut` aktif (#156).
 - Batch pemeriksaan scope operator pada monitor live sekali per ujian unik, bukan per sesi aktif (#155).
 - Abaikan `.zed/`, `scratch/`, dan `data/uploads/` di working tree, dan cabut media lokal yang sempat ter-commit (#154).
 - Kembalikan potongan sesi cache (dan UI bila belum ada edit baru) segera setelah autosave peserta gagal, tanpa menunggu hydrate penuh (#151).
