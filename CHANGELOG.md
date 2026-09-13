@@ -14,6 +14,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Fixed
 
+- Aktifkan SQLite `WAL` dan `busy_timeout=5000` pada Prisma jika `DATABASE_URL` berawalan `file:` (#159).
 - Muat snapshot mahasiswa tanpa seluruh bank soal: hanya soal+jawaban yang dirujuk sesi peserta (#155).
 
 ### Security
