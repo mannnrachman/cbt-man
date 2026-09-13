@@ -416,9 +416,14 @@ export const getLiveOnlineSesis = createServerFn({ method: "GET" }).handler(
 		});
 		// ponytail: super_admin sees all live sessions; operators only see ujian they can touch.
 		// If operator-all-read is intended by design, drop this filter.
-		const scoped: typeof rows = [];
-		for (const r of rows) {
-			if (caller.role === "super_admin" || await operatorCanTouchUjian(caller, r.ujianId)) scoped.push(r);
+		let scoped = rows;
+		if (caller.role !== "super_admin") {
+			const ujianIds = [...new Set(rows.map((r) => r.ujianId))];
+			const canTouchEntries = await Promise.all(
+				ujianIds.map(async (ujianId) => [ujianId, await operatorCanTouchUjian(caller, ujianId)] as const),
+			);
+			const canTouch = new Map(canTouchEntries);
+			scoped = rows.filter((r) => canTouch.get(r.ujianId));
 		}
 		return scoped.map((r: any) => {
 			const soalIds = parseJson<string[]>(r.soalIds, []);
