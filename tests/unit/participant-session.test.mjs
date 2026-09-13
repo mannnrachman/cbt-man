@@ -85,11 +85,20 @@ test("participant route never writes through the generic session repository", ()
   assert.match(server, /timedOut && \(data\.action !== "submit"/);
 });
 
-test("participant transport failures rehydrate optimistic session state", () => {
+test("participant transport failures roll back the optimistic session slice", () => {
   const repos = readFileSync(new URL("../../src/lib/cbt/repos.ts", import.meta.url), "utf8");
+  const route = readFileSync(
+    new URL("../../src/routes/_authenticated/peserta.ujian.$id.kerjakan.tsx", import.meta.url),
+    "utf8",
+  );
 
+  assert.match(repos, /rollbackParticipantSession\(previousSnapshot, optimistic\)/);
+  assert.match(repos, /structuredClone\(previous\)/);
+  assert.match(repos, /if \(current !== optimistic\) return/);
   assert.match(repos, /saveParticipantSesiServer\([\s\S]*?\.catch\(\(error\) =>/);
   assert.match(repos, /notifyMutationFailure\("jawaban ujian", message\)/);
+  assert.match(route, /sesiRepo\.byId\(nextSesi\.id\)/);
+  assert.match(route, /sesiRef\.current !== nextSesi/);
 });
 
 test("participant polling reads only the current session state", () => {

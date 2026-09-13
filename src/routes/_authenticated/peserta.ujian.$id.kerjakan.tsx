@@ -208,7 +208,12 @@ function RouteComponent() {
 
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
-      void saveParticipantSession(nextSesi);
+      void saveParticipantSession(nextSesi).then((result) => {
+        if (result.ok || sesiRef.current !== nextSesi) return;
+        const restored = sesiRepo.byId(nextSesi.id) ?? null;
+        sesiRef.current = restored;
+        setSesi(restored);
+      });
     }, 2000);
   }
 
@@ -237,7 +242,13 @@ function RouteComponent() {
       clearTimeout(saveTimer.current);
       saveTimer.current = null;
       if (sesiRef.current) {
-        void saveParticipantSession(sesiRef.current);
+        const pending = sesiRef.current;
+        void saveParticipantSession(pending).then((result) => {
+          if (result.ok || sesiRef.current !== pending) return;
+          const restored = sesiRepo.byId(pending.id) ?? null;
+          sesiRef.current = restored;
+          setSesi(restored);
+        });
       }
     }
     setIdx(newIdx);

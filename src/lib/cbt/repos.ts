@@ -178,12 +178,27 @@ export function getParticipantSessionState(sesiId: string) {
 
 let participantSessionPending: Promise<MutationResult> = Promise.resolve({ ok: true });
 
+function rollbackParticipantSession(previous: SesiUjian | undefined, optimistic: SesiUjian) {
+	const current = cache.sesi.find((item) => item.id === optimistic.id);
+	if (current !== optimistic) return;
+	const next = cache.sesi.slice();
+	if (previous) upsertArrayItem(next, previous);
+	else {
+		const idx = next.findIndex((item) => item.id === optimistic.id);
+		if (idx >= 0) next.splice(idx, 1);
+	}
+	cache.sesi = next;
+}
+
 export function saveParticipantSession(
 	sesi: SesiUjian,
 	submit = false,
 ): Promise<MutationResult> {
+	const previous = cache.sesi.find((item) => item.id === sesi.id);
+	const previousSnapshot = previous ? structuredClone(previous) : undefined;
+	const optimistic = submit ? { ...sesi, status: "selesai" as const } : sesi;
 	const next = cache.sesi.slice();
-	upsertArrayItem(next, submit ? { ...sesi, status: "selesai" } : sesi);
+	upsertArrayItem(next, optimistic);
 	cache.sesi = next;
 
 	const request = () =>
@@ -201,11 +216,13 @@ export function saveParticipantSession(
 		})
 			.then((result) => {
 				if (!result.ok) {
+					rollbackParticipantSession(previousSnapshot, optimistic);
 					notifyMutationFailure("jawaban ujian", result.error ?? "Unknown error");
 				}
 				return result;
 			})
 			.catch((error) => {
+				rollbackParticipantSession(previousSnapshot, optimistic);
 				const message = error instanceof Error ? error.message : String(error);
 				notifyMutationFailure("jawaban ujian", message);
 				return { ok: false, error: message };
