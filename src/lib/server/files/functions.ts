@@ -15,6 +15,8 @@ import type { NavKey, Role } from "@/lib/cbt/types";
 import type { UserRow } from "@/lib/server/repos/mappers";
 
 const uploadsDir = [process.cwd(), "data", "uploads"] as const;
+/** Decoded payload cap for `uploadStoredFile` only. Restore/import of existing backups is not gated. */
+const MAX_STORED_FILE_BYTES = 10 * 1024 * 1024;
 const DEFAULT_OPERATOR_ROLE_ACCESS: NavKey[] = [
   "dashboard",
   "peserta",
@@ -370,6 +372,9 @@ export const uploadStoredFile = createServerFn({ method: "POST" })
       const extension = extname(data.name).slice(0, 16);
       if (extension.toLowerCase() === ".json") throw new Error("Ekstensi .json dicadangkan untuk metadata file");
       const buffer = Buffer.from(data.dataBase64, "base64");
+      if (buffer.byteLength > MAX_STORED_FILE_BYTES) {
+        throw new Error("Ukuran file melebihi batas 10 MB");
+      }
       const meta: StoredFileRecord = {
         id,
         name: data.name,
