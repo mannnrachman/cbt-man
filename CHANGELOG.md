@@ -16,6 +16,8 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Security
 
+- Tolak unggah file tersimpan di atas 10 MB setelah decode, sebelum ditulis ke disk (#150).
+
 ### Deprecated
 
 ### Removed
