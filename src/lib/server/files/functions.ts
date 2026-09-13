@@ -6,8 +6,13 @@ import { z } from "zod";
 import { prisma } from "@/lib/server/db/prisma";
 import { parseJson } from "@/lib/server/db/json";
 import { readSessionToken, validateSession } from "@/lib/server/db/session";
-import { pesertaCanTouchUjian } from "@/lib/server/db/auth";
+import {
+  operatorCanTouchTopikId,
+  operatorCanTouchUjian,
+  pesertaCanTouchUjian,
+} from "@/lib/server/db/auth";
 import type { NavKey, Role } from "@/lib/cbt/types";
+import type { UserRow } from "@/lib/server/repos/mappers";
 
 const uploadsDir = [process.cwd(), "data", "uploads"] as const;
 const DEFAULT_OPERATOR_ROLE_ACCESS: NavKey[] = [
@@ -292,6 +297,50 @@ async function pesertaCanAccessFile(
   return allowed.has(fileId);
 }
 
+async function operatorCanAccessFile(
+  caller: UserRow,
+  fileId: string,
+  meta: StoredFileRecord,
+): Promise<boolean> {
+  if (caller.role === "super_admin") return true;
+  if (caller.role !== "admin_prodi" && caller.role !== "evaluator") return false;
+  if (meta.jurusanId && meta.jurusanId !== caller.unitId) return false;
+
+  const marker = `file://${fileId}`;
+  const [soals, ujians] = await Promise.all([
+    prisma.soal.findMany({
+      where: {
+        OR: [
+          { audioFileId: fileId },
+          { detail: { contains: marker } },
+          { pembahasan: { contains: marker } },
+          { jawaban: { some: { detail: { contains: marker } } } },
+        ],
+      },
+      select: { topikId: true },
+    }),
+    prisma.ujian.findMany({
+      where: { deskripsi: { contains: marker } },
+      select: { id: true },
+    }),
+  ]);
+
+  for (const soal of soals) {
+    if (await operatorCanTouchTopikId(caller, soal.topikId)) return true;
+  }
+  for (const ujian of ujians) {
+    if (await operatorCanTouchUjian(caller, ujian.id)) return true;
+  }
+
+  // Unreferenced files follow the file-manager list boundary.
+  return (
+    soals.length === 0 &&
+    ujians.length === 0 &&
+    meta.jurusanId === caller.unitId &&
+    (await operatorHasFilesAccess(caller.role))
+  );
+}
+
 export const listStoredFiles = createServerFn({ method: "GET" }).handler(async () => {
   const auth = await requireFileManagerAccess();
   if (!auth.ok) throw new Error(auth.error);
@@ -360,17 +409,14 @@ export const getStoredFileUrl = createServerFn({ method: "GET" })
     const caller = await requireCaller();
     if (!caller) throw new Error("Forbidden");
 
-    // Authorize by role (Issue #2). Admin and operators may read any blob:
-    // operators legitimately view exam/soal images (hasil/evaluasi/laporan)
-    // based on their topik scope, independent of the file-manager nav, so
-    // gating reads behind the "files" management nav would break those images.
-    // A peserta is scoped to files referenced by exams/soal they can access;
-    // everyone else is denied.
-    if (caller.role === "super_admin" || caller.role === "admin_prodi" || caller.role === "evaluator") {
-      // allowed
+    const meta = await readMeta(data.id);
+    if (!meta) return null;
+
+    if (caller.role === "admin_prodi" || caller.role === "evaluator") {
+      if (!(await operatorCanAccessFile(caller, data.id, meta))) throw new Error("Forbidden");
     } else if (caller.role === "mahasiswa") {
       if (!(await pesertaCanAccessFile(caller, data.id))) throw new Error("Forbidden");
-    } else {
+    } else if (caller.role !== "super_admin") {
       throw new Error("Forbidden");
     }
 
