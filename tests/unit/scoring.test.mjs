@@ -1,7 +1,7 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
-import { readFileSync } from "node:fs";
-import { gradeAnswers } from "../../src/lib/cbt/scoring.ts";
+import { existsSync, readFileSync } from "node:fs";
+import { gradeAnswers, recomputeSkor } from "../../src/lib/cbt/scoring.ts";
 
 function soal(id, tipe, jawaban) {
   return {
@@ -104,6 +104,59 @@ test("gradeAnswers leaves unknown soal entries untouched", () => {
   assert.equal(graded[0], ghost);
   assert.equal(skorTotal, 0);
   assert.equal(maxSkor, 0);
+});
+
+function sesiWithJawaban(jawabanList) {
+  return {
+    id: "se-1",
+    ujianId: "uj-1",
+    pesertaId: "u-1",
+    status: "selesai",
+    soalIds: jawabanList.map((j) => j.soalId),
+    soalSnapshot: [],
+    jawabanOrder: {},
+    jawaban: jawabanList,
+    pelanggaran: 0,
+    createdAt: 0,
+  };
+}
+
+test("recomputeSkor sums jawaban.skor and sets maxSkor from question count times poinBenar", () => {
+  const next = recomputeSkor(
+    sesiWithJawaban([
+      { ...jawaban(PG.id, ["a"]), skor: 2 },
+      { ...jawaban(ESSAY.id, [], "esai"), skor: 4 },
+    ]),
+    ujian({ poinBenar: 5 }),
+  );
+  assert.equal(next.skorTotal, 6);
+  assert.equal(next.maxSkor, 10);
+});
+
+test("recomputeSkor treats missing skor as 0 and does not consult answer keys", () => {
+  const next = recomputeSkor(
+    sesiWithJawaban([jawaban(PG.id, ["a"]), { ...jawaban(ESSAY.id, [], "esai"), skor: 3 }]),
+    ujian({ poinBenar: 5 }),
+  );
+  assert.equal(next.skorTotal, 3);
+  assert.equal(next.maxSkor, 10);
+});
+
+test("evaluasi and analitik recompute totals from scoring.ts, not a client gradeSesi", () => {
+  const evaluasi = readFileSync(
+    new URL("../../src/routes/_authenticated/admin.evaluasi.$id.tsx", import.meta.url),
+    "utf8",
+  );
+  const analitik = readFileSync(
+    new URL("../../src/routes/_authenticated/admin.analitik.$id.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(evaluasi, /import \{ recomputeSkor \} from "@\/lib\/cbt\/scoring"/);
+  assert.match(analitik, /import \{ recomputeSkor \} from "@\/lib\/cbt\/scoring"/);
+  assert.doesNotMatch(evaluasi, /gradeSesi/);
+  assert.doesNotMatch(analitik, /gradeSesi/);
+  assert.ok(!existsSync(new URL("../../src/lib/cbt/exam.ts", import.meta.url)));
+  assert.ok(!existsSync(new URL("../../src/lib/cbt/grading.ts", import.meta.url)));
 });
 
 test("participant session mutation accepts only answer fields and preserves completed force-submits", () => {

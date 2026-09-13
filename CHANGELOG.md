@@ -10,6 +10,8 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Changed
 
+- Hapus helper sesi/penilaian client legacy (`buildSesi`, `findOrCreateSesi`, `gradeSesi`) dan pindahkan `recomputeSkor` ke `scoring.ts` untuk evaluasi/analitik; penilaian otoritatif tetap `gradeAnswers` + `gradeSesiServerSide` (#151).
+
 ### Fixed
 
 ### Security

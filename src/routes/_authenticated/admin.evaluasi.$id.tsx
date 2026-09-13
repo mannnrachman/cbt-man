@@ -2,7 +2,7 @@ import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useState } from "react";
 import { sesiRepo, ujianRepo, soalRepo, usersRepo, hydrateRepos } from "@/lib/cbt/repos";
 import { useAuthStore } from "@/lib/cbt/auth-store";
-import { recomputeSkor } from "@/lib/cbt/exam";
+import { recomputeSkor } from "@/lib/cbt/scoring";
 import { RichView } from "@/components/cbt/RichEditor";
 import { toast } from "sonner";
 import { CheckCircle2, AlertTriangle, Save } from "lucide-react";

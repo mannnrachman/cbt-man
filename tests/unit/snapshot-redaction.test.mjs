@@ -142,7 +142,9 @@ test("question mutation awaits the server-side topic scope check", () => {
 
 test("kerjakan submits through the narrow server action and re-hydrates authoritative results", () => {
   const src = read("src/routes/_authenticated/peserta.ujian.$id.kerjakan.tsx");
+  const scoring = read("src/lib/cbt/scoring.ts");
   assert.ok(!/function gradeSesi\(/.test(src), "client-side gradeSesi must be removed");
+  assert.ok(!/function gradeSesi\(/.test(scoring), "shared scoring must not reintroduce client gradeSesi");
   assert.ok(!/function finalizeSesi\(/.test(src), "client must not construct submitted session state");
   assert.match(
     src,

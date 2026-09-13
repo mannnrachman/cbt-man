@@ -8,11 +8,11 @@ import type { User, Ujian } from "./types";
 import { topikRepo, soalRepo, modulRepo, ujianRepo, penawaranRepo } from "./repos";
 
 /**
- * Thrown by `buildSesi` / `findOrCreateSesi` when a participant tries to
- * start or resume a session for an exam that is not assigned to their
- * group. The pre-exam route also guards against this in the UI, but the
- * session builder re-checks (defense in depth) so that direct server
- * calls and stale client state cannot bypass the policy.
+ * Thrown when a participant tries to start or resume a session for an
+ * exam that is not assigned to their group. The pre-exam route also
+ * guards against this in the UI; server session creation re-checks via
+ * `pesertaCanTouchUjian` so direct calls and stale client state cannot
+ * bypass the policy.
  */
 export class PesertaNotAssignedToExamError extends Error {
   readonly code = "PESERTA_NOT_ASSIGNED_TO_EXAM";
@@ -147,9 +147,9 @@ export function visibleUjians(user: User | null | undefined) {
 //      (`src/routes/_authenticated/peserta.index.tsx`).
 //   2. Pre-exam direct URL is blocked before token redemption / session
 //      creation (`src/routes/_authenticated/peserta.ujian.$id.tsx`).
-//   3. The session builder itself re-checks before producing a sesi, so
-//      server-side `mutateEntity` calls and stale client state cannot
-//      bypass the policy (`src/lib/cbt/exam.ts`).
+//   3. Server session creation re-checks assignment via
+//      `pesertaCanTouchUjian` before producing a sesi, so stale client
+//      state cannot bypass the policy (`src/lib/server/sesi/functions.ts`).
 //
 // A participant must be explicitly assigned to at least one exam group.
 export function isParticipantAssignedToExam(

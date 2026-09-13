@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { ujianRepo, sesiRepo, usersRepo, soalRepo, hydrateRepos, mataKuliahRepo, semesterRepo, unitAkademikRepo } from "@/lib/cbt/repos";
-import { recomputeSkor } from "@/lib/cbt/exam";
+import { recomputeSkor } from "@/lib/cbt/scoring";
 import { exportSheet, stripHtml } from "@/lib/cbt/excel";
 import { analisisButir, labelKesukaran, labelDiskriminasi } from "@/lib/cbt/analisis";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";

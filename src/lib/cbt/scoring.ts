@@ -63,3 +63,17 @@ export function gradeAnswers(
 
   return { jawaban: jawabanGraded, skorTotal: total, maxSkor };
 }
+
+/**
+ * Recompute skorTotal from already-assigned jawaban[].skor after manual
+ * essay grading. This is not a substitute for gradeAnswers /
+ * gradeSesiServerSide — it does not look up answer keys.
+ */
+export function recomputeSkor(
+  sesi: SesiUjian,
+  ujian: Pick<Ujian, "poinBenar">,
+): SesiUjian {
+  const total = sesi.jawaban.reduce((a, j) => a + (j.skor ?? 0), 0);
+  const maxSkor = sesi.jawaban.length * ujian.poinBenar;
+  return { ...sesi, skorTotal: total, maxSkor };
+}
