@@ -21,6 +21,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { armExamAlarm } from "@/lib/cbt/exam-alarm";
 import { toast } from "sonner";
 import { RichView } from "@/components/cbt/RichEditor";
 import { Clock, AlertTriangle, CalendarClock, CalendarX, ShieldOff, FileText, BookOpen } from "lucide-react";
@@ -138,6 +139,7 @@ function PreUjianContent({
       toast.error("Centang persetujuan dulu");
       return;
     }
+    armExamAlarm();
     if (ujian.tokenAktif) {
       const kode = token.trim().toUpperCase();
       if (kode.length === 0) {
