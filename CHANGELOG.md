@@ -12,6 +12,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Fixed
 
+- Batch pemeriksaan scope operator pada monitor live sekali per ujian unik, bukan per sesi aktif (#155).
 - Abaikan `.zed/`, `scratch/`, dan `data/uploads/` di working tree, dan cabut media lokal yang sempat ter-commit (#154).
 - Kembalikan potongan sesi cache (dan UI bila belum ada edit baru) segera setelah autosave peserta gagal, tanpa menunggu hydrate penuh (#151).
 - Ganti konfirmasi destruktif admin dari `confirm()` native ke dialog bersama yang dapat diakses, dan tambahkan `aria-label` pada toolbar ikon RichEditor (#151).
