@@ -14,6 +14,8 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Security
 
+- Seed demo di image production tidak lagi memaksa `NODE_ENV=development`; `SEED_DEMO=true` tetap mengisi dataset demo penuh dan mewajibkan `ADMIN_PASSWORD` (#150).
+
 ### Deprecated
 
 ### Removed

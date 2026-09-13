@@ -129,8 +129,10 @@ function buildSesiRecord({ uid, now, ujian, peserta, questionEntries, answerPlan
 export async function createSeedDataset({ uid, now, hashPassword }) {
   const ts = now ?? Date.now();
   const schoolName = "Universitas Teknologi Nusantara";
+  const isProduction = process.env.NODE_ENV === "production";
+  const seedDemo = process.env.SEED_DEMO === "true";
 
-  if (process.env.NODE_ENV === "production" && !process.env.ADMIN_PASSWORD) {
+  if (isProduction && !process.env.ADMIN_PASSWORD) {
     throw new Error("ADMIN_PASSWORD is required when NODE_ENV=production");
   }
 
@@ -141,7 +143,7 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
     { id: uid("u_"), nama: "Bisnis Digital", tipe: "prodi", parentId: null },
   ];
 
-  const adminPassword = process.env.NODE_ENV === "production" ? process.env.ADMIN_PASSWORD : "admin123";
+  const adminPassword = isProduction ? process.env.ADMIN_PASSWORD : "admin123";
 
   const admin = {
     id: uid("u_"),
@@ -155,7 +157,7 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
     createdAt: ts,
   };
 
-  if (process.env.NODE_ENV === "production") {
+  if (isProduction && !seedDemo) {
     return {
       unitAkademik: [],
       users: [admin],

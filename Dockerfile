@@ -19,4 +19,4 @@ EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 CMD node -e "fetch('http://127.0.0.1:8080/api/health').then((response) => { if (!response.ok) process.exit(1); }).catch(() => process.exit(1))"
 
-CMD ["sh", "-c", "npx prisma migrate deploy && if [ \"${SEED_DEMO:-false}\" = true ] && [ ! -f /app/data/.demo-seeded ]; then NODE_ENV=development npm run prisma:seed && touch /app/data/.demo-seeded; fi && npm run preview -- --host 0.0.0.0 --port 8080"]
+CMD ["sh", "-c", "npx prisma migrate deploy && if [ \"${SEED_DEMO:-false}\" = true ] && [ ! -f /app/data/.demo-seeded ]; then npm run prisma:seed && touch /app/data/.demo-seeded; fi && npm run preview -- --host 0.0.0.0 --port 8080"]
