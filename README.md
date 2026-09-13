@@ -39,6 +39,14 @@ Cuplikan dari data demo lokal. Gambar memakai tautan relatif sesuai [sintaks gam
 **Backend & DB:** Prisma, SQLite, TanStack server functions
 **Tooling:** Vite, ESLint, Prettier, Node test runner
 
+## Persistensi
+
+Production saat ini memakai **SQLite single-node** (volume Compose, `DATABASE_URL=file:/app/data/cbt.db`).
+
+Jika kelak meninggalkan SQLite (HA, lebih dari satu replica, atau database jaringan), target client/server adalah **PostgreSQL saja**, bukan MySQL. Alasan: Prisma native arrays, `jsonb`, dan MVCC sesuai pola tulis ujian.
+
+Jangan ganti `provider` sekarang — belum ada bukti concurrent-write / `SQLITE_BUSY`. Normalisasi kolom JSON adalah pekerjaan terpisah (#155).
+
 ## Memulai
 
 ```bash
