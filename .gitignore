@@ -57,6 +57,7 @@ _bmad-output/
 # playwright test outputs / generated evidence (regenerable)
 artifacts/
 tests/output/
+test-results/
 playwright-report/
 # generated per-flow evidence manifests (keep only planned *-flows definitions)
 tests/meta/roles/*.evidence.json

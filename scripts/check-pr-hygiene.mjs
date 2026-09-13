@@ -8,7 +8,7 @@ const FORBIDDEN_PATHS = [
   [/(^|\/)diff_users\.txt$/i, "dump diff pengguna"],
   [/(^|\/)(?:raw_|temp_)[^/]*$/i, "file raw/temp"],
   [/^data\/uploads\//, "upload runtime"],
-  [/^(dist|node_modules|coverage|artifacts|playwright-report)\//, "output/generated artifact"],
+  [/^(dist|node_modules|coverage|artifacts|playwright-report|test-results)\//, "output/generated artifact"],
   [/^tests\/output\//, "output test"],
   [/(?:^|\/)[^/]+\.(?:db|sqlite)(?:-journal)?$/i, "database lokal"],
   [/(?:^|\/)[^/]+\.log$/i, "log"],

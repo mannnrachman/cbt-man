@@ -21,7 +21,8 @@
     "check:domain-preflight": "node scripts/preflight-domain-migration.mjs",
     "report:legacy-sessions": "node scripts/report-legacy-sessions.mjs",
     "remediate:legacy-module-courses": "node scripts/remediate-legacy-module-courses.mjs",
-    "test:unit": "node --test tests/unit/*.test.mjs"
+    "test:unit": "node --test tests/unit/*.test.mjs",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -92,6 +93,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
+    "@playwright/test": "^1.63.0",
     "@types/katex": "^0.16.8",
     "@types/node": "^22.16.5",
     "@types/react": "^19.2.0",

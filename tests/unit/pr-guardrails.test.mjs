@@ -22,6 +22,8 @@ test("PR hygiene rejects historical CBT-MAN artifacts and legacy branding", () =
     "temp_export.csv",
     "prisma/dev.db",
     "tests/output/trace.zip",
+    "playwright-report/index.html",
+    "test-results/results.json",
   ]) {
     assert.ok(forbiddenReason(path), `${path} must be rejected`);
   }
