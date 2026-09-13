@@ -133,6 +133,7 @@ function RouteComponent() {
   const showListRef = useRef(showList);
   const examLockedRef = useRef(examLocked);
   const leaveInFlightRef = useRef(false);
+  const leaveQuietUntilRef = useRef(0);
   useEffect(() => {
     sesiRef.current = sesi;
   }, [sesi]);
@@ -184,8 +185,10 @@ function RouteComponent() {
 
     const reportLeave = async () => {
       if (examLockedRef.current || leaveInFlightRef.current) return;
+      if (Date.now() < leaveQuietUntilRef.current) return;
       if (sesiRef.current?.status !== "sedang") return;
       leaveInFlightRef.current = true;
+      leaveQuietUntilRef.current = Date.now() + 1500;
       try {
         const pending = sesiRef.current;
         if (pending) {

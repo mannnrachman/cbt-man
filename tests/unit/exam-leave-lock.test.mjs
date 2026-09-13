@@ -16,6 +16,7 @@ test("kerjakan registers leave-surface listeners while the session is sedang", (
   assert.match(src, /removeEventListener\("blur"/);
   assert.match(src, /role="dialog"/);
   assert.match(src, /reportExamViolation/);
+  assert.match(src, /leaveQuietUntilRef/);
   assert.match(src, /Sesi ujian dikunci/);
 });
 
