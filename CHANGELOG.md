@@ -10,17 +10,42 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Changed
 
-- Hapus helper sesi/penilaian client legacy (`buildSesi`, `findOrCreateSesi`, `gradeSesi`) dan pindahkan `recomputeSkor` ke `scoring.ts` untuk evaluasi/analitik; penilaian otoritatif tetap `gradeAnswers` + `gradeSesiServerSide` (#151).
-
 ### Fixed
 
 ### Security
 
-- Seed demo di image production tidak lagi memaksa `NODE_ENV=development`; `SEED_DEMO=true` tetap mengisi dataset demo penuh dan mewajibkan `ADMIN_PASSWORD` (#150).
-
 ### Deprecated
 
 ### Removed
+
+## [0.1.3] - 2026-09-17
+
+Patch setelah seed Dockerfile, pembersihan helper exam client, perbaikan crash `process.cwd`, dan bucket penyimpanan manual merapat ke `main`. Ini **bukan** klaim siap produksi.
+
+Yang dikerjakan sejak `v0.1.2`:
+
+- **#150 / #180** — seed demo image tidak memaksa `NODE_ENV=development`; `SEED_DEMO=true` tetap wajib `ADMIN_PASSWORD` (F-11).
+- **#151 / #181** — hapus helper client `exam.ts` / `grading.ts`; `recomputeSkor` di `scoring.ts` (F-20).
+- **#182** — tunda `process.cwd()` ke resolusi path server agar route authenticated tidak crash saat hydration.
+- **#183** — bucket penyimpanan manual (`kategori_bebas`) di drive admin, metadata `bucketId`, filter jurusan/prodi.
+
+Sengaja belum masuk: hop PostgreSQL, lazy snapshot admin/operator, F-02 `npm audit`, F-12 `z.any()`, F-13 mobile lock, F-04/F-05 lifecycle sesi.
+
+### Added
+
+- Tambah bucket penyimpanan manual di `/admin/files` (tipe `kategori_bebas`), metadata `bucketId`, dan sort tanggal (#183).
+
+### Changed
+
+- Hapus helper sesi/penilaian client legacy (`buildSesi`, `findOrCreateSesi`, `gradeSesi`) dan pindahkan `recomputeSkor` ke `scoring.ts` untuk evaluasi/analitik; penilaian otoritatif tetap `gradeAnswers` + `gradeSesiServerSide` (#151, #181).
+
+### Fixed
+
+- Tunda evaluasi `process.cwd()` sampai fungsi server file berjalan; detail error SSR hanya di development dan di-escape (#182).
+
+### Security
+
+- Seed demo di image production tidak lagi memaksa `NODE_ENV=development`; `SEED_DEMO=true` tetap mengisi dataset demo penuh dan mewajibkan `ADMIN_PASSWORD` (#150, #180).
 
 ## [0.1.2] - 2026-09-13
 
@@ -36,7 +61,7 @@ Yang dikerjakan sejak `v0.1.1`:
 - **#156 / #177** — kunci sesi setelah pindah tab, cabut session, audit tanpa isi jawaban (F-22 / F-24 / F-25).
 - **#154 / #178** — smoke Playwright landing publik di CI (F-10).
 
-Sengaja belum masuk: hop PostgreSQL, lazy snapshot admin/operator, F-02 `npm audit`, F-12 `z.any()`, F-11 seed Dockerfile.
+Sengaja belum masuk saat rilis ini: hop PostgreSQL, lazy snapshot admin/operator, F-02 `npm audit`, F-12 `z.any()`, F-11 seed Dockerfile.
 
 ### Added
 
@@ -172,7 +197,8 @@ Rilis awal: snapshot bertanda dari `main`, bukan klaim siap produksi. Issue audi
 - Jangan mencatat formatting/refactor internal murni kecuali perilaku atau risiko operasional ikut berubah.
 - Saat membuat rilis, pindahkan item `Unreleased` ke heading versi bertanggal, misalnya `## [1.2.0] - 2026-08-09`.
 
-[Unreleased]: https://github.com/mannnrachman/cbt-man/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/mannnrachman/cbt-man/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/mannnrachman/cbt-man/releases/tag/v0.1.3
 [0.1.2]: https://github.com/mannnrachman/cbt-man/releases/tag/v0.1.2
 [0.1.1]: https://github.com/mannnrachman/cbt-man/releases/tag/v0.1.1
 [0.1.0]: https://github.com/mannnrachman/cbt-man/releases/tag/v0.1.0
