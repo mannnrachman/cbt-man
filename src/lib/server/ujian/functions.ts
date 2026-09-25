@@ -13,7 +13,7 @@ import {
 	pesertaCanTouchUjian,
 } from "../db/auth";
 import type { Ujian, TokenUjian } from "@/lib/cbt/types";
-import { requireAuditLog } from "../db/audit";
+import { requireAuditLog, writeAuditLog } from "../db/audit";
 import { Prisma } from "@prisma/client";
 import { stringifyJson, toBigInt, parseJson } from "../db/json";
 import { mapToken, mapUjian } from "../repos/mappers";
@@ -154,9 +154,16 @@ export const mutateUjianServer = createServerFn({ method: "POST" })
 					validateUjianForSave(item);
 					const existing = await tx.ujian.findUnique({
 						where: { id: item.id },
-						select: { id: true, status: true, createdAt: true },
+						select: {
+							id: true,
+							status: true,
+							topicSets: true,
+							poinBenar: true,
+							poinSalah: true,
+							poinKosong: true,
+						},
 					});
-					if (existing?.status === "published") throw new Error("Paket published hanya dapat diubah melalui alur revisi.");
+					if (existing?.status === "published") throw new Error("Paket published tidak dapat diubah melalui editor.");
 					if (existing && await tx.sesiUjian.count({ where: { ujianId: item.id } }) > 0) {
 						throw new Error("Paket tidak dapat diubah karena sudah memiliki sesi peserta.");
 					}
@@ -187,7 +194,7 @@ export const mutateUjianServer = createServerFn({ method: "POST" })
 					};
 					if (existing) {
 						const updated = await tx.ujian.updateMany({ where: { id: item.id, status: "draft" }, data: writeData });
-						if (updated.count !== 1) throw new Error("Paket ujian sudah dipublikasikan.");
+						if (updated.count !== 1) throw new Error("Paket ujian sudah dipublikasikan atau tidak ditemukan.");
 					} else {
 						await tx.ujian.create({
 							data: {
@@ -207,6 +214,72 @@ export const mutateUjianServer = createServerFn({ method: "POST" })
 				ok: false as const,
 				error: err instanceof Error ? err.message : String(err),
 			};
+		}
+	});
+
+class ExamScheduleValidationError extends Error {}
+
+export const extendJadwalUjianServer = createServerFn({ method: "POST" })
+	.validator(
+		z.object({
+			ujianId: z.string().min(1),
+			newEndAt: z.number().int().positive(),
+		}),
+	)
+	.handler(async ({ data }) => {
+		try {
+			await seedIfNeeded();
+			const caller = await requireCaller();
+			if (!caller) return { ok: false as const, error: "Forbidden" };
+
+			if (caller.role === "admin_prodi") {
+				if (!(await operatorHasNav(caller, "ujian"))) {
+					return { ok: false as const, error: "Forbidden" };
+				}
+				if (!(await operatorCanTouchUjian(caller, data.ujianId))) {
+					return { ok: false as const, error: "Forbidden" };
+				}
+			} else if (caller.role !== "super_admin") {
+				return { ok: false as const, error: "Forbidden" };
+			}
+
+			await prisma.$transaction(async (tx) => {
+				const exam = await tx.ujian.findUnique({
+					where: { id: data.ujianId },
+					select: { id: true, status: true, beginAt: true, endAt: true },
+				});
+				if (!exam) throw new ExamScheduleValidationError("Paket ujian tidak ditemukan.");
+				if (exam.status !== "published") throw new ExamScheduleValidationError("Hanya paket published yang dapat diperpanjang.");
+				if (exam.endAt !== null && data.newEndAt <= Number(exam.endAt)) {
+					throw new ExamScheduleValidationError("Waktu selesai baru harus lebih besar dari waktu selesai sebelumnya.");
+				}
+				if (exam.beginAt && data.newEndAt <= Number(exam.beginAt)) {
+					throw new ExamScheduleValidationError("Waktu selesai baru harus setelah waktu mulai.");
+				}
+				if (data.newEndAt <= Date.now()) {
+					throw new ExamScheduleValidationError("Waktu selesai baru harus di masa mendatang.");
+				}
+
+				const updated = await tx.ujian.updateMany({
+					where: { id: data.ujianId, status: "published", endAt: exam.endAt },
+					data: { endAt: BigInt(data.newEndAt) },
+				});
+				if (updated.count !== 1) throw new ExamScheduleValidationError("Jadwal ujian telah berubah. Muat ulang lalu coba lagi.");
+				const auditResult = await writeAuditLog({
+					userId: caller.id,
+					userRole: caller.role,
+					action: "ujian.extendJadwal",
+					entity: "ujian",
+					entityId: data.ujianId,
+				}, tx);
+				if (!auditResult.ok) throw new Error(auditResult.error);
+			});
+
+			return { ok: true as const };
+		} catch (err) {
+			if (err instanceof ExamScheduleValidationError) return { ok: false as const, error: err.message };
+			console.error("Gagal memperpanjang jadwal ujian", err);
+			return { ok: false as const, error: "Gagal memperpanjang jadwal ujian. Muat ulang lalu coba lagi." };
 		}
 	});
 

@@ -8,9 +8,20 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Added
 
+- Fitur perpanjangan waktu tutup paket ujian published melalui aksi server terbatas (`extendJadwalUjianServer`), untuk peserta yang belum memulai sesi. Batas waktu sesi yang sudah berjalan tidak berubah.
+- Fitur hapus sesi satuan (`mutateSesiServer` aksi `remove`) dan massal (`deleteAllExamSessionsServer`) di halaman monitoring peserta dan analitik, dengan konfirmasi. Tindakan ini **menghapus permanen** jawaban dan nilai sesi serta klaim token; gunakan hanya bila memang perlu mengulang dari awal.
+
 ### Changed
 
+- Penyederhanaan interaksi daftar paket ujian (`/admin/ujian`): klik baris paket ujian membuka langsung editor paket (`/admin/ujian/$id`), penambahan tombol aksi eksplisit "Lihat Peserta", serta perbaikan tampilan status ujian (persiapan vs berlangsung vs selesai).
+- Perombakan tata letak editor paket ujian (`/admin/ujian/$id`) menjadi 2 kolom terstruktur yang bersih, menyederhanakan konfigurasi waktu dan identitas, mengintegrasikan dialog konfirmasi penghapusan ujian bertema, dan menghilangkan banner peringatan mode berlangsung yang mengganggu.
+- Pembersihan antarmuka kotak teks soal esai peserta (`/peserta/ujian/$id/kerjakan`): menghilangkan lapisan gradien neon kabur (*glow blur*) dan latar belakang semi-transparan, beralih ke kontainer kartu solid ergonomis dengan indikator autosave dan penghitung kata serta karakter real-time.
+- Navigasi tombol "Kembali" pada halaman daftar peserta ujian (`/admin/ujian/$id/peserta`) kini kembali secara konsisten ke halaman editor paket ujian terkait (`/admin/ujian/$id`).
+
 ### Fixed
+
+- Portal peserta tidak lagi menawarkan melanjutkan sesi saat jadwal ujian atau batas waktu sesinya sudah habis, karena server menolak penyimpanan jawaban setelah tenggat.
+- Sinkronisasi korelasi status ujian berlangsung dan selesai antara portal peserta dan ringkasan operasional admin.
 
 ### Security
 

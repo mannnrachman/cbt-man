@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet, useParams, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ujianRepo, unitAkademikRepo, hydrateRepos, mataKuliahRepo, semesterRepo, penawaranRepo } from "@/lib/cbt/repos";
+import { ujianRepo, unitAkademikRepo, hydrateRepos, mataKuliahRepo, semesterRepo, penawaranRepo, sesiRepo } from "@/lib/cbt/repos";
 
 import { uid } from "@/lib/cbt/storage";
 import type { Ujian, TopicSet } from "@/lib/cbt/types";
@@ -17,9 +17,20 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Trash2, Save, Lock, ArrowLeft, FileSignature, KeyRound } from "lucide-react";
+import { Plus, Trash2, Save, Lock, ArrowLeft, FileSignature, KeyRound, Users, BarChart3, CalendarClock, Calendar, Clock, Info, FileText } from "lucide-react";
 import { toast } from "sonner";
-import { RichEditor } from "@/components/cbt/RichEditor";
+import { cn } from "@/lib/utils";
+import { RichEditor, RichView } from "@/components/cbt/RichEditor";
+import { AdminPage, AdminPageHeader } from "@/components/cbt/AdminPage";
+import { ConfirmDialog } from "@/components/cbt/ConfirmDialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import {
   allowedTopikIdSet,
@@ -28,8 +39,7 @@ import {
   visibleModuls,
   visibleTopiks,
 } from "@/lib/cbt/access";
-import { fetchUjianByIdServer, mutateUjianServer } from "@/lib/server/ujian/functions";
-import { useConfirmDialog } from "@/components/cbt/ConfirmDialog";
+import { fetchUjianByIdServer, mutateUjianServer, extendJadwalUjianServer } from "@/lib/server/ujian/functions";
 
 function toDateTimeLocal(value?: number) {
   if (value === undefined) return "";
@@ -42,6 +52,22 @@ function fromDateTimeLocal(value: string) {
   if (!value) return undefined;
   const timestamp = Date.parse(value);
   return Number.isFinite(timestamp) ? timestamp : undefined;
+}
+
+function formatReadableDate(value?: number) {
+  if (!value) return "";
+  try {
+    return new Date(value).toLocaleDateString("id-ID", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return "";
+  }
 }
 
 export const Route = createFileRoute("/_authenticated/admin/ujian/$id")({
@@ -63,7 +89,6 @@ function UjianEditorRoute() {
 }
 
 function UjianEditor() {
-  const { confirm, dialog } = useConfirmDialog();
   const { id } = useParams({ from: "/_authenticated/admin/ujian/$id" });
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
@@ -110,6 +135,11 @@ function UjianEditor() {
   const [u, setU] = useState<Ujian | null>(initial ?? null);
   const [loadingRemote, setLoadingRemote] = useState(initial === undefined);
   const [denied, setDenied] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [extendOpen, setExtendOpen] = useState(false);
+  const [newEndAtInput, setNewEndAtInput] = useState("");
+  const [isExtending, setIsExtending] = useState(false);
   // After the auth store hydrates, re-evaluate the access check. If the
   // operator is out of scope, flip to the lock screen.
   useEffect(() => {
@@ -213,17 +243,18 @@ function UjianEditor() {
   const allowedSet = allowedTopikIdSet(user);
 
   function set<K extends keyof Ujian>(k: K, v: Ujian[K]) {
+    if (u!.status !== "draft" || sesiRepo.all().some((s) => s.ujianId === id)) return;
     setU({ ...u!, [k]: v });
   }
 
   function addTopicSet() {
-    if (topiks.length === 0) {
+    if (sortedTopiks.length === 0) {
       toast.error("Buat topik dulu");
       return;
     }
     const ts: TopicSet = {
       id: uid("ts_"),
-      topikId: topiks[0].id,
+      topikId: sortedTopiks[0].id,
       jumlah: 5,
       jumlahOpsi: 4,
       acakSoal: true,
@@ -233,6 +264,10 @@ function UjianEditor() {
   }
 
   async function save() {
+    if (u!.status !== "draft" || sesiRepo.all().some((s) => s.ujianId === id)) {
+      toast.error("Paket yang telah dipublikasikan atau memiliki sesi tidak dapat diubah melalui editor");
+      return;
+    }
     if (!u!.nama.trim()) {
       toast.error("Nama wajib");
       return;
@@ -260,12 +295,17 @@ function UjianEditor() {
       }
     }
     ujianRepo.upsert(u!);
-    await ujianRepo.flush();
+    const result = await ujianRepo.flush();
+    if (!result.ok) {
+      toast.error(result.error || "Gagal menyimpan perubahan");
+      return;
+    }
     toast.success("Disimpan");
     navigate({ to: "/admin/ujian" });
   }
 
   async function publish() {
+    if (u!.status !== "draft") return;
     ujianRepo.upsert(u!);
     const saveResult = await ujianRepo.flush();
     if (!saveResult.ok) {
@@ -278,86 +318,218 @@ function UjianEditor() {
       return;
     }
     const published = { ...u!, status: "published" as const };
-    ujianRepo.upsert(published);
-    await ujianRepo.flush();
     setU(published);
     toast.success("Paket ujian dipublikasikan");
   }
 
-  async function hapus() {
-    if (!(await confirm({ title: "Hapus ujian", description: `Yakin ingin menghapus ujian "${u!.nama}" beserta seluruh data yang terkait?`, confirmLabel: "Hapus" }))) return;
-    ujianRepo.remove(u!.id);
-    await ujianRepo.flush();
-    toast.success("Ujian dihapus");
-    navigate({ to: "/admin/ujian" });
+  function openExtendModal() {
+    if (!u) return;
+    const baseTime = u.endAt ? Math.max(Date.now(), Number(u.endAt)) : Date.now();
+    const d = new Date(baseTime + 60 * 60 * 1000);
+    setNewEndAtInput(toDateTimeLocal(d.getTime()));
+    setExtendOpen(true);
   }
 
+  async function handleExtendJadwal() {
+    if (!newEndAtInput || !u) return;
+    const newEndAt = fromDateTimeLocal(newEndAtInput);
+    if (!newEndAt) {
+      toast.error("Format waktu selesai tidak valid");
+      return;
+    }
+    if (newEndAt <= Date.now()) {
+      toast.error("Batas waktu selesai baru harus di masa mendatang");
+      return;
+    }
+    if (u.beginAt && newEndAt <= u.beginAt) {
+      toast.error("Batas waktu selesai harus lebih besar dari waktu mulai");
+      return;
+    }
+
+    setIsExtending(true);
+    try {
+      const res = await extendJadwalUjianServer({
+        data: {
+          ujianId: u.id,
+          newEndAt,
+        },
+      });
+
+      if (!res.ok) {
+        toast.error(res.error || "Gagal memperpanjang jadwal ujian");
+        return;
+      }
+
+      setU((prev) => prev ? { ...prev, endAt: newEndAt } : prev);
+      toast.success("Jadwal ujian berhasil diperpanjang");
+      setExtendOpen(false);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Terjadi kesalahan saat memperpanjang jadwal");
+    } finally {
+      setIsExtending(false);
+    }
+  }
+
+  async function hapus() {
+    if (isDeleting) return;
+    setIsDeleting(true);
+    try {
+      ujianRepo.remove(u!.id);
+      const result = await ujianRepo.flush();
+      if (!result.ok) {
+        toast.error(result.error || "Gagal menghapus ujian");
+        return;
+      }
+      toast.success("Ujian dihapus");
+      navigate({ to: "/admin/ujian" });
+    } catch {
+      toast.error("Gagal menghapus ujian");
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+
+  const hasSessions = sesiRepo.all().some((s) => s.ujianId === id);
+  const locked = u.status !== "draft" || hasSessions;
   const totalSoal = u.topicSets.reduce((total, topicSet) => total + (Number(topicSet.jumlah) || 0), 0);
 
   return (
-    <div className="space-y-6 w-full max-w-[1600px] mx-auto pb-12">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-        <div>
-          <Link to="/admin/ujian" className="mb-1.5 inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100">
-            <ArrowLeft className="h-3.5 w-3.5" /> Kembali ke Manajemen Ujian
-          </Link>
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
-              <FileSignature className="h-5 w-5" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Editor Paket Ujian</h1>
-              <p className="text-xs text-slate-500 dark:text-slate-400">{u.nama || "Ujian Baru"}</p>
-            </div>
+    <AdminPage className="mx-auto w-full max-w-[1600px] pb-12">
+      <AdminPageHeader
+        title={
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span className="inline-flex items-center gap-2">
+              <FileSignature className="h-5 w-5 text-primary" />
+              Editor Paket Ujian
+            </span>
+            <span
+              className={cn(
+                "inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide uppercase",
+                u.status === "published"
+                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800"
+                  : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700",
+              )}
+            >
+              {u.status === "published" ? "Published" : "Draft"}
+            </span>
+            {hasSessions && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide uppercase bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+                Memiliki Sesi Peserta
+              </span>
+            )}
           </div>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button asChild variant="outline" className="h-9 text-xs">
-            <Link to="/admin/ujian/$id/token" params={{ id: u.id }}>
-              <KeyRound className="mr-1 h-4 w-4" />
-              Kelola Token
+        }
+        description={
+          <span className="text-xs text-muted-foreground block truncate max-w-xl">
+            {u.nama || "Ujian Baru"} · {u.durasiMenit} Menit · {totalSoal} Soal
+          </span>
+        }
+        action={
+          <div className="flex flex-wrap items-center gap-2">
+            <Button asChild variant="ghost" className="h-9 text-xs">
+              <Link to="/admin/ujian">
+                <ArrowLeft className="mr-1 h-4 w-4" />
+                Kembali
+              </Link>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-9 text-xs text-destructive border-destructive/30 hover:bg-destructive/10"
+              onClick={() => setDeleteOpen(true)}
+            >
+              <Trash2 className="mr-1 h-4 w-4" />
+              Hapus
+            </Button>
+            {u.status === "draft" && (
+              <Button variant="outline" className="h-9 text-xs" onClick={publish}>
+                Publikasikan
+              </Button>
+            )}
+            {!locked && <Button onClick={save} className="h-9 text-xs font-semibold shadow-xs">
+              <Save className="mr-1 h-4 w-4" />
+              Simpan Perubahan
+            </Button>}
+          </div>
+        }
+      />
+
+      {/* Sub-Modul & Quick Actions Toolbar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-2.5 bg-card border border-border/80 rounded-lg shadow-xs">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-medium text-muted-foreground px-1">
+            Modul Terkait:
+          </span>
+          <Button asChild variant="outline" size="sm" className="h-8 text-xs font-medium">
+            <Link to="/admin/ujian/$id/peserta" params={{ id: u.id }}>
+              <Users className="mr-1 h-3.5 w-3.5 text-muted-foreground" /> Peserta
             </Link>
           </Button>
-          <Button variant="outline" className="h-9 text-xs text-destructive border-destructive/30 hover:bg-destructive/10" onClick={hapus}>
-            <Trash2 className="mr-1 h-4 w-4" />
-            Hapus
+          <Button asChild variant="outline" size="sm" className="h-8 text-xs font-medium">
+            <Link to="/admin/ujian/$id/token" params={{ id: u.id }}>
+              <KeyRound className="mr-1 h-3.5 w-3.5 text-muted-foreground" /> Kelola Token
+            </Link>
           </Button>
-          {u.status === "draft" && (
-            <Button variant="outline" onClick={publish}>
-              Publikasikan
-            </Button>
-          )}
-          <Button onClick={save} className="h-9 text-xs font-semibold shadow-xs">
-            <Save className="mr-1 h-4 w-4" />
-            Simpan Perubahan
+          <Button asChild variant="outline" size="sm" className="h-8 text-xs font-medium">
+            <Link to="/admin/analitik/$id" params={{ id: u.id }}>
+              <BarChart3 className="mr-1 h-3.5 w-3.5 text-muted-foreground" /> Analitik
+            </Link>
           </Button>
         </div>
+
+        {u.status === "published" && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={openExtendModal}
+            className="h-8 text-xs font-medium text-primary hover:text-primary border-primary/30 hover:bg-primary/5 w-fit"
+          >
+            <CalendarClock className="mr-1 h-3.5 w-3.5" />
+            Perpanjang Jadwal
+          </Button>
+        )}
       </div>
 
+      {locked && <p className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-200" role="status">Paket yang sudah dipublikasikan atau memiliki sesi tidak dapat diedit.</p>}
+      <fieldset disabled={locked} aria-disabled={locked} className="min-w-0 space-y-4">
       <Card className="border-slate-200 dark:border-slate-800 shadow-xs">
         <CardContent className="space-y-4 p-4">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <div>
-              <Label>Nama</Label>
-              <Input value={u.nama} onChange={(e) => set("nama", e.target.value)} />
+          <div className="flex items-center gap-2.5 border-b pb-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <FileText className="h-4.5 w-4.5" />
             </div>
             <div>
-              <Label>Durasi (menit)</Label>
+              <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100">Informasi Dasar</h3>
+              <p className="text-xs text-muted-foreground">Nama paket ujian, durasi pengerjaan, dan petunjuk pelaksanaan ujian.</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div>
+              <Label className="text-xs font-medium">Nama Paket Ujian</Label>
+              <Input value={u.nama} onChange={(e) => set("nama", e.target.value)} className="mt-1" />
+            </div>
+            <div>
+              <Label className="text-xs font-medium">Durasi (menit)</Label>
               <Input
                 type="number"
                 min={1}
                 value={u.durasiMenit}
                 onChange={(e) => set("durasiMenit", Number(e.target.value))}
+                className="mt-1"
               />
             </div>
           </div>
           <div>
-            <Label>Deskripsi / instruksi</Label>
-            <RichEditor value={u.deskripsi} onChange={(v) => set("deskripsi", v)} minHeight={80} />
+            <Label className="text-xs font-medium">Deskripsi / Instruksi</Label>
+            <div className="mt-1">
+              {locked ? <RichView html={u.deskripsi} /> : <RichEditor value={u.deskripsi} onChange={(v) => set("deskripsi", v)} minHeight={80} />}
+            </div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <details className="rounded-md border">
+            <summary className="cursor-pointer px-3 py-2 text-sm font-medium">Metadata akademik (opsional)</summary>
+            <div className="grid grid-cols-1 gap-3 border-t p-3 sm:grid-cols-3">
             <div>
-              <Label>Mata Kuliah (Opsional)</Label>
+              <Label>Mata Kuliah</Label>
               <Select value={u.mataKuliahId || "none"} onValueChange={(v) => { set("mataKuliahId", v === "none" ? undefined : v); set("penawaranId", undefined); }}>
                 <SelectTrigger>
                   <SelectValue placeholder="Pilih Mata Kuliah" />
@@ -371,7 +543,7 @@ function UjianEditor() {
               </Select>
             </div>
             <div>
-              <Label>Semester (Opsional)</Label>
+              <Label>Semester</Label>
               <Select value={u.semesterId || "none"} onValueChange={(v) => { set("semesterId", v === "none" ? undefined : v); set("penawaranId", undefined); }}>
                 <SelectTrigger>
                   <SelectValue placeholder="Pilih Semester" />
@@ -407,51 +579,207 @@ function UjianEditor() {
                   })}
                 </SelectContent>
               </Select>
-              <p className="mt-1 text-xs text-muted-foreground">Wajib dipilih sebelum paket dipublikasikan.</p>
+              <p className="mt-1 text-xs text-muted-foreground">Gunakan jika peserta dikelola melalui kelas mata kuliah.</p>
             </div>
           </div>
+          </details>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardContent className="space-y-3 p-4">
-          <div>
-            <h3 className="font-medium">Jadwal ujian</h3>
-            <p className="text-xs text-muted-foreground">
-              Peserta hanya dapat mulai di antara waktu mulai dan selesai. Jadwal wajib sebelum publikasi.
-            </p>
+      <ConfirmDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        title="Hapus Ujian"
+        description={`Yakin ingin menghapus ujian "${u.nama}" beserta seluruh data yang terkait?`}
+        confirmLabel="Hapus"
+        busy={isDeleting}
+        onConfirm={hapus}
+      />
+
+      <Dialog open={extendOpen} onOpenChange={setExtendOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-base">
+              <CalendarClock className="h-5 w-5 text-primary" />
+              Perpanjang Jadwal Ujian
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+Perpanjang batas mulai ujian baru. Batas waktu sesi peserta yang sudah berjalan tidak berubah; gunakan pengelolaan sesi terpisah untuk peserta tersebut.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div className="rounded-lg bg-muted/50 p-3 text-xs space-y-1">
+              <div className="font-semibold text-slate-900 dark:text-slate-100">{u.nama}</div>
+              <div className="text-muted-foreground">
+                Waktu Mulai: {u.beginAt ? new Date(u.beginAt).toLocaleString("id-ID") : "-"}
+              </div>
+              <div className="text-muted-foreground">
+                Waktu Selesai Sebelumnya: {u.endAt ? new Date(u.endAt).toLocaleString("id-ID") : "-"}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="perpanjang-end-at" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                Batas Waktu Selesai Baru
+              </label>
+              <Input
+                id="perpanjang-end-at"
+                type="datetime-local"
+                value={newEndAtInput}
+                onChange={(e) => setNewEndAtInput(e.target.value)}
+                className="w-full text-sm"
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Berlaku untuk peserta yang memulai sesi baru. Sesi yang sudah berjalan tidak berubah.
+              </p>
+            </div>
           </div>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="ujian-begin-at">Mulai</Label>
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={isExtending}
+              onClick={() => setExtendOpen(false)}
+            >
+              Batal
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              disabled={isExtending}
+              onClick={handleExtendJadwal}
+            >
+              {isExtending ? "Menyimpan..." : "Simpan Jadwal"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Card className="border-slate-200 dark:border-slate-800 shadow-xs">
+        <CardContent className="space-y-4 p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <Calendar className="h-4.5 w-4.5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100">Jadwal Ujian</h3>
+                  {u.status === "published" && u.beginAt && u.endAt && (
+                    <span className={cn(
+                      "inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border",
+                      Date.now() > u.endAt
+                        ? "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700"
+                        : Date.now() >= u.beginAt
+                          ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800"
+                          : "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border-blue-300 dark:border-blue-800"
+                    )}>
+                      {Date.now() > u.endAt
+                        ? "Jadwal Telah Berakhir"
+                        : Date.now() >= u.beginAt
+                          ? "Sedang Berlangsung"
+                          : "Belum Dimulai"}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Peserta hanya dapat mulai di antara waktu mulai dan selesai. Jadwal wajib ditentukan sebelum publikasi.
+                </p>
+              </div>
+            </div>
+
+            {u.status === "published" && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={openExtendModal}
+                className="h-8 gap-1.5 px-3 text-xs font-medium border-primary/30 hover:bg-primary/5 text-primary shrink-0"
+              >
+                <CalendarClock className="h-3.5 w-3.5" />
+                Perpanjang Jadwal
+              </Button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+            {/* Kolom Waktu Mulai */}
+            <div className="rounded-lg border border-border/80 bg-slate-50/50 dark:bg-slate-900/30 p-3.5 space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="ujian-begin-at" className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  <Clock className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                  Waktu Mulai
+                </Label>
+                <span className="text-[11px] text-muted-foreground">Awal gerbang dibuka</span>
+              </div>
               <Input
                 id="ujian-begin-at"
                 type="datetime-local"
                 value={toDateTimeLocal(u.beginAt)}
                 onChange={(e) => set("beginAt", fromDateTimeLocal(e.target.value))}
+                className="bg-white dark:bg-slate-950 text-sm font-medium"
               />
+              <div className="text-[11px] text-muted-foreground min-h-[1.25rem]">
+                {u.beginAt ? (
+                  <span className="font-medium text-slate-700 dark:text-slate-300">
+                    {formatReadableDate(u.beginAt)}
+                  </span>
+                ) : (
+                  <span className="italic text-slate-400">Belum diatur</span>
+                )}
+              </div>
             </div>
-            <div>
-              <Label htmlFor="ujian-end-at">Selesai</Label>
+
+            {/* Kolom Waktu Selesai */}
+            <div className="rounded-lg border border-border/80 bg-slate-50/50 dark:bg-slate-900/30 p-3.5 space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="ujian-end-at" className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  <CalendarClock className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+                  Waktu Selesai
+                </Label>
+                <span className="text-[11px] text-muted-foreground">Batas akhir mulai sesi</span>
+              </div>
               <Input
                 id="ujian-end-at"
                 type="datetime-local"
                 value={toDateTimeLocal(u.endAt)}
                 onChange={(e) => set("endAt", fromDateTimeLocal(e.target.value))}
+                className="bg-white dark:bg-slate-950 text-sm font-medium"
               />
+              <div className="text-[11px] text-muted-foreground min-h-[1.25rem]">
+                {u.endAt ? (
+                  <span className="font-medium text-slate-700 dark:text-slate-300">
+                    {formatReadableDate(u.endAt)}
+                  </span>
+                ) : (
+                  <span className="italic text-slate-400">Belum diatur</span>
+                )}
+              </div>
             </div>
+          </div>
+
+          <div className="flex items-center gap-2 pt-1 text-xs text-muted-foreground">
+            <Info className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+            <span>
+              Durasi pengerjaan masing-masing peserta adalah <strong>{u.durasiMenit} menit</strong> sejak peserta memulai sesi.
+            </span>
           </div>
         </CardContent>
       </Card>
 
       <Card className="border-slate-200 dark:border-slate-800 shadow-xs">
-        <CardContent className="p-4 space-y-3">
-          <h3 className="font-medium">Skoring</h3>
+          <details>
+          <summary className="cursor-pointer p-4 text-sm font-medium">Pengaturan skoring</summary>
+      <CardContent className="p-4 space-y-3">
           <div className="grid grid-cols-3 gap-3">
             <div>
               <Label>Poin benar</Label>
               <Input
                 type="number"
+                disabled={hasSessions}
                 value={u.poinBenar}
                 onChange={(e) => set("poinBenar", Number(e.target.value))}
               />
@@ -460,6 +788,7 @@ function UjianEditor() {
               <Label>Poin salah</Label>
               <Input
                 type="number"
+                disabled={hasSessions}
                 value={u.poinSalah}
                 onChange={(e) => set("poinSalah", Number(e.target.value))}
               />
@@ -468,27 +797,34 @@ function UjianEditor() {
               <Label>Poin kosong</Label>
               <Input
                 type="number"
+                disabled={hasSessions}
                 value={u.poinKosong}
                 onChange={(e) => set("poinKosong", Number(e.target.value))}
               />
             </div>
           </div>
           <p className="text-xs text-muted-foreground">
-            Poin salah boleh negatif untuk negative marking.
+            {hasSessions
+              ? "Bobot poin dikunci karena ujian sudah memiliki sesi peserta."
+              : "Poin salah boleh negatif untuk negative marking."}
           </p>
         </CardContent>
+        </details>
       </Card>
 
       <Card className="border-slate-200 dark:border-slate-800 shadow-xs">
         <CardContent className="p-4 space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-medium">Topic Set (sumber soal)</h3>
-              <p className="mt-1 text-xs text-muted-foreground">Total butir soal yang dirakit: <span className="font-semibold text-foreground">{totalSoal} soal</span></p>
+              <h3 className="font-medium">Sumber soal ujian</h3>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Tambahkan satu atau beberapa topik. Total soal: <span className="font-semibold text-foreground">{totalSoal}</span>
+                {hasSessions && <span className="ml-2 font-medium text-amber-600 dark:text-amber-400">(Dikunci karena memiliki sesi)</span>}
+              </p>
             </div>
-            <Button size="sm" variant="outline" onClick={addTopicSet}>
+            <Button size="sm" variant="outline" onClick={addTopicSet} disabled={hasSessions} type="button">
               <Plus className="mr-1 h-4 w-4" />
-              Tambah
+              Tambah topik
             </Button>
           </div>
           {u.topicSets.map((ts, i) => {
@@ -496,11 +832,12 @@ function UjianEditor() {
             const m = t ? moduls.find((mm) => mm.id === t.modulId) : null;
             const inScope = isTopikAllowed(user, ts.topikId);
             return (
-              <div key={ts.id} className="rounded border p-3 space-y-2">
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-                  <div className="col-span-2">
-                    <Label className="text-xs">Topik</Label>
+              <div key={ts.id} className="space-y-2 border-t py-3 first:border-t-0 first:pt-0">
+                <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_8rem_auto_auto] sm:items-end">
+                  <div>
+                    <Label className="text-xs">Topik sumber</Label>
                     <Select
+                      disabled={hasSessions}
                       value={ts.topikId}
                       onValueChange={(v) =>
                         set(
@@ -530,10 +867,11 @@ function UjianEditor() {
                     </Select>
                   </div>
                   <div>
-                    <Label className="text-xs">Jumlah</Label>
+                    <Label className="text-xs">Jumlah soal</Label>
                     <Input
                       type="number"
                       min={1}
+                      disabled={hasSessions}
                       value={ts.jumlah}
                       onChange={(e) =>
                         set(
@@ -545,8 +883,9 @@ function UjianEditor() {
                       }
                     />
                   </div>
-                  <div className="flex items-center gap-2 pt-5">
+                  <div className="flex min-h-9 items-center gap-2">
                     <Checkbox
+                      disabled={hasSessions}
                       checked={ts.acakSoal}
                       onCheckedChange={(v) =>
                         set(
@@ -557,8 +896,9 @@ function UjianEditor() {
                     />
                     <Label className="text-xs">Acak soal</Label>
                   </div>
-                  <div className="flex items-center gap-2 pt-5">
+                  <div className="flex min-h-9 items-center gap-2">
                     <Checkbox
+                      disabled={hasSessions}
                       checked={ts.acakJawaban}
                       onCheckedChange={(v) =>
                         set(
@@ -582,6 +922,9 @@ function UjianEditor() {
                   <Button
                     size="sm"
                     variant="ghost"
+                    disabled={hasSessions}
+                    aria-label={`Hapus sumber topik ${i + 1}`}
+                    title={`Hapus sumber topik ${i + 1}`}
                     onClick={() =>
                       set(
                         "topicSets",
@@ -639,8 +982,9 @@ function UjianEditor() {
       </Card>
 
       <Card>
-        <CardContent className="space-y-3 p-4">
-          <h3 className="font-medium">Alat bantu ujian</h3>
+          <details>
+          <summary className="cursor-pointer p-4 text-sm font-medium">Alat bantu ujian</summary>
+      <CardContent className="space-y-3 p-4">
           <div className="flex items-center justify-between rounded border p-2">
             <div>
               <Label htmlFor="allow-calculator">Kalkulator ujian</Label>
@@ -668,11 +1012,13 @@ function UjianEditor() {
             />
           </div>
         </CardContent>
+        </details>
       </Card>
 
       <Card>
-        <CardContent className="p-4 space-y-3">
-          <h3 className="font-medium">Tampilan hasil & anti-cheat</h3>
+          <details>
+          <summary className="cursor-pointer p-4 text-sm font-medium">Tampilan hasil & anti-cheat</summary>
+      <CardContent className="p-4 space-y-3">
           <div className="flex items-center justify-between rounded border p-2">
             <Label>Tampilkan skor ke peserta setelah submit</Label>
             <Switch checked={u.showResult} onCheckedChange={(v) => set("showResult", v)} />
@@ -710,8 +1056,9 @@ function UjianEditor() {
             </div>
           </div>
         </CardContent>
+        </details>
       </Card>
-      {dialog}
-    </div>
+      </fieldset>
+    </AdminPage>
   );
 }

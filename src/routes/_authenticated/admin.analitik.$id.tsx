@@ -1,18 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
-import { ujianRepo, sesiRepo, usersRepo, soalRepo, hydrateRepos, mataKuliahRepo, semesterRepo, unitAkademikRepo } from "@/lib/cbt/repos";
+import { ujianRepo, sesiRepo, usersRepo, soalRepo, hydrateRepos, mataKuliahRepo, semesterRepo, unitAkademikRepo, deleteAllExamSessions } from "@/lib/cbt/repos";
 import { recomputeSkor } from "@/lib/cbt/scoring";
 import { exportSheet, stripHtml } from "@/lib/cbt/excel";
 import { analisisButir, labelKesukaran, labelDiskriminasi } from "@/lib/cbt/analisis";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trash2, Pencil, Save, X, BookOpen, Clock, FileText, ChevronRight, CheckCircle2, BarChart, Sparkles, AlertTriangle, TrendingUp, TrendingDown, Printer, Download } from "lucide-react";
+import { AdminPage, AdminPageHeader } from "@/components/cbt/AdminPage";
+import { ConfirmDialog } from "@/components/cbt/ConfirmDialog";
+import { Trash2, Pencil, X, BookOpen, Clock, FileText, CheckCircle2, Sparkles, AlertTriangle, TrendingUp, Printer, Download, ArrowLeft } from "lucide-react";
 import { useState, useEffect } from "react";
 import { RichView } from "@/components/cbt/RichEditor";
 import { toast } from "sonner";
-import { useConfirmDialog } from "@/components/cbt/ConfirmDialog";
 import {
   BarChart as RechartsBarChart,
   Bar,
@@ -53,66 +55,73 @@ function HasilUjian() {
     setSesis(sesiRepo.all().filter((s) => s.ujianId === id));
   }
 
+  const totalSoal = (ujian.topicSets || []).reduce((total, set) => total + set.jumlah, 0);
+  const selesaiCount = sesis.filter((s) => s.status === "selesai").length;
+
   return (
-    <div className="mx-auto max-w-6xl space-y-6 animate-in fade-in duration-500 pb-12 pt-4">
-      <div className="bg-white dark:bg-slate-950 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-        <Link to="/admin/analitik" className="text-sm font-medium text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 transition-colors flex items-center gap-1 w-fit mb-4">
-          ← Kembali ke Pilihan Ujian
-        </Link>
-        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">{ujian.nama}</h1>
-            {mk && (
-              <p className="text-muted-foreground mt-1 flex items-center gap-1.5 font-medium">
-                <BookOpen className="h-4 w-4" />
-                {mk.nama} {smt ? `· ${smt.nama}` : ""}
-              </p>
-            )}
-          </div>
-          <div className="flex items-center gap-4 bg-background/60 backdrop-blur-sm px-4 py-2 rounded-lg border shadow-sm">
-            <div className="text-center">
-              <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Durasi</div>
-              <div className="font-semibold text-lg flex items-center justify-center gap-1"><Clock className="h-4 w-4 text-primary" /> {ujian.durasiMenit}'</div>
+    <AdminPage className="pb-12">
+      <Link to="/admin/analitik" className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+        <ArrowLeft className="h-4 w-4" /> Kembali ke Analitik
+      </Link>
+
+      <AdminPageHeader
+        title={ujian.nama}
+        description={
+          <span className="inline-flex flex-wrap items-center gap-1.5">
+            {mk ? <><BookOpen className="h-3.5 w-3.5" /> {mk.nama} {smt ? `· ${smt.nama}` : ""}</> : "Ringkasan hasil pelaksanaan ujian"}
+          </span>
+        }
+        action={
+          <div className="grid grid-cols-3 gap-2 text-right">
+            <div className="min-w-[5.5rem] rounded-lg border bg-card px-3 py-2">
+              <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Durasi</div>
+              <div className="mt-0.5 inline-flex items-center gap-1 text-sm font-semibold tabular-nums"><Clock className="h-3.5 w-3.5 text-primary" />{ujian.durasiMenit}'</div>
             </div>
-            <div className="w-px h-8 bg-border" />
-            <div className="text-center">
-              <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Total Soal</div>
-              <div className="font-semibold text-lg flex items-center justify-center gap-1"><FileText className="h-4 w-4 text-primary" /> {(ujian.topicSets || []).reduce((a, b) => a + b.jumlah, 0)}</div>
+            <div className="min-w-[5.5rem] rounded-lg border bg-card px-3 py-2">
+              <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Soal</div>
+              <div className="mt-0.5 inline-flex items-center gap-1 text-sm font-semibold tabular-nums"><FileText className="h-3.5 w-3.5 text-primary" />{totalSoal}</div>
+            </div>
+            <div className="min-w-[5.5rem] rounded-lg border bg-card px-3 py-2">
+              <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Selesai</div>
+              <div className="mt-0.5 inline-flex items-center gap-1 text-sm font-semibold tabular-nums text-primary"><CheckCircle2 className="h-3.5 w-3.5" />{selesaiCount}</div>
             </div>
           </div>
-        </div>
-      </div>
+        }
+      />
 
       <Tabs defaultValue={initialTab} className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="peserta">Daftar Peserta</TabsTrigger>
-          <TabsTrigger value="report">Laporan Ujian</TabsTrigger>
-          <TabsTrigger value="ai" className="gap-1.5 text-primary"><Sparkles className="h-3.5 w-3.5" /> Wawasan AI</TabsTrigger>
+        <TabsList className="grid h-auto w-full grid-cols-3 gap-1 rounded-xl border bg-muted/60 p-1 sm:inline-grid sm:w-auto">
+          <TabsTrigger value="peserta" className="px-2 text-xs sm:px-4 sm:text-sm">Daftar Peserta</TabsTrigger>
+          <TabsTrigger value="report" className="px-2 text-xs sm:px-4 sm:text-sm">Laporan Ujian</TabsTrigger>
+          <TabsTrigger value="ai" className="gap-1.5 px-2 text-xs text-primary sm:px-4 sm:text-sm"><Sparkles className="h-3.5 w-3.5" /> Wawasan AI</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="peserta" className="space-y-4 outline-none">
+        <TabsContent value="peserta" className="mt-4 space-y-4 outline-none">
           <DaftarPesertaTab ujian={ujian} sesis={sesis} refresh={refresh} />
         </TabsContent>
 
-        <TabsContent value="report" className="outline-none">
+        <TabsContent value="report" className="mt-4 outline-none">
           <ExamReportTab ujian={ujian} sesis={sesis} />
         </TabsContent>
 
-        <TabsContent value="ai" className="outline-none">
+        <TabsContent value="ai" className="mt-4 outline-none">
           <AiInsightTab ujian={ujian} sesis={sesis} />
         </TabsContent>
       </Tabs>
-    </div>
+    </AdminPage>
   );
 }
 
 function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: SesiUjian[], refresh: () => void }) {
-  const { confirm, dialog } = useConfirmDialog();
   const users = usersRepo.all();
   const [openId, setOpenId] = useState<string | null>(null);
   const [editIdx, setEditIdx] = useState<number | null>(null);
   const [editSkor, setEditSkor] = useState<string>("");
   const [savingKey, setSavingKey] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isDeletingSingle, setIsDeletingSingle] = useState(false);
+  const [deleteAllOpen, setDeleteAllOpen] = useState(false);
+  const [isDeletingAll, setIsDeletingAll] = useState(false);
 
   async function saveEdit(sesiId: string, idx: number) {
     const s = sesiRepo.byId(sesiId);
@@ -134,20 +143,79 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
     }
   }
 
+  async function deleteSession() {
+    if (!deleteId || isDeletingSingle) return;
+    const sesiId = deleteId;
+    setIsDeletingSingle(true);
+    try {
+      sesiRepo.remove(sesiId);
+      const result = await sesiRepo.flush();
+      if (!result.ok) {
+        toast.error("Gagal menghapus sesi ujian");
+        return;
+      }
+      if (openId === sesiId) setOpenId(null);
+      refresh();
+      setDeleteId(null);
+      toast.success("Sesi ujian berhasil dihapus");
+    } catch {
+      toast.error("Gagal menghapus sesi ujian. Coba lagi.");
+    } finally {
+      setIsDeletingSingle(false);
+    }
+  }
+
+  async function handleDeleteAll() {
+    setIsDeletingAll(true);
+    try {
+      const result = await deleteAllExamSessions(ujian.id);
+      if (!result.ok) {
+        toast.error(result.error || "Gagal menghapus semua sesi");
+        return;
+      }
+      setDeleteAllOpen(false);
+      if (openId) setOpenId(null);
+      refresh();
+      toast.success("Semua sesi peserta berhasil dihapus");
+    } catch {
+      toast.error("Gagal menghapus semua sesi. Coba lagi.");
+    } finally {
+      setIsDeletingAll(false);
+    }
+  }
+
   return (
     <>
-      <Card className="shadow-sm overflow-hidden">
+      <Card className="overflow-hidden shadow-sm">
+        <CardHeader className="border-b bg-muted/20 pb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <CardTitle className="text-base">Daftar Peserta</CardTitle>
+              <CardDescription>{sesis.length} sesi peserta tercatat pada ujian ini.</CardDescription>
+            </div>
+            {sesis.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-rose-200 dark:border-rose-900 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 w-fit"
+                onClick={() => setDeleteAllOpen(true)}
+              >
+                <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Hapus Semua Sesi ({sesis.length})
+              </Button>
+            )}
+          </div>
+        </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-semibold">
+            <table className="w-full min-w-[760px] text-sm">
+              <thead className="border-b bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
                 <tr>
-                  <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center border-r border-slate-200 dark:border-slate-800">Peserta</th>
-                  <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center border-r border-slate-200 dark:border-slate-800">Status</th>
-                  <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center border-r border-slate-200 dark:border-slate-800">Mulai</th>
-                  <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center border-r border-slate-200 dark:border-slate-800">Skor</th>
-                  <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center border-r border-slate-200 dark:border-slate-800">Pelanggaran</th>
-                  <th className="p-4 font-semibold text-slate-700 dark:text-slate-300 text-center">Aksi</th>
+                  <th className="p-4 text-left font-medium">Peserta</th>
+                  <th className="p-4 text-center font-medium">Status</th>
+                  <th className="p-4 text-center font-medium">Mulai</th>
+                  <th className="p-4 text-center font-medium">Skor</th>
+                  <th className="p-4 text-center font-medium">Pelanggaran</th>
+                  <th className="p-4 text-center font-medium">Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -155,48 +223,42 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
                   const u = users.find((x) => x.id === s.pesertaId);
                   const isOpen = openId === s.id;
                   return (
-                    <tr key={s.id} className={`transition-colors ${isOpen ? 'bg-primary/5' : 'hover:bg-muted/30'}`}>
-                      <td className="p-4 font-medium text-center border-r border-slate-200 dark:border-slate-800">{u?.namaLengkap ?? s.pesertaId}</td>
-                      <td className="p-4 text-center border-r border-slate-200 dark:border-slate-800">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${
-                          s.status === 'selesai' ? 'bg-success/15 text-success' :
-                          s.status === 'sedang' ? 'bg-primary/15 text-primary' :
-                          'bg-accent text-accent-foreground'
-                        }`}>
-                          {s.status}
-                        </span>
+                    <tr key={s.id} className={`border-b last:border-0 transition-colors ${isOpen ? 'bg-primary/5' : 'hover:bg-muted/30'}`}>
+                      <td className="p-4">
+                        <div className="font-medium text-foreground">{u?.namaLengkap ?? s.pesertaId}</div>
+                        {u?.username && <div className="mt-0.5 text-xs text-muted-foreground">{u.username}</div>}
                       </td>
-                      <td className="p-4 text-muted-foreground text-center border-r border-slate-200 dark:border-slate-800">
+                      <td className="p-4 text-center">
+                        <Badge variant="outline" className={s.status === "selesai" ? "border-success/30 bg-success/10 text-success" : s.status === "sedang" ? "border-primary/30 bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}>
+                          {s.status}
+                        </Badge>
+                      </td>
+                      <td className="p-4 text-center text-muted-foreground">
                         {s.mulaiAt ? (
                           <span suppressHydrationWarning>
                             {new Date(s.mulaiAt).toLocaleString("id-ID", { timeZone: "Asia/Jakarta" })}
                           </span>
                         ) : "-"}
                       </td>
-                      <td className="p-4 text-center border-r border-slate-200 dark:border-slate-800">
+                      <td className="p-4 text-center">
                         {s.status === "selesai" ? (
                           <span className="font-bold text-base">{s.skorTotal ?? 0} <span className="text-xs text-muted-foreground font-normal">/ {s.maxSkor ?? 0}</span></span>
                         ) : "-"}
                       </td>
-                      <td className="p-4 text-center border-r border-slate-200 dark:border-slate-800">
+                      <td className="p-4 text-center">
                         {s.pelanggaran > 0 ? (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-destructive/15 text-destructive">
+                          <span className="inline-flex items-center rounded-md bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">
                             {s.pelanggaran} peringatan
                           </span>
                         ) : (
                           <span className="text-muted-foreground">-</span>
                         )}
                       </td>
-                      <td className="p-4 text-center space-x-2">
+                      <td className="space-x-2 p-4 text-center">
                         <Button size="sm" variant={isOpen ? "default" : "outline"} disabled={savingKey !== null} onClick={() => { setOpenId(isOpen ? null : s.id); setEditIdx(null); }}>
                           {isOpen ? "Tutup Lembar" : "Koreksi Lembar"}
                         </Button>
-                        <Button size="sm" variant="ghost" disabled={savingKey !== null} className="text-destructive hover:bg-destructive/10" aria-label="Hapus sesi ujian" onClick={async () => {
-                          if (!(await confirm({ title: "Hapus sesi ujian", description: "Hapus sesi ujian ini secara permanen?", confirmLabel: "Hapus" }))) return;
-                          sesiRepo.remove(s.id);
-                          const result = await sesiRepo.flush();
-                          if (result.ok) refresh();
-                        }}>
+                        <Button size="sm" variant="ghost" disabled={savingKey !== null} className="text-destructive hover:bg-destructive/10" onClick={() => setDeleteId(s.id)} aria-label={`Hapus sesi ${s.id}`} title={`Hapus sesi ${s.id}`}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </td>
@@ -307,7 +369,28 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
             </div>
           );
         })()}
-      {dialog}
+
+      <ConfirmDialog
+        open={deleteId !== null}
+        onOpenChange={(open) => !open && setDeleteId(null)}
+        title="Hapus Sesi Ujian"
+        description="Sesi peserta dan seluruh jawaban yang tersimpan akan dihapus secara permanen sehingga peserta dapat mengikuti ujian ulang."
+        confirmLabel="Hapus"
+        destructive={true}
+        busy={isDeletingSingle}
+        onConfirm={deleteSession}
+      />
+
+      <ConfirmDialog
+        open={deleteAllOpen}
+        onOpenChange={setDeleteAllOpen}
+        title="Hapus Semua Sesi Ujian?"
+        description={`Apakah Anda yakin ingin menghapus seluruh ${sesis.length} sesi pengerjaan ujian ini? Seluruh data jawaban dan skor peserta akan direset sehingga semua peserta dapat mengikuti ujian kembali.`}
+        confirmLabel="Ya, Hapus Semua Sesi"
+        destructive={true}
+        busy={isDeletingAll}
+        onConfirm={handleDeleteAll}
+      />
     </>
   );
 }
@@ -317,7 +400,13 @@ function ExamReportTab({ ujian, sesis }: { ujian: Ujian, sesis: SesiUjian[] }) {
   const total = completed.length;
   
   if (total === 0) {
-    return <Card className="p-12 text-center text-muted-foreground shadow-sm">Belum ada sesi selesai untuk dianalisis.</Card>;
+    return (
+      <Card className="shadow-sm">
+        <CardContent className="p-12 text-center text-sm text-muted-foreground">
+          Belum ada sesi selesai untuk dianalisis.
+        </CardContent>
+      </Card>
+    );
   }
 
   const scores = completed.map(s => s.skorTotal ?? 0);
@@ -418,59 +507,59 @@ function ExamReportTab({ ujian, sesis }: { ujian: Ujian, sesis: SesiUjian[] }) {
   }
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="text-xl font-semibold">Laporan Kelulusan</h2>
-          <p className="text-sm text-muted-foreground">Ringkasan hasil ujian untuk seluruh peserta</p>
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">Laporan Ujian</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Ringkasan hasil ujian untuk {total} peserta yang selesai.</p>
         </div>
-        <div className="flex gap-2">
-          <Button onClick={exportRekapExcel} variant="outline" className="gap-2 bg-white">
+        <div className="flex flex-wrap gap-2">
+          <Button onClick={exportRekapExcel} variant="outline" className="gap-2">
             <Download className="h-4 w-4" /> Download Rekap
           </Button>
-          <Button onClick={exportAnalisisExcel} variant="outline" className="gap-2 bg-white">
+          <Button onClick={exportAnalisisExcel} variant="outline" className="gap-2">
             <Download className="h-4 w-4" /> Download Analisis
           </Button>
-          <Button onClick={() => window.print()} variant="outline" className="gap-2 bg-white">
+          <Button onClick={() => window.print()} variant="outline" className="gap-2">
             <Printer className="h-4 w-4" /> Cetak Laporan
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-sm font-medium text-muted-foreground mb-1">Rata-Rata Kelas</div>
-            <div className="text-3xl font-bold">{avg}</div>
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <Card className="shadow-sm">
+          <CardContent className="p-4 sm:p-5">
+            <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Rata-Rata Kelas</div>
+            <div className="mt-2 text-2xl font-bold tabular-nums">{avg}</div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-sm font-medium text-muted-foreground mb-1">Tingkat Kelulusan</div>
-            <div className="text-3xl font-bold">{passRate}%</div>
-            <div className="text-xs text-muted-foreground mt-1">{passedCount} dari {total} lulus (KKM: {threshold})</div>
+        <Card className="shadow-sm">
+          <CardContent className="p-4 sm:p-5">
+            <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Tingkat Kelulusan</div>
+            <div className="mt-2 text-2xl font-bold tabular-nums">{passRate}%</div>
+            <div className="mt-1 text-xs text-muted-foreground">{passedCount} dari {total} lulus · KKM {threshold}</div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-sm font-medium text-muted-foreground mb-1">Skor Tertinggi</div>
-            <div className="text-3xl font-bold text-success">{highest}</div>
+        <Card className="shadow-sm">
+          <CardContent className="p-4 sm:p-5">
+            <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Skor Tertinggi</div>
+            <div className="mt-2 text-2xl font-bold tabular-nums text-success">{highest}</div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-sm font-medium text-muted-foreground mb-1">Skor Terendah</div>
-            <div className="text-3xl font-bold text-destructive">{lowest}</div>
+        <Card className="shadow-sm">
+          <CardContent className="p-4 sm:p-5">
+            <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Skor Terendah</div>
+            <div className="mt-2 text-2xl font-bold tabular-nums text-destructive">{lowest}</div>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Distribusi Nilai</CardTitle>
+      <Card className="overflow-hidden shadow-sm">
+        <CardHeader className="border-b bg-muted/20 pb-4">
+          <CardTitle className="text-base">Distribusi Nilai</CardTitle>
           <CardDescription>Persebaran jumlah siswa berdasarkan rentang skor</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="h-72 w-full">
+        <CardContent className="p-4 sm:p-6">
+          <div className="h-64 w-full sm:h-72">
             <ResponsiveContainer width="100%" height="100%">
               <RechartsBarChart data={distribution} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -522,83 +611,95 @@ function AiInsightTab({ ujian, sesis }: { ujian: Ujian, sesis: SesiUjian[] }) {
   }
 
   if (total === 0) {
-    return <Card className="p-12 text-center text-muted-foreground shadow-sm">Belum ada sesi selesai untuk dianalisis oleh AI.</Card>;
+    return (
+      <Card className="shadow-sm">
+        <CardContent className="p-12 text-center text-sm text-muted-foreground">
+          Belum ada sesi selesai untuk dianalisis oleh AI.
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
-    <div className="space-y-6">
-      <Card className="bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 shadow-sm">
-        <CardContent className="p-8 text-center space-y-4">
-          <div className="mx-auto w-12 h-12 bg-slate-100 dark:bg-slate-900 rounded-full flex items-center justify-center mb-2">
-            <Sparkles className="h-6 w-6 text-slate-700 dark:text-slate-300" />
+    <div className="space-y-4">
+      <Card className="border-primary/20 bg-primary/5 shadow-sm">
+        <CardContent className="p-5 sm:p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <Sparkles className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-foreground">Wawasan AI</h2>
+                <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+                  Gunakan kecerdasan buatan untuk membaca tren, mendeteksi soal paling sulit, dan mendapatkan rekomendasi tindak lanjut bagi dosen secara instan.
+                </p>
+              </div>
+            </div>
+            {!report && (
+              <Button onClick={generateInsight} disabled={analyzing} className="shrink-0">
+                {analyzing ? (
+                  <span className="flex items-center gap-2">
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                    AI Sedang Menganalisis...
+                  </span>
+                ) : (
+                  <><Sparkles className="mr-2 h-4 w-4" />Generate Insight</>
+                )}
+              </Button>
+            )}
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Wawasan Otomatis</h2>
-          <p className="text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
-            Gunakan kecerdasan buatan untuk membaca tren, mendeteksi soal paling sulit, dan mendapatkan rekomendasi tindak lanjut bagi dosen secara instan.
-          </p>
-          {!report && (
-            <Button onClick={generateInsight} disabled={analyzing} className="bg-indigo-600 hover:bg-indigo-700 text-white mt-4 h-11 px-8">
-              {analyzing ? (
-                <span className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
-                  AI Sedang Menganalisis...
-                </span>
-              ) : (
-                "Generate AI Insight"
-              )}
-            </Button>
-          )}
         </CardContent>
       </Card>
 
       {report && (
-        <div className="grid gap-6 animate-in slide-in-from-bottom-4 duration-500">
-          <Card className="border-l-4 border-l-indigo-500">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-indigo-500" /> Tren Kinerja Keseluruhan
+        <div className="grid gap-4 animate-in slide-in-from-bottom-4 duration-500">
+          <Card className="overflow-hidden shadow-sm">
+            <CardHeader className="border-b bg-muted/20 pb-4">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <TrendingUp className="h-5 w-5 text-primary" /> Tren Kinerja Keseluruhan
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-slate-700 dark:text-slate-300 leading-relaxed">{report.trend}</p>
+            <CardContent className="p-5">
+              <p className="leading-relaxed text-muted-foreground">{report.trend}</p>
             </CardContent>
           </Card>
 
-          <div className="grid sm:grid-cols-2 gap-6">
-            <Card className="border-l-4 border-l-destructive">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2 text-destructive">
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card className="border-destructive/30 shadow-sm">
+              <CardHeader className="border-b bg-destructive/5 pb-4">
+                <CardTitle className="flex items-center gap-2 text-base text-destructive">
                   <AlertTriangle className="h-5 w-5" /> Area Perlu Perhatian (Sulit)
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <ul className="list-disc list-inside space-y-1 text-slate-700 dark:text-slate-300">
+              <CardContent className="p-5">
+                <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
                   {report.difficultTopics.map((t: string, i: number) => <li key={i}>{t}</li>)}
                 </ul>
               </CardContent>
             </Card>
 
-            <Card className="border-l-4 border-l-success">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2 text-success">
+            <Card className="border-success/30 shadow-sm">
+              <CardHeader className="border-b bg-success/5 pb-4">
+                <CardTitle className="flex items-center gap-2 text-base text-success">
                   <CheckCircle2 className="h-5 w-5" /> Area Dikuasai (Mudah)
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <ul className="list-disc list-inside space-y-1 text-slate-700 dark:text-slate-300">
+              <CardContent className="p-5">
+                <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
                   {report.easyTopics.map((t: string, i: number) => <li key={i}>{t}</li>)}
                 </ul>
               </CardContent>
             </Card>
           </div>
 
-          <Card className="bg-slate-900 text-white dark:bg-slate-950 border-slate-800">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2 text-amber-400">
+          <Card className="border-primary/20 bg-primary text-primary-foreground shadow-sm">
+            <CardHeader className="border-b border-primary-foreground/10 pb-4">
+              <CardTitle className="flex items-center gap-2 text-base text-primary-foreground">
                 <Sparkles className="h-5 w-5" /> Rekomendasi Tindak Lanjut
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-5">
               <p className="leading-relaxed opacity-90">{report.recommendation}</p>
             </CardContent>
           </Card>

@@ -432,42 +432,42 @@ function RouteComponent() {
     fontSize === "lg" ? "text-xl sm:text-2xl prose-xl" : "text-base sm:text-lg prose-base";
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-64px)] overflow-hidden bg-slate-50 dark:bg-slate-950/50 font-sans">
-      <div className="flex-1 flex mx-auto w-full max-w-[1600px] h-full relative">
+    <div className="flex flex-col h-[calc(100dvh-64px)] overflow-hidden bg-slate-50/50 dark:bg-slate-950 font-sans p-0 sm:p-3 lg:p-5">
+      <div className="flex-1 flex mx-auto w-full max-w-[1600px] h-full min-h-0 relative overflow-hidden rounded-none sm:rounded-3xl border-0 sm:border border-white/60 dark:border-slate-800/80 bg-white/60 dark:bg-slate-900/60 shadow-none sm:shadow-xl">
 
         {/* LEFT PANEL: MAIN EXAM AREA */}
-        <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 relative z-10 shadow-2xl md:shadow-none">
+        <div className="flex-1 flex flex-col min-w-0 bg-white/80 dark:bg-slate-900/80 relative z-10">
           
           {/* Top Sticky Header */}
-          <div className="sticky top-0 z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 px-4 sm:px-8 py-4 sm:py-5 flex items-center justify-between transition-colors">
+          <div className="sticky top-0 z-20 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800/80 px-4 sm:px-8 py-3 sm:py-4 flex items-center justify-between transition-colors">
             
             <div className="flex items-center gap-4">
-              <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-primary/10 text-primary font-black text-xl border border-primary/20 shadow-sm">
+              <div className="flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-primary/10 text-primary font-black text-xl border border-primary/20 shadow-sm">
                 {idx + 1}
               </div>
-              <div className="hidden sm:block">
-                <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-0.5">Soal Ke-</p>
-                <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 leading-none">Dari {currentSesi.soalIds.length} Soal</p>
+              <div className="min-w-0 hidden sm:block">
+                <p className="max-w-[22rem] truncate text-sm font-extrabold text-slate-800 dark:text-white" title={ujian.nama}>{ujian.nama}</p>
+                <p className="mt-1 text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Soal {idx + 1} dari {currentSesi.soalIds.length}</p>
               </div>
             </div>
 
             <div className="flex items-center gap-3 sm:gap-6">
               {/* Font Size Controls */}
               <div className="hidden sm:flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700/50">
-                <button onClick={() => setFontSize("sm")} className={cn("flex items-center justify-center w-8 h-8 rounded-lg font-bold text-sm transition-all", fontSize === "sm" ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200")} title="Perkecil Teks">
+                <button type="button" onClick={() => setFontSize("sm")} className={cn("flex items-center justify-center w-8 h-8 rounded-lg font-bold text-sm transition-all", fontSize === "sm" ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200")} aria-label="Perkecil teks" title="Perkecil teks">
                   <Type className="w-3.5 h-3.5" />
                 </button>
-                <button onClick={() => setFontSize("base")} className={cn("flex items-center justify-center w-8 h-8 rounded-lg font-bold text-base transition-all", fontSize === "base" ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200")} title="Teks Normal">
+                <button type="button" onClick={() => setFontSize("base")} className={cn("flex items-center justify-center w-8 h-8 rounded-lg font-bold text-base transition-all", fontSize === "base" ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200")} aria-label="Gunakan ukuran teks normal" title="Gunakan ukuran teks normal">
                   <Type className="w-4 h-4" />
                 </button>
-                <button onClick={() => setFontSize("lg")} className={cn("flex items-center justify-center w-8 h-8 rounded-lg font-bold text-lg transition-all", fontSize === "lg" ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200")} title="Perbesar Teks">
+                <button type="button" onClick={() => setFontSize("lg")} className={cn("flex items-center justify-center w-8 h-8 rounded-lg font-bold text-lg transition-all", fontSize === "lg" ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200")} aria-label="Perbesar teks" title="Perbesar teks">
                   <Type className="w-5 h-5" />
                 </button>
               </div>
 
               {/* Timer */}
               <div className={cn(
-                "flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl border shadow-sm transition-colors",
+                "flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1.5 sm:py-2 rounded-2xl border shadow-sm transition-colors",
                 critical ? "bg-red-500 text-white border-red-600 animate-pulse" : 
                 danger ? "bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 border-red-200 dark:border-red-900" : 
                 "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700"
@@ -484,14 +484,14 @@ function RouteComponent() {
                 </p>
               )}
 
-              <Button variant="outline" size="icon" className="md:hidden w-10 h-10 rounded-xl border-slate-200 dark:border-slate-700" onClick={() => setShowList(true)}>
+              <Button variant="outline" size="icon" className="md:hidden w-10 h-10 rounded-xl border-slate-200 dark:border-slate-700" onClick={() => setShowList(true)} aria-label="Buka daftar soal" title="Buka daftar soal">
                 <LayoutGrid className="w-5 h-5 text-slate-600 dark:text-slate-400" />
               </Button>
             </div>
           </div>
 
           {/* Question & Options Scrollable Area */}
-          <div className="flex-1 overflow-y-auto overflow-x-hidden relative">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden relative bg-slate-50/40 dark:bg-slate-950/20">
             <div className="max-w-5xl mx-auto px-5 sm:px-10 py-6 sm:py-10 pb-32">
 
               {/* Question Text */}
@@ -504,7 +504,7 @@ function RouteComponent() {
               
               {/* Audio Player if present */}
               {currentSoal.audioFileId && (
-                <div className="mb-10 bg-slate-50 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
+                <div className="mb-10 rounded-3xl border border-slate-200/80 bg-white/70 p-6 shadow-sm dark:border-slate-800/80 dark:bg-slate-900/60">
                   <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-4 uppercase tracking-widest">Audio Pendukung</p>
                   <AudioPlayer
                     fileId={currentSoal.audioFileId}
@@ -517,18 +517,26 @@ function RouteComponent() {
               {/* Options / Essay Input */}
               <div className="space-y-4">
                 {currentSoal.tipe === "essay" ? (
-                  <div className="group relative">
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/50 to-primary opacity-0 group-focus-within:opacity-100 rounded-2xl blur transition duration-300" />
-                    <Textarea
-                      rows={10}
-                      value={currentJawaban.jawabanEssay ?? ""}
-                      onChange={(e) => updateJawaban({ jawabanEssay: e.target.value })}
-                      placeholder="Ketik jawaban esai Anda secara lengkap dan jelas di sini..."
-                      className={cn(
-                        "relative bg-white dark:bg-slate-950 resize-y p-6 rounded-2xl border-2 border-slate-200 dark:border-slate-800 focus-visible:ring-0 focus-visible:border-primary shadow-inner transition-colors",
-                        textSizeClass
-                      )}
-                    />
+                  <div className="space-y-2">
+                    <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+                      <Textarea
+                        rows={10}
+                        aria-label={`Jawaban esai soal nomor ${idx + 1}`}
+                        value={currentJawaban.jawabanEssay ?? ""}
+                        onChange={(e) => updateJawaban({ jawabanEssay: e.target.value })}
+                        placeholder="Ketik jawaban esai Anda secara lengkap dan jelas di sini..."
+                        className={cn(
+                          "w-full resize-y rounded-t-xl border-0 bg-transparent p-4 sm:p-5 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus-visible:ring-0 focus-visible:outline-none min-h-[220px] leading-relaxed",
+                          textSizeClass
+                        )}
+                      />
+                      <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 px-4 py-2.5 bg-slate-50/60 dark:bg-slate-900/60 text-xs text-slate-400 dark:text-slate-500 rounded-b-xl select-none">
+                        <span>Jawaban tersimpan otomatis</span>
+                        <span>
+                          {((currentJawaban.jawabanEssay ?? "").trim() ? (currentJawaban.jawabanEssay ?? "").trim().split(/\s+/).length : 0)} kata · {(currentJawaban.jawabanEssay ?? "").length} karakter
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   optOrder.map((oid, i) => {
@@ -541,11 +549,11 @@ function RouteComponent() {
                       <label 
                         key={oid}
                         className={cn(
-                          "group relative flex items-start p-4 sm:p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 hover:-translate-y-0.5",
+                          "group relative flex items-start p-4 sm:p-5 rounded-3xl border-2 cursor-pointer transition-all duration-200 hover:-translate-y-0.5",
                           "has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-primary/40 has-[:focus-visible]:border-primary", // a11y focus ring
                           isChecked 
                             ? "bg-primary/5 border-primary shadow-[0_0_0_1px_rgba(3,165,89,1)] dark:bg-primary/10 dark:shadow-[0_0_0_1px_rgba(3,165,89,0.5)]" 
-                            : "bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-md"
+                            : "bg-white/80 dark:bg-slate-950/70 border-slate-200/80 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-md"
                         )}
                       >
                         <input
@@ -583,7 +591,7 @@ function RouteComponent() {
           </div>
 
           {/* Bottom Action Footer */}
-          <div className="sticky bottom-0 z-20 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 p-4 sm:p-6">
+          <div className="sticky bottom-0 z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-200/80 dark:border-slate-800/80 p-4 sm:p-5">
             <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
 
               <div className="flex w-full sm:w-auto items-center gap-3">
@@ -637,8 +645,8 @@ function RouteComponent() {
         </div>
 
         {/* RIGHT PANEL: GRID NAVIGATION (Desktop Only) */}
-        <div className="hidden md:flex flex-col w-80 bg-slate-50/50 dark:bg-slate-950/30 border-l border-slate-200 dark:border-slate-800">
-          <div className="p-6 border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
+        <div className="hidden md:flex flex-col w-80 bg-slate-50/70 dark:bg-slate-950/30 border-l border-slate-200/80 dark:border-slate-800/80">
+          <div className="p-6 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm">
             <h3 className="font-extrabold text-slate-800 dark:text-slate-200 text-lg tracking-tight">Navigasi Soal</h3>
             <CalculatorAction ujian={ujian} />
             <NilaiNormalAction ujian={ujian} />
@@ -665,6 +673,9 @@ function RouteComponent() {
                 return (
                   <button
                     key={i}
+                    type="button"
+                    aria-label={`Buka soal nomor ${i + 1}`}
+                    title={`Buka soal nomor ${i + 1}`}
                     onClick={() => handleNavigateIdx(i)}
                     className={cn(
                       "relative aspect-square flex items-center justify-center rounded-xl text-sm font-bold border-2 transition-all hover:scale-105",
@@ -688,7 +699,7 @@ function RouteComponent() {
             </div>
           </div>
 
-          <div className="p-6 border-t border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
+          <div className="p-6 border-t border-slate-200/80 dark:border-slate-800/80 bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm">
             <Button
               variant="destructive"
               className="w-full h-12 font-bold uppercase tracking-widest shadow-md"
@@ -739,7 +750,10 @@ function RouteComponent() {
             <div className="flex items-center gap-3 text-lg font-black text-slate-800 dark:text-white">
               <LayoutGrid className="w-5 h-5 text-primary" /> DAFTAR SOAL
             </div>
-            <button 
+            <button
+              type="button"
+              aria-label="Tutup daftar soal"
+              title="Tutup daftar soal"
               className="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-full transition-colors text-slate-600 dark:text-slate-300"
               onClick={() => setShowList(false)}
             >
@@ -774,6 +788,9 @@ function RouteComponent() {
                   return (
                     <button
                       key={i}
+                      type="button"
+                      aria-label={`Buka soal nomor ${i + 1}`}
+                      title={`Buka soal nomor ${i + 1}`}
                       onClick={() => { handleNavigateIdx(i); setShowList(false); }}
                       className={cn(
                         "relative aspect-square rounded-2xl text-lg font-bold border-2 transition-all shadow-sm active:scale-95",

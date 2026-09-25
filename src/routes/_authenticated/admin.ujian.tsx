@@ -2,6 +2,7 @@ import {
   createFileRoute,
   Link,
   Outlet,
+  useNavigate,
   useRouterState,
 } from "@tanstack/react-router";
 import { useState } from "react";
@@ -9,7 +10,16 @@ import { ujianRepo, sesiRepo, mataKuliahRepo, penawaranRepo } from "@/lib/cbt/re
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import { uid } from "@/lib/cbt/storage";
 import type { Ujian } from "@/lib/cbt/types";
-import { Plus, Users, BarChart3, KeyRound, PlayCircle, Clock, CheckCircle2, Settings2, FileSignature, FileText, Search, Filter } from "lucide-react";
+import {
+  Plus,
+  BarChart3,
+  PlayCircle,
+  Clock,
+  CheckCircle2,
+  Users,
+  FileText,
+  Search,
+} from "lucide-react";
 import { toast } from "sonner";
 import { visibleUjians } from "@/lib/cbt/access";
 import { cn } from "@/lib/utils";
@@ -32,6 +42,7 @@ function UjianRoute() {
 
 function UjianList() {
   const user = useAuthStore((s) => s.user)!;
+  const navigate = useNavigate();
   const [list, setList] = useState<Ujian[]>(visibleUjians(user));
   const [activeTab, setActiveTab] = useState<"semua" | "persiapan" | "berlangsung" | "selesai">("semua");
   const [search, setSearch] = useState("");
@@ -65,10 +76,14 @@ function UjianList() {
       createdAt: Date.now(),
     };
     ujianRepo.upsert(u);
-    await ujianRepo.flush();
-    setList((current) => [...current, u]);
-    toast.success("Ujian baru dibuat — silakan edit");
+    const result = await ujianRepo.flush();
     setIsAdding(false);
+    if (!result.ok) {
+      toast.error(result.error || "Gagal membuat ujian");
+      return;
+    }
+    toast.success("Ujian baru dibuat");
+    navigate({ to: "/admin/ujian/$id", params: { id: u.id } });
   }
 
   const now = Date.now();
@@ -77,9 +92,15 @@ function UjianList() {
     u.nama.toLowerCase().includes(search.toLowerCase())
   );
 
-  const persiapan = filteredList.filter((u) => !u.beginAt || !u.endAt || u.beginAt > now);
-  const berlangsung = filteredList.filter((u) => u.beginAt && u.endAt && u.beginAt <= now && u.endAt >= now);
-  const selesai = filteredList.filter((u) => u.endAt && u.endAt < now);
+  const persiapan = filteredList.filter(
+    (u) => u.status === "draft" || !u.beginAt || !u.endAt || u.beginAt > now,
+  );
+  const berlangsung = filteredList.filter(
+    (u) => u.status === "published" && u.beginAt && u.endAt && u.beginAt <= now && u.endAt >= now,
+  );
+  const selesai = filteredList.filter(
+    (u) => u.status === "published" && u.endAt && u.endAt < now,
+  );
 
   const renderRow = (u: Ujian, type: "persiapan" | "berlangsung" | "selesai") => {
     const sesiCount = sesiRepo.all().filter((s) => s.ujianId === u.id).length;
@@ -90,7 +111,12 @@ function UjianList() {
     return (
       <div key={u.id} className="group flex flex-col gap-3 p-3 transition-colors bg-card border-b border-border/80 last:border-b-0 hover:bg-muted/40 sm:flex-row sm:items-center sm:justify-between sm:p-4">
         <div className="flex items-center gap-4 flex-1 min-w-0">
-          <div className="hidden sm:flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <Link
+            to="/admin/ujian/$id"
+            params={{ id: u.id }}
+            className="hidden sm:flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
+            title="Edit ujian"
+          >
             {type === "persiapan" && <Clock className="h-5 w-5 text-slate-400" />}
             {type === "berlangsung" && (
               <span className="relative flex h-5 w-5 items-center justify-center">
@@ -99,10 +125,14 @@ function UjianList() {
               </span>
             )}
             {type === "selesai" && <CheckCircle2 className="h-5 w-5 text-slate-400" />}
-          </div>
+          </Link>
           
           <div className="flex flex-col min-w-0">
-            <Link to={type === "persiapan" ? "/admin/ujian/$id" : "/admin/ujian/$id/peserta"} params={{ id: u.id }} className="font-semibold text-sm text-slate-900 dark:text-slate-100 truncate hover:text-slate-600 dark:hover:text-slate-300">
+            <Link
+              to="/admin/ujian/$id"
+              params={{ id: u.id }}
+              className="font-semibold text-sm text-slate-900 dark:text-slate-100 truncate hover:text-primary dark:hover:text-primary transition-colors"
+            >
               {u.nama}
             </Link>
             <div className="flex items-center gap-2 mt-1">
@@ -116,36 +146,31 @@ function UjianList() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2 shrink-0 sm:ml-4">
-          <Link to="/admin/ujian/$id/token" params={{ id: u.id }} className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-            <KeyRound className="h-3.5 w-3.5" /> Kelola Token
-          </Link>
-          {type === "persiapan" && (
-            <>
-              <Link to="/admin/ujian/$id/peserta" params={{ id: u.id }} className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-colors">
-                <Users className="h-3.5 w-3.5"/> Peserta
-              </Link>
-              <Link to="/admin/ujian/$id" params={{ id: u.id }} className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-md text-xs font-medium hover:bg-slate-800 transition-colors">
-                <Settings2 className="h-3.5 w-3.5"/> Edit
-              </Link>
-            </>
-          )}
           {type === "berlangsung" && (
-            <>
-              <Link to="/admin/peserta/online" search={{ ujianId: u.id }} className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 dark:bg-emerald-500 text-white rounded-md text-xs font-medium hover:bg-emerald-700 transition-colors">
-                <PlayCircle className="h-3.5 w-3.5"/> Pantau
-              </Link>
-            </>
+            <Link
+              to="/admin/peserta/online"
+              search={{ ujianId: u.id }}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 dark:bg-emerald-500 text-white rounded-md text-xs font-medium hover:bg-emerald-700 transition-colors"
+            >
+              <PlayCircle className="h-3.5 w-3.5" /> Pantau
+            </Link>
           )}
           {type === "selesai" && (
-            <>
-              <Link to="/admin/evaluasi" className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-colors">
-                <FileSignature className="h-3.5 w-3.5"/> Evaluasi
-              </Link>
-              <Link to="/admin/analitik/$id" params={{ id: u.id }} className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-md text-xs font-medium hover:bg-slate-800 transition-colors">
-                <BarChart3 className="h-3.5 w-3.5"/> Analitik
-              </Link>
-            </>
+            <Link
+              to="/admin/analitik/$id"
+              params={{ id: u.id }}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-colors"
+            >
+              <BarChart3 className="h-3.5 w-3.5" /> Analitik
+            </Link>
           )}
+          <Link
+            to="/admin/ujian/$id/peserta"
+            params={{ id: u.id }}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-colors"
+          >
+            <Users className="h-3.5 w-3.5" /> Peserta {sesiCount > 0 ? `(${sesiCount})` : ""}
+          </Link>
         </div>
       </div>
     );
@@ -182,6 +207,8 @@ function UjianList() {
           {tabs.map(tab => (
             <button
               key={tab.id}
+              type="button"
+              aria-label={tab.label}
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors ${
                 activeTab === tab.id 
@@ -223,15 +250,16 @@ function UjianList() {
         ) : (
           <div className="flex flex-col">
             {currentList.map(u => {
-              const status = (!u.beginAt || !u.endAt || u.beginAt > now) ? "persiapan" : 
-                             (u.beginAt && u.endAt && u.beginAt <= now && u.endAt >= now) ? "berlangsung" : "selesai";
+              const status = u.status === "draft" || !u.beginAt || !u.endAt || u.beginAt > now
+                ? "persiapan"
+                : u.beginAt <= now && u.endAt >= now
+                  ? "berlangsung"
+                  : "selesai";
               return renderRow(u, status);
             })}
           </div>
         )}
       </div>
-
-
     </AdminPage>
   );
 }

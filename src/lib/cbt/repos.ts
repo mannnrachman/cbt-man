@@ -3,7 +3,7 @@ import { getCbtSnapshot, getPublicBootConfigServer } from "@/lib/server/snapshot
 import { claimExamToken as claimExamTokenServer, saveConfigServer, mutateUjianServer, mutateTokenServer } from "@/lib/server/ujian/functions";
 import { mutateUserServer } from "@/lib/server/users/functions";
 import { mutateModulServer, mutateTopikServer, mutateSoalServer } from "@/lib/server/modul/functions";
-import { mutateSesiServer, createSesiServer, getParticipantSesiStateServer, saveParticipantSesiServer } from "@/lib/server/sesi/functions";
+import { mutateSesiServer, createSesiServer, getParticipantSesiStateServer, saveParticipantSesiServer, deleteAllExamSessionsServer } from "@/lib/server/sesi/functions";
 import { getTodaysExamsServer } from "@/lib/server/exams";
 import { 
 	mutateUnitAkademikServer, 
@@ -172,6 +172,19 @@ export async function createExamSession(
 	return { ok: true, sesiId: result.sesiId };
 }
 
+export async function deleteAllExamSessions(
+	ujianId: string,
+): Promise<MutationResult> {
+	const result = await deleteAllExamSessionsServer({ data: { ujianId } });
+	if (result.ok) {
+		cache.sesi = cache.sesi.filter((s) => s.ujianId !== ujianId);
+		cache.token = cache.token.map((t) =>
+			t.ujianId === ujianId ? { ...t, dipakaiOleh: undefined, dipakaiAt: undefined } : t,
+		);
+	}
+	return result;
+}
+
 export function getParticipantSessionState(sesiId: string) {
 	return getParticipantSesiStateServer({ data: { sesiId } });
 }
@@ -252,14 +265,14 @@ function runEntityMutation(
 	let mutationPromise: Promise<{ ok: boolean; error?: string }>;
 	
 	switch (entity) {
-		case "users": mutationPromise = mutateUserServer({ data: { action, payload } }); break;
+		case "users": mutationPromise = mutateUserServer({ data: { action, payload: payload as never } }); break;
 
-		case "modul": mutationPromise = mutateModulServer({ data: { action, payload } }); break;
-		case "topik": mutationPromise = mutateTopikServer({ data: { action, payload } }); break;
-		case "soal": mutationPromise = mutateSoalServer({ data: { action, payload } }); break;
-		case "ujian": mutationPromise = mutateUjianServer({ data: { action, payload } }); break;
-		case "token": mutationPromise = mutateTokenServer({ data: { action, payload } }); break;
-		case "sesi": mutationPromise = mutateSesiServer({ data: { action, payload } }); break;
+		case "modul": mutationPromise = mutateModulServer({ data: { action, payload: payload as never } }); break;
+		case "topik": mutationPromise = mutateTopikServer({ data: { action, payload: payload as never } }); break;
+		case "soal": mutationPromise = mutateSoalServer({ data: { action, payload: payload as never } }); break;
+		case "ujian": mutationPromise = mutateUjianServer({ data: { action, payload: payload as never } }); break;
+		case "token": mutationPromise = mutateTokenServer({ data: { action, payload: payload as never } }); break;
+		case "sesi": mutationPromise = mutateSesiServer({ data: { action, payload: payload as never } }); break;
 		case "unitAkademik": mutationPromise = mutateUnitAkademikServer({ data: { action: action as any, payload } }); break;
 		case "tahunAkademik": mutationPromise = mutateTahunAkademikServer({ data: { action: action as any, payload } }); break;
 		case "semester": mutationPromise = mutateSemesterServer({ data: { action: action as any, payload } }); break;

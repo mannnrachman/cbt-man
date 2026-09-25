@@ -1,4 +1,5 @@
 import { useCallback, useState, type ReactNode } from "react";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -28,8 +29,10 @@ export function ConfirmDialog(props: {
 	confirmLabel?: string;
 	cancelLabel?: string;
 	destructive?: boolean;
+	icon?: ReactNode;
+	busy?: boolean;
 	onOpenChange: (open: boolean) => void;
-	onConfirm: () => void;
+	onConfirm: () => void | Promise<void>;
 }) {
 	const {
 		open,
@@ -38,6 +41,8 @@ export function ConfirmDialog(props: {
 		confirmLabel = "Lanjutkan",
 		cancelLabel = "Batal",
 		destructive = true,
+	icon,
+	busy = false,
 		onOpenChange,
 		onConfirm,
 	} = props;
@@ -46,17 +51,22 @@ export function ConfirmDialog(props: {
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="sm:max-w-md">
 				<DialogHeader>
-					<DialogTitle>{title}</DialogTitle>
+				<DialogTitle className={`flex items-center gap-2 ${destructive ? "text-rose-600" : "text-foreground"}`}>
+					{icon ?? <Trash2 className="h-5 w-5" />}
+					{title}
+				</DialogTitle>
 					<DialogDescription>{description}</DialogDescription>
 				</DialogHeader>
 				<DialogFooter className="mt-4">
-					<Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+					<Button type="button" variant="outline" disabled={busy} onClick={() => onOpenChange(false)} aria-label="Batal">
 						{cancelLabel}
 					</Button>
 					<Button
 						type="button"
 						variant={destructive ? "destructive" : "default"}
+						disabled={busy}
 						onClick={onConfirm}
+						aria-label={confirmLabel}
 					>
 						{confirmLabel}
 					</Button>

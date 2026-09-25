@@ -123,6 +123,12 @@ function PreUjianContent({
   const tokenInputId = `token-ujian-${ujian.id}`;
   const availability = getExamAvailabilityStatus(ujian);
   const examAllowed = isExamAvailable(ujian);
+  const sesiBerlangsung = sesiRepo
+    .all()
+    .find((s) => s.ujianId === ujian.id && s.pesertaId === user.id && s.status === "sedang" &&
+      s.endsAt !== undefined && s.endsAt > Date.now() &&
+      (ujian.endAt === undefined || ujian.endAt > Date.now()));
+  const canOpen = examAllowed;
   const blockedMessage = getExamAvailabilityMessage(availability, ujian);
   const BlockedIcon = availability === "upcoming" ? CalendarClock : CalendarX;
 
@@ -131,7 +137,7 @@ function PreUjianContent({
     .find((s) => s.ujianId === ujian.id && s.pesertaId === user.id && s.status === "selesai");
 
   async function mulai() {
-    if (!examAllowed) {
+    if (!canOpen) {
       toast.error(blockedMessage || "Ujian tidak dapat dimulai saat ini");
       return;
     }
@@ -140,7 +146,7 @@ function PreUjianContent({
       return;
     }
     armExamAlarm();
-    if (ujian.tokenAktif) {
+    if (ujian.tokenAktif && !sesiBerlangsung) {
       const kode = token.trim().toUpperCase();
       if (kode.length === 0) {
         toast.error("Masukkan token");
@@ -181,23 +187,23 @@ function PreUjianContent({
   const smt = ujian.semesterId ? semesterRepo.byId(ujian.semesterId) : null;
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] bg-slate-50/50 dark:bg-slate-950">
+    <div className="relative min-h-[calc(100vh-64px)] bg-slate-50 dark:bg-slate-950/30">
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 pb-8 sm:pb-12 space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="relative max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 pt-3 sm:pt-5 pb-8 sm:pb-12 space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-700">
         {/* Header Info */}
         <div className="space-y-4">
-          <Link to="/peserta" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group">
+          <Link to="/peserta" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-primary dark:hover:text-emerald-400 transition-colors group">
             <span className="group-hover:-translate-x-1 transition-transform mr-1">←</span> Kembali ke Daftar Ujian
           </Link>
-          <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/40 dark:border-slate-800/60 p-6 sm:p-8 rounded-3xl shadow-xl shadow-slate-200/40 dark:shadow-black/20">
+          <div className="bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-sm p-6 sm:p-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
               <div>
                 <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300">
                   {ujian.nama}
                 </h1>
                 {mk && (
-                  <div className="flex items-center gap-2 mt-4 text-sm sm:text-base font-medium text-blue-600 dark:text-blue-400">
-                    <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                  <div className="flex items-center gap-2 mt-4 text-sm sm:text-base font-medium text-primary dark:text-emerald-400">
+                    <div className="p-2 rounded-lg bg-primary/10 dark:bg-emerald-900/30">
                       <BookOpen className="h-4 w-4" />
                     </div>
                     <span>{mk.nama}</span>
@@ -212,7 +218,7 @@ function PreUjianContent({
               </div>
               <div className="flex flex-row sm:flex-col gap-3 shrink-0">
                 <div className="flex items-center gap-3 bg-white dark:bg-slate-800/80 px-4 py-3 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/50">
-                  <div className="p-2 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-500">
+                  <div className="p-2 rounded-full bg-primary/10 dark:bg-emerald-900/20 text-primary dark:text-emerald-400">
                     <Clock className="h-5 w-5" />
                   </div>
                   <div>
@@ -221,7 +227,7 @@ function PreUjianContent({
                   </div>
                 </div>
                 <div className="flex items-center gap-3 bg-white dark:bg-slate-800/80 px-4 py-3 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/50">
-                  <div className="p-2 rounded-full bg-indigo-50 dark:bg-indigo-900/20 text-indigo-500">
+                  <div className="p-2 rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400">
                     <FileText className="h-5 w-5" />
                   </div>
                   <div>
@@ -237,7 +243,7 @@ function PreUjianContent({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content: Instructions & Details */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-lg shadow-slate-200/30 dark:shadow-black/20 p-6 sm:p-8 overflow-hidden relative">
+            <div className="bg-white dark:bg-slate-900/90 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-sm p-6 sm:p-8 overflow-hidden relative">
               <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-slate-100 to-transparent dark:from-slate-800 rounded-bl-full opacity-50 pointer-events-none" />
               <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                 Informasi & Instruksi
@@ -295,9 +301,9 @@ function PreUjianContent({
 
           {/* Sidebar Action Area */}
           <div className="lg:col-span-1">
-            <div className="sticky top-8 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-6 sm:p-8 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-2xl shadow-blue-500/5 space-y-8">
+            <div className="sticky top-8 bg-white dark:bg-slate-900/90 p-6 sm:p-8 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-sm space-y-8">
               
-              {!examAllowed && (
+              {!canOpen && (
                 <div className="rounded-2xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 p-5 flex flex-col items-center text-center gap-3">
                   <div className="p-3 bg-red-100 dark:bg-red-900/50 rounded-full">
                     <BlockedIcon className="h-6 w-6 text-red-600 dark:text-red-500" />
@@ -328,9 +334,9 @@ function PreUjianContent({
                 </div>
               )}
 
-              {examAllowed && !sesiSelesai && (
+              {canOpen && !sesiSelesai && (
                 <div className="space-y-6">
-                  {ujian.tokenAktif && (
+                  {ujian.tokenAktif && !sesiBerlangsung && (
                     <div className="space-y-3">
                       <Label htmlFor={tokenInputId} className="text-sm font-bold text-slate-700 dark:text-slate-300">
                         Token Akses Ujian
@@ -340,7 +346,7 @@ function PreUjianContent({
                         value={token} 
                         onChange={(e) => setToken(e.target.value)}
                         placeholder="Contoh: X7Y9Q"
-                        className="h-14 text-center text-xl font-black tracking-[0.2em] uppercase bg-slate-50 dark:bg-slate-950/50 border-slate-300 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-blue-500/20 transition-all placeholder:tracking-normal placeholder:font-normal placeholder:text-sm"
+                        className="h-14 text-center text-xl font-black tracking-[0.2em] uppercase bg-slate-50 dark:bg-slate-950/50 border-slate-300 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-primary/20 transition-all placeholder:tracking-normal placeholder:font-normal placeholder:text-sm"
                       />
                       <p className="text-[11px] text-center text-slate-500 font-medium uppercase tracking-wider">Minta token ke pengawas ruangan</p>
                     </div>
@@ -350,7 +356,7 @@ function PreUjianContent({
                     <div className="relative flex items-center justify-center shrink-0 mt-0.5">
                       <input 
                         type="checkbox" 
-                        className="peer appearance-none w-5 h-5 border-2 border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-slate-900 checked:bg-blue-600 checked:border-blue-600 transition-all cursor-pointer" 
+                        className="peer appearance-none w-5 h-5 border-2 border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-slate-900 checked:bg-primary checked:border-primary transition-all cursor-pointer"
                         checked={agree} 
                         onChange={(e) => setAgree(e.target.checked)} 
                       />
@@ -365,9 +371,9 @@ function PreUjianContent({
                   
                   <Button 
                     size="lg" 
-                    className="w-full h-14 rounded-xl text-sm font-bold tracking-wide shadow-xl hover:shadow-blue-500/25 hover:-translate-y-0.5 transition-all bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 border-0" 
+                    className="w-full h-14 rounded-xl text-sm font-bold tracking-wide shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:-translate-y-0.5 transition-all bg-primary hover:bg-primary/90 border-0"
                     onClick={mulai} 
-                    disabled={!examAllowed || !agree}
+                    disabled={!canOpen || !agree}
                   >
                     MULAI UJIAN
                   </Button>
