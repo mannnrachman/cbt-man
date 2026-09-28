@@ -20,6 +20,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Fixed
 
+- Resolusi status aktif navigasi sidebar admin yang tumpang tindih antara "Struktur Akademik" dan "Kelas Mata Kuliah" (`/admin/akademik/kelas-mata-kuliah`), serta antara "Mahasiswa / Peserta" dan "Pantau Ujian Live" (`/admin/peserta/online`) menggunakan algoritma pencocokan rute paling spesifik (*longest match precedence*) dan status aktif terkontrol pada `SidebarLink`.
 - Portal peserta tidak lagi menawarkan melanjutkan sesi saat jadwal ujian atau batas waktu sesinya sudah habis, karena server menolak penyimpanan jawaban setelah tenggat.
 - Sinkronisasi korelasi status ujian berlangsung dan selesai antara portal peserta dan ringkasan operasional admin.
 - Deteksi perpindahan tab pada halaman ujian peserta (`/peserta/ujian/$id/kerjakan`) kini memiliki toleransi debouncing, membersihkan timer saat unmount, dan mengabaikan respons pelanggaran setelah cleanup/submit guna menghindari *false positive*; alarm buzzer berhenti otomatis setelah 3 detik dan dibersihkan saat berpindah halaman.
