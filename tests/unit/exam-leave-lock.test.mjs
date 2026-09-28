@@ -18,6 +18,14 @@ test("kerjakan registers leave-surface listeners while the session is sedang", (
   assert.match(src, /reportExamViolation/);
   assert.match(src, /leaveQuietUntilRef/);
   assert.match(src, /Sesi ujian dikunci/);
+  assert.match(src, /stopExamAlarm\(\)/);
+});
+
+test("exam-alarm provides stopExamAlarm and auto-stops buzzer", () => {
+  const alarm = read("src/lib/cbt/exam-alarm.ts");
+  assert.match(alarm, /export function stopExamAlarm/);
+  assert.match(alarm, /export function startExamAlarm/);
+  assert.match(alarm, /alarmTimer/);
 });
 
 test("reportExamViolation requires the caller and revokes sessions on lock", () => {

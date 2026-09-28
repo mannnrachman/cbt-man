@@ -22,6 +22,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 - Portal peserta tidak lagi menawarkan melanjutkan sesi saat jadwal ujian atau batas waktu sesinya sudah habis, karena server menolak penyimpanan jawaban setelah tenggat.
 - Sinkronisasi korelasi status ujian berlangsung dan selesai antara portal peserta dan ringkasan operasional admin.
+- Deteksi perpindahan tab pada halaman ujian peserta (`/peserta/ujian/$id/kerjakan`) kini memiliki toleransi debouncing dan pembatalan saat unmount/submit guna menghindari *false positive* akibat error sesaat, serta alarm buzzer kini berhenti otomatis setelah 3 detik dan dibersihkan saat berpindah halaman.
 
 ### Security
 
