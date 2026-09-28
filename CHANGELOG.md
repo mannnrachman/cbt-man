@@ -17,6 +17,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 - Perombakan tata letak editor paket ujian (`/admin/ujian/$id`) menjadi 2 kolom terstruktur yang bersih, menyederhanakan konfigurasi waktu dan identitas, mengintegrasikan dialog konfirmasi penghapusan ujian bertema, dan menghilangkan banner peringatan mode berlangsung yang mengganggu.
 - Pembersihan antarmuka kotak teks soal esai peserta (`/peserta/ujian/$id/kerjakan`): menghilangkan lapisan gradien neon kabur (*glow blur*) dan latar belakang semi-transparan, beralih ke kontainer kartu solid ergonomis dengan indikator autosave dan penghitung kata serta karakter real-time.
 - Navigasi tombol "Kembali" pada halaman daftar peserta ujian (`/admin/ujian/$id/peserta`) kini kembali secara konsisten ke halaman editor paket ujian terkait (`/admin/ujian/$id`).
+- Integrasi kalkulator ilmiah pada layar pengerjaan ujian peserta (`/peserta/ujian/$id/kerjakan`): memindahkan kalkulator dari modal popup dialog menjadi tab tersemat (*embedded*) di panel kanan (*right sidebar*) berdampingan dengan navigasi nomor soal, memungkinkan peserta menghitung sambil tetap membaca soal dan memilih jawaban tanpa terhalang backdrop modal.
 
 ### Fixed
 

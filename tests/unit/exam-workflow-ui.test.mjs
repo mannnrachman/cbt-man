@@ -164,3 +164,15 @@ test("essay question textarea provides clean distraction-free card with auto-sav
   assert.match(kerjakan, /kata · .*karakter/);
   assert.match(kerjakan, /aria-label=\{`Jawaban esai soal nomor \$\{idx \+ 1\}`\}/);
 });
+
+test("exam workspace embeds calculator in the right side panel instead of a dialog popup", () => {
+  const kerjakan = read("src/routes/_authenticated/peserta.ujian.$id.kerjakan.tsx");
+
+  // Should not have Dialog-based CalculatorAction
+  assert.doesNotMatch(kerjakan, /function CalculatorAction/);
+  // Should support rightTab switching between navigasi and kalkulator
+  assert.match(kerjakan, /rightTab === "kalkulator"/);
+  assert.match(kerjakan, /rightTab === "navigasi"/);
+  // Should render ExamCalculator in the side panel
+  assert.match(kerjakan, /<ExamCalculator \/>/);
+});
