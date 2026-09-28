@@ -108,30 +108,57 @@ function UjianList() {
     const mk = u.mataKuliahId ? mataKuliahRepo.byId(u.mataKuliahId) : null;
     const kelas = u.penawaranId ? penawaranRepo.byId(u.penawaranId) : undefined;
 
+    const handleRowClick = (e: React.MouseEvent<HTMLDivElement>) => {
+      const target = e.target as HTMLElement | null;
+      if (target?.closest("a, button, input, select, textarea")) {
+        return;
+      }
+      if (e.metaKey || e.ctrlKey) {
+        window.open(`/admin/ujian/${u.id}`, "_blank");
+        return;
+      }
+      navigate({ to: "/admin/ujian/$id", params: { id: u.id } });
+    };
+
+    const handleRowAuxClick = (e: React.MouseEvent<HTMLDivElement>) => {
+      if (e.button === 1) {
+        const target = e.target as HTMLElement | null;
+        if (target?.closest("a, button, input, select, textarea")) {
+          return;
+        }
+        window.open(`/admin/ujian/${u.id}`, "_blank");
+      }
+    };
+
     return (
-      <div key={u.id} className="group flex flex-col gap-3 p-3 transition-colors bg-card border-b border-border/80 last:border-b-0 hover:bg-muted/40 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+      <div
+        key={u.id}
+        onClick={handleRowClick}
+        onAuxClick={handleRowAuxClick}
+        className="group flex flex-col gap-3 p-3 transition-colors bg-card border-b border-border/80 last:border-b-0 hover:bg-muted/40 sm:flex-row sm:items-center sm:justify-between sm:p-4 cursor-pointer"
+      >
         <div className="flex items-center gap-4 flex-1 min-w-0">
           <Link
             to="/admin/ujian/$id"
             params={{ id: u.id }}
-            className="hidden sm:flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
+            className="hidden sm:flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 group-hover:border-slate-300 dark:group-hover:border-slate-700 hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
             title="Edit ujian"
           >
-            {type === "persiapan" && <Clock className="h-5 w-5 text-slate-400" />}
+            {type === "persiapan" && <Clock className="h-5 w-5 text-slate-400 group-hover:text-primary transition-colors" />}
             {type === "berlangsung" && (
               <span className="relative flex h-5 w-5 items-center justify-center">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-20"></span>
                 <PlayCircle className="h-5 w-5 text-emerald-500 relative" />
               </span>
             )}
-            {type === "selesai" && <CheckCircle2 className="h-5 w-5 text-slate-400" />}
+            {type === "selesai" && <CheckCircle2 className="h-5 w-5 text-slate-400 group-hover:text-primary transition-colors" />}
           </Link>
           
           <div className="flex flex-col min-w-0">
             <Link
               to="/admin/ujian/$id"
               params={{ id: u.id }}
-              className="font-semibold text-sm text-slate-900 dark:text-slate-100 truncate hover:text-primary dark:hover:text-primary transition-colors"
+              className="font-semibold text-sm text-slate-900 dark:text-slate-100 truncate group-hover:text-primary transition-colors"
             >
               {u.nama}
             </Link>
@@ -145,7 +172,10 @@ function UjianList() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 shrink-0 sm:ml-4">
+        <div
+          className="flex flex-wrap items-center gap-2 shrink-0 sm:ml-4"
+          onClick={(e) => e.stopPropagation()}
+        >
           {type === "berlangsung" && (
             <Link
               to="/admin/peserta/online"

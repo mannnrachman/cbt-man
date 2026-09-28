@@ -57,6 +57,17 @@ test("published and ongoing exams keep the edit action with question source guar
   assert.match(server, /where: \{ id: item\.id, status: "draft" \}, data: writeData/);
 });
 
+test("exam list row is clickable and navigates to editor while shielding action buttons", () => {
+  const list = read("src/routes/_authenticated/admin.ujian.tsx");
+
+  assert.match(list, /onClick=\{handleRowClick\}/);
+  assert.match(list, /onAuxClick=\{handleRowAuxClick\}/);
+  assert.match(list, /target\?\.closest\("a, button, input, select, textarea"\)/);
+  assert.match(list, /navigate\(\{ to: "\/admin\/ujian\/\$id", params: \{ id: u\.id \} \}\)/);
+  assert.match(list, /onClick=\{\(e\) => e\.stopPropagation\(\)\}/);
+  assert.match(list, /cursor-pointer/);
+});
+
 test("participant UI does not offer resume after the exam window closes", () => {
   const dashboard = read("src/routes/_authenticated/peserta.index.tsx");
   const preExam = read("src/routes/_authenticated/peserta.ujian.$id.index.tsx");
