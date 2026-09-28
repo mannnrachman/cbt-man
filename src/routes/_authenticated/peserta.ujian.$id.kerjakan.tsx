@@ -200,6 +200,7 @@ function RouteComponent() {
         }
         if (!isSubscribed || submittingRef.current) return;
         const result = await reportExamViolation({ data: { sesiId: activeSesiId } });
+        if (!isSubscribed || submittingRef.current) return;
         if (result.ok && result.locked) {
           examLockedRef.current = true;
           setExamLocked(true);
@@ -217,11 +218,14 @@ function RouteComponent() {
       }
     };
 
+    let blurTimer: number | null = null;
     const onVisibility = () => {
       if (document.hidden) void reportLeave();
     };
     const onBlur = () => {
-      window.setTimeout(() => {
+      if (blurTimer !== null) window.clearTimeout(blurTimer);
+      blurTimer = window.setTimeout(() => {
+        blurTimer = null;
         if (!isSubscribed || submittingRef.current) return;
         if (document.hasFocus()) return;
         if (inPageOverlayOpen()) return;
@@ -234,6 +238,7 @@ function RouteComponent() {
     window.addEventListener("blur", onBlur);
     return () => {
       isSubscribed = false;
+      if (blurTimer !== null) window.clearTimeout(blurTimer);
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("blur", onBlur);
     };
