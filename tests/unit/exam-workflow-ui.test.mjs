@@ -57,15 +57,14 @@ test("published and ongoing exams keep the edit action with question source guar
   assert.match(server, /where: \{ id: item\.id, status: "draft" \}, data: writeData/);
 });
 
-test("exam list row is clickable and navigates to editor while shielding action buttons", () => {
+test("exam list row primary area is a link to editor while shielding action buttons", () => {
   const list = read("src/routes/_authenticated/admin.ujian.tsx");
 
-  assert.match(list, /onClick=\{handleRowClick\}/);
-  assert.match(list, /onAuxClick=\{handleRowAuxClick\}/);
-  assert.match(list, /target\?\.closest\("a, button, input, select, textarea"\)/);
-  assert.match(list, /navigate\(\{ to: "\/admin\/ujian\/\$id", params: \{ id: u\.id \} \}\)/);
-  assert.match(list, /onClick=\{\(e\) => e\.stopPropagation\(\)\}/);
+  assert.match(list, /to="\/admin\/ujian\/\$id"/);
+  assert.match(list, /params=\{\{ id: u\.id \}\}/);
+  assert.match(list, /flex items-center gap-4 flex-1 min-w-0/);
   assert.match(list, /cursor-pointer/);
+  assert.match(list, /group-hover:text-primary/);
   assert.match(list, /hover:-translate-y-0\.5/);
   assert.match(list, /hover:shadow-md/);
   assert.match(list, /hover:\[&_svg\]:scale-110/);
