@@ -180,7 +180,7 @@ function UjianList() {
             <Link
               to="/admin/peserta/online"
               search={{ ujianId: u.id }}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 dark:bg-emerald-500 text-white rounded-md text-xs font-medium hover:bg-emerald-700 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 dark:bg-emerald-500 text-white rounded-md text-xs font-medium shadow-sm hover:shadow-md hover:bg-emerald-700 dark:hover:bg-emerald-600 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200 [&_svg]:transition-transform [&_svg]:duration-200 hover:[&_svg]:scale-110"
             >
               <PlayCircle className="h-3.5 w-3.5" /> Pantau
             </Link>
@@ -189,7 +189,7 @@ function UjianList() {
             <Link
               to="/admin/analitik/$id"
               params={{ id: u.id }}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium text-slate-700 dark:text-slate-300 shadow-sm hover:shadow-md hover:border-primary/50 dark:hover:border-primary/50 hover:text-primary dark:hover:text-primary hover:bg-primary/5 dark:hover:bg-primary/10 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200 [&_svg]:transition-transform [&_svg]:duration-200 hover:[&_svg]:scale-110"
             >
               <BarChart3 className="h-3.5 w-3.5" /> Analitik
             </Link>
@@ -197,7 +197,7 @@ function UjianList() {
           <Link
             to="/admin/ujian/$id/peserta"
             params={{ id: u.id }}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium text-slate-700 dark:text-slate-300 shadow-sm hover:shadow-md hover:border-primary/50 dark:hover:border-primary/50 hover:text-primary dark:hover:text-primary hover:bg-primary/5 dark:hover:bg-primary/10 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200 [&_svg]:transition-transform [&_svg]:duration-200 hover:[&_svg]:scale-110"
           >
             <Users className="h-3.5 w-3.5" /> Peserta {sesiCount > 0 ? `(${sesiCount})` : ""}
           </Link>

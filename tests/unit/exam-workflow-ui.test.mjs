@@ -66,6 +66,9 @@ test("exam list row is clickable and navigates to editor while shielding action 
   assert.match(list, /navigate\(\{ to: "\/admin\/ujian\/\$id", params: \{ id: u\.id \} \}\)/);
   assert.match(list, /onClick=\{\(e\) => e\.stopPropagation\(\)\}/);
   assert.match(list, /cursor-pointer/);
+  assert.match(list, /hover:-translate-y-0\.5/);
+  assert.match(list, /hover:shadow-md/);
+  assert.match(list, /hover:\[&_svg\]:scale-110/);
 });
 
 test("participant UI does not offer resume after the exam window closes", () => {
