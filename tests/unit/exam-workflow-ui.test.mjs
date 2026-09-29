@@ -120,6 +120,18 @@ test("exam editor deletion uses a themed confirmation dialog", () => {
   assert.match(route, /<ConfirmDialog[\s\S]*title="Hapus Ujian"/);
 });
 
+test("admin exam rows use a semantic primary link and preserve independent action links", () => {
+  const list = read("src/routes/_authenticated/admin.ujian.tsx");
+  const renderRow = list.slice(list.indexOf("const renderRow ="), list.indexOf("  const tabs ="));
+
+  assert.match(renderRow, /<Link\s+to="\/admin\/ujian\/\$id"\s+params=\{\{ id: u\.id \}\}/);
+  assert.match(renderRow, /className="flex items-center gap-4 flex-1 min-w-0[^"]*focus-visible:ring-2/);
+  assert.match(renderRow, /<div\s+className="flex flex-wrap items-center gap-2 shrink-0 sm:ml-4"\s+onClick=\{\(e\) => e\.stopPropagation\(\)\}/);
+  assert.match(renderRow, /to="\/admin\/ujian\/\$id\/peserta"/);
+  assert.match(renderRow, /to="\/admin\/analitik\/\$id"/);
+  assert.doesNotMatch(renderRow, /role="button"|tabIndex=\{0\}/);
+});
+
 test("draft exams stay in preparation even when their schedule is active", () => {
   const route = read("src/routes/_authenticated/admin.ujian.tsx");
 
