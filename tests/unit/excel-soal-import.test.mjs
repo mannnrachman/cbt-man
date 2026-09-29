@@ -93,6 +93,33 @@ test("supports answer keys written as text matching the option (e.g. 'Benar' or 
   assert.equal(results[1].soal.jawaban[1].benar, false);
 });
 
+test("a letter key takes precedence over identical option text", () => {
+  const [result] = parseExcelSoalRows([{
+    Soal: "Pilih opsi A", "Opsi A": "X", "Opsi B": "A", "Kunci Jawaban": "A",
+  }], "topik_1");
+  assert.equal(result.valid, true);
+  assert.deepEqual(result.soal.jawaban.map((option) => option.benar), [true, false]);
+});
+
+test("matches full multi-word option text and all duplicate options", () => {
+  const [result] = parseExcelSoalRows([{
+    Soal: "Pilih istilah", "Opsi A": "Machine Learning", "Opsi B": "Machine Learning",
+    "Opsi C": "Deep Learning", "Kunci Jawaban": "Machine Learning",
+  }], "topik_1");
+  assert.equal(result.valid, true);
+  assert.equal(result.soal.tipe, "multi");
+  assert.deepEqual(result.soal.jawaban.map((option) => option.benar), [true, true, false]);
+});
+
+test("rejects an option-bearing row with no answer key", () => {
+  const [result] = parseExcelSoalRows([{
+    Soal: "Pilih jawaban", "Opsi A": "Satu", "Opsi B": "Dua", "Kunci Jawaban": "",
+  }], "topik_1");
+  assert.equal(result.soal.tipe, "pg");
+  assert.equal(result.valid, false);
+  assert.match(result.error || "", /Kunci jawaban belum ditentukan/);
+});
+
 test("supports explicit Tipe Soal BS without manual Opsi A/B columns", () => {
   const rows = [
     {

@@ -113,18 +113,15 @@ export function parseExcelSoalRows(
         optionEntries.push({ letter: "B", text: "Salah" });
       }
 
-      const trimmedKunci = kunciRaw.trim();
-      const wholeMatch = trimmedKunci
-        ? optionEntries.find(
-            (o) => o.text.trim().toLowerCase() === trimmedKunci.toLowerCase(),
-          )
-        : undefined;
-      const rawTokens = wholeMatch
-        ? [wholeMatch.letter]
-        : kunciRaw
-            .split(/[,;\s]+/)
-            .map((s) => s.trim())
-            .filter(Boolean);
+      const singleLetterKey = /^[A-E]$/.test(kunciRaw) ? kunciRaw : null;
+      const matchingOptions = singleLetterKey
+        ? []
+        : optionEntries.filter((option) => option.text.trim().toLowerCase() === kunciRaw.toLowerCase());
+      const rawTokens = singleLetterKey
+        ? [singleLetterKey]
+        : matchingOptions.length > 0
+          ? matchingOptions.map((option) => option.letter)
+          : kunciRaw.split(/[,;\s]+/).map((token) => token.trim()).filter(Boolean);
 
       const resolvedLetters: string[] = [];
       for (const token of rawTokens) {
