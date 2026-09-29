@@ -2,9 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useRef } from "react";
 import * as XLSX from "xlsx";
 import { soalRepo } from "@/lib/cbt/repos";
-import { uid } from "@/lib/cbt/storage";
 import { putFile } from "@/lib/cbt/files";
-import type { Soal, Jawaban, TipeSoal, Kesulitan } from "@/lib/cbt/types";
+import type { Soal } from "@/lib/cbt/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +17,7 @@ import { Upload, Check, Lock, AlertTriangle, Download, Info, ImagePlus, Loader2 
 import { toast } from "sonner";
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import { isTopikAllowed, visibleModuls, visibleTopiks } from "@/lib/cbt/access";
+import { parseExcelSoalRows } from "@/lib/cbt/excel";
 
 export const Route = createFileRoute("/_authenticated/admin/modul/import")({
   component: ImportPage,
@@ -34,6 +34,7 @@ function ImportPage() {
   const [preview, setPreview] = useState<PreviewRow[]>([]);
   const [imageMap, setImageMap] = useState<Record<string, string>>({});
   const [isUploadingImages, setIsUploadingImages] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const imageRef = useRef<HTMLInputElement>(null);
 
@@ -69,6 +70,7 @@ function ImportPage() {
     const ws = XLSX.utils.json_to_sheet([
       {
         No: 1,
+        "Tipe Soal": "PG",
         Soal: "Siapakah penemu jaringan komputer berbasis ARPANET?",
         Gambar: "",
         "Opsi A": "Alan Turing",
@@ -78,9 +80,11 @@ function ImportPage() {
         "Opsi E": "Steve Jobs",
         "Kunci Jawaban": "C",
         "Tingkat Kesulitan": 1,
+        Pembahasan: "Vint Cerf dan Bob Kahn merancang protokol TCP/IP dan jaringan ARPANET.",
       },
       {
         No: 2,
+        "Tipe Soal": "Multi",
         Soal: "Pilih bahasa pemrogramannya yang tergolong Strongly Typed!",
         Gambar: "",
         "Opsi A": "TypeScript",
@@ -90,9 +94,25 @@ function ImportPage() {
         "Opsi E": "JavaScript",
         "Kunci Jawaban": "A, B, D",
         "Tingkat Kesulitan": 2,
+        Pembahasan: "TypeScript, Rust, dan Go menerapkan sistem tipe data kuat.",
       },
       {
         No: 3,
+        "Tipe Soal": "BS",
+        Soal: "Bumi mengelilingi matahari merupakan peristiwa revolusi bumi.",
+        Gambar: "",
+        "Opsi A": "Benar",
+        "Opsi B": "Salah",
+        "Opsi C": "",
+        "Opsi D": "",
+        "Opsi E": "",
+        "Kunci Jawaban": "Benar",
+        "Tingkat Kesulitan": 1,
+        Pembahasan: "Revolusi bumi adalah peredaran bumi mengelilingi matahari.",
+      },
+      {
+        No: 4,
+        "Tipe Soal": "Essay",
         Soal: "Jelaskan prinsip kerja dari algoritma Dijkstra secara singkat!",
         Gambar: "",
         "Opsi A": "",
@@ -102,6 +122,7 @@ function ImportPage() {
         "Opsi E": "",
         "Kunci Jawaban": "",
         "Tingkat Kesulitan": 3,
+        Pembahasan: "Dijkstra menggunakan pendekatan greedy untuk mencari lintasan terpendek.",
       },
     ]);
     const wb = XLSX.utils.book_new();
@@ -146,195 +167,36 @@ function ImportPage() {
       return;
     }
 
-    const out: PreviewRow[] = [];
-
-    // Detect format: Horizontal (Standard) vs Vertical (Legacy)
-    const firstRowKeys = Object.keys(rows[0] ?? {});
-    const isHorizontal = firstRowKeys.some((k) => 
-      /^(soal|pertanyaan|opsi\s*[a-e]|kunci)/i.test(k.trim())
-    );
-
-    if (isHorizontal) {
-      // Parse Standard Horizontal Format (1 row = 1 question)
-      for (const r of rows) {
-        const isiRaw = String(r.Soal ?? r.Pertanyaan ?? r.isi ?? r.Isi ?? "").trim();
-        let gambarSrc = String(r.Gambar ?? r.gambar ?? "").trim();
-        const kunciRaw = String(r["Kunci Jawaban"] ?? r.Kunci ?? r.kunci ?? r.Jawaban ?? "").toUpperCase().trim();
-        const tingkatRaw = String(r["Tingkat Kesulitan"] ?? r["Tingkat Kesulitan Soal"] ?? r.Kesulitan ?? "2").trim();
-
-        if (gambarSrc && imageMap[gambarSrc.toLowerCase()]) {
-          gambarSrc = imageMap[gambarSrc.toLowerCase()];
-        }
-
-        if (!isiRaw && !gambarSrc) continue; // Skip empty row
-
-        let isi = isiRaw;
-        if (gambarSrc) {
-          isi = `<div class="mb-4"><img src="${gambarSrc}" alt="Gambar Soal" class="max-w-full h-auto rounded-md shadow-sm border border-slate-200 dark:border-slate-800" /></div>${isi}`;
-        }
-
-        let kesulitan: Kesulitan = "sedang";
-        if (tingkatRaw === "1" || tingkatRaw.toLowerCase().includes("mudah")) kesulitan = "mudah";
-        else if (tingkatRaw === "3" || tingkatRaw.toLowerCase().includes("sulit")) kesulitan = "sulit";
-
-        const optionEntries: { letter: string; text: string }[] = [];
-        ["A", "B", "C", "D", "E"].forEach((letter) => {
-          const val = r[`Opsi ${letter}`] ?? r[`Opsi_${letter}`] ?? r[`Opsi${letter}`] ?? r[letter];
-          if (val !== undefined && String(val).trim() !== "") {
-            optionEntries.push({ letter, text: String(val).trim() });
-          }
-        });
-
-        const correctLetters = kunciRaw.split(/[,\s]+/).map((s) => s.trim().toUpperCase()).filter(Boolean);
-
-        let tipe: TipeSoal = "pg";
-        let error: string | undefined = undefined;
-
-        if (optionEntries.length === 0 || !kunciRaw) {
-          tipe = "essay";
-        } else if (correctLetters.length > 1) {
-          tipe = "multi";
-        } else if (
-          optionEntries.length === 2 &&
-          optionEntries.some((o) => /^(benar|true|b)$/i.test(o.text.trim())) &&
-          optionEntries.some((o) => /^(salah|false|s)$/i.test(o.text.trim()))
-        ) {
-          tipe = "bs";
-        } else {
-          tipe = "pg";
-        }
-
-        if (tipe !== "essay") {
-          if (optionEntries.length < 2) {
-            error = "Pilihan ganda minimal 2 opsi (Opsi A dan Opsi B)";
-          } else if (correctLetters.length === 0) {
-            error = "Kunci jawaban belum ditentukan";
-          }
-        }
-
-        const jawaban: Jawaban[] = optionEntries.map((opt) => ({
-          id: uid("j_"),
-          detail: opt.text,
-          benar: correctLetters.includes(opt.letter),
-        }));
-
-        const soal: Soal = {
-          id: uid("s_"),
-          topikId,
-          detail: isi,
-          tipe,
-          kesulitan,
-          audioPlayOnce: false,
-          jawaban,
-          pembahasan: "",
-          createdAt: Date.now(),
-        };
-
-        out.push({ soal, valid: !error, error });
-      }
-    } else {
-      // Legacy Vertical Parsing Fallback
-      let currentSoal: Soal | null = null;
-      let currentError: string | undefined;
-
-      const commitCurrentSoal = () => {
-        if (!currentSoal) return;
-        if (currentSoal.jawaban.length === 0) {
-          currentSoal.tipe = "essay";
-        } else {
-          const correctCount = currentSoal.jawaban.filter((j) => j.benar).length;
-          const isBs = currentSoal.jawaban.length === 2 &&
-            currentSoal.jawaban.some((j) => /^(benar|true|b)$/i.test(j.detail.trim())) &&
-            currentSoal.jawaban.some((j) => /^(salah|false|s)$/i.test(j.detail.trim()));
-
-          if (isBs) {
-            currentSoal.tipe = "bs";
-          } else {
-            currentSoal.tipe = correctCount > 1 ? "multi" : "pg";
-          }
-
-          if (currentSoal.jawaban.length < 2) {
-            currentError = "Soal pilihan ganda minimal 2 opsi jawaban";
-          }
-        }
-        out.push({ soal: currentSoal, valid: !currentError, error: currentError });
-        currentSoal = null;
-        currentError = undefined;
-      };
-
-      for (const r of rows) {
-        const jenis = String(r.Jenis ?? "").toUpperCase().trim();
-        const kode = String(r.Kode ?? "").toUpperCase().trim();
-
-        if (jenis === "SOAL" || kode === "Q") {
-          commitCurrentSoal();
-          let isi = String(r.Isi ?? "").trim();
-          let gambarSrc = String(r.Gambar ?? "").trim();
-          const tingkat = String(r["Tingkat kesulitan Soal"] ?? "2").trim();
-
-          if (gambarSrc && imageMap[gambarSrc.toLowerCase()]) {
-            gambarSrc = imageMap[gambarSrc.toLowerCase()];
-          }
-
-          if (!isi && !gambarSrc) currentError = "Isi pertanyaan kosong";
-          if (gambarSrc) {
-            isi = `<div class="mb-4"><img src="${gambarSrc}" alt="Gambar Soal" class="max-w-full h-auto rounded-md shadow-sm border border-slate-200 dark:border-slate-800" /></div>${isi}`;
-          }
-
-          let kesulitan: Kesulitan = "sedang";
-          if (tingkat === "1") kesulitan = "mudah";
-          else if (tingkat === "3") kesulitan = "sulit";
-
-          currentSoal = {
-            id: uid("s_"),
-            topikId,
-            detail: isi,
-            tipe: "pg",
-            kesulitan,
-            audioPlayOnce: false,
-            jawaban: [],
-            pembahasan: "",
-            createdAt: Date.now(),
-          };
-        } else if (jenis === "JAWABAN" || kode === "A") {
-          if (!currentSoal) continue;
-          let isi = String(r.Isi ?? "").trim();
-          let gambarSrc = String(r.Gambar ?? "").trim();
-          const statusStr = String(r["Status Jawaban"] ?? "0").trim();
-          const status = statusStr === "1" || statusStr.toLowerCase() === "benar" || statusStr.toLowerCase() === "true";
-
-          if (gambarSrc && imageMap[gambarSrc.toLowerCase()]) {
-            gambarSrc = imageMap[gambarSrc.toLowerCase()];
-          }
-
-          if (gambarSrc) {
-            isi = `<div class="mb-2"><img src="${gambarSrc}" alt="Gambar Opsi" class="max-w-xs h-auto rounded shadow-sm border border-slate-200 dark:border-slate-800" /></div>${isi}`;
-          }
-
-          currentSoal.jawaban.push({
-            id: uid("j_"),
-            detail: isi,
-            benar: status,
-          });
-        }
-      }
-      commitCurrentSoal();
-    }
+    const out: PreviewRow[] = parseExcelSoalRows(rows, topikId, imageMap);
 
     setPreview(out);
     if (out.length === 0) toast.error("Tidak ada soal valid yang terdeteksi");
     else toast.success(`${out.length} baris soal berhasil diproses`);
   }
 
-  function commit() {
+  async function commit() {
     if (!topikId || !isTopikAllowed(user, topikId)) {
       toast.error("Topik tujuan di luar cakupan Anda");
       return;
     }
     const valid = preview.filter((r) => r.valid);
-    valid.forEach((r) => soalRepo.upsert(r.soal));
-    toast.success(`${valid.length} soal berhasil disimpan ke bank soal`);
-    setPreview([]);
+    if (valid.length === 0) return;
+
+    setIsSaving(true);
+    try {
+      valid.forEach((r) => soalRepo.upsert(r.soal));
+      const res = await soalRepo.flush();
+      if (res.ok) {
+        toast.success(`${valid.length} soal berhasil disimpan ke bank soal`);
+        setPreview([]);
+      } else {
+        toast.error("Gagal menyimpan soal ke server. Silakan coba lagi.");
+      }
+    } catch {
+      toast.error("Terjadi kesalahan saat menyimpan soal.");
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   return (
@@ -449,9 +311,10 @@ function ImportPage() {
           </div>
           <ul className="text-xs text-indigo-950/80 dark:text-indigo-200/80 space-y-1.5 list-disc pl-4 leading-relaxed">
             <li><strong>Soal</strong>: Tuliskan teks pertanyaan soal.</li>
-            <li><strong>Opsi A s/d Opsi E</strong>: Isikan teks pilihan jawaban.</li>
-            <li><strong>Kunci Jawaban</strong>: Isikan <code>A</code>, <code>B</code>, <code>C</code>, <code>D</code>, atau <code>E</code>. Untuk <em>Multi Jawaban</em> isikan terpisah koma (contoh: <code>A, C</code>). Kosongkan untuk soal <em>Essay</em>.</li>
+            <li><strong>Opsi A s/d Opsi E</strong>: Isikan teks pilihan jawaban. Kosongkan untuk soal <em>Essay</em>.</li>
+            <li><strong>Kunci Jawaban</strong>: Isikan huruf opsi (<code>A</code>, <code>B</code>, dll.) atau teks jawaban (misal <code>Benar</code>). Untuk <em>Multi Jawaban</em> isikan terpisah koma (contoh: <code>A, C</code>). Kosongkan untuk soal <em>Essay</em>.</li>
             <li><strong>Tingkat Kesulitan</strong>: <code>1</code> (Mudah), <code>2</code> (Sedang), <code>3</code> (Sulit).</li>
+            <li><strong>Pembahasan</strong> (Opsional): Teks pembahasan atau penjelasan solusi soal.</li>
           </ul>
         </div>
 
@@ -478,9 +341,23 @@ function ImportPage() {
                 <span className="text-emerald-600 dark:text-emerald-400 font-bold">{preview.filter((r) => r.valid).length} valid</span> ·{" "}
                 <span className="text-rose-600 dark:text-rose-400 font-bold">{preview.filter((r) => !r.valid).length} error</span>
               </div>
-              <Button size="sm" onClick={commit} disabled={!preview.some((r) => r.valid)} className="font-semibold bg-emerald-600 hover:bg-emerald-700 text-white">
-                <Check className="mr-1.5 h-4 w-4" />
-                Simpan Soal Valid ({preview.filter((r) => r.valid).length})
+              <Button
+                size="sm"
+                onClick={commit}
+                disabled={!preview.some((r) => r.valid) || isSaving}
+                className="font-semibold bg-emerald-600 hover:bg-emerald-700 text-white"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                    Menyimpan...
+                  </>
+                ) : (
+                  <>
+                    <Check className="mr-1.5 h-4 w-4" />
+                    Simpan Soal Valid ({preview.filter((r) => r.valid).length})
+                  </>
+                )}
               </Button>
             </div>
             <div className="overflow-x-auto">
