@@ -1,6 +1,6 @@
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import { soalBySessionId, sesiRepo, ujianRepo, getParticipantSessionState, invalidateReposCache, hydrateRepos, saveParticipantSession } from "@/lib/cbt/repos";
-import { armExamAlarm, startExamAlarm } from "@/lib/cbt/exam-alarm";
+import { armExamAlarm, startExamAlarm, stopExamAlarm } from "@/lib/cbt/exam-alarm";
 import { reportExamViolation } from "@/lib/server/sesi/functions";
 import type { SesiUjian, Ujian } from "@/lib/cbt/types";
 import { cn } from "@/lib/utils";
@@ -154,11 +154,14 @@ function RouteComponent() {
     return () => {
       window.removeEventListener("pointerdown", arm);
       window.removeEventListener("keydown", arm);
+      stopExamAlarm();
     };
   }, []);
 
   useEffect(() => {
     if (!activeSesiId || activeSesiStatus !== "sedang") return;
+
+    let isSubscribed = true;
 
     const inPageOverlayOpen = () => {
       if (showListRef.current) return true;
@@ -166,6 +169,7 @@ function RouteComponent() {
     };
 
     const reportLeave = async () => {
+      if (!isSubscribed || submittingRef.current) return;
       if (examLockedRef.current || leaveInFlightRef.current) return;
       if (Date.now() < leaveQuietUntilRef.current) return;
       if (sesiRef.current?.status !== "sedang") return;
@@ -176,7 +180,9 @@ function RouteComponent() {
         if (pending) {
           await saveParticipantSession(pending);
         }
+        if (!isSubscribed || submittingRef.current) return;
         const result = await reportExamViolation({ data: { sesiId: activeSesiId } });
+        if (!isSubscribed || submittingRef.current) return;
         if (result.ok && result.locked) {
           examLockedRef.current = true;
           setExamLocked(true);
@@ -194,20 +200,27 @@ function RouteComponent() {
       }
     };
 
+    let blurTimer: number | null = null;
     const onVisibility = () => {
       if (document.hidden) void reportLeave();
     };
     const onBlur = () => {
-      window.setTimeout(() => {
+      if (blurTimer !== null) window.clearTimeout(blurTimer);
+      blurTimer = window.setTimeout(() => {
+        blurTimer = null;
+        if (!isSubscribed || submittingRef.current) return;
         if (document.hasFocus()) return;
         if (inPageOverlayOpen()) return;
+        // Verify document is genuinely not focused and either hidden or active element is body/null
         void reportLeave();
-      }, 0);
+      }, 250);
     };
 
     document.addEventListener("visibilitychange", onVisibility);
     window.addEventListener("blur", onBlur);
     return () => {
+      isSubscribed = false;
+      if (blurTimer !== null) window.clearTimeout(blurTimer);
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("blur", onBlur);
     };

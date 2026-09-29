@@ -88,7 +88,7 @@ const navGroups: NavGroup[] = [
       { to: "/admin/akademik", label: "Struktur Akademik", icon: Landmark },
       { to: "/admin/akademik/kelas-mata-kuliah", label: "Kelas Mata Kuliah", icon: GraduationCap },
       { to: "/admin/users", label: "Pengelola Sistem", icon: Users },
-      { to: "/admin/peserta", label: "Mahasiswa / Peserta", icon: GraduationCap, exact: true },
+      { to: "/admin/peserta", label: "Mahasiswa / Peserta", icon: GraduationCap },
     ],
   },
   {
@@ -169,31 +169,49 @@ function firstAllowedAdminPath(user: RouteUser, cfg: AppConfig) {
 }
 
 function isNavItemActive(item: NavItem, pathname: string) {
-  if (item.exact) return normalizedAdminPath(pathname) === item.to;
-  const routeRule = resolveAdminRouteRule(pathname);
-  const itemRule = resolveAdminRouteRule(item.to);
-  return !!(routeRule && itemRule && routeRule.key === itemRule.key);
+  const normalized = normalizedAdminPath(pathname);
+  if (item.exact) return normalized === item.to;
+
+  let matches = normalized === item.to || normalized.startsWith(`${item.to}/`);
+  if (!matches) {
+    const routeRule = resolveAdminRouteRule(pathname);
+    const itemRule = resolveAdminRouteRule(item.to);
+    matches = !!(
+      routeRule &&
+      itemRule &&
+      routeRule.key === itemRule.key &&
+      item.to === routeRule.paths[0]
+    );
+  }
+
+  if (!matches) return false;
+
+  const hasMoreSpecificItem = navItems.some(
+    (other) =>
+      other.to !== item.to &&
+      other.to.length > item.to.length &&
+      (normalized === other.to || normalized.startsWith(`${other.to}/`)),
+  );
+
+  return !hasMoreSpecificItem;
 }
 
 function activeGroupId(pathname: string, groups: NavGroup[]) {
   return groups.find((group) => group.items.some((item) => isNavItemActive(item, pathname)))?.id;
 }
 
-function SidebarLink({ item }: { item: NavItem }) {
+function SidebarLink({ item, isActive }: { item: NavItem; isActive: boolean }) {
   const Icon = item.icon;
   return (
     <Link
       to={item.to as never}
-      activeOptions={{ exact: item.exact }}
-      activeProps={{
-        className:
-          "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 font-semibold shadow-sm",
-      }}
-      inactiveProps={{
-        className:
-          "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-slate-100",
-      }}
-      className="flex items-center gap-3 rounded-lg px-3 py-2 text-xs transition-colors duration-150 md:text-sm"
+      aria-current={isActive ? "page" : undefined}
+      className={cn(
+        "flex items-center gap-3 rounded-lg px-3 py-2 text-xs transition-colors duration-150 md:text-sm",
+        isActive
+          ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 font-semibold shadow-sm"
+          : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-slate-100",
+      )}
     >
       <Icon className="h-4 w-4 shrink-0" />
       <span className="leading-snug">{item.label}</span>
@@ -307,7 +325,10 @@ function AdminLayout() {
             </div>
             <nav aria-label="Navigasi administrasi" className="flex flex-col gap-5 p-3">
               {canAccessAdminPath(user, dashboardNavItem.to, cfg) && (
-                <SidebarLink item={dashboardNavItem} />
+                <SidebarLink
+                  item={dashboardNavItem}
+                  isActive={isNavItemActive(dashboardNavItem, pathname)}
+                />
               )}
 
               {visibleNavGroups.map((group) => {
@@ -345,7 +366,11 @@ function AdminLayout() {
                     {isOpen && (
                       <div id={panelId} className="ml-4 mt-1 flex flex-col gap-1 border-l border-slate-200 pl-2 dark:border-slate-800">
                         {group.items.map((item) => (
-                          <SidebarLink key={item.to} item={item} />
+                          <SidebarLink
+                            key={item.to}
+                            item={item}
+                            isActive={isNavItemActive(item, pathname)}
+                          />
                         ))}
                       </div>
                     )}

@@ -57,6 +57,19 @@ test("published and ongoing exams keep the edit action with question source guar
   assert.match(server, /where: \{ id: item\.id, status: "draft" \}, data: writeData/);
 });
 
+test("exam list row primary area is a link to editor while shielding action buttons", () => {
+  const list = read("src/routes/_authenticated/admin.ujian.tsx");
+
+  assert.match(list, /to="\/admin\/ujian\/\$id"/);
+  assert.match(list, /params=\{\{ id: u\.id \}\}/);
+  assert.match(list, /flex items-center gap-4 flex-1 min-w-0/);
+  assert.match(list, /cursor-pointer/);
+  assert.match(list, /group-hover:text-primary/);
+  assert.match(list, /hover:-translate-y-0\.5/);
+  assert.match(list, /hover:shadow-md/);
+  assert.match(list, /hover:\[&_svg\]:scale-110/);
+});
+
 test("participant UI does not offer resume after the exam window closes", () => {
   const dashboard = read("src/routes/_authenticated/peserta.index.tsx");
   const preExam = read("src/routes/_authenticated/peserta.ujian.$id.index.tsx");
@@ -168,11 +181,78 @@ test("essay question textarea provides clean distraction-free card with auto-sav
 test("exam workspace embeds calculator in the right side panel instead of a dialog popup", () => {
   const kerjakan = read("src/routes/_authenticated/peserta.ujian.$id.kerjakan.tsx");
 
-  // Should not have Dialog-based CalculatorAction
   assert.doesNotMatch(kerjakan, /function CalculatorAction/);
-  // Should support rightTab switching between navigasi and kalkulator
   assert.match(kerjakan, /rightTab === "kalkulator"/);
   assert.match(kerjakan, /rightTab === "navigasi"/);
-  // Should render ExamCalculator in the side panel
   assert.match(kerjakan, /<ExamCalculator \/>/);
+});
+
+test("admin sidebar navigation disambiguates overlapping paths and controls active state", () => {
+  const admin = read("src/routes/_authenticated/admin.tsx");
+
+  // Check code structure
+  assert.doesNotMatch(admin, /to: "\/admin\/peserta", label: "Mahasiswa \/ Peserta", icon: GraduationCap, exact: true/);
+  assert.match(admin, /function isNavItemActive/);
+  assert.match(admin, /hasMoreSpecificItem/);
+  assert.match(admin, /SidebarLink\(\{ item, isActive \}/);
+  assert.match(admin, /aria-current=\{isActive \? "page" : undefined\}/);
+  assert.match(admin, /isActive=\{isNavItemActive\(dashboardNavItem, pathname\)\}/);
+  assert.match(admin, /isActive=\{isNavItemActive\(item, pathname\)\}/);
+
+  // Behavioral verification of longest-matching-path algorithm
+  const navItems = [
+    { to: "/admin", exact: true },
+    { to: "/admin/akademik" },
+    { to: "/admin/akademik/kelas-mata-kuliah" },
+    { to: "/admin/users" },
+    { to: "/admin/peserta" },
+    { to: "/admin/modul" },
+    { to: "/admin/files" },
+    { to: "/admin/ujian" },
+    { to: "/admin/peserta/online" },
+    { to: "/admin/evaluasi" },
+    { to: "/admin/leaderboard" },
+    { to: "/admin/pengaturan" },
+    { to: "/admin/tools" },
+    { to: "/admin/audit" },
+    { to: "/admin/panduan" },
+  ];
+
+  function normalize(p) {
+    if (p === "/admin") return p;
+    return p.endsWith("/") ? p.slice(0, -1) : p;
+  }
+
+  function isActive(item, pathname) {
+    const normalized = normalize(pathname);
+    if (item.exact) return normalized === item.to;
+    const matches = normalized === item.to || normalized.startsWith(`${item.to}/`);
+    if (!matches) return false;
+    const hasMoreSpecific = navItems.some(
+      (other) =>
+        other.to !== item.to &&
+        other.to.length > item.to.length &&
+        (normalized === other.to || normalized.startsWith(`${other.to}/`)),
+    );
+    return !hasMoreSpecific;
+  }
+
+  const findActive = (pathname) => navItems.filter((item) => isActive(item, pathname)).map((i) => i.to);
+
+  // Academic structure vs Class courses
+  assert.deepEqual(findActive("/admin/akademik"), ["/admin/akademik"]);
+  assert.deepEqual(findActive("/admin/akademik/tahun-akademik"), ["/admin/akademik"]);
+  assert.deepEqual(findActive("/admin/akademik/semester"), ["/admin/akademik"]);
+  assert.deepEqual(findActive("/admin/akademik/mata-kuliah"), ["/admin/akademik"]);
+  assert.deepEqual(findActive("/admin/akademik/kelas-mata-kuliah"), ["/admin/akademik/kelas-mata-kuliah"]);
+  assert.deepEqual(findActive("/admin/akademik/kelas-mata-kuliah/"), ["/admin/akademik/kelas-mata-kuliah"]);
+
+  // Peserta vs Live Monitor
+  assert.deepEqual(findActive("/admin/peserta"), ["/admin/peserta"]);
+  assert.deepEqual(findActive("/admin/peserta/kartu"), ["/admin/peserta"]);
+  assert.deepEqual(findActive("/admin/peserta/online"), ["/admin/peserta/online"]);
+
+  // Dashboard root exactness
+  assert.deepEqual(findActive("/admin"), ["/admin"]);
+  assert.deepEqual(findActive("/admin/"), ["/admin"]);
 });
