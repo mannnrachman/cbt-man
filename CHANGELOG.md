@@ -13,7 +13,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Changed
 
-- Penyederhanaan interaksi daftar paket ujian (`/admin/ujian`): klik baris paket ujian membuka langsung editor paket (`/admin/ujian/$id`), penambahan tombol aksi eksplisit "Lihat Peserta", serta perbaikan tampilan status ujian (persiapan vs berlangsung vs selesai).
+- Penyederhanaan interaksi daftar paket ujian (`/admin/ujian`): seluruh area baris/kartu paket ujian kini dapat diklik langsung untuk membuka editor (`/admin/ujian/$id`), mendukung pembukaan di tab baru (klik tengah atau Cmd/Ctrl+klik), dengan efek sorot hover pada judul dan ikon, serta tombol aksi sekunder yang tetap terlindungi.
 - Perombakan tata letak editor paket ujian (`/admin/ujian/$id`) menjadi 2 kolom terstruktur yang bersih, menyederhanakan konfigurasi waktu dan identitas, mengintegrasikan dialog konfirmasi penghapusan ujian bertema, dan menghilangkan banner peringatan mode berlangsung yang mengganggu.
 - Pembersihan antarmuka kotak teks soal esai peserta (`/peserta/ujian/$id/kerjakan`): menghilangkan lapisan gradien neon kabur (*glow blur*) dan latar belakang semi-transparan, beralih ke kontainer kartu solid ergonomis dengan indikator autosave dan penghitung kata serta karakter real-time.
 - Navigasi tombol "Kembali" pada halaman daftar peserta ujian (`/admin/ujian/$id/peserta`) kini kembali secara konsisten ke halaman editor paket ujian terkait (`/admin/ujian/$id`).
@@ -23,6 +23,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 - Validasi integritas impor Excel soal bank soal (`parseExcelSoalRows`): pencegahan silent error skor 0 permanen akibat kunci jawaban tidak cocok dengan opsi yang tersedia, pencocokan kunci jawaban teks multi-kata terhadap teks opsi, klasifikasi tipe soal esai yang ketat untuk mencegah baris beropsi tanpa kunci menjadi esai, dukungan resolusi semantik kunci jawaban teks/dwibahasa untuk tipe Benar/Salah, ekstraksi kolom `Pembahasan` ke data soal, serta penanganan asynchronous save dengan `soalRepo.flush()` dan state loading pada tombol simpan impor.
 - Portal peserta tidak lagi menawarkan melanjutkan sesi saat jadwal ujian atau batas waktu sesinya sudah habis, karena server menolak penyimpanan jawaban setelah tenggat.
 - Sinkronisasi korelasi status ujian berlangsung dan selesai antara portal peserta dan ringkasan operasional admin.
+- Deteksi perpindahan tab pada halaman ujian peserta (`/peserta/ujian/$id/kerjakan`) kini memiliki toleransi debouncing, membersihkan timer saat unmount, dan mengabaikan respons pelanggaran setelah cleanup/submit guna menghindari *false positive*; alarm buzzer berhenti otomatis setelah 3 detik dan dibersihkan saat berpindah halaman.
 
 ### Security
 
