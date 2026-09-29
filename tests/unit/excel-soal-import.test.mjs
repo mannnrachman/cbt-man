@@ -113,3 +113,77 @@ test("supports explicit Tipe Soal BS without manual Opsi A/B columns", () => {
   assert.equal(results[0].soal.jawaban[1].detail, "Salah");
   assert.equal(results[0].soal.jawaban[1].benar, true);
 });
+
+test("supports multi-word answer keys matching option text", () => {
+  const rows = [
+    {
+      No: 1,
+      Soal: "Siapakah bapak internet dunia?",
+      "Opsi A": "Vint Cerf & Bob Kahn",
+      "Opsi B": "Tim Berners-Lee",
+      "Kunci Jawaban": "Vint Cerf & Bob Kahn",
+    },
+    {
+      No: 2,
+      Soal: "Dimanakah Monas berada?",
+      "Opsi A": "Jakarta Pusat",
+      "Opsi B": "Surabaya Timur",
+      "Kunci Jawaban": "jakarta pusat",
+    },
+  ];
+
+  const results = parseExcelSoalRows(rows, "topik_1");
+  assert.equal(results.length, 2);
+  assert.equal(results[0].valid, true);
+  assert.equal(results[0].soal.jawaban[0].benar, true);
+  assert.equal(results[0].soal.jawaban[1].benar, false);
+
+  assert.equal(results[1].valid, true);
+  assert.equal(results[1].soal.jawaban[0].benar, true);
+  assert.equal(results[1].soal.jawaban[1].benar, false);
+});
+
+test("rejects row with options but missing answer key without falsely converting to essay", () => {
+  const rows = [
+    {
+      No: 1,
+      Soal: "Soal tanpa kunci jawaban.",
+      "Tipe Soal": "PG",
+      "Opsi A": "Pilihan A",
+      "Opsi B": "Pilihan B",
+      "Kunci Jawaban": "",
+    },
+  ];
+
+  const results = parseExcelSoalRows(rows, "topik_1");
+  assert.equal(results.length, 1);
+  assert.equal(results[0].valid, false);
+  assert.equal(results[0].soal.tipe, "pg");
+  assert.match(results[0].error || "", /Kunci jawaban belum ditentukan/i);
+});
+
+test("classifies row without options or with explicit Essay type as essay with empty jawaban", () => {
+  const rows = [
+    {
+      No: 1,
+      Soal: "Jelaskan proses siklus air secara singkat.",
+      "Tipe Soal": "Essay",
+      "Kunci Jawaban": "",
+    },
+    {
+      No: 2,
+      Soal: "Uraikan penyebab pemanasan global.",
+      "Kunci Jawaban": "",
+    },
+  ];
+
+  const results = parseExcelSoalRows(rows, "topik_1");
+  assert.equal(results.length, 2);
+  assert.equal(results[0].valid, true);
+  assert.equal(results[0].soal.tipe, "essay");
+  assert.equal(results[0].soal.jawaban.length, 0);
+
+  assert.equal(results[1].valid, true);
+  assert.equal(results[1].soal.tipe, "essay");
+  assert.equal(results[1].soal.jawaban.length, 0);
+});

@@ -113,10 +113,18 @@ export function parseExcelSoalRows(
         optionEntries.push({ letter: "B", text: "Salah" });
       }
 
-      const rawTokens = kunciRaw
-        .split(/[,;\s]+/)
-        .map((s) => s.trim())
-        .filter(Boolean);
+      const trimmedKunci = kunciRaw.trim();
+      const wholeMatch = trimmedKunci
+        ? optionEntries.find(
+            (o) => o.text.trim().toLowerCase() === trimmedKunci.toLowerCase(),
+          )
+        : undefined;
+      const rawTokens = wholeMatch
+        ? [wholeMatch.letter]
+        : kunciRaw
+            .split(/[,;\s]+/)
+            .map((s) => s.trim())
+            .filter(Boolean);
 
       const resolvedLetters: string[] = [];
       for (const token of rawTokens) {
@@ -161,7 +169,8 @@ export function parseExcelSoalRows(
       let tipe: TipeSoal = "pg";
       let error: string | undefined = undefined;
 
-      if (optionEntries.length === 0 || (!kunciRaw && !isExplicitBS)) {
+      const isExplicitEssay = /^(essay|esai|uraian)$/i.test(tipeField);
+      if (isExplicitEssay || optionEntries.length === 0) {
         tipe = "essay";
       } else if (
         isExplicitBS ||
@@ -191,11 +200,14 @@ export function parseExcelSoalRows(
         }
       }
 
-      const jawaban: Jawaban[] = optionEntries.map((opt) => ({
-        id: uid("j_"),
-        detail: opt.text,
-        benar: correctLetters.includes(opt.letter),
-      }));
+      const jawaban: Jawaban[] =
+        tipe === "essay"
+          ? []
+          : optionEntries.map((opt) => ({
+              id: uid("j_"),
+              detail: opt.text,
+              benar: correctLetters.includes(opt.letter),
+            }));
 
       const soal: Soal = {
         id: uid("s_"),

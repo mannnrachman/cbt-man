@@ -20,7 +20,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Fixed
 
-- Validasi integritas impor Excel soal bank soal (`parseExcelSoalRows`): pencegahan silent error skor 0 permanen akibat kunci jawaban tidak cocok dengan opsi yang tersedia, dukungan resolusi semantik kunci jawaban teks/dwibahasa untuk tipe Benar/Salah, ekstraksi kolom `Pembahasan` ke data soal, serta penanganan asynchronous save dengan `soalRepo.flush()` dan state loading pada tombol simpan impor.
+- Validasi integritas impor Excel soal bank soal (`parseExcelSoalRows`): pencegahan silent error skor 0 permanen akibat kunci jawaban tidak cocok dengan opsi yang tersedia, pencocokan kunci jawaban teks multi-kata terhadap teks opsi, klasifikasi tipe soal esai yang ketat untuk mencegah baris beropsi tanpa kunci menjadi esai, dukungan resolusi semantik kunci jawaban teks/dwibahasa untuk tipe Benar/Salah, ekstraksi kolom `Pembahasan` ke data soal, serta penanganan asynchronous save dengan `soalRepo.flush()` dan state loading pada tombol simpan impor.
 - Portal peserta tidak lagi menawarkan melanjutkan sesi saat jadwal ujian atau batas waktu sesinya sudah habis, karena server menolak penyimpanan jawaban setelah tenggat.
 - Sinkronisasi korelasi status ujian berlangsung dan selesai antara portal peserta dan ringkasan operasional admin.
 
