@@ -109,32 +109,33 @@ function UjianList() {
     const kelas = u.penawaranId ? penawaranRepo.byId(u.penawaranId) : undefined;
 
     return (
-      <div key={u.id} className="group flex flex-col gap-3 p-3 transition-colors bg-card border-b border-border/80 last:border-b-0 hover:bg-muted/40 sm:flex-row sm:items-center sm:justify-between sm:p-4">
-        <div className="flex items-center gap-4 flex-1 min-w-0">
-          <Link
-            to="/admin/ujian/$id"
-            params={{ id: u.id }}
-            className="hidden sm:flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
+      <div
+        key={u.id}
+        className="group flex flex-col gap-3 p-3 transition-colors bg-card border-b border-border/80 last:border-b-0 hover:bg-muted/40 sm:flex-row sm:items-center sm:justify-between sm:p-4"
+      >
+        <Link
+          to="/admin/ujian/$id"
+          params={{ id: u.id }}
+          className="flex items-center gap-4 flex-1 min-w-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer"
+        >
+          <div
+            className="hidden sm:flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 group-hover:border-slate-300 dark:group-hover:border-slate-700 transition-colors"
             title="Edit ujian"
           >
-            {type === "persiapan" && <Clock className="h-5 w-5 text-slate-400" />}
+            {type === "persiapan" && <Clock className="h-5 w-5 text-slate-400 group-hover:text-primary transition-colors" />}
             {type === "berlangsung" && (
               <span className="relative flex h-5 w-5 items-center justify-center">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-20"></span>
                 <PlayCircle className="h-5 w-5 text-emerald-500 relative" />
               </span>
             )}
-            {type === "selesai" && <CheckCircle2 className="h-5 w-5 text-slate-400" />}
-          </Link>
+            {type === "selesai" && <CheckCircle2 className="h-5 w-5 text-slate-400 group-hover:text-primary transition-colors" />}
+          </div>
           
           <div className="flex flex-col min-w-0">
-            <Link
-              to="/admin/ujian/$id"
-              params={{ id: u.id }}
-              className="font-semibold text-sm text-slate-900 dark:text-slate-100 truncate hover:text-primary dark:hover:text-primary transition-colors"
-            >
+            <span className="font-semibold text-sm text-slate-900 dark:text-slate-100 truncate group-hover:text-primary transition-colors">
               {u.nama}
-            </Link>
+            </span>
             <div className="flex items-center gap-2 mt-1">
               {mk && <span className="text-[11px] font-medium px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 truncate max-w-[150px]">{mk.nama}</span>}
               {kelas && <span className="text-[11px] font-medium px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300">Kelas {kelas.kodeKelas || "-"} · {kelas.pesertaIds.length} peserta</span>}
@@ -143,14 +144,17 @@ function UjianList() {
               {sesiCount > 0 && <span className="text-[11px] font-medium text-slate-700 dark:text-slate-300">• {sesiCount} Peserta</span>}
             </div>
           </div>
-        </div>
+        </Link>
 
-        <div className="flex flex-wrap items-center gap-2 shrink-0 sm:ml-4">
+        <div
+          className="flex flex-wrap items-center gap-2 shrink-0 sm:ml-4"
+          onClick={(e) => e.stopPropagation()}
+        >
           {type === "berlangsung" && (
             <Link
               to="/admin/peserta/online"
               search={{ ujianId: u.id }}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 dark:bg-emerald-500 text-white rounded-md text-xs font-medium hover:bg-emerald-700 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 dark:bg-emerald-500 text-white rounded-md text-xs font-medium shadow-sm hover:shadow-md hover:bg-emerald-700 dark:hover:bg-emerald-600 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200 [&_svg]:transition-transform [&_svg]:duration-200 hover:[&_svg]:scale-110"
             >
               <PlayCircle className="h-3.5 w-3.5" /> Pantau
             </Link>
@@ -159,7 +163,7 @@ function UjianList() {
             <Link
               to="/admin/analitik/$id"
               params={{ id: u.id }}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium text-slate-700 dark:text-slate-300 shadow-sm hover:shadow-md hover:border-primary/50 dark:hover:border-primary/50 hover:text-primary dark:hover:text-primary hover:bg-primary/5 dark:hover:bg-primary/10 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200 [&_svg]:transition-transform [&_svg]:duration-200 hover:[&_svg]:scale-110"
             >
               <BarChart3 className="h-3.5 w-3.5" /> Analitik
             </Link>
@@ -167,7 +171,7 @@ function UjianList() {
           <Link
             to="/admin/ujian/$id/peserta"
             params={{ id: u.id }}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-medium text-slate-700 dark:text-slate-300 shadow-sm hover:shadow-md hover:border-primary/50 dark:hover:border-primary/50 hover:text-primary dark:hover:text-primary hover:bg-primary/5 dark:hover:bg-primary/10 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200 [&_svg]:transition-transform [&_svg]:duration-200 hover:[&_svg]:scale-110"
           >
             <Users className="h-3.5 w-3.5" /> Peserta {sesiCount > 0 ? `(${sesiCount})` : ""}
           </Link>
