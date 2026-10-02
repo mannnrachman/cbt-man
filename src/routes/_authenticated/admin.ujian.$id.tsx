@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { ujianRepo, unitAkademikRepo, hydrateRepos, mataKuliahRepo, semesterRepo, penawaranRepo, sesiRepo } from "@/lib/cbt/repos";
 
 import { uid } from "@/lib/cbt/storage";
+import { getExamAudienceMode, type ExamAudienceMode } from "@/lib/cbt/exam-audience";
 import type { Ujian, TopicSet } from "@/lib/cbt/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -137,6 +138,7 @@ function UjianEditor() {
   const [denied, setDenied] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [chosenAudienceMode, setChosenAudienceMode] = useState<ExamAudienceMode | null>(null);
   const [extendOpen, setExtendOpen] = useState(false);
   const [newEndAtInput, setNewEndAtInput] = useState("");
   const [isExtending, setIsExtending] = useState(false);
@@ -228,6 +230,11 @@ function UjianEditor() {
   // checked on the read path only.)
 
   const groups = unitAkademikRepo.all();
+  const selectedGroups = groups.filter((group) => u.groupIds.includes(group.id));
+  const savedAudienceMode = getExamAudienceMode(selectedGroups);
+  const audienceMode = chosenAudienceMode ?? savedAudienceMode ?? "kelas";
+  const invalidAudience = u.groupIds.length > 0 && (!savedAudienceMode || selectedGroups.length !== new Set(u.groupIds).size);
+  const audienceGroups = groups.filter((group) => audienceMode === "kelas" ? group.tipe === "kelas" : group.tipe === "jurusan" || group.tipe === "prodi");
   const topiks = visibleTopiks(user);
   const moduls = visibleModuls(user);
   
@@ -268,6 +275,10 @@ function UjianEditor() {
       toast.error("Paket yang telah dipublikasikan atau memiliki sesi tidak dapat diubah melalui editor");
       return;
     }
+    if (invalidAudience) {
+      toast.error("Pilih satu mode akses peserta: per kelas atau per jurusan/prodi.");
+      return;
+    }
     if (!u!.nama.trim()) {
       toast.error("Nama wajib");
       return;
@@ -306,6 +317,10 @@ function UjianEditor() {
 
   async function publish() {
     if (u!.status !== "draft") return;
+    if (invalidAudience) {
+      toast.error("Pilih satu mode akses peserta: per kelas atau per jurusan/prodi.");
+      return;
+    }
     ujianRepo.upsert(u!);
     const saveResult = await ujianRepo.flush();
     if (!saveResult.ok) {
@@ -947,27 +962,36 @@ Perpanjang batas mulai ujian baru. Batas waktu sesi peserta yang sudah berjalan 
       <Card>
         <CardContent className="p-4 space-y-3">
           <h3 className="font-medium">Akses peserta</h3>
-          <div className="space-y-1">
-            <Label className="text-xs">Unit peserta (wajib dipilih sebelum publikasi)</Label>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {groups.map((g) => (
-                <label key={g.id} className="flex items-center gap-2 rounded border p-2 text-sm">
-                  <Checkbox
-                    checked={u.groupIds.includes(g.id)}
-                    onCheckedChange={(v) =>
-                      set(
-                        "groupIds",
-                        v ? [...u.groupIds, g.id] : u.groupIds.filter((x) => x !== g.id),
-                      )
-                    }
-                  />
+          <div className="space-y-3">
+            <fieldset className="space-y-2" disabled={locked}>
+              <legend className="text-sm font-medium">Mode akses unit peserta</legend>
+              <div className="grid grid-cols-2 gap-3">
+                {([{ value: "kelas", label: "Per Kelas" }, { value: "jurusan", label: "Per Jurusan / Prodi" }] as const).map((mode) => (
+                  <label key={mode.value} className={`flex cursor-pointer items-center gap-2 rounded-lg border p-3 text-sm ${audienceMode === mode.value ? "border-primary bg-primary/5" : "border-border"}`}>
+                    <input type="radio" name="audience-mode" value={mode.value} checked={!invalidAudience && audienceMode === mode.value} onChange={() => {
+                      setChosenAudienceMode(mode.value);
+                      set("groupIds", selectedGroups.filter((group) => mode.value === "kelas" ? group.tipe === "kelas" : group.tipe === "jurusan" || group.tipe === "prodi").map((group) => group.id));
+                    }} className="accent-primary" />
+                    {mode.label}
+                  </label>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground">Mengganti mode akan menghapus pilihan unit dari mode lain.</p>
+            </fieldset>
+            {invalidAudience && <p role="alert" className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-800 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300">Pilihan lama mencampur jenis unit atau memuat unit yang tidak didukung. Pilih mode akses dan tentukan ulang unit sebelum menyimpan.</p>}
+            <Label className="text-xs">{audienceMode === "kelas" ? "Pilih kelas peserta" : "Pilih jurusan / prodi peserta"}</Label>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {audienceGroups.map((g) => (
+                <label key={g.id} className="flex items-center gap-2 rounded-lg border p-3 text-sm">
+                  <Checkbox disabled={locked} checked={u.groupIds.includes(g.id)} onCheckedChange={(checked) =>
+                    set("groupIds", checked ? Array.from(new Set([...u.groupIds, g.id])) : u.groupIds.filter((id) => id !== g.id))
+                  } />
                   {g.nama}
                 </label>
               ))}
             </div>
-            {u.groupIds.length === 0 && (
-              <p className="text-xs text-amber-600">Belum ada unit peserta. Paket tidak akan bisa diakses peserta.</p>
-            )}
+            {audienceGroups.length === 0 && <p className="text-xs text-muted-foreground">Belum ada {audienceMode === "kelas" ? "kelas" : "jurusan / prodi"} yang tersedia.</p>}
+            {u.groupIds.length === 0 && <p className="text-xs text-muted-foreground">Belum ada unit dipilih. Jika memakai kelas mata kuliah, peserta mengikuti keanggotaan kelas tersebut.</p>}
           </div>
           <div className="flex items-center justify-between rounded border p-2">
             <div>

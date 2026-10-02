@@ -12,6 +12,7 @@ import {
 	operatorCanTouchUjianInput,
 	pesertaCanTouchUjian,
 } from "../db/auth";
+import { getExamAudienceMode } from "@/lib/cbt/exam-audience";
 import type { Ujian, TokenUjian } from "@/lib/cbt/types";
 import { requireAuditLog, writeAuditLog } from "../db/audit";
 import { Prisma } from "@prisma/client";
@@ -23,8 +24,24 @@ import { checkRateLimit, clearRateLimit } from "@/lib/cbt/rate-limit";
 import { getRequestIP } from "@tanstack/start-server-core";
 import { ipInRanges } from "@/lib/cbt/cidr";
 
+async function validateExamAudience(item: Pick<Ujian, "groupIds">, db: any = prisma) {
+  if (!Array.isArray(item.groupIds) || item.groupIds.some((id) => typeof id !== "string")) {
+    throw new Error("Pilihan unit peserta tidak valid.");
+  }
+  if (item.groupIds.length === 0) return;
+  const ids = [...new Set(item.groupIds)];
+  const units = await db.unitAkademik.findMany({
+    where: { id: { in: ids } },
+    select: { id: true, tipe: true },
+  });
+  if (units.length !== ids.length || !getExamAudienceMode(units)) {
+    throw new Error("Pilih akses peserta per kelas atau per jurusan/prodi. Jenis unit tidak boleh dicampur.");
+  }
+}
+
 async function getPublishError(item: Ujian, db: any = prisma): Promise<string | null> {
 	if (item.status !== "draft") return "Paket ujian sudah dipublikasikan.";
+	await validateExamAudience(item, db);
 	if (item.topicSets.length === 0) return "Tambahkan minimal satu sumber soal.";
 	if (item.beginAt === undefined || item.endAt === undefined) return "Atur waktu mulai dan selesai.";
 	if (item.endAt <= item.beginAt) return "Waktu selesai harus setelah waktu mulai.";
@@ -136,6 +153,9 @@ export const mutateUjianServer = createServerFn({ method: "POST" })
 				} else if (action === "remove")
 					await tx.ujian.delete({ where: { id: String(payload.id) } });
 				else if (action === "bulkSet") {
+					for (const item of payload as Ujian[]) {
+						await validateExamAudience(item, tx);
+					}
 					await tx.ujian.deleteMany();
 					for (const item of payload as Ujian[]) {
 						await tx.ujian.create({
@@ -152,6 +172,7 @@ export const mutateUjianServer = createServerFn({ method: "POST" })
 				} else {
 					const item = payload as Ujian;
 					validateUjianForSave(item);
+					await validateExamAudience(item, tx);
 					const existing = await tx.ujian.findUnique({
 						where: { id: item.id },
 						select: {
