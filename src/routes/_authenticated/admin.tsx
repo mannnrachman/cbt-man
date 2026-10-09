@@ -322,7 +322,7 @@ function AdminLayout() {
         <aside className={cn(
             "w-64 shrink-0 border-r border-slate-200 bg-white transition-[width] duration-200 dark:border-slate-800 dark:bg-slate-950 lg:sticky lg:top-0 lg:block lg:h-screen lg:overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
             sidebarCollapsed ? "lg:w-16" : "lg:w-64",
-            mobileMenuOpen ? "fixed inset-y-0 left-0 h-screen overflow-y-auto shadow-xl" : "hidden",
+            mobileMenuOpen ? "fixed inset-y-0 left-0 z-50 h-screen overflow-y-auto shadow-xl" : "hidden",
           )} id="admin-sidebar">
             <div className={cn(
               "flex h-16 items-center border-b border-slate-200 dark:border-slate-800",

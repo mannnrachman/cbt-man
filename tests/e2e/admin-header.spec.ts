@@ -23,5 +23,8 @@ test("admin header shows the current page and account identity", async ({ page }
 	await expect(breadcrumb.getByText("Bank Soal", { exact: true })).toBeVisible();
 	await expect(breadcrumb.getByText("Bank Soal & Berkas", { exact: true })).toBeHidden();
 	await expect(page.getByRole("button", { name: "Buka menu navigasi" })).toBeVisible();
+	await page.getByRole("button", { name: "Buka menu navigasi" }).click();
+	await page.getByRole("link", { name: "Dashboard" }).click({ timeout: 5000 });
+	await expect(page).toHaveURL(/\/admin$/);
 	await expect(account).toBeHidden();
 });
