@@ -194,7 +194,7 @@ test("admin sidebar navigation disambiguates overlapping paths and controls acti
   assert.doesNotMatch(admin, /to: "\/admin\/peserta", label: "Mahasiswa \/ Peserta", icon: GraduationCap, exact: true/);
   assert.match(admin, /function isNavItemActive/);
   assert.match(admin, /hasMoreSpecificItem/);
-  assert.match(admin, /SidebarLink\(\{ item, isActive \}/);
+  assert.match(admin, /SidebarLink\(\{ item, isActive, sidebarCollapsed \}/);
   assert.match(admin, /aria-current=\{isActive \? "page" : undefined\}/);
   assert.match(admin, /isActive=\{isNavItemActive\(dashboardNavItem, pathname\)\}/);
   assert.match(admin, /isActive=\{isNavItemActive\(item, pathname\)\}/);

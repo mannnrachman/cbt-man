@@ -31,6 +31,8 @@ import {
   Moon,
   Menu,
   X,
+  ChevronLeft,
+  ChevronRight,
   BookOpenCheck,
   ChevronDown,
   ScrollText,
@@ -200,21 +202,23 @@ function activeGroupId(pathname: string, groups: NavGroup[]) {
   return groups.find((group) => group.items.some((item) => isNavItemActive(item, pathname)))?.id;
 }
 
-function SidebarLink({ item, isActive }: { item: NavItem; isActive: boolean }) {
+function SidebarLink({ item, isActive, sidebarCollapsed }: { item: NavItem; isActive: boolean; sidebarCollapsed: boolean }) {
   const Icon = item.icon;
   return (
     <Link
       to={item.to as never}
       aria-current={isActive ? "page" : undefined}
+      title={sidebarCollapsed ? item.label : undefined}
       className={cn(
         "flex items-center gap-3 rounded-lg px-3 py-2 text-xs transition-colors duration-150 md:text-sm",
+        sidebarCollapsed && "lg:justify-center lg:px-0",
         isActive
           ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 font-semibold shadow-sm"
           : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-slate-100",
       )}
     >
       <Icon className="h-4 w-4 shrink-0" />
-      <span className="leading-snug">{item.label}</span>
+      <span className={cn("leading-snug", sidebarCollapsed && "lg:sr-only")}>{item.label}</span>
     </Link>
   );
 }
@@ -248,6 +252,7 @@ function AdminLayout() {
 
   const [theme, setTheme] = useState("light");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const visibleNavGroups = React.useMemo(
     () =>
       navGroups
@@ -258,6 +263,18 @@ function AdminLayout() {
         .filter((group) => group.items.length > 0),
     [user, cfg],
   );
+  const activeGroup = visibleNavGroups.find((group) =>
+    group.items.some((item) => isNavItemActive(item, pathname)),
+  );
+  const activeNavItem = activeGroup?.items.find((item) => isNavItemActive(item, pathname))
+    ?? (isNavItemActive(dashboardNavItem, pathname) ? dashboardNavItem : undefined);
+  const userInitials = user.namaLengkap
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("") || "A";
   const [openGroupId, setOpenGroupId] = useState<string | undefined>(() =>
     activeGroupId(pathname, visibleNavGroups),
   );
@@ -303,31 +320,50 @@ function AdminLayout() {
 
         {/* Sidebar */}
         <aside className={cn(
-            "w-64 shrink-0 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 lg:block transition-transform duration-200 z-50 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto scrollbar-thin",
-            mobileMenuOpen ? "fixed inset-y-0 left-0 h-screen overflow-y-auto shadow-xl" : "hidden"
-          )}>
-            <div className="flex h-16 items-center justify-between border-b border-slate-200 dark:border-slate-800 px-5">
-              <div className="flex items-center gap-3">
+            "w-64 shrink-0 border-r border-slate-200 bg-white transition-[width] duration-200 dark:border-slate-800 dark:bg-slate-950 lg:sticky lg:top-0 lg:block lg:h-screen lg:overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+            sidebarCollapsed ? "lg:w-16" : "lg:w-64",
+            mobileMenuOpen ? "fixed inset-y-0 left-0 h-screen overflow-y-auto shadow-xl" : "hidden",
+          )} id="admin-sidebar">
+            <div className={cn(
+              "flex h-16 items-center border-b border-slate-200 dark:border-slate-800",
+              sidebarCollapsed ? "justify-between px-2 lg:flex-col lg:justify-center lg:gap-1" : "justify-between px-5",
+            )}>
+              <div className={cn("flex min-w-0 items-center gap-3", sidebarCollapsed && "lg:justify-center")} title={sidebarCollapsed ? appName : undefined}>
                 {cfg.appLogo ? (
-                  <img src={cfg.appLogo} alt="Logo" className="h-7 w-auto object-contain" />
+                  <img src={cfg.appLogo} alt="Logo" className={cn("h-7 w-auto object-contain", sidebarCollapsed && "lg:h-7 lg:w-7")} />
                 ) : (
                   <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground font-bold text-base shadow-sm">
                     Z
                   </span>
                 )}
-                <span className="font-bold text-slate-900 dark:text-slate-100 text-base tracking-tight truncate">{appName}</span>
+                <span className={cn("truncate text-base font-bold tracking-tight text-slate-900 dark:text-slate-100", sidebarCollapsed && "lg:hidden")}>{appName}</span>
               </div>
-              {mobileMenuOpen && (
-                <Button variant="ghost" size="icon" title="Tutup menu navigasi" aria-label="Tutup menu navigasi" className="lg:hidden h-8 w-8 text-slate-500 hover:text-slate-900" onClick={() => setMobileMenuOpen(false)}>
-                  <X className="h-5 w-5" />
+              <div className="flex items-center gap-1">
+                {mobileMenuOpen && (
+                  <Button variant="ghost" size="icon" title="Tutup menu navigasi" aria-label="Tutup menu navigasi" className="lg:hidden h-8 w-8 text-slate-500 hover:text-slate-900" onClick={() => setMobileMenuOpen(false)}>
+                    <X className="h-5 w-5" />
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  title={sidebarCollapsed ? "Lebarkan sidebar" : "Ciutkan sidebar"}
+                  aria-label={sidebarCollapsed ? "Lebarkan sidebar" : "Ciutkan sidebar"}
+                  aria-controls="admin-sidebar"
+                  aria-pressed={sidebarCollapsed}
+                  className="hidden h-8 w-8 shrink-0 text-slate-500 hover:bg-slate-100 hover:text-slate-900 lg:inline-flex dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-100"
+                  onClick={() => setSidebarCollapsed((collapsed) => !collapsed)}
+                >
+                  {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
                 </Button>
-              )}
+              </div>
             </div>
             <nav aria-label="Navigasi administrasi" className="flex flex-col gap-5 p-3">
               {canAccessAdminPath(user, dashboardNavItem.to, cfg) && (
                 <SidebarLink
                   item={dashboardNavItem}
                   isActive={isNavItemActive(dashboardNavItem, pathname)}
+                  sidebarCollapsed={sidebarCollapsed}
                 />
               )}
 
@@ -342,9 +378,11 @@ function AdminLayout() {
                       type="button"
                       aria-expanded={isOpen}
                       aria-controls={panelId}
+                      title={sidebarCollapsed ? group.label : undefined}
                       onClick={() => setOpenGroupId(isOpen ? undefined : group.id)}
                       className={cn(
                         "flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wider transition-colors duration-150",
+                        sidebarCollapsed && "lg:justify-center lg:px-0",
                         group.items.some((item) => isNavItemActive(item, pathname))
                           ? "bg-slate-100 text-slate-900 dark:bg-slate-900 dark:text-slate-100"
                           : "text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-100",
@@ -352,24 +390,26 @@ function AdminLayout() {
                     >
                       <span className="flex min-w-0 items-center gap-3">
                         <GroupIcon className="h-4 w-4 shrink-0" />
-                        <span className="truncate">{group.label}</span>
+                        <span className={cn("truncate", sidebarCollapsed && "lg:sr-only")}>{group.label}</span>
                       </span>
                       <ChevronDown
                         aria-hidden="true"
                         className={cn(
                           "h-4 w-4 shrink-0 transition-transform duration-150",
+                          sidebarCollapsed && "lg:hidden",
                           isOpen && "rotate-180",
                         )}
                       />
                     </button>
 
                     {isOpen && (
-                      <div id={panelId} className="ml-4 mt-1 flex flex-col gap-1 border-l border-slate-200 pl-2 dark:border-slate-800">
+                      <div id={panelId} className={cn("ml-4 mt-1 flex flex-col gap-1 border-l border-slate-200 pl-2 dark:border-slate-800", sidebarCollapsed && "lg:ml-0 lg:border-l-0 lg:pl-0")}>
                         {group.items.map((item) => (
                           <SidebarLink
                             key={item.to}
                             item={item}
                             isActive={isNavItemActive(item, pathname)}
+                            sidebarCollapsed={sidebarCollapsed}
                           />
                         ))}
                       </div>
@@ -382,45 +422,65 @@ function AdminLayout() {
 
         <div className="flex min-h-screen flex-1 flex-col min-w-0">
 
-          <header className="flex h-16 items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md px-4 lg:px-6 sticky top-0 z-30">
-            <div className="flex items-center gap-4">
+          <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 shadow-sm lg:px-6 dark:border-slate-800">
+            <div className="flex min-w-0 items-center gap-3">
               <Button
                 variant="ghost"
                 size="icon"
                 title="Buka menu navigasi"
                 aria-label="Buka menu navigasi"
-                className="lg:hidden h-9 w-9 text-slate-500 hover:text-slate-900"
+                className="lg:hidden h-9 w-9 rounded-lg bg-[#e6f5f3] hover:bg-[#d4efec]"
                 onClick={() => setMobileMenuOpen(true)}
               >
-                <Menu className="h-5 w-5" />
+                <span className="grid h-7 w-7 place-items-center rounded-md bg-[#0f766e]"><Menu className="h-4 w-4 text-white" /></span>
               </Button>
-              <div className="text-sm hidden sm:flex items-center gap-3">
-                <span className="font-semibold text-slate-900 dark:text-slate-100 text-sm">{user.namaLengkap}</span>
-                <Badge variant="outline" className="font-medium text-[11px] uppercase border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400">
+              <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 shadow-sm">
+                {activeGroup && (
+                  <>
+                    <span className="hidden max-w-48 truncate text-xs font-medium text-slate-500 sm:inline">{activeGroup.label}</span>
+                    <ChevronRight aria-hidden="true" className="hidden h-3.5 w-3.5 shrink-0 text-slate-400 sm:block" />
+                  </>
+                )}
+                <span aria-current="page" className="truncate text-sm font-semibold text-slate-900">
+                  {activeNavItem?.label ?? "Administrasi"}
+                </span>
+              </nav>
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              <div role="group" aria-label={`Akun ${user.namaLengkap}`} className="hidden max-w-[260px] items-center gap-2 rounded-xl border border-slate-200 bg-white px-2 py-1 shadow-sm sm:flex">
+                <span aria-hidden="true" className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#0f766e] text-xs font-bold text-white">
+                  {userInitials}
+                </span>
+                <span className="max-w-36 truncate text-sm font-semibold text-slate-900">{user.namaLengkap}</span>
+                <Badge variant="outline" className="shrink-0 border-[#0f9b8e]/30 bg-[#0f9b8e]/10 px-2 text-[10px] font-semibold uppercase text-[#0b5f58]">
                   {user.role}
                 </Badge>
               </div>
-            </div>
-            <div className="flex items-center gap-3">
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+                className="h-9 w-9 rounded-lg bg-slate-100 hover:bg-slate-200"
                 onClick={toggleTheme}
                 title="Ganti tema"
+                aria-label="Ganti tema"
               >
-                {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                <span className="grid h-7 w-7 place-items-center rounded-md bg-[#0f766e]">
+                  {theme === "dark" ? <Sun className="h-4 w-4 text-white" /> : <Moon className="h-4 w-4 text-white" />}
+                </span>
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                className="h-9 text-xs font-medium border-slate-200 dark:border-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/50 hover:text-rose-600 dark:hover:text-rose-400 hover:border-rose-200 dark:hover:border-rose-900 transition-colors"
+                className="h-9 border-slate-200 bg-white text-xs font-medium text-slate-800 transition-colors hover:border-slate-300 hover:bg-slate-50"
+                title="Keluar"
+                aria-label="Keluar"
                 onClick={async () => {
                   await logout();
                   window.location.assign("/login-admin");
                 }}
               >
-                <LogOut className="mr-1.5 h-3.5 w-3.5" /> <span className="hidden sm:inline">Keluar</span>
+                <span className="grid h-6 w-6 place-items-center rounded-md bg-[#0f766e]"><LogOut className="h-3.5 w-3.5 text-white" /></span>
+                <span className="hidden sm:inline">Keluar</span>
               </Button>
             </div>
           </header>
