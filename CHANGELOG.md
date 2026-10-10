@@ -14,7 +14,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 ### Changed
 
 - Batasi pemilihan akses unit peserta menjadi satu mode: per kelas atau per jurusan/prodi; server menolak unit tidak valid dan campuran kedua mode.
-- Perbarui shell admin dengan sidebar desktop yang dapat diciutkan menjadi jalur ikon, breadcrumb halaman aktif, dan header putih dengan identitas admin.
+- Perbarui shell admin dengan sidebar desktop yang dapat diciutkan menjadi jalur ikon, breadcrumb halaman aktif, dan header putih dengan identitas admin; cegah `aria-current` ganda pada rute bertumpang tindih melalui pencocokan Link yang tepat dan regresi browser pada aplikasi asli.
 
 - Penyederhanaan interaksi daftar paket ujian (`/admin/ujian`): seluruh area baris/kartu paket ujian kini dapat diklik langsung untuk membuka editor (`/admin/ujian/$id`), mendukung pembukaan di tab baru (klik tengah atau Cmd/Ctrl+klik), dengan efek sorot hover pada judul dan ikon, serta tombol aksi sekunder yang tetap terlindungi.
 - Perombakan tata letak editor paket ujian (`/admin/ujian/$id`) menjadi 2 kolom terstruktur yang bersih, menyederhanakan konfigurasi waktu dan identitas, mengintegrasikan dialog konfirmasi penghapusan ujian bertema, dan menghilangkan banner peringatan mode berlangsung yang mengganggu.

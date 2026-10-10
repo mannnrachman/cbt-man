@@ -20,4 +20,18 @@ test("admin sidebar can collapse to an icon rail and expand again", async ({ pag
 	await expandButton.focus();
 	await page.keyboard.press("Space");
 	await expect(sidebar).toHaveCSS("width", "256px");
+	const navigation = page.getByRole("navigation", { name: "Navigasi administrasi" });
+	const breadcrumb = page.getByRole("navigation", { name: "Breadcrumb" });
+	await page.getByRole("link", { name: "Struktur Akademik", exact: true }).click();
+	await expect(navigation.locator('[aria-current="page"]')).toHaveText("Struktur Akademik");
+	await expect(breadcrumb.locator('[aria-current="page"]')).toHaveText("Struktur Akademik");
+	await page.getByRole("link", { name: "Kelas Mata Kuliah", exact: true }).click();
+	await expect(navigation.locator('[aria-current="page"]')).toHaveText("Kelas Mata Kuliah");
+	await expect(breadcrumb.locator('[aria-current="page"]')).toHaveText("Kelas Mata Kuliah");
+	await page.goto("/admin/peserta/online");
+	await expect(navigation.locator('[aria-current="page"]')).toHaveText("Pantau Ujian Live");
+	await expect(breadcrumb.locator('[aria-current="page"]')).toHaveText("Pantau Ujian Live");
+	await page.goto("/admin/peserta");
+	await expect(navigation.locator('[aria-current="page"]')).toHaveText("Mahasiswa / Peserta");
+	await expect(breadcrumb.locator('[aria-current="page"]')).toHaveText("Mahasiswa / Peserta");
 });

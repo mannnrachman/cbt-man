@@ -207,6 +207,7 @@ function SidebarLink({ item, isActive, sidebarCollapsed }: { item: NavItem; isAc
   return (
     <Link
       to={item.to as never}
+      activeOptions={{ exact: true, includeSearch: false }}
       aria-current={isActive ? "page" : undefined}
       title={sidebarCollapsed ? item.label : undefined}
       className={cn(
