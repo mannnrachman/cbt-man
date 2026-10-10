@@ -186,4 +186,3 @@ test("exam workspace embeds calculator in the right side panel instead of a dial
   assert.match(kerjakan, /rightTab === "navigasi"/);
   assert.match(kerjakan, /<ExamCalculator \/>/);
 });
-
