@@ -37,6 +37,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 - Perbarui Seroval ke 1.6.9 untuk menghapus advisory runtime critical dan high yang terdeteksi pada dependency graph (#195).
 - Perbarui brace-expansion ke 1.1.21 dan 5.0.12 untuk perbaikan denial-of-service dari nested-brace parsing dan ekspansi yang tidak terkendali (#196).
 - Perbarui `source-map-js` ke 1.2.2 untuk menutup denial-of-service pada indexed source map (CVE-2026-93749), termasuk pada jalur konsumsi source map di browser (#197).
+- Override `argparse` only in Mammoth to 2.0.1, removing vulnerable transitive `sprintf-js` from the lockfile while preserving the CLI; verified resolved dependency tree and Mammoth CLI help smoke. GHSA-hp3w-g68c-fv3c has no upstream patched `sprintf-js` release.
 
 ### Deprecated
 
