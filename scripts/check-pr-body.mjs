@@ -24,7 +24,25 @@ const REQUIRED_CADENCE_CHECKS = [
   "CodeRabbit dijalankan pada head final; tindak lanjut review akan tetap di PR ini.",
 ];
 
-export function contractErrors(body) {
+const DEPENDABOT_LOGINS = new Set(["dependabot[bot]", "dependabot", "app/dependabot"]);
+
+function isDependabotUpdate(pullRequest) {
+  if (!DEPENDABOT_LOGINS.has(pullRequest?.user?.login)) return false;
+  const title = pullRequest.title ?? "";
+  const body = pullRequest.body ?? "";
+  if (!/^chore\(deps\): bump .+$/i.test(title)) return false;
+
+  return (
+    /^Bumps \[[^\]]+\]\([^)]+\) from \S+ to \S+\./m.test(body) ||
+    /^Updates `[^`]+` from \S+ to \S+/m.test(body) ||
+    /^Bumps .*? and \[[^\]]+\]\([^)]+\)\. These dependencies needed to be updated together\./m.test(
+      body,
+    )
+  );
+}
+
+export function contractErrors(body, pullRequest = undefined) {
+  if (isDependabotUpdate({ ...pullRequest, body })) return [];
   const errors = [];
   if (!body.trim()) return ["body PR kosong"];
 
@@ -67,7 +85,7 @@ function main() {
   if (!eventPath) throw new Error("GITHUB_EVENT_PATH diperlukan untuk memeriksa body pull request");
 
   const event = JSON.parse(readFileSync(eventPath, "utf8"));
-  const errors = contractErrors(event.pull_request?.body ?? "");
+  const errors = contractErrors(event.pull_request?.body ?? "", event.pull_request);
   if (errors.length === 0) {
     console.log("✅ Kontrak body pull request terisi.");
     return;

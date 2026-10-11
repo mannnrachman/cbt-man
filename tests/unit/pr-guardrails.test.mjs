@@ -231,13 +231,51 @@ test("PR body requires CBT-MAN review evidence sections", () => {
     ).some((error) => error.includes("field wajib belum diisi")),
   );
   assert.ok(
-    contractErrors(valid.replace("- [x] CodeRabbit dijalankan", "- [ ] CodeRabbit dijalankan")).some((error) =>
-      error.includes("checkbox cadence wajib dicentang"),
-    ),
+    contractErrors(
+      valid.replace("- [x] CodeRabbit dijalankan", "- [ ] CodeRabbit dijalankan"),
+    ).some((error) => error.includes("checkbox cadence wajib dicentang")),
   );
   assert.ok(
     contractErrors(valid.replace("- [x] Saya sudah mengecek PR aktif saya", "")).some((error) =>
       error.includes("checkbox cadence wajib hilang"),
     ),
+  );
+});
+test("Dependabot lockfile updates satisfy only the bot description contract", () => {
+  const cases = [
+    {
+      title: "chore(deps): bump katex from 0.17.0 to 0.18.2",
+      body: "Bumps [katex](https://github.com/KaTeX/KaTeX) from 0.17.0 to 0.18.2.",
+    },
+    {
+      title: "chore(deps): bump seroval from 1.5.4 to 1.6.9",
+      body: "Bumps [seroval](https://github.com/lxsmnsyc/seroval) from 1.5.4 to 1.6.9.",
+    },
+    {
+      title: "chore(deps): bump brace-expansion",
+      body:
+        "Bumps  and [brace-expansion](https://github.com/juliangruber/brace-expansion). These dependencies needed to be updated together.\nUpdates `brace-expansion` from 1.1.18 to 1.1.21",
+    },
+    {
+      title: "chore(deps): bump source-map-js from 1.2.1 to 1.2.2",
+      body: "Bumps [source-map-js](https://github.com/7rulnik/source-map-js) from 1.2.1 to 1.2.2.",
+    },
+  ];
+
+  for (const { title, body } of cases) {
+    assert.deepEqual(contractErrors(body, { user: { login: "dependabot[bot]" }, title }), []);
+    assert.ok(contractErrors(body, { user: { login: "contributor" }, title }).length > 0);
+  }
+  assert.ok(
+    contractErrors("Bumps dependency", {
+      user: { login: "dependabot[bot]" },
+      title: "chore(deps): bump package",
+    }).length > 0,
+  );
+  assert.ok(
+    contractErrors(cases[0].body, {
+      user: { login: "dependabot[bot]" },
+      title: "feat: skip checks",
+    }).length > 0,
   );
 });
