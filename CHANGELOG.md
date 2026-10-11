@@ -9,7 +9,6 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 ### Added
 
 ### Changed
-- Perbarui framework routing TanStack dan plugin ke patch/minor terbaru dalam rentang semver yang telah dinyatakan.
 
 ### Fixed
 
@@ -19,12 +18,12 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Removed
 
-## [0.2.1] - 2026-10-11
+## [0.2.2] - 2026-10-11
 
 ### Changed
-- Perbarui lockfile ke versi dependency terbaru yang sesuai rentang semver saat ini; upgrade major yang berpotensi memerlukan migrasi ditinjau terpisah (#210).
+- Perbarui framework routing TanStack dan plugin ke patch/minor terbaru dalam rentang semver yang telah dinyatakan (#212).
 
-## [0.2.0] - 2026-10-11
+## [0.2.1] - 2026-10-11
 
 ### Added
 
@@ -242,7 +241,8 @@ Rilis awal: snapshot bertanda dari `main`, bukan klaim siap produksi. Issue audi
 - Jangan mencatat formatting/refactor internal murni kecuali perilaku atau risiko operasional ikut berubah.
 - Saat membuat rilis, pindahkan item `Unreleased` ke heading versi bertanggal, misalnya `## [1.2.0] - 2026-08-09`.
 
-[Unreleased]: https://github.com/mannnrachman/cbt-man/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/mannnrachman/cbt-man/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/mannnrachman/cbt-man/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/mannnrachman/cbt-man/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/mannnrachman/cbt-man/compare/v0.1.3...v0.2.0
 [0.1.3]: https://github.com/mannnrachman/cbt-man/releases/tag/v0.1.3
