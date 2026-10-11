@@ -32,12 +32,17 @@ function isDependabotUpdate(pullRequest) {
   const body = pullRequest.body ?? "";
   if (!/^chore\(deps\): bump .+$/i.test(title)) return false;
 
-  return (
-    /^Bumps \[[^\]]+\]\([^)]+\) from \S+ to \S+\./m.test(body) ||
-    /^Updates `[^`]+` from \S+ to \S+/m.test(body) ||
+  if (
     /^Bumps .*? and \[[^\]]+\]\([^)]+\)\. These dependencies needed to be updated together\./m.test(
       body,
     )
+  ) {
+    return /^Updates `[^`]+` from \S+ to \S+/m.test(body);
+  }
+
+  return (
+    /^Bumps \[[^\]]+\]\([^)]+\) from \S+ to \S+\./m.test(body) ||
+    /^Updates `[^`]+` from \S+ to \S+/m.test(body)
   );
 }
 

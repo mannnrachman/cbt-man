@@ -279,3 +279,15 @@ test("Dependabot lockfile updates satisfy only the bot description contract", ()
     }).length > 0,
   );
 });
+test("Dependabot grouped updates must include package version details", () => {
+  const pullRequest = {
+    user: { login: "dependabot[bot]" },
+    title: "chore(deps): bump brace-expansion",
+  };
+  const header =
+    "Bumps  and [brace-expansion](https://github.com/juliangruber/brace-expansion). These dependencies needed to be updated together.";
+
+  assert.ok(contractErrors(header, pullRequest).length > 0);
+  const completeBody = `${header}\nUpdates ` + "`brace-expansion` from 1.1.18 to 1.1.21";
+  assert.deepEqual(contractErrors(completeBody, pullRequest), []);
+});
