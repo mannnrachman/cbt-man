@@ -90,7 +90,9 @@
     "@prisma/config@6.19.3": {
       "deepmerge-ts": "8.0.0"
     },
-    "argparse": "2.0.1"
+    "mammoth": {
+      "argparse": "2.0.1"
+    }
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",

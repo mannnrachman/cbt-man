@@ -9,6 +9,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 ### Added
 
 ### Changed
+- Perbarui lockfile ke versi dependency terbaru yang sesuai rentang semver saat ini; upgrade major yang berpotensi memerlukan migrasi ditinjau terpisah.
 
 ### Fixed
 
