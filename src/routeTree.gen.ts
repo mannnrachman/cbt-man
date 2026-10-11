@@ -9,57 +9,61 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as LoginAdminRouteImport } from './routes/login-admin'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ApiHealthRouteImport } from './routes/api.health'
-import { Route as AuthenticatedPesertaRouteImport } from './routes/_authenticated/peserta'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as LoginAdminRouteImport } from './routes/login-admin'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
-import { Route as AuthenticatedPesertaIndexRouteImport } from './routes/_authenticated/peserta.index'
+import { Route as AuthenticatedPesertaRouteImport } from './routes/_authenticated/peserta'
+import { Route as ApiHealthRouteImport } from './routes/api.health'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
-import { Route as ApiFilesIdRouteImport } from './routes/api.files.$id'
-import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
-import { Route as AuthenticatedAdminUjianRouteImport } from './routes/_authenticated/admin.ujian'
-import { Route as AuthenticatedAdminToolsRouteImport } from './routes/_authenticated/admin.tools'
-import { Route as AuthenticatedAdminPengaturanRouteImport } from './routes/_authenticated/admin.pengaturan'
-import { Route as AuthenticatedAdminPanduanRouteImport } from './routes/_authenticated/admin.panduan'
-import { Route as AuthenticatedAdminModulRouteImport } from './routes/_authenticated/admin.modul'
-import { Route as AuthenticatedAdminFilesRouteImport } from './routes/_authenticated/admin.files'
-import { Route as AuthenticatedAdminAuditRouteImport } from './routes/_authenticated/admin.audit'
 import { Route as AuthenticatedAdminAkademikRouteImport } from './routes/_authenticated/admin.akademik'
-import { Route as AuthenticatedAdminPesertaIndexRouteImport } from './routes/_authenticated/admin.peserta.index'
-import { Route as AuthenticatedAdminLeaderboardIndexRouteImport } from './routes/_authenticated/admin.leaderboard.index'
-import { Route as AuthenticatedAdminEvaluasiIndexRouteImport } from './routes/_authenticated/admin.evaluasi.index'
-import { Route as AuthenticatedAdminAnalitikIndexRouteImport } from './routes/_authenticated/admin.analitik.index'
+import { Route as AuthenticatedAdminAuditRouteImport } from './routes/_authenticated/admin.audit'
+import { Route as AuthenticatedAdminFilesRouteImport } from './routes/_authenticated/admin.files'
+import { Route as AuthenticatedAdminModulRouteImport } from './routes/_authenticated/admin.modul'
+import { Route as AuthenticatedAdminPanduanRouteImport } from './routes/_authenticated/admin.panduan'
+import { Route as AuthenticatedAdminPengaturanRouteImport } from './routes/_authenticated/admin.pengaturan'
+import { Route as AuthenticatedAdminToolsRouteImport } from './routes/_authenticated/admin.tools'
+import { Route as AuthenticatedAdminUjianRouteImport } from './routes/_authenticated/admin.ujian'
+import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
+import { Route as AuthenticatedPesertaIndexRouteImport } from './routes/_authenticated/peserta.index'
+import { Route as ApiFilesIdRouteImport } from './routes/api.files.$id'
 import { Route as AuthenticatedAdminAkademikIndexRouteImport } from './routes/_authenticated/admin.akademik.index'
-import { Route as AuthenticatedAdminUsersRolesRouteImport } from './routes/_authenticated/admin.users.roles'
-import { Route as AuthenticatedAdminUjianIdRouteImport } from './routes/_authenticated/admin.ujian.$id'
-import { Route as AuthenticatedAdminPesertaOnlineRouteImport } from './routes/_authenticated/admin.peserta.online'
-import { Route as AuthenticatedAdminPesertaKartuRouteImport } from './routes/_authenticated/admin.peserta.kartu'
-import { Route as AuthenticatedAdminModulImportWordRouteImport } from './routes/_authenticated/admin.modul.import-word'
-import { Route as AuthenticatedAdminModulImportRouteImport } from './routes/_authenticated/admin.modul.import'
-import { Route as AuthenticatedAdminLeaderboardIdRouteImport } from './routes/_authenticated/admin.leaderboard.$id'
-import { Route as AuthenticatedAdminEvaluasiIdRouteImport } from './routes/_authenticated/admin.evaluasi.$id'
-import { Route as AuthenticatedAdminAnalitikRekapRouteImport } from './routes/_authenticated/admin.analitik.rekap'
-import { Route as AuthenticatedAdminAnalitikAnalisisRouteImport } from './routes/_authenticated/admin.analitik.analisis'
-import { Route as AuthenticatedAdminAnalitikIdRouteImport } from './routes/_authenticated/admin.analitik.$id'
-import { Route as AuthenticatedAdminAkademikTahunAkademikRouteImport } from './routes/_authenticated/admin.akademik.tahun-akademik'
-import { Route as AuthenticatedAdminAkademikSemesterRouteImport } from './routes/_authenticated/admin.akademik.semester'
-import { Route as AuthenticatedAdminAkademikMataKuliahRouteImport } from './routes/_authenticated/admin.akademik.mata-kuliah'
 import { Route as AuthenticatedAdminAkademikKelasMataKuliahRouteImport } from './routes/_authenticated/admin.akademik.kelas-mata-kuliah'
-import { Route as AuthenticatedPesertaUjianIdIndexRouteImport } from './routes/_authenticated/peserta.ujian.$id.index'
-import { Route as AuthenticatedPesertaUjianIdKerjakanRouteImport } from './routes/_authenticated/peserta.ujian.$id.kerjakan'
-import { Route as AuthenticatedPesertaUjianIdHasilRouteImport } from './routes/_authenticated/peserta.ujian.$id.hasil'
-import { Route as AuthenticatedAdminUjianIdTokenRouteImport } from './routes/_authenticated/admin.ujian.$id.token'
-import { Route as AuthenticatedAdminUjianIdPesertaRouteImport } from './routes/_authenticated/admin.ujian.$id.peserta'
-import { Route as AuthenticatedAdminTopikIdSoalRouteImport } from './routes/_authenticated/admin.topik.$id.soal'
-import { Route as AuthenticatedAdminModulIdTopikRouteImport } from './routes/_authenticated/admin.modul.$id.topik'
+import { Route as AuthenticatedAdminAkademikMataKuliahRouteImport } from './routes/_authenticated/admin.akademik.mata-kuliah'
+import { Route as AuthenticatedAdminAkademikSemesterRouteImport } from './routes/_authenticated/admin.akademik.semester'
+import { Route as AuthenticatedAdminAkademikTahunAkademikRouteImport } from './routes/_authenticated/admin.akademik.tahun-akademik'
+import { Route as AuthenticatedAdminAnalitikIndexRouteImport } from './routes/_authenticated/admin.analitik.index'
+import { Route as AuthenticatedAdminAnalitikIdRouteImport } from './routes/_authenticated/admin.analitik.$id'
+import { Route as AuthenticatedAdminAnalitikAnalisisRouteImport } from './routes/_authenticated/admin.analitik.analisis'
+import { Route as AuthenticatedAdminAnalitikRekapRouteImport } from './routes/_authenticated/admin.analitik.rekap'
+import { Route as AuthenticatedAdminEvaluasiIndexRouteImport } from './routes/_authenticated/admin.evaluasi.index'
+import { Route as AuthenticatedAdminEvaluasiIdRouteImport } from './routes/_authenticated/admin.evaluasi.$id'
+import { Route as AuthenticatedAdminLeaderboardIndexRouteImport } from './routes/_authenticated/admin.leaderboard.index'
+import { Route as AuthenticatedAdminLeaderboardIdRouteImport } from './routes/_authenticated/admin.leaderboard.$id'
+import { Route as AuthenticatedAdminModulImportRouteImport } from './routes/_authenticated/admin.modul.import'
+import { Route as AuthenticatedAdminModulImportWordRouteImport } from './routes/_authenticated/admin.modul.import-word'
+import { Route as AuthenticatedAdminPesertaIndexRouteImport } from './routes/_authenticated/admin.peserta.index'
+import { Route as AuthenticatedAdminPesertaKartuRouteImport } from './routes/_authenticated/admin.peserta.kartu'
+import { Route as AuthenticatedAdminPesertaOnlineRouteImport } from './routes/_authenticated/admin.peserta.online'
+import { Route as AuthenticatedAdminUjianIdRouteImport } from './routes/_authenticated/admin.ujian.$id'
+import { Route as AuthenticatedAdminUsersRolesRouteImport } from './routes/_authenticated/admin.users.roles'
 import { Route as AuthenticatedAdminEvaluasiUjianIdRouteImport } from './routes/_authenticated/admin.evaluasi.ujian.$id'
+import { Route as AuthenticatedAdminModulIdTopikRouteImport } from './routes/_authenticated/admin.modul.$id.topik'
+import { Route as AuthenticatedAdminTopikIdSoalRouteImport } from './routes/_authenticated/admin.topik.$id.soal'
+import { Route as AuthenticatedAdminUjianIdPesertaRouteImport } from './routes/_authenticated/admin.ujian.$id.peserta'
+import { Route as AuthenticatedAdminUjianIdTokenRouteImport } from './routes/_authenticated/admin.ujian.$id.token'
+import { Route as AuthenticatedPesertaUjianIdIndexRouteImport } from './routes/_authenticated/peserta.ujian.$id.index'
+import { Route as AuthenticatedPesertaUjianIdHasilRouteImport } from './routes/_authenticated/peserta.ujian.$id.hasil'
+import { Route as AuthenticatedPesertaUjianIdKerjakanRouteImport } from './routes/_authenticated/peserta.ujian.$id.kerjakan'
 
-const LoginAdminRoute = LoginAdminRouteImport.update({
-  id: '/login-admin',
-  path: '/login-admin',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -67,86 +71,29 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRoute = AuthenticatedRouteImport.update({
-  id: '/_authenticated',
+const LoginAdminRoute = LoginAdminRouteImport.update({
+  id: '/login-admin',
+  path: '/login-admin',
   getParentRoute: () => rootRouteImport,
-} as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiHealthRoute = ApiHealthRouteImport.update({
-  id: '/api/health',
-  path: '/api/health',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedPesertaRoute = AuthenticatedPesertaRouteImport.update({
-  id: '/peserta',
-  path: '/peserta',
-  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedPesertaIndexRoute =
-  AuthenticatedPesertaIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AuthenticatedPesertaRoute,
-  } as any)
+const AuthenticatedPesertaRoute = AuthenticatedPesertaRouteImport.update({
+  id: '/peserta',
+  path: '/peserta',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AuthenticatedAdminRoute,
-} as any)
-const ApiFilesIdRoute = ApiFilesIdRouteImport.update({
-  id: '/api/files/$id',
-  path: '/api/files/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
-  id: '/users',
-  path: '/users',
-  getParentRoute: () => AuthenticatedAdminRoute,
-} as any)
-const AuthenticatedAdminUjianRoute = AuthenticatedAdminUjianRouteImport.update({
-  id: '/ujian',
-  path: '/ujian',
-  getParentRoute: () => AuthenticatedAdminRoute,
-} as any)
-const AuthenticatedAdminToolsRoute = AuthenticatedAdminToolsRouteImport.update({
-  id: '/tools',
-  path: '/tools',
-  getParentRoute: () => AuthenticatedAdminRoute,
-} as any)
-const AuthenticatedAdminPengaturanRoute =
-  AuthenticatedAdminPengaturanRouteImport.update({
-    id: '/pengaturan',
-    path: '/pengaturan',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminPanduanRoute =
-  AuthenticatedAdminPanduanRouteImport.update({
-    id: '/panduan',
-    path: '/panduan',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminModulRoute = AuthenticatedAdminModulRouteImport.update({
-  id: '/modul',
-  path: '/modul',
-  getParentRoute: () => AuthenticatedAdminRoute,
-} as any)
-const AuthenticatedAdminFilesRoute = AuthenticatedAdminFilesRouteImport.update({
-  id: '/files',
-  path: '/files',
-  getParentRoute: () => AuthenticatedAdminRoute,
-} as any)
-const AuthenticatedAdminAuditRoute = AuthenticatedAdminAuditRouteImport.update({
-  id: '/audit',
-  path: '/audit',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
 const AuthenticatedAdminAkademikRoute =
@@ -155,118 +102,63 @@ const AuthenticatedAdminAkademikRoute =
     path: '/akademik',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
-const AuthenticatedAdminPesertaIndexRoute =
-  AuthenticatedAdminPesertaIndexRouteImport.update({
-    id: '/peserta/',
-    path: '/peserta/',
+const AuthenticatedAdminAuditRoute = AuthenticatedAdminAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminFilesRoute = AuthenticatedAdminFilesRouteImport.update({
+  id: '/files',
+  path: '/files',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminModulRoute = AuthenticatedAdminModulRouteImport.update({
+  id: '/modul',
+  path: '/modul',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminPanduanRoute =
+  AuthenticatedAdminPanduanRouteImport.update({
+    id: '/panduan',
+    path: '/panduan',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
-const AuthenticatedAdminLeaderboardIndexRoute =
-  AuthenticatedAdminLeaderboardIndexRouteImport.update({
-    id: '/leaderboard/',
-    path: '/leaderboard/',
+const AuthenticatedAdminPengaturanRoute =
+  AuthenticatedAdminPengaturanRouteImport.update({
+    id: '/pengaturan',
+    path: '/pengaturan',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
-const AuthenticatedAdminEvaluasiIndexRoute =
-  AuthenticatedAdminEvaluasiIndexRouteImport.update({
-    id: '/evaluasi/',
-    path: '/evaluasi/',
-    getParentRoute: () => AuthenticatedAdminRoute,
+const AuthenticatedAdminToolsRoute = AuthenticatedAdminToolsRouteImport.update({
+  id: '/tools',
+  path: '/tools',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminUjianRoute = AuthenticatedAdminUjianRouteImport.update({
+  id: '/ujian',
+  path: '/ujian',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedPesertaIndexRoute =
+  AuthenticatedPesertaIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedPesertaRoute,
   } as any)
-const AuthenticatedAdminAnalitikIndexRoute =
-  AuthenticatedAdminAnalitikIndexRouteImport.update({
-    id: '/analitik/',
-    path: '/analitik/',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
+const ApiFilesIdRoute = ApiFilesIdRouteImport.update({
+  id: '/api/files/$id',
+  path: '/api/files/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminAkademikIndexRoute =
   AuthenticatedAdminAkademikIndexRouteImport.update({
     id: '/',
     path: '/',
-    getParentRoute: () => AuthenticatedAdminAkademikRoute,
-  } as any)
-const AuthenticatedAdminUsersRolesRoute =
-  AuthenticatedAdminUsersRolesRouteImport.update({
-    id: '/roles',
-    path: '/roles',
-    getParentRoute: () => AuthenticatedAdminUsersRoute,
-  } as any)
-const AuthenticatedAdminUjianIdRoute =
-  AuthenticatedAdminUjianIdRouteImport.update({
-    id: '/$id',
-    path: '/$id',
-    getParentRoute: () => AuthenticatedAdminUjianRoute,
-  } as any)
-const AuthenticatedAdminPesertaOnlineRoute =
-  AuthenticatedAdminPesertaOnlineRouteImport.update({
-    id: '/peserta/online',
-    path: '/peserta/online',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminPesertaKartuRoute =
-  AuthenticatedAdminPesertaKartuRouteImport.update({
-    id: '/peserta/kartu',
-    path: '/peserta/kartu',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminModulImportWordRoute =
-  AuthenticatedAdminModulImportWordRouteImport.update({
-    id: '/import-word',
-    path: '/import-word',
-    getParentRoute: () => AuthenticatedAdminModulRoute,
-  } as any)
-const AuthenticatedAdminModulImportRoute =
-  AuthenticatedAdminModulImportRouteImport.update({
-    id: '/import',
-    path: '/import',
-    getParentRoute: () => AuthenticatedAdminModulRoute,
-  } as any)
-const AuthenticatedAdminLeaderboardIdRoute =
-  AuthenticatedAdminLeaderboardIdRouteImport.update({
-    id: '/leaderboard/$id',
-    path: '/leaderboard/$id',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminEvaluasiIdRoute =
-  AuthenticatedAdminEvaluasiIdRouteImport.update({
-    id: '/evaluasi/$id',
-    path: '/evaluasi/$id',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminAnalitikRekapRoute =
-  AuthenticatedAdminAnalitikRekapRouteImport.update({
-    id: '/analitik/rekap',
-    path: '/analitik/rekap',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminAnalitikAnalisisRoute =
-  AuthenticatedAdminAnalitikAnalisisRouteImport.update({
-    id: '/analitik/analisis',
-    path: '/analitik/analisis',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminAnalitikIdRoute =
-  AuthenticatedAdminAnalitikIdRouteImport.update({
-    id: '/analitik/$id',
-    path: '/analitik/$id',
-    getParentRoute: () => AuthenticatedAdminRoute,
-  } as any)
-const AuthenticatedAdminAkademikTahunAkademikRoute =
-  AuthenticatedAdminAkademikTahunAkademikRouteImport.update({
-    id: '/tahun-akademik',
-    path: '/tahun-akademik',
-    getParentRoute: () => AuthenticatedAdminAkademikRoute,
-  } as any)
-const AuthenticatedAdminAkademikSemesterRoute =
-  AuthenticatedAdminAkademikSemesterRouteImport.update({
-    id: '/semester',
-    path: '/semester',
-    getParentRoute: () => AuthenticatedAdminAkademikRoute,
-  } as any)
-const AuthenticatedAdminAkademikMataKuliahRoute =
-  AuthenticatedAdminAkademikMataKuliahRouteImport.update({
-    id: '/mata-kuliah',
-    path: '/mata-kuliah',
     getParentRoute: () => AuthenticatedAdminAkademikRoute,
   } as any)
 const AuthenticatedAdminAkademikKelasMataKuliahRoute =
@@ -275,40 +167,118 @@ const AuthenticatedAdminAkademikKelasMataKuliahRoute =
     path: '/kelas-mata-kuliah',
     getParentRoute: () => AuthenticatedAdminAkademikRoute,
   } as any)
-const AuthenticatedPesertaUjianIdIndexRoute =
-  AuthenticatedPesertaUjianIdIndexRouteImport.update({
-    id: '/ujian/$id/',
-    path: '/ujian/$id/',
-    getParentRoute: () => AuthenticatedPesertaRoute,
+const AuthenticatedAdminAkademikMataKuliahRoute =
+  AuthenticatedAdminAkademikMataKuliahRouteImport.update({
+    id: '/mata-kuliah',
+    path: '/mata-kuliah',
+    getParentRoute: () => AuthenticatedAdminAkademikRoute,
   } as any)
-const AuthenticatedPesertaUjianIdKerjakanRoute =
-  AuthenticatedPesertaUjianIdKerjakanRouteImport.update({
-    id: '/ujian/$id/kerjakan',
-    path: '/ujian/$id/kerjakan',
-    getParentRoute: () => AuthenticatedPesertaRoute,
+const AuthenticatedAdminAkademikSemesterRoute =
+  AuthenticatedAdminAkademikSemesterRouteImport.update({
+    id: '/semester',
+    path: '/semester',
+    getParentRoute: () => AuthenticatedAdminAkademikRoute,
   } as any)
-const AuthenticatedPesertaUjianIdHasilRoute =
-  AuthenticatedPesertaUjianIdHasilRouteImport.update({
-    id: '/ujian/$id/hasil',
-    path: '/ujian/$id/hasil',
-    getParentRoute: () => AuthenticatedPesertaRoute,
+const AuthenticatedAdminAkademikTahunAkademikRoute =
+  AuthenticatedAdminAkademikTahunAkademikRouteImport.update({
+    id: '/tahun-akademik',
+    path: '/tahun-akademik',
+    getParentRoute: () => AuthenticatedAdminAkademikRoute,
   } as any)
-const AuthenticatedAdminUjianIdTokenRoute =
-  AuthenticatedAdminUjianIdTokenRouteImport.update({
-    id: '/token',
-    path: '/token',
-    getParentRoute: () => AuthenticatedAdminUjianIdRoute,
+const AuthenticatedAdminAnalitikIndexRoute =
+  AuthenticatedAdminAnalitikIndexRouteImport.update({
+    id: '/analitik/',
+    path: '/analitik/',
+    getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
-const AuthenticatedAdminUjianIdPesertaRoute =
-  AuthenticatedAdminUjianIdPesertaRouteImport.update({
-    id: '/peserta',
-    path: '/peserta',
-    getParentRoute: () => AuthenticatedAdminUjianIdRoute,
+const AuthenticatedAdminAnalitikIdRoute =
+  AuthenticatedAdminAnalitikIdRouteImport.update({
+    id: '/analitik/$id',
+    path: '/analitik/$id',
+    getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
-const AuthenticatedAdminTopikIdSoalRoute =
-  AuthenticatedAdminTopikIdSoalRouteImport.update({
-    id: '/topik/$id/soal',
-    path: '/topik/$id/soal',
+const AuthenticatedAdminAnalitikAnalisisRoute =
+  AuthenticatedAdminAnalitikAnalisisRouteImport.update({
+    id: '/analitik/analisis',
+    path: '/analitik/analisis',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminAnalitikRekapRoute =
+  AuthenticatedAdminAnalitikRekapRouteImport.update({
+    id: '/analitik/rekap',
+    path: '/analitik/rekap',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminEvaluasiIndexRoute =
+  AuthenticatedAdminEvaluasiIndexRouteImport.update({
+    id: '/evaluasi/',
+    path: '/evaluasi/',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminEvaluasiIdRoute =
+  AuthenticatedAdminEvaluasiIdRouteImport.update({
+    id: '/evaluasi/$id',
+    path: '/evaluasi/$id',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminLeaderboardIndexRoute =
+  AuthenticatedAdminLeaderboardIndexRouteImport.update({
+    id: '/leaderboard/',
+    path: '/leaderboard/',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminLeaderboardIdRoute =
+  AuthenticatedAdminLeaderboardIdRouteImport.update({
+    id: '/leaderboard/$id',
+    path: '/leaderboard/$id',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminModulImportRoute =
+  AuthenticatedAdminModulImportRouteImport.update({
+    id: '/import',
+    path: '/import',
+    getParentRoute: () => AuthenticatedAdminModulRoute,
+  } as any)
+const AuthenticatedAdminModulImportWordRoute =
+  AuthenticatedAdminModulImportWordRouteImport.update({
+    id: '/import-word',
+    path: '/import-word',
+    getParentRoute: () => AuthenticatedAdminModulRoute,
+  } as any)
+const AuthenticatedAdminPesertaIndexRoute =
+  AuthenticatedAdminPesertaIndexRouteImport.update({
+    id: '/peserta/',
+    path: '/peserta/',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminPesertaKartuRoute =
+  AuthenticatedAdminPesertaKartuRouteImport.update({
+    id: '/peserta/kartu',
+    path: '/peserta/kartu',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminPesertaOnlineRoute =
+  AuthenticatedAdminPesertaOnlineRouteImport.update({
+    id: '/peserta/online',
+    path: '/peserta/online',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminUjianIdRoute =
+  AuthenticatedAdminUjianIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedAdminUjianRoute,
+  } as any)
+const AuthenticatedAdminUsersRolesRoute =
+  AuthenticatedAdminUsersRolesRouteImport.update({
+    id: '/roles',
+    path: '/roles',
+    getParentRoute: () => AuthenticatedAdminUsersRoute,
+  } as any)
+const AuthenticatedAdminEvaluasiUjianIdRoute =
+  AuthenticatedAdminEvaluasiUjianIdRouteImport.update({
+    id: '/evaluasi/ujian/$id',
+    path: '/evaluasi/ujian/$id',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminModulIdTopikRoute =
@@ -317,11 +287,41 @@ const AuthenticatedAdminModulIdTopikRoute =
     path: '/$id/topik',
     getParentRoute: () => AuthenticatedAdminModulRoute,
   } as any)
-const AuthenticatedAdminEvaluasiUjianIdRoute =
-  AuthenticatedAdminEvaluasiUjianIdRouteImport.update({
-    id: '/evaluasi/ujian/$id',
-    path: '/evaluasi/ujian/$id',
+const AuthenticatedAdminTopikIdSoalRoute =
+  AuthenticatedAdminTopikIdSoalRouteImport.update({
+    id: '/topik/$id/soal',
+    path: '/topik/$id/soal',
     getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminUjianIdPesertaRoute =
+  AuthenticatedAdminUjianIdPesertaRouteImport.update({
+    id: '/peserta',
+    path: '/peserta',
+    getParentRoute: () => AuthenticatedAdminUjianIdRoute,
+  } as any)
+const AuthenticatedAdminUjianIdTokenRoute =
+  AuthenticatedAdminUjianIdTokenRouteImport.update({
+    id: '/token',
+    path: '/token',
+    getParentRoute: () => AuthenticatedAdminUjianIdRoute,
+  } as any)
+const AuthenticatedPesertaUjianIdIndexRoute =
+  AuthenticatedPesertaUjianIdIndexRouteImport.update({
+    id: '/ujian/$id/',
+    path: '/ujian/$id/',
+    getParentRoute: () => AuthenticatedPesertaRoute,
+  } as any)
+const AuthenticatedPesertaUjianIdHasilRoute =
+  AuthenticatedPesertaUjianIdHasilRouteImport.update({
+    id: '/ujian/$id/hasil',
+    path: '/ujian/$id/hasil',
+    getParentRoute: () => AuthenticatedPesertaRoute,
+  } as any)
+const AuthenticatedPesertaUjianIdKerjakanRoute =
+  AuthenticatedPesertaUjianIdKerjakanRouteImport.update({
+    id: '/ujian/$id/kerjakan',
+    path: '/ujian/$id/kerjakan',
+    getParentRoute: () => AuthenticatedPesertaRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -623,18 +623,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/login-admin': {
-      id: '/login-admin'
-      path: '/login-admin'
-      fullPath: '/login-admin'
-      preLoaderRoute: typeof LoginAdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -644,26 +637,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/health': {
-      id: '/api/health'
-      path: '/api/health'
-      fullPath: '/api/health'
-      preLoaderRoute: typeof ApiHealthRouteImport
+    '/login-admin': {
+      id: '/login-admin'
+      path: '/login-admin'
+      fullPath: '/login-admin'
+      preLoaderRoute: typeof LoginAdminRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/peserta': {
-      id: '/_authenticated/peserta'
-      path: '/peserta'
-      fullPath: '/peserta'
-      preLoaderRoute: typeof AuthenticatedPesertaRouteImport
-      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
@@ -672,81 +658,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/peserta/': {
-      id: '/_authenticated/peserta/'
-      path: '/'
-      fullPath: '/peserta/'
-      preLoaderRoute: typeof AuthenticatedPesertaIndexRouteImport
-      parentRoute: typeof AuthenticatedPesertaRoute
+    '/_authenticated/peserta': {
+      id: '/_authenticated/peserta'
+      path: '/peserta'
+      fullPath: '/peserta'
+      preLoaderRoute: typeof AuthenticatedPesertaRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin/': {
       id: '/_authenticated/admin/'
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/api/files/$id': {
-      id: '/api/files/$id'
-      path: '/api/files/$id'
-      fullPath: '/api/files/$id'
-      preLoaderRoute: typeof ApiFilesIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/admin/users': {
-      id: '/_authenticated/admin/users'
-      path: '/users'
-      fullPath: '/admin/users'
-      preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/ujian': {
-      id: '/_authenticated/admin/ujian'
-      path: '/ujian'
-      fullPath: '/admin/ujian'
-      preLoaderRoute: typeof AuthenticatedAdminUjianRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/tools': {
-      id: '/_authenticated/admin/tools'
-      path: '/tools'
-      fullPath: '/admin/tools'
-      preLoaderRoute: typeof AuthenticatedAdminToolsRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/pengaturan': {
-      id: '/_authenticated/admin/pengaturan'
-      path: '/pengaturan'
-      fullPath: '/admin/pengaturan'
-      preLoaderRoute: typeof AuthenticatedAdminPengaturanRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/panduan': {
-      id: '/_authenticated/admin/panduan'
-      path: '/panduan'
-      fullPath: '/admin/panduan'
-      preLoaderRoute: typeof AuthenticatedAdminPanduanRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/modul': {
-      id: '/_authenticated/admin/modul'
-      path: '/modul'
-      fullPath: '/admin/modul'
-      preLoaderRoute: typeof AuthenticatedAdminModulRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/files': {
-      id: '/_authenticated/admin/files'
-      path: '/files'
-      fullPath: '/admin/files'
-      preLoaderRoute: typeof AuthenticatedAdminFilesRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/audit': {
-      id: '/_authenticated/admin/audit'
-      path: '/audit'
-      fullPath: '/admin/audit'
-      preLoaderRoute: typeof AuthenticatedAdminAuditRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/akademik': {
@@ -756,137 +686,81 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAkademikRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/admin/peserta/': {
-      id: '/_authenticated/admin/peserta/'
-      path: '/peserta'
-      fullPath: '/admin/peserta/'
-      preLoaderRoute: typeof AuthenticatedAdminPesertaIndexRouteImport
+    '/_authenticated/admin/audit': {
+      id: '/_authenticated/admin/audit'
+      path: '/audit'
+      fullPath: '/admin/audit'
+      preLoaderRoute: typeof AuthenticatedAdminAuditRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/admin/leaderboard/': {
-      id: '/_authenticated/admin/leaderboard/'
-      path: '/leaderboard'
-      fullPath: '/admin/leaderboard/'
-      preLoaderRoute: typeof AuthenticatedAdminLeaderboardIndexRouteImport
+    '/_authenticated/admin/files': {
+      id: '/_authenticated/admin/files'
+      path: '/files'
+      fullPath: '/admin/files'
+      preLoaderRoute: typeof AuthenticatedAdminFilesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/admin/evaluasi/': {
-      id: '/_authenticated/admin/evaluasi/'
-      path: '/evaluasi'
-      fullPath: '/admin/evaluasi/'
-      preLoaderRoute: typeof AuthenticatedAdminEvaluasiIndexRouteImport
+    '/_authenticated/admin/modul': {
+      id: '/_authenticated/admin/modul'
+      path: '/modul'
+      fullPath: '/admin/modul'
+      preLoaderRoute: typeof AuthenticatedAdminModulRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/admin/analitik/': {
-      id: '/_authenticated/admin/analitik/'
-      path: '/analitik'
-      fullPath: '/admin/analitik/'
-      preLoaderRoute: typeof AuthenticatedAdminAnalitikIndexRouteImport
+    '/_authenticated/admin/panduan': {
+      id: '/_authenticated/admin/panduan'
+      path: '/panduan'
+      fullPath: '/admin/panduan'
+      preLoaderRoute: typeof AuthenticatedAdminPanduanRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/pengaturan': {
+      id: '/_authenticated/admin/pengaturan'
+      path: '/pengaturan'
+      fullPath: '/admin/pengaturan'
+      preLoaderRoute: typeof AuthenticatedAdminPengaturanRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/tools': {
+      id: '/_authenticated/admin/tools'
+      path: '/tools'
+      fullPath: '/admin/tools'
+      preLoaderRoute: typeof AuthenticatedAdminToolsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/ujian': {
+      id: '/_authenticated/admin/ujian'
+      path: '/ujian'
+      fullPath: '/admin/ujian'
+      preLoaderRoute: typeof AuthenticatedAdminUjianRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/users': {
+      id: '/_authenticated/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/peserta/': {
+      id: '/_authenticated/peserta/'
+      path: '/'
+      fullPath: '/peserta/'
+      preLoaderRoute: typeof AuthenticatedPesertaIndexRouteImport
+      parentRoute: typeof AuthenticatedPesertaRoute
+    }
+    '/api/files/$id': {
+      id: '/api/files/$id'
+      path: '/api/files/$id'
+      fullPath: '/api/files/$id'
+      preLoaderRoute: typeof ApiFilesIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin/akademik/': {
       id: '/_authenticated/admin/akademik/'
       path: '/'
       fullPath: '/admin/akademik/'
       preLoaderRoute: typeof AuthenticatedAdminAkademikIndexRouteImport
-      parentRoute: typeof AuthenticatedAdminAkademikRoute
-    }
-    '/_authenticated/admin/users/roles': {
-      id: '/_authenticated/admin/users/roles'
-      path: '/roles'
-      fullPath: '/admin/users/roles'
-      preLoaderRoute: typeof AuthenticatedAdminUsersRolesRouteImport
-      parentRoute: typeof AuthenticatedAdminUsersRoute
-    }
-    '/_authenticated/admin/ujian/$id': {
-      id: '/_authenticated/admin/ujian/$id'
-      path: '/$id'
-      fullPath: '/admin/ujian/$id'
-      preLoaderRoute: typeof AuthenticatedAdminUjianIdRouteImport
-      parentRoute: typeof AuthenticatedAdminUjianRoute
-    }
-    '/_authenticated/admin/peserta/online': {
-      id: '/_authenticated/admin/peserta/online'
-      path: '/peserta/online'
-      fullPath: '/admin/peserta/online'
-      preLoaderRoute: typeof AuthenticatedAdminPesertaOnlineRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/peserta/kartu': {
-      id: '/_authenticated/admin/peserta/kartu'
-      path: '/peserta/kartu'
-      fullPath: '/admin/peserta/kartu'
-      preLoaderRoute: typeof AuthenticatedAdminPesertaKartuRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/modul/import-word': {
-      id: '/_authenticated/admin/modul/import-word'
-      path: '/import-word'
-      fullPath: '/admin/modul/import-word'
-      preLoaderRoute: typeof AuthenticatedAdminModulImportWordRouteImport
-      parentRoute: typeof AuthenticatedAdminModulRoute
-    }
-    '/_authenticated/admin/modul/import': {
-      id: '/_authenticated/admin/modul/import'
-      path: '/import'
-      fullPath: '/admin/modul/import'
-      preLoaderRoute: typeof AuthenticatedAdminModulImportRouteImport
-      parentRoute: typeof AuthenticatedAdminModulRoute
-    }
-    '/_authenticated/admin/leaderboard/$id': {
-      id: '/_authenticated/admin/leaderboard/$id'
-      path: '/leaderboard/$id'
-      fullPath: '/admin/leaderboard/$id'
-      preLoaderRoute: typeof AuthenticatedAdminLeaderboardIdRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/evaluasi/$id': {
-      id: '/_authenticated/admin/evaluasi/$id'
-      path: '/evaluasi/$id'
-      fullPath: '/admin/evaluasi/$id'
-      preLoaderRoute: typeof AuthenticatedAdminEvaluasiIdRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/analitik/rekap': {
-      id: '/_authenticated/admin/analitik/rekap'
-      path: '/analitik/rekap'
-      fullPath: '/admin/analitik/rekap'
-      preLoaderRoute: typeof AuthenticatedAdminAnalitikRekapRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/analitik/analisis': {
-      id: '/_authenticated/admin/analitik/analisis'
-      path: '/analitik/analisis'
-      fullPath: '/admin/analitik/analisis'
-      preLoaderRoute: typeof AuthenticatedAdminAnalitikAnalisisRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/analitik/$id': {
-      id: '/_authenticated/admin/analitik/$id'
-      path: '/analitik/$id'
-      fullPath: '/admin/analitik/$id'
-      preLoaderRoute: typeof AuthenticatedAdminAnalitikIdRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/akademik/tahun-akademik': {
-      id: '/_authenticated/admin/akademik/tahun-akademik'
-      path: '/tahun-akademik'
-      fullPath: '/admin/akademik/tahun-akademik'
-      preLoaderRoute: typeof AuthenticatedAdminAkademikTahunAkademikRouteImport
-      parentRoute: typeof AuthenticatedAdminAkademikRoute
-    }
-    '/_authenticated/admin/akademik/semester': {
-      id: '/_authenticated/admin/akademik/semester'
-      path: '/semester'
-      fullPath: '/admin/akademik/semester'
-      preLoaderRoute: typeof AuthenticatedAdminAkademikSemesterRouteImport
-      parentRoute: typeof AuthenticatedAdminAkademikRoute
-    }
-    '/_authenticated/admin/akademik/mata-kuliah': {
-      id: '/_authenticated/admin/akademik/mata-kuliah'
-      path: '/mata-kuliah'
-      fullPath: '/admin/akademik/mata-kuliah'
-      preLoaderRoute: typeof AuthenticatedAdminAkademikMataKuliahRouteImport
       parentRoute: typeof AuthenticatedAdminAkademikRoute
     }
     '/_authenticated/admin/akademik/kelas-mata-kuliah': {
@@ -896,46 +770,137 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAkademikKelasMataKuliahRouteImport
       parentRoute: typeof AuthenticatedAdminAkademikRoute
     }
-    '/_authenticated/peserta/ujian/$id/': {
-      id: '/_authenticated/peserta/ujian/$id/'
-      path: '/ujian/$id'
-      fullPath: '/peserta/ujian/$id/'
-      preLoaderRoute: typeof AuthenticatedPesertaUjianIdIndexRouteImport
-      parentRoute: typeof AuthenticatedPesertaRoute
+    '/_authenticated/admin/akademik/mata-kuliah': {
+      id: '/_authenticated/admin/akademik/mata-kuliah'
+      path: '/mata-kuliah'
+      fullPath: '/admin/akademik/mata-kuliah'
+      preLoaderRoute: typeof AuthenticatedAdminAkademikMataKuliahRouteImport
+      parentRoute: typeof AuthenticatedAdminAkademikRoute
     }
-    '/_authenticated/peserta/ujian/$id/kerjakan': {
-      id: '/_authenticated/peserta/ujian/$id/kerjakan'
-      path: '/ujian/$id/kerjakan'
-      fullPath: '/peserta/ujian/$id/kerjakan'
-      preLoaderRoute: typeof AuthenticatedPesertaUjianIdKerjakanRouteImport
-      parentRoute: typeof AuthenticatedPesertaRoute
+    '/_authenticated/admin/akademik/semester': {
+      id: '/_authenticated/admin/akademik/semester'
+      path: '/semester'
+      fullPath: '/admin/akademik/semester'
+      preLoaderRoute: typeof AuthenticatedAdminAkademikSemesterRouteImport
+      parentRoute: typeof AuthenticatedAdminAkademikRoute
     }
-    '/_authenticated/peserta/ujian/$id/hasil': {
-      id: '/_authenticated/peserta/ujian/$id/hasil'
-      path: '/ujian/$id/hasil'
-      fullPath: '/peserta/ujian/$id/hasil'
-      preLoaderRoute: typeof AuthenticatedPesertaUjianIdHasilRouteImport
-      parentRoute: typeof AuthenticatedPesertaRoute
+    '/_authenticated/admin/akademik/tahun-akademik': {
+      id: '/_authenticated/admin/akademik/tahun-akademik'
+      path: '/tahun-akademik'
+      fullPath: '/admin/akademik/tahun-akademik'
+      preLoaderRoute: typeof AuthenticatedAdminAkademikTahunAkademikRouteImport
+      parentRoute: typeof AuthenticatedAdminAkademikRoute
     }
-    '/_authenticated/admin/ujian/$id/token': {
-      id: '/_authenticated/admin/ujian/$id/token'
-      path: '/token'
-      fullPath: '/admin/ujian/$id/token'
-      preLoaderRoute: typeof AuthenticatedAdminUjianIdTokenRouteImport
-      parentRoute: typeof AuthenticatedAdminUjianIdRoute
+    '/_authenticated/admin/analitik/': {
+      id: '/_authenticated/admin/analitik/'
+      path: '/analitik'
+      fullPath: '/admin/analitik/'
+      preLoaderRoute: typeof AuthenticatedAdminAnalitikIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/admin/ujian/$id/peserta': {
-      id: '/_authenticated/admin/ujian/$id/peserta'
+    '/_authenticated/admin/analitik/$id': {
+      id: '/_authenticated/admin/analitik/$id'
+      path: '/analitik/$id'
+      fullPath: '/admin/analitik/$id'
+      preLoaderRoute: typeof AuthenticatedAdminAnalitikIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/analitik/analisis': {
+      id: '/_authenticated/admin/analitik/analisis'
+      path: '/analitik/analisis'
+      fullPath: '/admin/analitik/analisis'
+      preLoaderRoute: typeof AuthenticatedAdminAnalitikAnalisisRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/analitik/rekap': {
+      id: '/_authenticated/admin/analitik/rekap'
+      path: '/analitik/rekap'
+      fullPath: '/admin/analitik/rekap'
+      preLoaderRoute: typeof AuthenticatedAdminAnalitikRekapRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/evaluasi/': {
+      id: '/_authenticated/admin/evaluasi/'
+      path: '/evaluasi'
+      fullPath: '/admin/evaluasi/'
+      preLoaderRoute: typeof AuthenticatedAdminEvaluasiIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/evaluasi/$id': {
+      id: '/_authenticated/admin/evaluasi/$id'
+      path: '/evaluasi/$id'
+      fullPath: '/admin/evaluasi/$id'
+      preLoaderRoute: typeof AuthenticatedAdminEvaluasiIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/leaderboard/': {
+      id: '/_authenticated/admin/leaderboard/'
+      path: '/leaderboard'
+      fullPath: '/admin/leaderboard/'
+      preLoaderRoute: typeof AuthenticatedAdminLeaderboardIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/leaderboard/$id': {
+      id: '/_authenticated/admin/leaderboard/$id'
+      path: '/leaderboard/$id'
+      fullPath: '/admin/leaderboard/$id'
+      preLoaderRoute: typeof AuthenticatedAdminLeaderboardIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/modul/import': {
+      id: '/_authenticated/admin/modul/import'
+      path: '/import'
+      fullPath: '/admin/modul/import'
+      preLoaderRoute: typeof AuthenticatedAdminModulImportRouteImport
+      parentRoute: typeof AuthenticatedAdminModulRoute
+    }
+    '/_authenticated/admin/modul/import-word': {
+      id: '/_authenticated/admin/modul/import-word'
+      path: '/import-word'
+      fullPath: '/admin/modul/import-word'
+      preLoaderRoute: typeof AuthenticatedAdminModulImportWordRouteImport
+      parentRoute: typeof AuthenticatedAdminModulRoute
+    }
+    '/_authenticated/admin/peserta/': {
+      id: '/_authenticated/admin/peserta/'
       path: '/peserta'
-      fullPath: '/admin/ujian/$id/peserta'
-      preLoaderRoute: typeof AuthenticatedAdminUjianIdPesertaRouteImport
-      parentRoute: typeof AuthenticatedAdminUjianIdRoute
+      fullPath: '/admin/peserta/'
+      preLoaderRoute: typeof AuthenticatedAdminPesertaIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
     }
-    '/_authenticated/admin/topik/$id/soal': {
-      id: '/_authenticated/admin/topik/$id/soal'
-      path: '/topik/$id/soal'
-      fullPath: '/admin/topik/$id/soal'
-      preLoaderRoute: typeof AuthenticatedAdminTopikIdSoalRouteImport
+    '/_authenticated/admin/peserta/kartu': {
+      id: '/_authenticated/admin/peserta/kartu'
+      path: '/peserta/kartu'
+      fullPath: '/admin/peserta/kartu'
+      preLoaderRoute: typeof AuthenticatedAdminPesertaKartuRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/peserta/online': {
+      id: '/_authenticated/admin/peserta/online'
+      path: '/peserta/online'
+      fullPath: '/admin/peserta/online'
+      preLoaderRoute: typeof AuthenticatedAdminPesertaOnlineRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/ujian/$id': {
+      id: '/_authenticated/admin/ujian/$id'
+      path: '/$id'
+      fullPath: '/admin/ujian/$id'
+      preLoaderRoute: typeof AuthenticatedAdminUjianIdRouteImport
+      parentRoute: typeof AuthenticatedAdminUjianRoute
+    }
+    '/_authenticated/admin/users/roles': {
+      id: '/_authenticated/admin/users/roles'
+      path: '/roles'
+      fullPath: '/admin/users/roles'
+      preLoaderRoute: typeof AuthenticatedAdminUsersRolesRouteImport
+      parentRoute: typeof AuthenticatedAdminUsersRoute
+    }
+    '/_authenticated/admin/evaluasi/ujian/$id': {
+      id: '/_authenticated/admin/evaluasi/ujian/$id'
+      path: '/evaluasi/ujian/$id'
+      fullPath: '/admin/evaluasi/ujian/$id'
+      preLoaderRoute: typeof AuthenticatedAdminEvaluasiUjianIdRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/modul/$id/topik': {
@@ -945,12 +910,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminModulIdTopikRouteImport
       parentRoute: typeof AuthenticatedAdminModulRoute
     }
-    '/_authenticated/admin/evaluasi/ujian/$id': {
-      id: '/_authenticated/admin/evaluasi/ujian/$id'
-      path: '/evaluasi/ujian/$id'
-      fullPath: '/admin/evaluasi/ujian/$id'
-      preLoaderRoute: typeof AuthenticatedAdminEvaluasiUjianIdRouteImport
+    '/_authenticated/admin/topik/$id/soal': {
+      id: '/_authenticated/admin/topik/$id/soal'
+      path: '/topik/$id/soal'
+      fullPath: '/admin/topik/$id/soal'
+      preLoaderRoute: typeof AuthenticatedAdminTopikIdSoalRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/ujian/$id/peserta': {
+      id: '/_authenticated/admin/ujian/$id/peserta'
+      path: '/peserta'
+      fullPath: '/admin/ujian/$id/peserta'
+      preLoaderRoute: typeof AuthenticatedAdminUjianIdPesertaRouteImport
+      parentRoute: typeof AuthenticatedAdminUjianIdRoute
+    }
+    '/_authenticated/admin/ujian/$id/token': {
+      id: '/_authenticated/admin/ujian/$id/token'
+      path: '/token'
+      fullPath: '/admin/ujian/$id/token'
+      preLoaderRoute: typeof AuthenticatedAdminUjianIdTokenRouteImport
+      parentRoute: typeof AuthenticatedAdminUjianIdRoute
+    }
+    '/_authenticated/peserta/ujian/$id/': {
+      id: '/_authenticated/peserta/ujian/$id/'
+      path: '/ujian/$id'
+      fullPath: '/peserta/ujian/$id/'
+      preLoaderRoute: typeof AuthenticatedPesertaUjianIdIndexRouteImport
+      parentRoute: typeof AuthenticatedPesertaRoute
+    }
+    '/_authenticated/peserta/ujian/$id/hasil': {
+      id: '/_authenticated/peserta/ujian/$id/hasil'
+      path: '/ujian/$id/hasil'
+      fullPath: '/peserta/ujian/$id/hasil'
+      preLoaderRoute: typeof AuthenticatedPesertaUjianIdHasilRouteImport
+      parentRoute: typeof AuthenticatedPesertaRoute
+    }
+    '/_authenticated/peserta/ujian/$id/kerjakan': {
+      id: '/_authenticated/peserta/ujian/$id/kerjakan'
+      path: '/ujian/$id/kerjakan'
+      fullPath: '/peserta/ujian/$id/kerjakan'
+      preLoaderRoute: typeof AuthenticatedPesertaUjianIdKerjakanRouteImport
+      parentRoute: typeof AuthenticatedPesertaRoute
     }
   }
 }

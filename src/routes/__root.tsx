@@ -7,6 +7,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import type { ErrorComponentProps } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
 import { Toaster } from "@/components/ui/sonner";
@@ -34,10 +35,11 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
   const showDetails = import.meta.env.DEV;
+  const errorDetails = error instanceof Error ? error.stack ?? error.message : String(error);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -54,7 +56,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
               Detail error (development)
             </summary>
             <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap break-words rounded-md border border-destructive/30 bg-destructive/5 p-3 text-left text-xs text-destructive">
-              {error?.stack ?? error?.message ?? String(error)}
+              {errorDetails}
             </pre>
           </details>
         )}

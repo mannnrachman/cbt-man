@@ -9,6 +9,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 ### Added
 
 ### Changed
+- Perbarui framework routing TanStack dan plugin ke patch/minor terbaru dalam rentang semver yang telah dinyatakan.
 
 ### Fixed
 
