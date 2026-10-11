@@ -8,6 +8,20 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Added
 
+### Changed
+
+### Fixed
+
+### Security
+
+### Deprecated
+
+### Removed
+
+## [0.2.0] - 2026-10-11
+
+### Added
+
 - Fitur perpanjangan waktu tutup paket ujian published melalui aksi server terbatas (`extendJadwalUjianServer`), untuk peserta yang belum memulai sesi. Batas waktu sesi yang sudah berjalan tidak berubah.
 - Fitur hapus sesi satuan (`mutateSesiServer` aksi `remove`) dan massal (`deleteAllExamSessionsServer`) di halaman monitoring peserta dan analitik, dengan konfirmasi. Tindakan ini **menghapus permanen** jawaban dan nilai sesi serta klaim token; gunakan hanya bila memang perlu mengulang dari awal.
 
@@ -37,7 +51,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 - Perbarui Seroval ke 1.6.9 untuk menghapus advisory runtime critical dan high yang terdeteksi pada dependency graph (#195).
 - Perbarui brace-expansion ke 1.1.21 dan 5.0.12 untuk perbaikan denial-of-service dari nested-brace parsing dan ekspansi yang tidak terkendali (#196).
 - Perbarui `source-map-js` ke 1.2.2 untuk menutup denial-of-service pada indexed source map (CVE-2026-93749), termasuk pada jalur konsumsi source map di browser (#197).
-- Override `argparse` only in Mammoth to 2.0.1, removing vulnerable transitive `sprintf-js` from the lockfile while preserving the CLI; verified resolved dependency tree and Mammoth CLI help smoke. GHSA-hp3w-g68c-fv3c has no upstream patched `sprintf-js` release.
+- Batasi override `argparse` 2.0.1 hanya untuk Mammoth; hapus `sprintf-js` rentan dari lockfile sambil mempertahankan ekstraksi DOCX dan CLI (#208). GHSA-hp3w-g68c-fv3c tidak memiliki rilis `sprintf-js` upstream yang telah ditambal.
 
 ### Deprecated
 
@@ -222,7 +236,8 @@ Rilis awal: snapshot bertanda dari `main`, bukan klaim siap produksi. Issue audi
 - Jangan mencatat formatting/refactor internal murni kecuali perilaku atau risiko operasional ikut berubah.
 - Saat membuat rilis, pindahkan item `Unreleased` ke heading versi bertanggal, misalnya `## [1.2.0] - 2026-08-09`.
 
-[Unreleased]: https://github.com/mannnrachman/cbt-man/compare/v0.1.3...HEAD
+[Unreleased]: https://github.com/mannnrachman/cbt-man/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/mannnrachman/cbt-man/compare/v0.1.3...v0.2.0
 [0.1.3]: https://github.com/mannnrachman/cbt-man/releases/tag/v0.1.3
 [0.1.2]: https://github.com/mannnrachman/cbt-man/releases/tag/v0.1.2
 [0.1.1]: https://github.com/mannnrachman/cbt-man/releases/tag/v0.1.1
