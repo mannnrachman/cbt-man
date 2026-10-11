@@ -36,7 +36,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 - Perbarui KaTeX ke 0.18.2 untuk perbaikan prototype pollution pada settings; konfigurasi renderer aplikasi tetap memakai `trust: false` (#194).
 - Perbarui Seroval ke 1.6.9 untuk menghapus advisory runtime critical dan high yang terdeteksi pada dependency graph (#195).
 - Perbarui brace-expansion ke 1.1.21 dan 5.0.12 untuk perbaikan denial-of-service dari nested-brace parsing dan ekspansi yang tidak terkendali (#196).
-- Perbarui source-map-js ke 1.2.2 untuk menutup denial-of-service pada indexed source map (CVE-2026-93749) (#197).
+- Perbarui `source-map-js` ke 1.2.2 untuk menutup denial-of-service pada indexed source map (CVE-2026-93749), termasuk pada jalur konsumsi source map di browser (#197).
 
 ### Deprecated
 
