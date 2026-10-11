@@ -32,6 +32,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 - Deteksi perpindahan tab pada halaman ujian peserta (`/peserta/ujian/$id/kerjakan`) kini memiliki toleransi debouncing, membersihkan timer saat unmount, dan mengabaikan respons pelanggaran setelah cleanup/submit guna menghindari *false positive*; alarm buzzer berhenti otomatis setelah 3 detik dan dibersihkan saat berpindah halaman.
 
 ### Security
+- Perketat CI agar dependency rentan moderate ke atas gagal pada scope `unknown`, runtime, dan development; terima deskripsi update Dependabot standar tanpa melewati gate teknis; jadwalkan update dependency mingguan dan kelompokkan patch/minor tooling terpilih.
 
 ### Deprecated
 
