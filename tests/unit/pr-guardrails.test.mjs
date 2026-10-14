@@ -260,6 +260,16 @@ test("Dependabot lockfile updates satisfy only the bot description contract", ()
       title: "chore(deps): bump source-map-js from 1.2.1 to 1.2.2",
       body: "Bumps [source-map-js](https://github.com/7rulnik/source-map-js) from 1.2.1 to 1.2.2.",
     },
+    {
+      title: "chore(deps-dev): bump @eslint/js from 9.39.5 to 10.0.1",
+      body: "Bumps [@eslint/js](https://github.com/eslint/eslint/tree/HEAD/packages/js) from 9.39.5 to 10.0.1.",
+    },
+    {
+      title:
+        "chore(deps-dev): bump eslint-plugin-react-refresh from 0.4.26 to 0.5.7 in the tooling-patch-minor group across 1 directory",
+      body:
+        "Bumps the tooling-patch-minor group with 1 update in the / directory: [eslint-plugin-react-refresh](https://github.com/ArnaudBarre/eslint-plugin-react-refresh).\n\nUpdates `eslint-plugin-react-refresh` from 0.4.26 to 0.5.7",
+    },
   ];
 
   for (const { title, body } of cases) {

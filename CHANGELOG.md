@@ -11,6 +11,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 ### Changed
 
 ### Fixed
+- Kontrak body PR di CI kini juga menerima update Dependabot untuk devDependency (judul `chore(deps-dev): bump ...`), sama seperti `chore(deps)`.
 
 ### Security
 
