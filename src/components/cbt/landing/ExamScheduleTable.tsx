@@ -116,7 +116,7 @@ export function ExamScheduleTable({ exams, activeTab, groupsMap, now }: ExamSche
                 <TableCell className="text-right pr-6 py-4">
                   {(() => {
                     const status = getExamStatus(exam.beginAt, exam.endAt, now);
-                    let colorClasses = "";
+                    let colorClasses: string;
                     if (status.text === "Ujian Sudah Berlalu") {
                       colorClasses =
                         "bg-red-50 text-red-600 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20";

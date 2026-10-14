@@ -595,7 +595,7 @@ function AiInsightTab({ ujian, sesis }: { ujian: Ujian, sesis: SesiUjian[] }) {
       const avg = Math.round(scores.reduce((a, b) => a + b, 0) / (total || 1));
       
       // Heuristic analysis
-      let performanceTrend = "";
+      let performanceTrend: string;
       if (avg >= 80) performanceTrend = "Sangat Baik. Mayoritas siswa memiliki pemahaman yang kuat terhadap materi.";
       else if (avg >= 60) performanceTrend = "Cukup Baik. Pemahaman materi berada pada tingkat standar, namun beberapa topik memerlukan penguatan.";
       else performanceTrend = "Mengkhawatirkan. Nilai rata-rata kelas di bawah harapan. Terdapat celah pemahaman yang signifikan.";

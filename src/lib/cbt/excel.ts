@@ -163,7 +163,7 @@ export function parseExcelSoalRows(
 
       const correctLetters = Array.from(new Set(resolvedLetters));
 
-      let tipe: TipeSoal = "pg";
+      let tipe: TipeSoal;
       let error: string | undefined = undefined;
 
       const isExplicitEssay = /^(essay|esai|uraian)$/i.test(tipeField);

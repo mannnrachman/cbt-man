@@ -41,7 +41,7 @@ export function gradeAnswers(
     }
     const benarIds = soal.jawaban.filter((x) => x.benar).map((x) => x.id);
     const selected = j.jawabanIds || [];
-    let skor = 0;
+    let skor: number;
     if (selected.length === 0) {
       skor = ujian.poinKosong;
     } else if (benarIds.length === selected.length && benarIds.every((id) => selected.includes(id))) {

@@ -314,7 +314,7 @@ function RouteComponent() {
     if (!sesi || !soal) return;
     const currentJawaban = sesi.jawaban[idx];
     const currentSoal = soal;
-    let nextJawabanIds = [...currentJawaban.jawabanIds];
+    let nextJawabanIds: string[];
 
     if (currentSoal.tipe === "multi") {
       const has = currentJawaban.jawabanIds.includes(jawabanId);
