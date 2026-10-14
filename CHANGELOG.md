@@ -9,8 +9,10 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 ### Added
 
 ### Changed
+- Upgrade toolchain lint ke ESLint 10 dan `eslint-plugin-react-hooks` 7. Aturan React Compiler dari preset baru tidak diaktifkan karena proyek tidak memakai React Compiler; hanya `rules-of-hooks` dan `exhaustive-deps` yang berlaku seperti sebelumnya.
 
 ### Fixed
+- `npm install` kembali berjalan: `@eslint/js` 10 sebelumnya membutuhkan ESLint 10 sebagai peer, sementara proyek masih memakai ESLint 9.
 - Kontrak body PR di CI kini juga menerima update Dependabot untuk devDependency (judul `chore(deps-dev): bump ...`), sama seperti `chore(deps)`.
 
 ### Security
