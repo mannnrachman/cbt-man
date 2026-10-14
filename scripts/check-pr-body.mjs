@@ -30,7 +30,7 @@ function isDependabotUpdate(pullRequest) {
   if (!DEPENDABOT_LOGINS.has(pullRequest?.user?.login)) return false;
   const title = pullRequest.title ?? "";
   const body = pullRequest.body ?? "";
-  if (!/^chore\(deps\): bump .+$/i.test(title)) return false;
+  if (!/^chore\(deps(?:-dev)?\): bump .+$/i.test(title)) return false;
 
   if (
     /^Bumps .*? and \[[^\]]+\]\([^)]+\)\. These dependencies needed to be updated together\./m.test(
