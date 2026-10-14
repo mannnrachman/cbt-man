@@ -9,6 +9,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 ### Added
 
 ### Changed
+- Upgrade `recharts` ke v3. Tipe props `ChartTooltipContent`/`ChartLegendContent` di `src/components/ui/chart.tsx` disesuaikan dengan API v3; grafik distribusi nilai di Laporan Ujian tetap tampil sama.
 - Upgrade toolchain lint ke ESLint 10 dan `eslint-plugin-react-hooks` 7. Aturan React Compiler dari preset baru tidak diaktifkan karena proyek tidak memakai React Compiler; hanya `rules-of-hooks` dan `exhaustive-deps` yang berlaku seperti sebelumnya.
 
 ### Fixed
