@@ -9,18 +9,24 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 ### Added
 
 ### Changed
-- Upgrade `recharts` ke v3. Tipe props `ChartTooltipContent`/`ChartLegendContent` di `src/components/ui/chart.tsx` disesuaikan dengan API v3; grafik distribusi nilai di Laporan Ujian tetap tampil sama.
-- Upgrade toolchain lint ke ESLint 10 dan `eslint-plugin-react-hooks` 7. Aturan React Compiler dari preset baru tidak diaktifkan karena proyek tidak memakai React Compiler; hanya `rules-of-hooks` dan `exhaustive-deps` yang berlaku seperti sebelumnya.
 
 ### Fixed
-- `npm install` kembali berjalan: `@eslint/js` 10 sebelumnya membutuhkan ESLint 10 sebagai peer, sementara proyek masih memakai ESLint 9.
-- Kontrak body PR di CI kini juga menerima update Dependabot untuk devDependency (judul `chore(deps-dev): bump ...`), sama seperti `chore(deps)`.
 
 ### Security
 
 ### Deprecated
 
 ### Removed
+
+## [0.2.3] - 2026-10-14
+
+### Changed
+- Upgrade `recharts` ke v3. Tipe props `ChartTooltipContent`/`ChartLegendContent` di `src/components/ui/chart.tsx` disesuaikan dengan API v3; grafik distribusi nilai di Laporan Ujian tetap tampil sama (#221).
+- Upgrade toolchain lint ke ESLint 10, `@eslint/js` 10, `eslint-plugin-react-hooks` 7, dan `eslint-plugin-react-refresh` 0.5. Aturan React Compiler dari preset baru tidak diaktifkan karena proyek tidak memakai React Compiler; hanya `rules-of-hooks` dan `exhaustive-deps` yang berlaku seperti sebelumnya (#214, #215, #220).
+
+### Fixed
+- `npm install` kembali berjalan: `@eslint/js` 10 sebelumnya membutuhkan ESLint 10 sebagai peer, sementara proyek masih memakai ESLint 9 (#220).
+- Kontrak body PR di CI kini juga menerima update Dependabot untuk devDependency (judul `chore(deps-dev): bump ...`), sama seperti `chore(deps)` (#219).
 
 ## [0.2.2] - 2026-10-11
 
@@ -245,7 +251,8 @@ Rilis awal: snapshot bertanda dari `main`, bukan klaim siap produksi. Issue audi
 - Jangan mencatat formatting/refactor internal murni kecuali perilaku atau risiko operasional ikut berubah.
 - Saat membuat rilis, pindahkan item `Unreleased` ke heading versi bertanggal, misalnya `## [1.2.0] - 2026-08-09`.
 
-[Unreleased]: https://github.com/mannnrachman/cbt-man/compare/v0.2.2...HEAD
+[Unreleased]: https://github.com/mannnrachman/cbt-man/compare/v0.2.3...HEAD
+[0.2.3]: https://github.com/mannnrachman/cbt-man/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/mannnrachman/cbt-man/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/mannnrachman/cbt-man/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/mannnrachman/cbt-man/compare/v0.1.3...v0.2.0
