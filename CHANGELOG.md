@@ -12,6 +12,9 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Fixed
 
+- Impor soal Excel memakai topik yang dipilih saat menyimpan, memeriksa hasil setiap penyimpanan, dan mempertahankan baris yang belum tersimpan untuk dicoba ulang. File yang gagal dibaca menghapus preview lama dan menampilkan pesan error.
+- Memilih modul tanpa topik di halaman impor soal tidak lagi menghilangkan pemilih modul.
+- Baris Excel dengan tipe PG/Multi eksplisit tanpa opsi ditolak, bukan diubah diam-diam menjadi esai.
 - Backup memakai kredensial pengguna terbaru dari server khusus super admin; restore menolak backup lama dengan kredensial kosong/tidak valid sebelum mengganti data.
 
 ### Security

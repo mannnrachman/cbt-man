@@ -120,6 +120,17 @@ test("rejects an option-bearing row with no answer key", () => {
   assert.match(result.error || "", /Kunci jawaban belum ditentukan/);
 });
 
+test("rejects explicit PG and Multi rows without options instead of converting them to essay", () => {
+  for (const tipe of ["PG", "Multi", "Pilihan Ganda", "Multi Jawaban"]) {
+    const [result] = parseExcelSoalRows([{
+      Soal: "Pilihan tanpa opsi", "Tipe Soal": tipe, "Kunci Jawaban": "A",
+    }], "topik_1");
+    assert.equal(result.valid, false, `${tipe} without options must be rejected`);
+    assert.notEqual(result.soal.tipe, "essay");
+    assert.match(result.error || "", /minimal 2 opsi/);
+  }
+});
+
 test("supports explicit Tipe Soal BS without manual Opsi A/B columns", () => {
   const rows = [
     {

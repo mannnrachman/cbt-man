@@ -167,7 +167,8 @@ export function parseExcelSoalRows(
       let error: string | undefined = undefined;
 
       const isExplicitEssay = /^(essay|esai|uraian)$/i.test(tipeField);
-      if (isExplicitEssay || optionEntries.length === 0) {
+      const isExplicitChoice = /^(pg|pilihan\s*ganda|multi)/.test(tipeField);
+      if (isExplicitEssay || (optionEntries.length === 0 && !isExplicitChoice)) {
         tipe = "essay";
       } else if (
         isExplicitBS ||

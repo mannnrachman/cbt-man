@@ -29,16 +29,19 @@ function ImportPage() {
   const user = useAuthStore((s) => s.user);
   const moduls = visibleModuls(user);
   const [modulId, setModulId] = useState<string>(moduls[0]?.id ?? "");
-  const topiks = visibleTopiks(user).filter((t) => t.modulId === modulId);
+  const allowedTopiks = visibleTopiks(user);
+  const topiks = allowedTopiks.filter((t) => t.modulId === modulId);
   const [topikId, setTopikId] = useState<string>(topiks[0]?.id ?? "");
   const [preview, setPreview] = useState<PreviewRow[]>([]);
   const [imageMap, setImageMap] = useState<Record<string, string>>({});
   const [isUploadingImages, setIsUploadingImages] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isReading, setIsReading] = useState(false);
+  const isBusy = isSaving || isReading || isUploadingImages;
   const fileRef = useRef<HTMLInputElement>(null);
   const imageRef = useRef<HTMLInputElement>(null);
 
-  if (moduls.length === 0 || topiks.length === 0) {
+  if (moduls.length === 0 || allowedTopiks.length === 0) {
     return (
       <div className="space-y-4 max-w-5xl">
         <div>
@@ -153,28 +156,37 @@ function ImportPage() {
   }
 
   async function loadFile(file: File) {
+    if (isBusy) return;
     if (!topikId) {
       toast.error("Pilih topik tujuan terlebih dahulu");
       return;
     }
-    const buf = await file.arrayBuffer();
-    const wb = XLSX.read(buf);
-    const sheet = wb.Sheets[wb.SheetNames[0]];
-    const rows: Record<string, unknown>[] = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-    
-    if (rows.length === 0) {
-      toast.error("File Excel kosong atau tidak terbaca");
-      return;
+    setPreview([]);
+    setIsReading(true);
+    try {
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf);
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const rows: Record<string, unknown>[] = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+      if (rows.length === 0) {
+        toast.error("File Excel kosong atau tidak terbaca");
+        return;
+      }
+
+      const out: PreviewRow[] = parseExcelSoalRows(rows, topikId, imageMap);
+      setPreview(out);
+      if (out.length === 0) toast.error("Tidak ada soal valid yang terdeteksi");
+      else toast.success(`${out.length} baris soal berhasil diproses`);
+    } catch {
+      toast.error("File Excel tidak dapat dibaca. Gunakan template .xlsx atau .xls yang valid.");
+    } finally {
+      setIsReading(false);
     }
-
-    const out: PreviewRow[] = parseExcelSoalRows(rows, topikId, imageMap);
-
-    setPreview(out);
-    if (out.length === 0) toast.error("Tidak ada soal valid yang terdeteksi");
-    else toast.success(`${out.length} baris soal berhasil diproses`);
   }
 
   async function commit() {
+    if (isBusy) return;
     if (!topikId || !isTopikAllowed(user, topikId)) {
       toast.error("Topik tujuan di luar cakupan Anda");
       return;
@@ -184,14 +196,16 @@ function ImportPage() {
 
     setIsSaving(true);
     try {
-      valid.forEach((r) => soalRepo.upsert(r.soal));
-      const res = await soalRepo.flush();
-      if (res.ok) {
-        toast.success(`${valid.length} soal berhasil disimpan ke bank soal`);
-        setPreview([]);
-      } else {
-        toast.error("Gagal menyimpan soal ke server. Silakan coba lagi.");
+      for (const row of valid) {
+        soalRepo.upsert({ ...row.soal, topikId });
+        const res = await soalRepo.flush();
+        if (!res.ok) {
+          toast.error("Gagal menyimpan soal ke server. Silakan coba lagi.");
+          return;
+        }
+        setPreview((current) => current.filter((item) => item.soal.id !== row.soal.id));
       }
+      toast.success(`${valid.length} soal berhasil disimpan ke bank soal`);
     } catch {
       toast.error("Terjadi kesalahan saat menyimpan soal.");
     } finally {
@@ -218,16 +232,17 @@ function ImportPage() {
         <CardContent className="space-y-4 p-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Modul Tujuan</label>
+              <label htmlFor="import-modul" className="text-xs font-bold uppercase tracking-wider text-slate-500">Modul Tujuan</label>
               <Select
+                disabled={isBusy}
                 value={modulId}
                 onValueChange={(v) => {
                   setModulId(v);
-                  const ts = visibleTopiks(user).filter((t) => t.modulId === v);
+                  const ts = allowedTopiks.filter((t) => t.modulId === v);
                   setTopikId(ts[0]?.id ?? "");
                 }}
               >
-                <SelectTrigger className="h-10">
+                <SelectTrigger id="import-modul" className="h-10">
                   <SelectValue placeholder="Pilih modul" />
                 </SelectTrigger>
                 <SelectContent>
@@ -240,10 +255,10 @@ function ImportPage() {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Topik / Bab Tujuan *</label>
-              <Select value={topikId} onValueChange={setTopikId}>
-                <SelectTrigger className="h-10">
-                  <SelectValue placeholder="Pilih topik" />
+              <label htmlFor="import-topik" className="text-xs font-bold uppercase tracking-wider text-slate-500">Topik / Bab Tujuan *</label>
+              <Select value={topikId} onValueChange={setTopikId} disabled={isBusy || topiks.length === 0}>
+                <SelectTrigger id="import-topik" className="h-10">
+                  <SelectValue placeholder={topiks.length === 0 ? "Modul ini belum memiliki topik" : "Pilih topik"} />
                 </SelectTrigger>
                 <SelectContent>
                   {topiks.map((t) => (
@@ -268,6 +283,7 @@ function ImportPage() {
               type="file"
               multiple
               accept="image/*"
+              disabled={isBusy}
               hidden
               onChange={(e) => {
                 if (e.target.files) handleImageUpload(e.target.files);
@@ -277,7 +293,7 @@ function ImportPage() {
             <Button 
               variant="outline" 
               onClick={() => imageRef.current?.click()} 
-              disabled={isUploadingImages}
+              disabled={isBusy}
               className="h-10 font-semibold border-amber-200 dark:border-amber-900/50 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-700 dark:text-amber-400"
             >
               {isUploadingImages ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ImagePlus className="mr-2 h-4 w-4" />}
@@ -288,6 +304,7 @@ function ImportPage() {
               ref={fileRef}
               type="file"
               accept=".xlsx,.xls"
+              disabled={isBusy}
               hidden
               onChange={(e) => {
                 const f = e.target.files?.[0];
@@ -295,8 +312,8 @@ function ImportPage() {
                 e.target.value = "";
               }}
             />
-            <Button onClick={() => fileRef.current?.click()} className="h-10 font-semibold bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-500">
-              <Upload className="mr-2 h-4 w-4" /> Pilih File Excel
+            <Button disabled={isBusy} onClick={() => fileRef.current?.click()} className="h-10 font-semibold bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-500">
+              <Upload className="mr-2 h-4 w-4" /> {isReading ? "Membaca Excel..." : "Pilih File Excel"}
             </Button>
           </div>
         </CardContent>
@@ -344,7 +361,7 @@ function ImportPage() {
               <Button
                 size="sm"
                 onClick={commit}
-                disabled={!preview.some((r) => r.valid) || isSaving}
+                disabled={!preview.some((r) => r.valid) || isBusy}
                 className="font-semibold bg-emerald-600 hover:bg-emerald-700 text-white"
               >
                 {isSaving ? (
