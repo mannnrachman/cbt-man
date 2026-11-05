@@ -21,6 +21,8 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Security
 
+- Penyiapan demo wajib memakai `NODE_ENV=development`, URL SQLite lokal absolut, dan konfirmasi path database sebenarnya sebelum Prisma diinisialisasi.
+
 ### Deprecated
 
 ### Removed

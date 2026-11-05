@@ -1,10 +1,14 @@
-import { PrismaClient } from "@prisma/client";
+import { confirmedDemoDatabaseUrl } from "./lib/demo-database-guard.mjs";
 import { createLivePreviewExam } from "../src/lib/server/db/seed-shared.mjs";
 
-if (process.env.NODE_ENV === "production") {
-  throw new Error("Penyiapan live preview hanya untuk database development/demo lokal.");
-}
-const prisma = new PrismaClient();
+const args = process.argv.slice(2);
+const databaseUrl = confirmedDemoDatabaseUrl(
+  process.env,
+  args.length === 2 && args[0] === "--confirm-database" ? args[1] : undefined,
+);
+console.log(`Target database development terkonfirmasi: ${databaseUrl.slice(5)}`);
+const { PrismaClient } = await import("@prisma/client");
+const prisma = new PrismaClient({ datasources: { db: { url: databaseUrl } } });
 try {
   await prisma.$transaction(async (tx) => {
     const admin = await tx.user.findFirst({ where: { role: "super_admin", aktif: true } });

@@ -88,8 +88,17 @@ kalkulator, dan tabel nilai normal. Untuk menyiapkan atau memperbaikinya pada
 **database lokal yang sudah berisi data**, jalankan:
 
 ```bash
-node scripts/prepare-live-preview-demo.mjs
+# Periksa bahwa path ini benar-benar berisi data development/demo.
+NODE_ENV=development DATABASE_URL="file:$(pwd)/prisma/dev.db" \
+  node scripts/prepare-live-preview-demo.mjs \
+  --confirm-database "$(realpath prisma/dev.db)"
 ```
+
+Script menolak environment selain `development`, URL relatif/remote, dan
+konfirmasi yang tidak cocok dengan path database sebenarnya. `DATABASE_URL`
+wajib diberikan secara eksplisit; script tidak mengandalkan `.env`. Pastikan
+sendiri file yang dikonfirmasi bukan database production: path lokal dan
+`NODE_ENV` tidak membuktikan isi database aman untuk demo.
 
 Perintah ini memakai bank soal yang tersedia dan unit peserta aktif, tanpa
 menghapus sesi atau jawaban. Paket tidak memiliki batas tanggal; setiap sesi
