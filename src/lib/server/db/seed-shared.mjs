@@ -126,6 +126,42 @@ function buildSesiRecord({ uid, now, ujian, peserta, questionEntries, answerPlan
   };
 }
 
+export function createLivePreviewExam({ soal, groupIds, createdBy, now = Date.now() }) {
+  for (const tipe of ["pg", "multi", "bs", "essay"]) {
+    if (!soal.some((item) => item.tipe === tipe)) throw new Error(`Demo memerlukan soal ${tipe}.`);
+  }
+  if (!groupIds.length) throw new Error("Demo memerlukan unit peserta.");
+  const counts = new Map();
+  for (const item of soal) counts.set(item.topikId, (counts.get(item.topikId) ?? 0) + 1);
+  return {
+    id: "ex_demo_live_preview",
+    nama: "Ujian Demo Live Preview (Jalan Terus)",
+    status: "published",
+    deskripsi: "<p>Demo semua jenis soal, kalkulator ilmiah, dan tabel nilai normal. Tanpa batas jadwal; durasi setiap percobaan 180 menit. Untuk mengulang, reset sesi melalui admin.</p>",
+    durasiMenit: 180,
+    poinBenar: 10,
+    poinSalah: 0,
+    poinKosong: 0,
+    tokenAktif: false,
+    ipRange: "",
+    groupIds,
+    topicSets: [...counts].map(([topikId, jumlah], index) => ({
+      id: `ts_demo_${index + 1}`, topikId, jumlah, jumlahOpsi: 4,
+      acakSoal: false, acakJawaban: false,
+    })),
+    showResult: true,
+    showResultDetail: true,
+    fullscreenWajib: false,
+    maxPindahTab: 99,
+    blokirShortcut: false,
+    mode: "online",
+    allowCalculator: true,
+    allowNilaiNormal: true,
+    createdBy,
+    createdAt: now,
+  };
+}
+
 export async function createSeedDataset({ uid, now, hashPassword }) {
   const ts = now ?? Date.now();
   const schoolName = "Universitas Teknologi Nusantara";
@@ -573,6 +609,10 @@ export async function createSeedDataset({ uid, now, hashPassword }) {
       ],
     }),
   );
+
+  ujian.push(createLivePreviewExam({
+    soal, groupIds: unitAkademik.map((unit) => unit.id), createdBy: admin.id, now: ts,
+  }));
 
   const config = {
     appName: "CBT-MAN",
