@@ -12,12 +12,16 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Fixed
 
+- Demo Live Preview memakai jumlah soal aktual per topik, mencakup semua jenis soal serta alat bantu, dan tidak kedaluwarsa. Penyiapan ulang lokal mempertahankan sesi dan jawaban.
+
 - Impor soal Excel memakai topik yang dipilih saat menyimpan, memeriksa hasil setiap penyimpanan, dan mempertahankan baris yang belum tersimpan untuk dicoba ulang. File yang gagal dibaca menghapus preview lama dan menampilkan pesan error.
 - Memilih modul tanpa topik di halaman impor soal tidak lagi menghilangkan pemilih modul.
 - Baris Excel dengan tipe PG/Multi eksplisit tanpa opsi ditolak, bukan diubah diam-diam menjadi esai.
 - Backup memakai kredensial pengguna terbaru dari server khusus super admin; restore menolak backup lama dengan kredensial kosong/tidak valid sebelum mengganti data.
 
 ### Security
+
+- Penyiapan demo wajib memakai `NODE_ENV=development`, URL SQLite lokal absolut, dan konfirmasi path database sebenarnya sebelum Prisma diinisialisasi.
 
 ### Deprecated
 
