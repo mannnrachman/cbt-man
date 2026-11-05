@@ -18,7 +18,12 @@ test("live preview uses actual topic counts and includes every question type", (
   assert.equal(exam.allowNilaiNormal, true);
   assert.equal(exam.fullscreenWajib, false);
   assert.equal(exam.blokirShortcut, false);
-  assert.throws(() => createLivePreviewExam({ soal: soal.slice(1), groupIds: ["unit"], createdBy: "admin" }), /pg/);
+  for (const tipe of ["pg", "multi", "bs", "essay"]) {
+    assert.throws(() => createLivePreviewExam({
+      soal: soal.filter((item) => item.tipe !== tipe),
+      groupIds: ["unit"], createdBy: "admin",
+    }), new RegExp(`Demo memerlukan soal ${tipe}`));
+  }
   assert.throws(() => createLivePreviewExam({ soal, groupIds: [], createdBy: "admin" }), /peserta/);
 });
 
