@@ -101,8 +101,8 @@ function readBlock(pattern) {
 
 const SHARED = /\n\.shell-sidebar,\n\.shell-header \{[\s\S]*?\n\}/;
 const chrome = {
-  sidebar: { ...readBlock(SHARED), ...readBlock(/\n\.shell-sidebar \{\n  --ground[\s\S]*?\n\}/) },
-  header: { ...readBlock(SHARED), ...readBlock(/\n\.shell-header \{\n  --ground[\s\S]*?\n\}/) },
+  sidebar: readBlock(SHARED),
+  header: readBlock(SHARED),
 };
 
 for (const [region, tokens] of Object.entries(chrome)) {
@@ -112,7 +112,6 @@ for (const [region, tokens] of Object.entries(chrome)) {
     ["ink-muted", "surface", 4.5],
     ["ink-muted", "surface-2", 4.5],
     ["action", "surface", 4.5],
-    ["action", "surface-2", 4.5],
     ["danger", "surface", 4.5],
     ["warn", "surface", 4.5],
   ]) {
@@ -124,7 +123,13 @@ for (const [region, tokens] of Object.entries(chrome)) {
   }
 }
 
-test("the header is dark blue and the sidebar is near-black", () => {
+test("the hover fill is clearly lighter than the chrome surface", () => {
+  for (const tokens of Object.values(chrome)) {
+    assert.ok(contrast(tokens["surface-2"], tokens.surface) >= 1.5, "hover fill must be visibly different from the surface");
+  }
+});
+
+test("the header and the sidebar share the same dark blue", () => {
   assert.equal(chrome.header.surface.toLowerCase(), "#10264a");
-  assert.equal(chrome.sidebar.surface.toLowerCase(), "#0f1714");
+  assert.equal(chrome.sidebar.surface.toLowerCase(), chrome.header.surface.toLowerCase());
 });

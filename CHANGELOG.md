@@ -27,7 +27,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 - Halaman akademik (struktur, mata kuliah, semester, tahun, kelas) serta peserta (daftar, kartu, online) memakai token warna; tidak ada perubahan perilaku.
 - Halaman evaluasi, analitik, dan leaderboard memakai token warna; tidak ada perubahan perilaku atau rumus.
 - Halaman pengguna, peran, pengaturan, alat, audit, panduan, serta halaman galat dasar, grafik, dan toast memakai token warna; tidak ada perubahan perilaku.
-- Sidebar admin berlatar hampir hitam (`#0F1714`) dan bilah atas biru gelap (`#10264A`) di mode terang maupun gelap. Keduanya mendeklarasikan ulang palet gelap secara lokal (`.shell-sidebar`, `.shell-header` di `src/styles.css`), jadi tombol, lencana, dan cincin fokus di dalamnya otomatis berkontras tinggi; rasio kontrasnya diperiksa di `tests/unit/ui-contrast.test.mjs`.
+- Sidebar admin dan bilah atas sama-sama berlatar biru gelap (`#10264A`) di mode terang maupun gelap. Keduanya mendeklarasikan ulang palet gelap secara lokal (blok bersama `.shell-sidebar, .shell-header` di `src/styles.css`), jadi tombol, lencana, dan cincin fokus di dalamnya otomatis berkontras tinggi; warna hover/terpilih `#24487F` jelas lebih terang dari latar (1,65:1) dengan teks putih di atasnya (7,7:1); rasio kontrasnya diperiksa di `tests/unit/ui-contrast.test.mjs`.
 - `cn()` mengenali skala ukuran huruf baru (`text-ui`, `text-body`, dst.) agar `tailwind-merge` tidak menghapus warna teks.
 - `npm run check:ui` (juga di CI) menolak warna palet mentah, teks di bawah 13 px, huruf kapital berjarak, gradien, kaca buram, bayangan, dan animasi hias di `src/**/*.tsx`. Jumlah pelanggaran per berkas dicatat di `scripts/ui-baseline.json` dan hanya boleh turun.
 

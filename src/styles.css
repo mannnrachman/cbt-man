@@ -186,7 +186,7 @@
 }
 
 /*
- * Admin chrome: the sidebar is near-black and the header dark blue in both colour schemes.
+ * Admin chrome: the sidebar and the header share one dark blue in both colour schemes.
  * Each region re-declares the dark palette locally, so every control inside it (buttons,
  * badges, links, focus rings) picks light-on-dark tokens without per-component classes.
  */
@@ -202,20 +202,10 @@
   --danger-ink: #101613;
   --warn: #ebb04c;
   --shadow-overlay: 0 0 0 1px var(--line), 0 8px 24px rgb(0 0 0 / 0.5);
-}
-
-.shell-sidebar {
-  --ground: #0f1714;
-  --surface: #0f1714;
-  --surface-2: #1a2420;
-  --ink-muted: #a9b3ad;
-}
-
-.shell-header {
   --ground: #10264a;
   --surface: #10264a;
-  --surface-2: #1b3763;
-  --ink-muted: #b4c1d6;
+  --surface-2: #24487f; /* hover and selected fill: 1.65:1 against --surface, ink on it 7.7:1 */
+  --ink-muted: #c4cfe0;
 }
 
 /* Map the shadcn token names the UI primitives already use onto the semantic palette. */
