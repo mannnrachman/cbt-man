@@ -83,6 +83,7 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+  --radius-dialog: 1.25rem;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -257,19 +258,10 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Jakub Krehel's Tactile Spring Feedback */
+  /* Press feedback: a button sinks 1px. No scale, no overshoot. */
   button:not(:disabled):active,
-  [role="button"]:not(:disabled):active,
-  a:not(:disabled):active {
-    transform: scale(0.97);
-    transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-  }
-  
-  /* Optical Alignment for Icons in Buttons */
-  button:not(.icon-only) > svg,
-  [role="button"]:not(.icon-only) > svg {
-    /* Slight optical adjustment to make icons feel perfectly centered next to text */
-    transform: translateY(0.5px);
+  [role="button"]:not(:disabled):active {
+    transform: translateY(1px);
   }
 }
 
