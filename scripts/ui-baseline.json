@@ -31,7 +31,6 @@
   "src/routes/_authenticated/admin.peserta.online.tsx": 76,
   "src/routes/_authenticated/admin.tools.tsx": 68,
   "src/routes/_authenticated/admin.topik.$id.soal.tsx": 178,
-  "src/routes/_authenticated/admin.ujian.$id.tsx": 139,
   "src/routes/_authenticated/admin.users.roles.tsx": 15,
   "src/routes/_authenticated/admin.users.tsx": 53
 }
