@@ -74,15 +74,15 @@ function HasilUjian() {
         action={
           <div className="grid grid-cols-3 gap-2 text-right">
             <div className="min-w-[5.5rem] rounded-lg border bg-card px-3 py-2">
-              <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Durasi</div>
+              <div className="text-label font-medium text-muted-foreground">Durasi</div>
               <div className="mt-0.5 inline-flex items-center gap-1 text-sm font-semibold tabular-nums"><Clock className="h-3.5 w-3.5 text-primary" />{ujian.durasiMenit}'</div>
             </div>
             <div className="min-w-[5.5rem] rounded-lg border bg-card px-3 py-2">
-              <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Soal</div>
+              <div className="text-label font-medium text-muted-foreground">Soal</div>
               <div className="mt-0.5 inline-flex items-center gap-1 text-sm font-semibold tabular-nums"><FileText className="h-3.5 w-3.5 text-primary" />{totalSoal}</div>
             </div>
             <div className="min-w-[5.5rem] rounded-lg border bg-card px-3 py-2">
-              <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Selesai</div>
+              <div className="text-label font-medium text-muted-foreground">Selesai</div>
               <div className="mt-0.5 inline-flex items-center gap-1 text-sm font-semibold tabular-nums text-primary"><CheckCircle2 className="h-3.5 w-3.5" />{selesaiCount}</div>
             </div>
           </div>
@@ -90,10 +90,10 @@ function HasilUjian() {
       />
 
       <Tabs defaultValue={initialTab} className="w-full">
-        <TabsList className="grid h-auto w-full grid-cols-3 gap-1 rounded-xl border bg-muted/60 p-1 sm:inline-grid sm:w-auto">
-          <TabsTrigger value="peserta" className="px-2 text-xs sm:px-4 sm:text-sm">Daftar Peserta</TabsTrigger>
-          <TabsTrigger value="report" className="px-2 text-xs sm:px-4 sm:text-sm">Laporan Ujian</TabsTrigger>
-          <TabsTrigger value="ai" className="gap-1.5 px-2 text-xs text-primary sm:px-4 sm:text-sm"><Sparkles className="h-3.5 w-3.5" /> Wawasan AI</TabsTrigger>
+        <TabsList className="grid h-auto w-full grid-cols-3 gap-1 rounded-lg border bg-muted/60 p-1 sm:inline-grid sm:w-auto">
+          <TabsTrigger value="peserta" className="px-2 text-label sm:px-4 sm:text-sm">Daftar Peserta</TabsTrigger>
+          <TabsTrigger value="report" className="px-2 text-label sm:px-4 sm:text-sm">Laporan Ujian</TabsTrigger>
+          <TabsTrigger value="ai" className="gap-1.5 px-2 text-label text-primary sm:px-4 sm:text-sm"><Sparkles className="h-3.5 w-3.5" /> Wawasan AI</TabsTrigger>
         </TabsList>
 
         <TabsContent value="peserta" className="mt-4 space-y-4 outline-none">
@@ -186,7 +186,7 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
 
   return (
     <>
-      <Card className="overflow-hidden shadow-sm">
+      <Card className="overflow-hidden">
         <CardHeader className="border-b bg-muted/20 pb-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
@@ -197,7 +197,7 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
               <Button
                 variant="outline"
                 size="sm"
-                className="border-rose-200 dark:border-rose-900 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 w-fit"
+                className="border-destructive/30 text-destructive hover:bg-destructive/10 w-fit"
                 onClick={() => setDeleteAllOpen(true)}
               >
                 <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Hapus Semua Sesi ({sesis.length})
@@ -208,7 +208,7 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] text-sm">
-              <thead className="border-b bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
+              <thead className="border-b bg-muted/40 text-left text-label text-muted-foreground">
                 <tr>
                   <th className="p-4 text-left font-medium">Peserta</th>
                   <th className="p-4 text-center font-medium">Status</th>
@@ -226,7 +226,7 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
                     <tr key={s.id} className={`border-b last:border-0 transition-colors ${isOpen ? 'bg-primary/5' : 'hover:bg-muted/30'}`}>
                       <td className="p-4">
                         <div className="font-medium text-foreground">{u?.namaLengkap ?? s.pesertaId}</div>
-                        {u?.username && <div className="mt-0.5 text-xs text-muted-foreground">{u.username}</div>}
+                        {u?.username && <div className="mt-0.5 text-label text-muted-foreground">{u.username}</div>}
                       </td>
                       <td className="p-4 text-center">
                         <Badge variant="outline" className={s.status === "selesai" ? "border-success/30 bg-success/10 text-success" : s.status === "sedang" ? "border-primary/30 bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}>
@@ -242,12 +242,12 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
                       </td>
                       <td className="p-4 text-center">
                         {s.status === "selesai" ? (
-                          <span className="font-bold text-base">{s.skorTotal ?? 0} <span className="text-xs text-muted-foreground font-normal">/ {s.maxSkor ?? 0}</span></span>
+                          <span className="font-semibold text-base">{s.skorTotal ?? 0} <span className="text-label text-muted-foreground font-normal">/ {s.maxSkor ?? 0}</span></span>
                         ) : "-"}
                       </td>
                       <td className="p-4 text-center">
                         {s.pelanggaran > 0 ? (
-                          <span className="inline-flex items-center rounded-md bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">
+                          <span className="inline-flex items-center rounded-md bg-destructive/10 px-2 py-0.5 text-label font-medium text-destructive">
                             {s.pelanggaran} peringatan
                           </span>
                         ) : (
@@ -283,8 +283,8 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
           const s = sesis.find((x) => x.id === openId);
           if (!s) return null;
           return (
-            <div className="mt-4 animate-in slide-in-from-top-2 fade-in duration-200">
-              <Card className="border-primary/20 shadow-lg relative overflow-hidden">
+            <div className="mt-4 duration-200">
+              <Card className="border-primary/20 relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
                 <CardHeader className="bg-primary/5 pb-4 border-b">
                   <CardTitle className="text-lg flex items-center gap-2 text-primary">
@@ -301,10 +301,10 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
                     const needsGrading = isEssay && j.skor === undefined;
 
                     return (
-                      <div key={i} className={`space-y-3 rounded-xl border p-4 text-sm bg-background transition-all ${needsGrading ? 'ring-2 ring-warning/50 border-warning/50 shadow-sm' : ''}`}>
+                      <div key={i} className={`space-y-3 rounded-lg border p-4 text-sm bg-background transition-all ${needsGrading ? 'ring-2 ring-warning/50 border-warning/50' : ''}`}>
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-3">
-                          <div className="flex flex-wrap items-center gap-2 text-xs font-medium">
-                            <span className="bg-primary/10 text-primary px-2.5 py-1 rounded-full text-xs">Soal #{i + 1}</span>
+                          <div className="flex flex-wrap items-center gap-2 text-label font-medium">
+                            <span className="bg-primary/10 text-primary px-2.5 py-1 rounded-md text-label">Soal #{i + 1}</span>
                             <span className="bg-muted px-2.5 py-1 rounded text-muted-foreground capitalize">{soal.tipe}</span>
                             {s.status === "selesai" && (
                               isEssay ? (
@@ -321,12 +321,12 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
                           <div className="flex items-center gap-1 bg-muted/50 p-1 rounded-lg border">
                             {editIdx === i ? (
                               <div className="flex items-center gap-1">
-                                <Input type="number" className="h-8 w-24 text-center font-bold" value={editSkor} onChange={(e) => setEditSkor(e.target.value)} autoFocus />
+                                <Input type="number" className="h-8 w-24 text-center font-semibold" value={editSkor} onChange={(e) => setEditSkor(e.target.value)} autoFocus />
                                 <Button size="sm" disabled={savingKey !== null} onClick={() => saveEdit(s.id, i)} className="h-8 px-3">Simpan</Button>
                                 <Button size="sm" variant="ghost" disabled={savingKey !== null} onClick={() => setEditIdx(null)} className="h-8 px-2 text-destructive">Batal</Button>
                               </div>
                             ) : isEssay ? (
-                              <Button size="sm" disabled={savingKey !== null} variant={needsGrading ? "default" : "secondary"} className={`h-8 text-xs ${needsGrading ? 'animate-pulse' : ''}`} onClick={() => { setEditIdx(i); setEditSkor(String(j.skor ?? "")); }}>
+                              <Button size="sm" disabled={savingKey !== null} variant={needsGrading ? "default" : "secondary"} className={`h-8 text-label ${needsGrading ? '' : ''}`} onClick={() => { setEditIdx(i); setEditSkor(String(j.skor ?? "")); }}>
                                 <Pencil className="h-3.5 w-3.5 mr-1.5" /> {needsGrading ? "Beri Nilai" : "Ubah Nilai"}
                               </Button>
                             ) : null}
@@ -335,8 +335,8 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
                         <div className="pt-2"><RichView html={soal.detail} className="prose prose-sm max-w-none" /></div>
                         {isEssay && (
                           <div className="mt-3 rounded-lg bg-muted/40 border p-3 text-sm space-y-1">
-                            <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Jawaban Peserta:</div>
-                            <div className="prose prose-sm max-w-none bg-background p-3 rounded shadow-sm border"><RichView html={j.jawabanEssay || "<em>(kosong)</em>"} /></div>
+                            <div className="text-label font-semibold text-muted-foreground mb-2">Jawaban Peserta:</div>
+                            <div className="prose prose-sm max-w-none bg-background p-3 rounded border"><RichView html={j.jawabanEssay || "<em>(kosong)</em>"} /></div>
                           </div>
                         )}
                         {!isEssay && (
@@ -355,7 +355,7 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
                                     {isBenar ? <CheckCircle2 className="h-4 w-4 text-success" /> : isSelected ? <X className="h-4 w-4 text-destructive" /> : <div className="h-4 w-4 rounded-full border-2 border-muted" />}
                                   </div>
                                   <div className="flex-1 text-sm prose prose-sm leading-snug"><RichView html={opt.detail} /></div>
-                                  {isSelected && <div className="text-[10px] uppercase font-bold tracking-wider bg-background px-1.5 py-0.5 rounded border opacity-70">Dipilih</div>}
+                                  {isSelected && <div className="text-label font-semibold bg-background px-1.5 py-0.5 rounded border opacity-70">Dipilih</div>}
                                 </div>
                               );
                             })}
@@ -401,7 +401,7 @@ function ExamReportTab({ ujian, sesis }: { ujian: Ujian, sesis: SesiUjian[] }) {
   
   if (total === 0) {
     return (
-      <Card className="shadow-sm">
+      <Card className="">
         <CardContent className="p-12 text-center text-sm text-muted-foreground">
           Belum ada sesi selesai untuk dianalisis.
         </CardContent>
@@ -526,34 +526,34 @@ function ExamReportTab({ ujian, sesis }: { ujian: Ujian, sesis: SesiUjian[] }) {
       </div>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Card className="shadow-sm">
+        <Card className="">
           <CardContent className="p-4 sm:p-5">
-            <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Rata-Rata Kelas</div>
-            <div className="mt-2 text-2xl font-bold tabular-nums">{avg}</div>
+            <div className="text-label font-medium text-muted-foreground">Rata-Rata Kelas</div>
+            <div className="mt-2 text-2xl font-semibold tabular-nums">{avg}</div>
           </CardContent>
         </Card>
-        <Card className="shadow-sm">
+        <Card className="">
           <CardContent className="p-4 sm:p-5">
-            <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Tingkat Kelulusan</div>
-            <div className="mt-2 text-2xl font-bold tabular-nums">{passRate}%</div>
-            <div className="mt-1 text-xs text-muted-foreground">{passedCount} dari {total} lulus · KKM {threshold}</div>
+            <div className="text-label font-medium text-muted-foreground">Tingkat Kelulusan</div>
+            <div className="mt-2 text-2xl font-semibold tabular-nums">{passRate}%</div>
+            <div className="mt-1 text-label text-muted-foreground">{passedCount} dari {total} lulus · KKM {threshold}</div>
           </CardContent>
         </Card>
-        <Card className="shadow-sm">
+        <Card className="">
           <CardContent className="p-4 sm:p-5">
-            <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Skor Tertinggi</div>
-            <div className="mt-2 text-2xl font-bold tabular-nums text-success">{highest}</div>
+            <div className="text-label font-medium text-muted-foreground">Skor Tertinggi</div>
+            <div className="mt-2 text-2xl font-semibold tabular-nums text-success">{highest}</div>
           </CardContent>
         </Card>
-        <Card className="shadow-sm">
+        <Card className="">
           <CardContent className="p-4 sm:p-5">
-            <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Skor Terendah</div>
-            <div className="mt-2 text-2xl font-bold tabular-nums text-destructive">{lowest}</div>
+            <div className="text-label font-medium text-muted-foreground">Skor Terendah</div>
+            <div className="mt-2 text-2xl font-semibold tabular-nums text-destructive">{lowest}</div>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="overflow-hidden shadow-sm">
+      <Card className="overflow-hidden">
         <CardHeader className="border-b bg-muted/20 pb-4">
           <CardTitle className="text-base">Distribusi Nilai</CardTitle>
           <CardDescription>Persebaran jumlah siswa berdasarkan rentang skor</CardDescription>
@@ -612,7 +612,7 @@ function AiInsightTab({ ujian, sesis }: { ujian: Ujian, sesis: SesiUjian[] }) {
 
   if (total === 0) {
     return (
-      <Card className="shadow-sm">
+      <Card className="">
         <CardContent className="p-12 text-center text-sm text-muted-foreground">
           Belum ada sesi selesai untuk dianalisis oleh AI.
         </CardContent>
@@ -622,7 +622,7 @@ function AiInsightTab({ ujian, sesis }: { ujian: Ujian, sesis: SesiUjian[] }) {
 
   return (
     <div className="space-y-4">
-      <Card className="border-primary/20 bg-primary/5 shadow-sm">
+      <Card className="border-primary/20 bg-primary/5">
         <CardContent className="p-5 sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
@@ -653,8 +653,8 @@ function AiInsightTab({ ujian, sesis }: { ujian: Ujian, sesis: SesiUjian[] }) {
       </Card>
 
       {report && (
-        <div className="grid gap-4 animate-in slide-in-from-bottom-4 duration-500">
-          <Card className="overflow-hidden shadow-sm">
+        <div className="grid gap-4 duration-500">
+          <Card className="overflow-hidden">
             <CardHeader className="border-b bg-muted/20 pb-4">
               <CardTitle className="flex items-center gap-2 text-base">
                 <TrendingUp className="h-5 w-5 text-primary" /> Tren Kinerja Keseluruhan
@@ -666,7 +666,7 @@ function AiInsightTab({ ujian, sesis }: { ujian: Ujian, sesis: SesiUjian[] }) {
           </Card>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <Card className="border-destructive/30 shadow-sm">
+            <Card className="border-destructive/30">
               <CardHeader className="border-b bg-destructive/5 pb-4">
                 <CardTitle className="flex items-center gap-2 text-base text-destructive">
                   <AlertTriangle className="h-5 w-5" /> Area Perlu Perhatian (Sulit)
@@ -679,7 +679,7 @@ function AiInsightTab({ ujian, sesis }: { ujian: Ujian, sesis: SesiUjian[] }) {
               </CardContent>
             </Card>
 
-            <Card className="border-success/30 shadow-sm">
+            <Card className="border-success/30">
               <CardHeader className="border-b bg-success/5 pb-4">
                 <CardTitle className="flex items-center gap-2 text-base text-success">
                   <CheckCircle2 className="h-5 w-5" /> Area Dikuasai (Mudah)
@@ -693,7 +693,7 @@ function AiInsightTab({ ujian, sesis }: { ujian: Ujian, sesis: SesiUjian[] }) {
             </Card>
           </div>
 
-          <Card className="border-primary/20 bg-primary text-primary-foreground shadow-sm">
+          <Card className="border-primary/20 bg-primary text-primary-foreground">
             <CardHeader className="border-b border-primary-foreground/10 pb-4">
               <CardTitle className="flex items-center gap-2 text-base text-primary-foreground">
                 <Sparkles className="h-5 w-5" /> Rekomendasi Tindak Lanjut

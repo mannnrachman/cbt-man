@@ -25,6 +25,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 - Bank soal (modul, topik, daftar soal) dan editor teks kaya memakai token warna; tidak ada perubahan perilaku.
 - Halaman impor soal (Excel, Word) dan manajer berkas memakai token warna; tidak ada perubahan perilaku.
 - Halaman akademik (struktur, mata kuliah, semester, tahun, kelas) serta peserta (daftar, kartu, online) memakai token warna; tidak ada perubahan perilaku.
+- Halaman evaluasi, analitik, dan leaderboard memakai token warna; tidak ada perubahan perilaku atau rumus.
 - `cn()` mengenali skala ukuran huruf baru (`text-ui`, `text-body`, dst.) agar `tailwind-merge` tidak menghapus warna teks.
 - `npm run check:ui` (juga di CI) menolak warna palet mentah, teks di bawah 13 px, huruf kapital berjarak, gradien, kaca buram, bayangan, dan animasi hias di `src/**/*.tsx`. Jumlah pelanggaran per berkas dicatat di `scripts/ui-baseline.json` dan hanya boleh turun.
 
