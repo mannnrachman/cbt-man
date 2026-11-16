@@ -48,14 +48,14 @@ export function AudioPlayer({
     }
   }
 
-  if (!url) return <div className="text-xs text-muted-foreground">Memuat audio…</div>;
+  if (!url) return <div className="text-label text-muted-foreground">Memuat audio…</div>;
 
   return (
     <div className="flex items-center gap-2 rounded border bg-muted/30 p-2">
       <Button type="button" size="sm" variant="outline" onClick={toggle} disabled={done && playOnce}>
         {done && playOnce ? <Lock className="h-4 w-4" /> : playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
       </Button>
-      <span className="text-xs text-muted-foreground">
+      <span className="text-label text-muted-foreground">
         {playOnce ? (done ? "Audio sudah diputar (tidak bisa diulang)" : "Audio hanya bisa diputar 1 kali") : "Audio"}
       </span>
       <audio

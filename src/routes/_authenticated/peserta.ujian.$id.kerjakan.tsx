@@ -6,7 +6,7 @@ import type { SesiUjian, Ujian } from "@/lib/cbt/types";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { LayoutGrid, X, ChevronLeft, ChevronRight, Flag, CheckCircle2, AlertCircle, Type, Clock, Calculator, FileText } from "lucide-react";
+import { LayoutGrid, X, ChevronLeft, ChevronRight, Flag, CheckCircle2, Type, Clock, Calculator, FileText } from "lucide-react";
 import {
   createFileRoute,
   useNavigate,
@@ -387,12 +387,12 @@ function RouteComponent() {
 
   if (examLocked) {
     return (
-      <div className="flex h-screen items-center justify-center bg-slate-50 p-6 dark:bg-slate-950">
+      <div className="flex h-screen items-center justify-center bg-background p-6">
         <div
           role="alert"
-          className="max-w-md rounded-2xl border border-red-200 bg-red-50 p-6 text-red-900 shadow-sm dark:border-red-900 dark:bg-red-950/40 dark:text-red-100"
+          className="max-w-md rounded-lg border border-destructive/40 bg-card p-6 text-destructive"
         >
-          <h1 className="text-lg font-bold">Sesi ujian dikunci</h1>
+          <h1 className="text-lg font-semibold">Sesi ujian dikunci</h1>
           <p className="mt-2 text-sm leading-relaxed">
             Anda meninggalkan halaman ujian melebihi batas. Jawaban dikumpulkan dan sesi diakhiri.
           </p>
@@ -403,7 +403,7 @@ function RouteComponent() {
 
   if (!user) return <div className="p-8 text-center font-medium">Anda harus login.</div>;
   if (!ujian) return <div className="p-8 text-center font-medium">Data ujian tidak ditemukan.</div>;
-  if (!sesiDicari) return <div className="flex h-screen items-center justify-center bg-slate-50 dark:bg-slate-950"><div className="animate-pulse flex flex-col items-center gap-4"><div className="h-10 w-10 rounded-full border-4 border-primary border-t-transparent animate-spin" /><p className="text-slate-500 font-medium tracking-widest uppercase text-sm">Menyiapkan Mesin Ujian...</p></div></div>;
+  if (!sesiDicari) return <div className="flex h-screen items-center justify-center bg-background"><div className="flex flex-col items-center gap-4"><div className="h-10 w-10 rounded-full border-4 border-primary border-t-transparent animate-spin" /><p className="text-ui text-muted-foreground">Menyiapkan ujian…</p></div></div>;
   if (!sesi) return <div className="p-8 text-center font-medium">Sesi tidak valid.</div>;
 
   const soalId = sesi.soalIds[idx];
@@ -427,54 +427,54 @@ function RouteComponent() {
     fontSize === "lg" ? "text-xl sm:text-2xl prose-xl" : "text-base sm:text-lg prose-base";
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-64px)] overflow-hidden bg-slate-50/50 dark:bg-slate-950 font-sans p-0 sm:p-3 lg:p-5">
-      <div className="flex-1 flex mx-auto w-full max-w-[1600px] h-full min-h-0 relative overflow-hidden rounded-none sm:rounded-3xl border-0 sm:border border-white/60 dark:border-slate-800/80 bg-white/60 dark:bg-slate-900/60 shadow-none sm:shadow-xl">
+    <div className="flex flex-col h-[calc(100dvh-64px)] overflow-hidden bg-background font-sans p-0 sm:p-3 lg:p-5">
+      <div className="flex-1 flex mx-auto w-full max-w-[1600px] h-full min-h-0 relative overflow-hidden rounded-none sm:rounded-lg border-0 sm:border bg-card">
 
         {/* LEFT PANEL: MAIN EXAM AREA */}
-        <div className="flex-1 flex flex-col min-w-0 bg-white/80 dark:bg-slate-900/80 relative z-10">
+        <div className="flex-1 flex flex-col min-w-0 bg-card relative z-10">
           
           {/* Top Sticky Header */}
-          <div className="sticky top-0 z-20 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800/80 px-4 sm:px-8 py-3 sm:py-4 flex items-center justify-between transition-colors">
+          <div className="sticky top-0 z-20 bg-card border-b border-border px-4 sm:px-8 py-3 sm:py-4 flex items-center justify-between transition-colors">
             
-            <div className="flex items-center gap-4">
-              <div className="flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-primary/10 text-primary font-black text-xl border border-primary/20 shadow-sm">
-                {idx + 1}
-              </div>
-              <div className="min-w-0 hidden sm:block">
-                <p className="max-w-[22rem] truncate text-sm font-extrabold text-slate-800 dark:text-white" title={ujian.nama}>{ujian.nama}</p>
-                <p className="mt-1 text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Soal {idx + 1} dari {currentSesi.soalIds.length}</p>
-              </div>
+            <div className="min-w-0">
+              <p className="max-w-[22rem] truncate text-ui font-medium text-foreground" title={ujian.nama}>{ujian.nama}</p>
+              <p className="text-label text-muted-foreground tabular-nums">Soal {idx + 1} dari {currentSesi.soalIds.length}</p>
             </div>
 
             <div className="flex items-center gap-3 sm:gap-6">
               {/* Font Size Controls */}
-              <div className="hidden sm:flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700/50">
-                <button type="button" onClick={() => setFontSize("sm")} className={cn("flex items-center justify-center w-8 h-8 rounded-lg font-bold text-sm transition-all", fontSize === "sm" ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200")} aria-label="Perkecil teks" title="Perkecil teks">
+              <div className="hidden sm:flex items-center gap-1 bg-muted p-1 rounded-lg border border-border">
+                <button type="button" onClick={() => setFontSize("sm")} className={cn("flex items-center justify-center w-8 h-8 rounded-lg font-semibold text-sm transition-all", fontSize === "sm" ? "bg-card text-primary" : "text-muted-foreground hover:text-foreground")} aria-label="Perkecil teks" title="Perkecil teks">
                   <Type className="w-3.5 h-3.5" />
                 </button>
-                <button type="button" onClick={() => setFontSize("base")} className={cn("flex items-center justify-center w-8 h-8 rounded-lg font-bold text-base transition-all", fontSize === "base" ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200")} aria-label="Gunakan ukuran teks normal" title="Gunakan ukuran teks normal">
+                <button type="button" onClick={() => setFontSize("base")} className={cn("flex items-center justify-center w-8 h-8 rounded-lg font-semibold text-base transition-all", fontSize === "base" ? "bg-card text-primary" : "text-muted-foreground hover:text-foreground")} aria-label="Gunakan ukuran teks normal" title="Gunakan ukuran teks normal">
                   <Type className="w-4 h-4" />
                 </button>
-                <button type="button" onClick={() => setFontSize("lg")} className={cn("flex items-center justify-center w-8 h-8 rounded-lg font-bold text-lg transition-all", fontSize === "lg" ? "bg-white dark:bg-slate-700 text-primary shadow-sm" : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200")} aria-label="Perbesar teks" title="Perbesar teks">
+                <button type="button" onClick={() => setFontSize("lg")} className={cn("flex items-center justify-center w-8 h-8 rounded-lg font-semibold text-lg transition-all", fontSize === "lg" ? "bg-card text-primary" : "text-muted-foreground hover:text-foreground")} aria-label="Perbesar teks" title="Perbesar teks">
                   <Type className="w-5 h-5" />
                 </button>
               </div>
 
               {/* Timer */}
               <div className={cn(
-                "flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1.5 sm:py-2 rounded-2xl border shadow-sm transition-colors",
-                critical ? "bg-red-500 text-white border-red-600 animate-pulse" : 
-                danger ? "bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 border-red-200 dark:border-red-900" : 
-                "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700"
+                "flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1.5 rounded-lg border transition-colors",
+                critical ? "bg-destructive text-destructive-foreground border-destructive" : 
+                danger ? "bg-destructive/10 text-destructive border-destructive/30" : 
+                "bg-muted text-foreground border-border"
               )}>
-                <Clock className={cn("w-4 h-4 sm:w-5 sm:h-5", critical ? "text-white" : danger ? "text-red-500" : "text-slate-400")} />
-                <span className="font-mono font-bold text-base sm:text-lg tracking-tight tabular-nums mt-0.5">
-                  {String(mm).padStart(2, "0")}:{String(ss).padStart(2, "0")}
+                <Clock className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+                <span className="flex flex-col leading-tight">
+                  <span className="font-mono text-heading font-semibold tabular-nums">
+                    {String(mm).padStart(2, "0")}:{String(ss).padStart(2, "0")}
+                  </span>
+                  <span className={cn("whitespace-nowrap text-label", !danger && "hidden sm:inline")}>
+                    {critical ? "Kurang dari 1 menit" : danger ? "Kurang dari 5 menit" : "Sisa waktu"}
+                  </span>
                 </span>
               </div>
 
               {pollingError && (
-                <p role="status" className="max-w-[9rem] text-right text-[11px] font-medium leading-tight text-amber-600 dark:text-amber-400 sm:text-xs">
+                <p role="status" className="max-w-[9rem] text-right text-label font-medium leading-tight text-warn sm:text-label">
                   Sinkronisasi tertunda — mencoba lagi.
                 </p>
               )}
@@ -485,7 +485,7 @@ function RouteComponent() {
                   variant={rightTab === "kalkulator" ? "default" : "outline"}
                   size="sm"
                   onClick={() => setRightTab((prev) => (prev === "kalkulator" ? "navigasi" : "kalkulator"))}
-                  className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 rounded-xl font-bold text-xs shadow-xs transition-all"
+                  className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 rounded-lg font-semibold text-label transition-all"
                   title={rightTab === "kalkulator" ? "Kembali ke Navigasi Soal" : "Buka Kalkulator di Panel Kanan"}
                   aria-label={rightTab === "kalkulator" ? "Tutup kalkulator di panel kanan" : "Buka kalkulator di panel kanan"}
                 >
@@ -494,28 +494,28 @@ function RouteComponent() {
                 </Button>
               )}
 
-              <Button variant="outline" size="icon" className="md:hidden w-10 h-10 rounded-xl border-slate-200 dark:border-slate-700" onClick={() => setShowList(true)} aria-label="Buka daftar soal" title="Buka daftar soal">
-                <LayoutGrid className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+              <Button variant="outline" size="icon" className="md:hidden w-10 h-10 rounded-lg border-border" onClick={() => setShowList(true)} aria-label="Buka daftar soal" title="Buka daftar soal">
+                <LayoutGrid className="w-5 h-5 text-muted-foreground" />
               </Button>
             </div>
           </div>
 
           {/* Question & Options Scrollable Area */}
-          <div className="flex-1 overflow-y-auto overflow-x-hidden relative bg-slate-50/40 dark:bg-slate-950/20">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden relative bg-background">
             <div className="max-w-5xl mx-auto px-5 sm:px-10 py-6 sm:py-10 pb-32">
 
               {/* Question Text */}
               <div 
                 aria-live="polite"
-                className={cn("prose prose-slate dark:prose-invert max-w-none mb-10 text-slate-800 dark:text-slate-200 leading-loose", textSizeClass)}
+                className={cn("prose prose-slate dark:prose-invert max-w-none mb-10 text-foreground leading-loose", textSizeClass)}
               >
                 <RichView html={currentSoal.detail} />
               </div>
               
               {/* Audio Player if present */}
               {currentSoal.audioFileId && (
-                <div className="mb-10 rounded-3xl border border-slate-200/80 bg-white/70 p-6 shadow-sm dark:border-slate-800/80 dark:bg-slate-900/60">
-                  <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-4 uppercase tracking-widest">Audio Pendukung</p>
+                <div className="mb-10 rounded-lg border border-border bg-card p-6">
+                  <p className="mb-4 text-ui font-medium text-muted-foreground">Audio pendukung</p>
                   <AudioPlayer
                     fileId={currentSoal.audioFileId}
                     playOnce={currentSoal.audioPlayOnce}
@@ -528,7 +528,7 @@ function RouteComponent() {
               <div className="space-y-4">
                 {currentSoal.tipe === "essay" ? (
                   <div className="space-y-2">
-                    <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+                    <div className="rounded-lg border border-border bg-card focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
                       <Textarea
                         rows={10}
                         aria-label={`Jawaban esai soal nomor ${idx + 1}`}
@@ -536,11 +536,11 @@ function RouteComponent() {
                         onChange={(e) => updateJawaban({ jawabanEssay: e.target.value })}
                         placeholder="Ketik jawaban esai Anda secara lengkap dan jelas di sini..."
                         className={cn(
-                          "w-full resize-y rounded-t-xl border-0 bg-transparent p-4 sm:p-5 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus-visible:ring-0 focus-visible:outline-none min-h-[220px] leading-relaxed",
+                          "w-full resize-y rounded-t-lg border-0 bg-transparent p-4 sm:p-5 text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:outline-none min-h-[220px] leading-relaxed",
                           textSizeClass
                         )}
                       />
-                      <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 px-4 py-2.5 bg-slate-50/60 dark:bg-slate-900/60 text-xs text-slate-400 dark:text-slate-500 rounded-b-xl select-none">
+                      <div className="flex items-center justify-between border-t border-border px-4 py-2.5 bg-muted/60 text-label text-muted-foreground rounded-b-lg select-none">
                         <span>Jawaban tersimpan otomatis</span>
                         <span>
                           {((currentJawaban.jawabanEssay ?? "").trim() ? (currentJawaban.jawabanEssay ?? "").trim().split(/\s+/).length : 0)} kata · {(currentJawaban.jawabanEssay ?? "").length} karakter
@@ -559,11 +559,11 @@ function RouteComponent() {
                       <label 
                         key={oid}
                         className={cn(
-                          "group relative flex items-start p-4 sm:p-5 rounded-3xl border-2 cursor-pointer transition-all duration-200 hover:-translate-y-0.5",
-                          "has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-primary/40 has-[:focus-visible]:border-primary", // a11y focus ring
+                          "group relative flex items-start p-4 sm:p-5 rounded-lg border cursor-pointer transition-colors",
+                          "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-background", // a11y focus ring
                           isChecked 
-                            ? "bg-primary/5 border-primary shadow-[0_0_0_1px_rgba(3,165,89,1)] dark:bg-primary/10 dark:shadow-[0_0_0_1px_rgba(3,165,89,0.5)]" 
-                            : "bg-white/80 dark:bg-slate-950/70 border-slate-200/80 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-md"
+                            ? "border-2 border-primary bg-primary/10"
+                            : "border-foreground/30 bg-card hover:bg-muted"
                         )}
                       >
                         <input
@@ -576,19 +576,19 @@ function RouteComponent() {
                         
                         <div className="flex shrink-0 items-center justify-center mt-0.5 sm:mt-1 mr-4 sm:mr-6">
                           <div className={cn(
-                            "flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 font-bold transition-all duration-300",
+                            "flex h-8 w-8 items-center justify-center rounded-md border font-semibold transition-colors sm:h-9 sm:w-9",
                             isChecked
-                              ? "bg-primary border-primary text-white scale-110 shadow-md"
-                              : "bg-slate-50 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 group-hover:border-primary/50 group-hover:text-primary"
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "border-foreground/30 bg-muted text-muted-foreground"
                           )}>
                             {optLetter}
                           </div>
                         </div>
 
                         <div className={cn(
-                          "flex-1 min-w-0 prose prose-slate dark:prose-invert max-w-none prose-p:my-0 leading-relaxed transition-colors",
+                          "flex-1 min-w-0 pt-1 prose prose-slate dark:prose-invert max-w-none prose-p:my-0 leading-relaxed transition-colors",
                           textSizeClass,
-                          isChecked ? "text-slate-900 dark:text-white font-medium" : "text-slate-600 dark:text-slate-300"
+                          isChecked ? "text-foreground font-medium" : "text-foreground"
                         )}>
                           <RichView html={opt.detail} />
                         </div>
@@ -601,52 +601,54 @@ function RouteComponent() {
           </div>
 
           {/* Bottom Action Footer */}
-          <div className="sticky bottom-0 z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-200/80 dark:border-slate-800/80 p-4 sm:p-5">
+          <div className="sticky bottom-0 z-20 bg-card border-t border-border p-4 sm:p-5">
             <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
 
               <div className="flex w-full sm:w-auto items-center gap-3">
                 <Button
                   variant="outline"
                   size="lg"
-                  className="w-full sm:w-auto font-bold rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 h-14 px-6 transition-all"
+                  className="w-full sm:w-auto"
                   disabled={idx === 0}
                   onClick={() => handleNavigateIdx(idx - 1)}
                 >
-                  <ChevronLeft className="w-5 h-5 mr-1" /> SEBELUMNYA
+                  <ChevronLeft className="h-4 w-4" /> Soal sebelumnya
                 </Button>
 
                 <label className={cn(
-                  "flex-1 sm:flex-none flex items-center justify-center gap-2 cursor-pointer h-14 px-6 rounded-xl font-bold uppercase tracking-wider transition-all border-2 select-none",
-                  currentJawaban.ragu 
-                    ? "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-700 shadow-sm" 
-                    : "bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-amber-200 dark:hover:border-amber-800/50 hover:bg-amber-50 dark:hover:bg-amber-950/20"
+                  "flex h-11 flex-1 cursor-pointer select-none items-center justify-center gap-2 rounded-md border px-4 text-ui font-medium transition-colors sm:flex-none",
+                  currentJawaban.ragu
+                    ? "border-2 border-warn bg-warn/10 text-warn"
+                    : "border-foreground/30 bg-card text-foreground hover:bg-muted"
                 )}>
                   <input 
                     type="checkbox" 
-                    className="w-5 h-5 accent-amber-500 rounded cursor-pointer"
+                    className="w-5 h-5 rounded cursor-pointer"
                     checked={currentJawaban.ragu}
                     onChange={(e) => updateJawaban({ ragu: e.target.checked })}
                   />
-                  RAGU-RAGU
+                  <span className="whitespace-nowrap">
+                    <span className="sm:hidden">Ragu-ragu</span>
+                    <span className="hidden sm:inline">Tandai ragu-ragu</span>
+                  </span>
                 </label>
               </div>
 
               {idx < currentSesi.soalIds.length - 1 ? (
                 <Button
                   size="lg"
-                  className="w-full sm:w-auto h-14 px-8 rounded-xl font-bold uppercase tracking-widest shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
+                  className="w-full sm:w-auto"
                   onClick={() => handleNavigateIdx(idx + 1)}
                 >
-                  SELANJUTNYA <ChevronRight className="w-5 h-5 ml-1" />
+                  Soal berikutnya <ChevronRight className="h-4 w-4" />
                 </Button>
               ) : (
                 <Button
                   size="lg"
-                  variant="destructive"
-                  className="w-full sm:w-auto h-14 px-8 rounded-xl font-black uppercase tracking-widest shadow-lg shadow-red-500/20 hover:shadow-red-500/40 transition-all hover:-translate-y-0.5"
+                  className="w-full sm:w-auto"
                   onClick={() => setShowSubmitDialog(true)}
                 >
-                  KUMPULKAN
+                  Kumpulkan ujian
                 </Button>
               )}
 
@@ -655,33 +657,33 @@ function RouteComponent() {
         </div>
 
         {/* RIGHT PANEL: GRID NAVIGATION & EMBEDDED CALCULATOR (Desktop Only) */}
-        <div className="hidden md:flex flex-col w-80 lg:w-96 bg-slate-50/70 dark:bg-slate-950/30 border-l border-slate-200/80 dark:border-slate-800/80 shrink-0">
-          <div className="p-4 sm:p-5 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm space-y-3">
+        <div className="hidden md:flex flex-col w-80 lg:w-96 bg-muted border-l border-border shrink-0">
+          <div className="p-4 sm:p-5 border-b border-border bg-card space-y-3">
             {ujian.allowCalculator ? (
-              <div className="flex rounded-xl bg-slate-200/70 dark:bg-slate-800/70 p-1 border border-slate-300/50 dark:border-slate-700/50">
+              <div className="flex rounded-lg bg-muted/70 p-1 border border-border">
                 <button
                   type="button"
                   onClick={() => setRightTab("navigasi")}
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-bold transition-all",
+                    "flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-label font-semibold transition-all",
                     rightTab === "navigasi"
-                      ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm"
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                      ? "bg-card text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
                   )}
                   aria-selected={rightTab === "navigasi"}
                   role="tab"
                 >
                   <LayoutGrid className="w-3.5 h-3.5" />
-                  Navigasi Soal
+                  Navigasi soal
                 </button>
                 <button
                   type="button"
                   onClick={() => setRightTab("kalkulator")}
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-bold transition-all",
+                    "flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-label font-semibold transition-all",
                     rightTab === "kalkulator"
-                      ? "bg-white dark:bg-slate-900 text-primary dark:text-primary-foreground shadow-sm"
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                      ? "bg-card text-primary dark:text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground"
                   )}
                   aria-selected={rightTab === "kalkulator"}
                   role="tab"
@@ -691,33 +693,33 @@ function RouteComponent() {
                 </button>
               </div>
             ) : (
-              <h3 className="font-extrabold text-slate-800 dark:text-slate-200 text-lg tracking-tight">Navigasi Soal</h3>
+              <h3 className="text-heading font-medium text-foreground">Navigasi soal</h3>
             )}
 
             {rightTab === "navigasi" ? (
               <>
                 <NilaiNormalAction ujian={ujian} />
                 <div className="flex flex-col gap-2 pt-1">
-                  <div className="flex items-center gap-3 text-sm font-medium text-slate-600 dark:text-slate-400">
-                    <div className="w-4 h-4 rounded-full bg-primary shadow-sm" /> Sudah Dijawab
+                  <div className="flex items-center gap-3 text-ui text-muted-foreground">
+                    <div className="h-4 w-4 rounded-sm bg-primary" /> Sudah dijawab
                   </div>
-                  <div className="flex items-center gap-3 text-sm font-medium text-slate-600 dark:text-slate-400">
-                    <div className="w-4 h-4 rounded-full bg-amber-400 shadow-sm" /> Ragu-ragu
+                  <div className="flex items-center gap-3 text-ui text-muted-foreground">
+                    <div className="h-4 w-4 rounded-sm bg-warn" /> Ragu-ragu
                   </div>
-                  <div className="flex items-center gap-3 text-sm font-medium text-slate-600 dark:text-slate-400">
-                    <div className="w-4 h-4 rounded-full bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 shadow-sm" /> Belum Dijawab
+                  <div className="flex items-center gap-3 text-ui text-muted-foreground">
+                    <div className="h-4 w-4 rounded-sm border border-foreground/50 bg-card" /> Belum dijawab
                   </div>
                 </div>
               </>
             ) : (
-              <div className="flex items-center justify-between text-xs font-medium text-slate-500 dark:text-slate-400 pt-0.5">
-                <span className="font-bold text-slate-700 dark:text-slate-300">Kalkulator Ilmiah</span>
+              <div className="flex items-center justify-between text-label font-medium text-muted-foreground pt-0.5">
+                <span className="font-medium text-foreground">Kalkulator ilmiah</span>
                 <button
                   type="button"
                   onClick={() => setRightTab("navigasi")}
                   className="text-primary hover:underline font-semibold"
                 >
-                  Lihat Navigasi Soal →
+                  Lihat navigasi soal →
                 </button>
               </div>
             )}
@@ -738,24 +740,23 @@ function RouteComponent() {
                     <button
                       key={i}
                       type="button"
-                      aria-label={`Buka soal nomor ${i + 1}`}
+                      aria-label={`Buka soal nomor ${i + 1}${a.ragu ? ", ragu-ragu" : dijawab ? ", sudah dijawab" : ", belum dijawab"}`}
+                      aria-current={i === idx ? "step" : undefined}
                       title={`Buka soal nomor ${i + 1}`}
                       onClick={() => handleNavigateIdx(i)}
                       className={cn(
-                        "relative aspect-square flex items-center justify-center rounded-xl text-sm font-bold border-2 transition-all hover:scale-105",
-                        i === idx && "ring-4 ring-primary/20 dark:ring-primary/40",
+                        "relative flex aspect-square items-center justify-center rounded-md border text-ui font-medium tabular-nums transition-colors",
+                        i === idx && "ring-2 ring-foreground ring-offset-2 ring-offset-muted",
                         a.ragu
-                          ? "bg-amber-400 text-white border-amber-500 shadow-sm"
+                          ? "border-warn bg-warn text-background"
                           : dijawab
-                            ? "bg-primary text-white border-primary shadow-sm"
-                            : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500"
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-foreground/50 bg-card text-foreground hover:bg-accent"
                       )}
                     >
                       {i + 1}
-                      {i === idx && (
-                        <span className="absolute -bottom-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full bg-white dark:bg-slate-800 ring-2 ring-primary/20">
-                          <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                        </span>
+                      {a.ragu && (
+                        <span aria-hidden="true" className="absolute right-1 top-0 text-label font-semibold">?</span>
                       )}
                     </button>
                   );
@@ -764,13 +765,13 @@ function RouteComponent() {
             </div>
           )}
 
-          <div className="p-6 border-t border-slate-200/80 dark:border-slate-800/80 bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm">
+          <div className="p-6 border-t border-border bg-card">
             <Button
-              variant="destructive"
-              className="w-full h-12 font-bold uppercase tracking-widest shadow-md"
+              variant="outline"
+              className="w-full"
               onClick={() => setShowSubmitDialog(true)}
             >
-              Akhiri Ujian
+              Kumpulkan ujian
             </Button>
           </div>
         </div>
@@ -778,30 +779,26 @@ function RouteComponent() {
       </div>
 
       <Dialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
-        <DialogContent className="w-[calc(100%_-_2rem)] max-w-md overflow-hidden rounded-2xl border-0 p-0 shadow-2xl">
-          <div className="bg-gradient-to-br from-red-50 to-white p-6 dark:from-red-950/40 dark:to-slate-950">
-            <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-300">
-              <AlertCircle className="h-6 w-6" aria-hidden="true" />
-            </div>
+        <DialogContent className="w-[calc(100%_-_2rem)] max-w-md">
+          <div>
             <DialogHeader>
-              <DialogTitle className="text-xl">Kumpulkan ujian sekarang?</DialogTitle>
+              <DialogTitle className="text-heading">Kumpulkan ujian sekarang?</DialogTitle>
               <DialogDescription className="pt-2 leading-relaxed">
                 Pastikan semua jawaban telah terisi dengan benar. Setelah dikumpulkan, jawaban tidak dapat diubah kembali.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter className="mt-6 gap-2 sm:space-x-0">
               <DialogClose asChild>
-                <Button variant="outline" className="h-11 rounded-xl">Periksa Kembali</Button>
+                <Button variant="outline">Periksa kembali</Button>
               </DialogClose>
               <Button
                 variant="destructive"
-                className="h-11 rounded-xl font-bold"
                 onClick={() => {
                   setShowSubmitDialog(false);
                   void submit();
                 }}
               >
-                Ya, Kumpulkan
+                Ya, kumpulkan
               </Button>
             </DialogFooter>
           </div>
@@ -810,16 +807,16 @@ function RouteComponent() {
 
       {/* MOBILE LIST MODAL (Show when showList is true) */}
       {showList && (
-        <div className="fixed inset-0 z-50 bg-slate-50/95 dark:bg-slate-950/95 backdrop-blur-md flex flex-col animate-in fade-in zoom-in-95 duration-200">
-          <div className="flex justify-between items-center bg-white dark:bg-slate-900 px-6 py-5 border-b border-slate-200 dark:border-slate-800 shadow-sm">
-            <div className="flex items-center gap-3 text-lg font-black text-slate-800 dark:text-white">
-              <LayoutGrid className="w-5 h-5 text-primary" /> DAFTAR SOAL
+        <div className="fixed inset-0 z-50 bg-background flex flex-col">
+          <div className="flex items-center justify-between border-b bg-card px-6 py-4">
+            <div className="flex items-center gap-3 text-lg font-semibold text-foreground">
+              <LayoutGrid className="h-5 w-5" aria-hidden="true" /> Daftar soal
             </div>
             <button
               type="button"
               aria-label="Tutup daftar soal"
               title="Tutup daftar soal"
-              className="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-full transition-colors text-slate-600 dark:text-slate-300"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
               onClick={() => setShowList(false)}
             >
               <X className="w-5 h-5" />
@@ -829,15 +826,15 @@ function RouteComponent() {
           <div className="flex-1 overflow-y-auto p-6">
             <div className="max-w-xl mx-auto">
               {ujian.allowCalculator && (
-                <div className="flex rounded-xl bg-slate-200/70 dark:bg-slate-800/70 p-1 mb-5 border border-slate-300/50 dark:border-slate-700/50">
+                <div className="flex rounded-lg bg-muted/70 p-1 mb-5 border border-border">
                   <button
                     type="button"
                     onClick={() => setMobileTab("navigasi")}
                     className={cn(
-                      "flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition-all",
+                      "flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-label font-semibold transition-all",
                       mobileTab === "navigasi"
-                        ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm"
-                        : "text-slate-600 dark:text-slate-400"
+                        ? "bg-card text-foreground"
+                        : "text-muted-foreground"
                     )}
                   >
                     <LayoutGrid className="w-3.5 h-3.5" />
@@ -847,10 +844,10 @@ function RouteComponent() {
                     type="button"
                     onClick={() => setMobileTab("kalkulator")}
                     className={cn(
-                      "flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition-all",
+                      "flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-label font-semibold transition-all",
                       mobileTab === "kalkulator"
-                        ? "bg-white dark:bg-slate-900 text-primary dark:text-primary-foreground shadow-sm"
-                        : "text-slate-600 dark:text-slate-400"
+                        ? "bg-card text-primary dark:text-primary-foreground"
+                        : "text-muted-foreground"
                     )}
                   >
                     <Calculator className="w-3.5 h-3.5" />
@@ -867,18 +864,18 @@ function RouteComponent() {
                 <>
                   <NilaiNormalAction ujian={ujian} />
 
-                  <div className="flex justify-between items-center bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 mb-8 mt-4 shadow-sm">
+                  <div className="flex justify-between items-center bg-card p-4 rounded-lg border border-border mb-8 mt-4">
                     <div className="flex flex-col items-center">
-                      <div className="w-4 h-4 rounded-full bg-primary shadow-sm mb-1" />
-                      <span className="text-xs font-semibold text-slate-500">Sudah</span>
+                      <div className="mb-1 h-4 w-4 rounded-sm bg-primary" />
+                      <span className="text-label text-muted-foreground">Sudah</span>
                     </div>
                     <div className="flex flex-col items-center">
-                      <div className="w-4 h-4 rounded-full bg-amber-400 shadow-sm mb-1" />
-                      <span className="text-xs font-semibold text-slate-500">Ragu</span>
+                      <div className="mb-1 h-4 w-4 rounded-sm bg-warn" />
+                      <span className="text-label text-muted-foreground">Ragu</span>
                     </div>
                     <div className="flex flex-col items-center">
-                      <div className="w-4 h-4 rounded-full bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 shadow-sm mb-1" />
-                      <span className="text-xs font-semibold text-slate-500">Kosong</span>
+                      <div className="mb-1 h-4 w-4 rounded-sm border border-foreground/50 bg-card" />
+                      <span className="text-label text-muted-foreground">Kosong</span>
                     </div>
                   </div>
 
@@ -894,16 +891,19 @@ function RouteComponent() {
                           title={`Buka soal nomor ${i + 1}`}
                           onClick={() => { handleNavigateIdx(i); setShowList(false); }}
                           className={cn(
-                            "relative aspect-square rounded-2xl text-lg font-bold border-2 transition-all shadow-sm active:scale-95",
-                            i === idx && "ring-4 ring-primary/30",
+                            "relative aspect-square rounded-md border text-heading font-medium tabular-nums transition-colors",
+                            i === idx && "ring-2 ring-foreground ring-offset-2 ring-offset-background",
                             a.ragu
-                              ? "bg-amber-400 text-white border-amber-500"
+                              ? "border-warn bg-warn text-background"
                               : dijawab
-                                ? "bg-primary text-white border-primary"
-                                : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700"
+                                ? "border-primary bg-primary text-primary-foreground"
+                                : "border-foreground/50 bg-card text-foreground"
                           )}
                         >
                           {i + 1}
+                          {a.ragu && (
+                            <span aria-hidden="true" className="absolute right-1.5 top-0.5 text-label font-semibold">?</span>
+                          )}
                         </button>
                       );
                     })}
@@ -914,14 +914,14 @@ function RouteComponent() {
               <div className="mt-12 pb-12">
                 <Button 
                   size="lg"
-                  variant="destructive"
-                  className="w-full h-14 font-black text-lg uppercase tracking-widest shadow-lg"
+                  className="w-full"
+                  variant="outline"
                   onClick={() => {
                     setShowList(false);
                     setShowSubmitDialog(true);
                   }}
                 >
-                  Akhiri Ujian
+                  Kumpulkan ujian
                 </Button>
               </div>
             </div>

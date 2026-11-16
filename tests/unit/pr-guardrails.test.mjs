@@ -56,7 +56,11 @@ test("admin layout reads the authenticated route context instead of nullable cli
 
 test("admin demo credentials are development-only", () => {
   const login = readFileSync("src/routes/login-admin.tsx", "utf8");
-  assert.match(login, /import\.meta\.env\.DEV && <div[^>]*>[\s\S]{0,500}Kredensial Demo/);
+  const devGuard = login.indexOf("import.meta.env.DEV &&");
+  const firstCredential = login.indexOf("admin123");
+  assert.ok(devGuard !== -1, "login-admin must gate demo credentials on import.meta.env.DEV");
+  assert.ok(firstCredential > devGuard, "demo credentials may only appear after the DEV guard");
+  assert.equal(login.indexOf("evaluator123") > devGuard, true);
 });
 
 test("file delete action matches the super-admin server boundary", () => {
