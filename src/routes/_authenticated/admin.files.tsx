@@ -320,7 +320,7 @@ function FilesPage() {
                   onClick={() => setSelectedFolder(bucket.id)}
                   className={`flex min-h-20 items-center gap-3 rounded-lg border p-3 text-left transition-colors ${active ? "border-primary bg-primary/5 text-primary" : "border-border bg-card text-foreground hover:border-primary/40"}`}
                 >
-                  <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${active ? "bg-primary text-white" : "bg-muted text-muted-foreground"}`}>
+                  <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
                     <BucketIcon className="h-5 w-5" />
                   </span>
                   <span className="min-w-0">
