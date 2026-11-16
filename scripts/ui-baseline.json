@@ -44,9 +44,6 @@
   "src/routes/_authenticated/admin.ujian.tsx": 99,
   "src/routes/_authenticated/admin.users.roles.tsx": 15,
   "src/routes/_authenticated/admin.users.tsx": 53,
-  "src/routes/_authenticated/peserta.index.tsx": 138,
-  "src/routes/_authenticated/peserta.tsx": 40,
   "src/routes/_authenticated/peserta.ujian.$id.hasil.tsx": 223,
-  "src/routes/_authenticated/peserta.ujian.$id.index.tsx": 169,
   "src/routes/_authenticated/peserta.ujian.$id.kerjakan.tsx": 340
 }

@@ -5,7 +5,7 @@ import {
 	useNavigate,
 	useLocation,
 } from "@tanstack/react-router";
-import { LogOut, Sparkles, Sun, Moon } from "lucide-react";
+import { LogOut, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import { configRepo, hydrateRepos } from "@/lib/cbt/repos";
@@ -61,46 +61,33 @@ function PesertaLayout() {
 	};
 
 	return (
-		<div className={cn("relative flex flex-col bg-slate-50 dark:bg-[#030712] overflow-hidden z-0 transition-colors duration-300", isKerjakan ? "h-screen" : "min-h-screen")}>
-			
-
-			<header className="w-full bg-white/40 dark:bg-black/20 backdrop-blur-md px-6 py-3 flex items-center justify-between relative z-20 font-sans border-b border-slate-200/50 dark:border-white/5 shadow-sm transition-colors shrink-0">
+		<div className={cn("flex flex-col bg-background", isKerjakan ? "h-screen overflow-hidden" : "min-h-screen")}>
+			<header className="flex h-16 shrink-0 items-center justify-between border-b bg-card px-4 sm:px-6">
 				<div className="flex items-center gap-3">
 					{appLogo ? (
-						<img src={appLogo} alt="Logo" className="h-8 max-w-[120px] object-contain drop-shadow-sm" />
-					) : (
-						<div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[#03A559] to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/30">
-							<Sparkles className="h-4 w-4 text-white" />
-						</div>
-					)}
-					<span className="font-extrabold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300">
-						{appName}
-					</span>
+						<img src={appLogo} alt="" className="h-8 max-w-[120px] object-contain" />
+					) : null}
+					<span className="text-heading font-semibold tracking-tight text-foreground">{appName}</span>
 				</div>
-				<div className="flex items-center gap-3 sm:gap-4">
-					<div className="text-right hidden sm:block mr-2">
-						<div className="font-bold text-sm text-slate-800 dark:text-slate-200 leading-tight">{user.namaLengkap}</div>
-						<div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 tracking-wider uppercase">Portal Peserta</div>
+				<div className="flex items-center gap-3">
+					<div className="mr-2 hidden text-right sm:block">
+						<div className="text-ui font-medium leading-tight text-foreground">{user.namaLengkap}</div>
+						<div className="text-label text-muted-foreground">Peserta</div>
 					</div>
 
 					<Button
 						variant="outline"
 						size="icon"
 						onClick={toggleTheme}
-						className="h-9 w-9 rounded-xl bg-white/50 dark:bg-black/50 backdrop-blur-sm border-slate-200 dark:border-white/10 hover:bg-white dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 transition-all shadow-sm"
-						aria-label="Toggle Theme"
+						aria-label={theme === "dark" ? "Pakai tema terang" : "Pakai tema gelap"}
 					>
-						{theme === "dark" ? (
-							<Sun className="h-4 w-4 text-amber-400" />
-						) : (
-							<Moon className="h-4 w-4 text-[#03A559]" />
-						)}
+						{theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
 					</Button>
-					
-					<Button 
+
+					<Button
 						variant="outline"
 						size="icon"
-						className="h-9 w-9 rounded-xl bg-white/50 dark:bg-black/50 backdrop-blur-sm border-slate-200 dark:border-white/10 hover:bg-red-50 hover:text-red-600 hover:border-red-200 dark:hover:bg-red-500/20 dark:hover:text-red-400 transition-all shadow-sm text-slate-600 dark:text-slate-300"
+						aria-label="Keluar"
 						title="Keluar"
 						onClick={async () => {
 							if (isKerjakan) {
