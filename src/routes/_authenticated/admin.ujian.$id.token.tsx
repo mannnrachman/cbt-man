@@ -111,7 +111,7 @@ function TokenPage() {
       refresh();
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      toast.error(`Gagal membuat token: ${message}`);
+      toast.error(`Gagal membuat ${message}`);
     } finally {
       setGenerating(false);
     }
@@ -178,12 +178,12 @@ function TokenPage() {
 
   return (
     <div className="w-full max-w-[1600px] mx-auto space-y-6 pb-12">
-      <div className="flex flex-col gap-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 rounded-lg border border-border bg-card p-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
-          <Link to="/admin/ujian" className="inline-flex items-center text-xs font-semibold text-muted-foreground hover:text-foreground">
+          <Link to="/admin/ujian" className="inline-flex items-center text-label font-semibold text-muted-foreground hover:text-foreground">
             ← Kembali ke Paket Ujian
           </Link>
-          <h1 className="text-xl font-bold tracking-tight">Kelola Token: {ujian.nama}</h1>
+          <h1 className="text-xl font-semibold tracking-tight">Kelola Token: {ujian.nama}</h1>
           <p className="text-sm text-muted-foreground">
             {ujian.tokenAktif
               ? "Token ujian aktif. Peserta wajib memasukkan salah satu token valid sebelum memulai ujian."
@@ -194,15 +194,15 @@ function TokenPage() {
           <Link
             to="/admin/ujian/$id"
             params={{ id: ujian.id }}
-            className="text-xs font-semibold text-primary underline"
+            className="text-label font-semibold text-primary underline"
           >
             Buka Editor Ujian →
           </Link>
         </div>
       </div>
 
-      <Card className="border-slate-200 dark:border-slate-800 shadow-xs">
-        <CardHeader className="bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800 pb-4">
+      <Card className="border-border">
+        <CardHeader className="bg-muted/50 border-b border-border pb-4">
           <CardTitle className="text-base flex items-center gap-2">
             <KeyRound className="h-5 w-5 text-primary" />
             Buat Token Baru / Master Token
@@ -214,12 +214,12 @@ function TokenPage() {
             <div className="space-y-4">
               <div>
                 <h4 className="text-sm font-semibold">Mode Pembuatan</h4>
-                <p className="text-xs text-muted-foreground">Pilih acak otomatis atau kode kustom/master token.</p>
+                <p className="text-label text-muted-foreground">Pilih acak otomatis atau kode kustom/master token.</p>
               </div>
 
               <div className="p-3 bg-muted/20 rounded-lg border space-y-3">
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium">1. Acak Otomatis (Jumlah)</Label>
+                  <Label className="text-label font-medium">1. Acak Otomatis (Jumlah)</Label>
                   <Input
                     type="number"
                     min={1}
@@ -232,19 +232,19 @@ function TokenPage() {
                 </div>
 
                 <div className="relative flex items-center justify-center py-1">
-                  <span className="bg-background px-2 text-[10px] uppercase font-bold text-muted-foreground absolute">
+                  <span className="bg-background px-2 text-label font-semibold text-muted-foreground absolute">
                     Atau
                   </span>
                   <div className="w-full border-t"></div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium">2. Custom / Master Token Kode</Label>
+                  <Label className="text-label font-medium">2. Custom / Master Token Kode</Label>
                   <Input
                     type="text"
                     value={customKode}
                     onChange={(e) => setCustomKode(e.target.value.toUpperCase())}
-                    placeholder="Contoh: CBT-2026"
+                    placeholder="CBT-2026"
                     className="h-9 font-mono text-sm"
                   />
                 </div>
@@ -255,12 +255,12 @@ function TokenPage() {
             <div className="space-y-4">
               <div>
                 <h4 className="text-sm font-semibold">Masa Berlaku & Cakupan</h4>
-                <p className="text-xs text-muted-foreground">Atur jadwal kedaluwarsa dan penyebaran token.</p>
+                <p className="text-label text-muted-foreground">Atur jadwal kedaluwarsa dan penyebaran token.</p>
               </div>
 
               <div className="p-3 bg-muted/20 rounded-lg border space-y-3">
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium flex items-center gap-1.5">
+                  <Label className="text-label font-medium flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5 text-primary" /> Batas Waktu Kedaluwarsa
                   </Label>
                   <Input
@@ -269,7 +269,7 @@ function TokenPage() {
                     onChange={(e) => setExpireDate(e.target.value)}
                     className="h-9 text-sm"
                   />
-                  <p className="text-[10px] text-muted-foreground">Kosongkan jika token berlaku selamanya.</p>
+                  <p className="text-label text-muted-foreground">Kosongkan jika token berlaku selamanya.</p>
                 </div>
 
                 <div className="pt-2 border-t">
@@ -279,7 +279,7 @@ function TokenPage() {
                       checked={applyToAll}
                       onCheckedChange={(c) => setApplyToAll(c === true)}
                     />
-                    <Label htmlFor="applyAll" className="text-xs font-medium cursor-pointer">
+                    <Label htmlFor="applyAll" className="text-label font-medium cursor-pointer">
                       Terapkan token ke semua ujian
                     </Label>
                   </div>
@@ -302,7 +302,7 @@ function TokenPage() {
         </CardContent>
       </Card>
 
-      <Card className="border-slate-200 dark:border-slate-800 shadow-xs">
+      <Card className="border-border">
         <CardHeader className="py-3 px-4 border-b">
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm font-medium">Daftar Token Ujian ({tokens.length})</CardTitle>
@@ -329,19 +329,19 @@ function TokenPage() {
                     <td className="p-3 font-mono font-semibold">{t.kode}</td>
                     <td className="p-3">
                       {isExpired ? (
-                        <span className="inline-flex items-center gap-1 rounded bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 px-2 py-0.5 text-xs font-medium">
+                        <span className="inline-flex items-center gap-1 rounded bg-warn/10 text-warn px-2 py-0.5 text-label font-medium">
                           <AlertCircle className="w-3 h-3" /> Kedaluwarsa
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-2 py-0.5 text-xs font-medium">
+                        <span className="inline-flex items-center gap-1 rounded bg-primary/10 text-primary px-2 py-0.5 text-label font-medium">
                           <CheckCircle2 className="w-3 h-3" /> Aktif
                         </span>
                       )}
                     </td>
-                    <td className="p-3 text-xs text-muted-foreground">
+                    <td className="p-3 text-label text-muted-foreground">
                       {t.expireAt ? new Date(t.expireAt).toLocaleString("id-ID") : "Selamanya"}
                     </td>
-                    <td className="p-3 text-xs">
+                    <td className="p-3 text-label">
                       {u ? `${u.namaLengkap} (${t.dipakaiAt ? new Date(t.dipakaiAt).toLocaleTimeString("id-ID") : ""})` : "-"}
                     </td>
                     <td className="p-3 text-right">
