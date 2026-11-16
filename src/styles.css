@@ -67,15 +67,6 @@
   --font-sans: var(--font-family-base, "SN Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
   --font-family-sans: var(--font-family-base, "SN Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
 
-  --shadow-neo: var(--neo-shadow);
-  --border-width-neo: var(--neo-border-width);
-  --color-neo-border: var(--neo-border-color);
-  --color-neo-bg: var(--neo-bg);
-  --color-neo-accent: var(--neo-accent);
-  --color-neo-text: var(--neo-text);
-  --radius-neo: var(--neo-radius);
-  --color-neo-hover: var(--neo-hover);
-
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -154,15 +145,6 @@
 :root {
   --font-family-base: "SN Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
-  /* Default Modern Theme values mapping to the 'neo' aliases */
-  --neo-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  --neo-border-width: 1px;
-  --neo-border-color: var(--border);
-  --neo-bg: var(--background);
-  --neo-accent: var(--primary);
-  --neo-text: var(--foreground);
-  --neo-radius: var(--radius);
-  --neo-hover: var(--accent);
 
   --radius: 0.75rem;
 
@@ -293,72 +275,3 @@
 [data-font='sn-pro'] body {
   font-family: "SN Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
-
-[data-theme='neumorphism'],
-[data-theme='neobrutalism'] {
-  --radius: 0.875rem;
-  --background: #f0f3f8;
-  --foreground: oklch(0.25 0.02 240);
-  --card: #f0f3f8;
-  --card-foreground: oklch(0.25 0.02 240);
-  --popover: #f0f3f8;
-  --popover-foreground: oklch(0.25 0.02 240);
-  --primary: #047a43;
-  --primary-foreground: #ffffff;
-  --secondary: #e2e8f0;
-  --secondary-foreground: oklch(0.25 0.02 240);
-  --muted: #e2e8f0;
-  --muted-foreground: oklch(0.48 0.02 240);
-  --accent: #e2e8f0;
-  --accent-foreground: oklch(0.25 0.02 240);
-  --border: #d5dce6;
-  --input: #e6ebf2;
-  --ring: #047a43;
-
-  --sidebar: #e8edf4;
-  --sidebar-foreground: oklch(0.25 0.02 240);
-  --sidebar-primary: #047a43;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #dee4ed;
-  --sidebar-accent-foreground: oklch(0.25 0.02 240);
-  --sidebar-border: #d5dce6;
-  --sidebar-ring: #047a43;
-
-  /* Neumorphism Shadow Variables */
-  --neo-shadow: 5px 5px 12px rgba(166, 180, 200, 0.55), -5px -5px 12px rgba(255, 255, 255, 0.9);
-  --neo-border-width: 1px;
-  --neo-border-color: rgba(255, 255, 255, 0.7);
-  --neo-bg: #f0f3f8;
-  --neo-accent: #047a43;
-  --neo-text: oklch(0.25 0.02 240);
-  --neo-radius: 0.875rem;
-  --neo-hover: #e6ebf2;
-}
-
-/* Global shadow & tactile overrides for Neumorphism */
-[data-theme='neumorphism'] .shadow,
-[data-theme='neumorphism'] .shadow-sm,
-[data-theme='neumorphism'] .shadow-md,
-[data-theme='neumorphism'] .shadow-lg,
-[data-theme='neumorphism'] .shadow-xl,
-[data-theme='neumorphism'] .shadow-sleek,
-[data-theme='neumorphism'] .shadow-popover-sleek {
-  box-shadow: 6px 6px 14px rgba(166, 180, 200, 0.5), -6px -6px 14px rgba(255, 255, 255, 0.9) !important;
-  border-color: rgba(255, 255, 255, 0.6) !important;
-}
-
-[data-theme='neumorphism'] input:focus,
-[data-theme='neumorphism'] textarea:focus,
-[data-theme='neumorphism'] select:focus {
-  box-shadow: inset 2px 2px 5px rgba(166, 180, 200, 0.45), inset -2px -2px 5px rgba(255, 255, 255, 0.8), 0 0 0 2px rgba(3, 165, 89, 0.2) !important;
-}
-
-[data-theme='neumorphism'] button:not(:disabled):active,
-[data-theme='neumorphism'] [role="button"]:not(:disabled):active {
-  box-shadow: inset 3px 3px 6px rgba(166, 180, 200, 0.5), inset -3px -3px 6px rgba(255, 255, 255, 0.8) !important;
-}
-
-
-
-
-

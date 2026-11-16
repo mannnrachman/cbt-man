@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Settings, Upload, Image as ImageIcon, Save } from "lucide-react";
 import { toast } from "sonner";
 import { AdminPage, AdminPageHeader } from "@/components/cbt/AdminPage";
-import { useThemeStore, ThemeType } from "@/lib/cbt/theme-store";
+import { useThemeStore } from "@/lib/cbt/theme-store";
 import { CheckCircle2 } from "lucide-react";
 
 
@@ -28,7 +28,7 @@ export const Route = createFileRoute("/_authenticated/admin/pengaturan")({
 
 function PengaturanPage() {
   const [cfg, setCfg] = useState(configRepo.get());
-  const { theme, setTheme, font, setFont } = useThemeStore();
+  const { font, setFont } = useThemeStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function save() {
@@ -195,55 +195,8 @@ function PengaturanPage() {
         </div>
         <div role="region" aria-labelledby="tema-heading" className="lg:col-span-2 space-y-8">
 
-          {/* Pilihan Tema Visual */}
-          <div className="space-y-3">
-            <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Gaya Tema Visual</Label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-              {/* Theme: Modern (Default) */}
-              <button
-                type="button"
-                onClick={() => setTheme("default")}
-                aria-pressed={theme === "default"}
-                className={`text-left p-4 rounded-xl border-2 transition-all cursor-pointer ${theme === "default" ? "border-primary ring-2 ring-primary/20 bg-primary/5" : "border-slate-200 dark:border-slate-800 hover:border-primary/50 bg-white dark:bg-slate-900"}`}
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <div className="font-bold text-slate-900 dark:text-white">Modern (Default)</div>
-                  {theme === "default" && <CheckCircle2 className="h-5 w-5 text-primary" />}
-                </div>
-                <div className="h-20 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-2 shadow-sm flex flex-col gap-2">
-                  <div className="w-full h-3 bg-white dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-800 shadow-sm" />
-                  <div className="w-2/3 h-3 bg-primary/20 rounded" />
-                </div>
-                <p className="text-xs text-slate-500 mt-4">Bersih, profesional, standar SaaS modern.</p>
-              </button>
-
-              {/* Theme: Neumorphism (Soft UI) */}
-              <button
-                type="button"
-                onClick={() => setTheme("neumorphism")}
-                aria-pressed={theme === "neumorphism"}
-                className={`text-left p-4 rounded-xl border-2 transition-all cursor-pointer ${theme === "neumorphism" ? "border-primary ring-2 ring-primary/20 bg-[#f0f3f8]" : "border-slate-200 dark:border-slate-800 hover:border-primary/50 bg-[#f0f3f8]/60 dark:bg-slate-900"}`}
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <div className="font-bold text-slate-900 dark:text-white">Neumorphism (Soft UI)</div>
-                    <span className="text-[10px] font-semibold text-primary uppercase tracking-wide">Soft Extruded Surfaces</span>
-                  </div>
-                  {theme === "neumorphism" && <CheckCircle2 className="h-5 w-5 text-primary" />}
-                </div>
-                <div className="h-20 rounded-xl bg-[#f0f3f8] border border-white/80 p-2.5 flex flex-col gap-2" style={{ boxShadow: "4px 4px 10px rgba(166, 180, 200, 0.6), -4px -4px 10px rgba(255, 255, 255, 0.9)" }}>
-                  <div className="w-full h-3.5 bg-[#f0f3f8] rounded-md border border-white/60" style={{ boxShadow: "inset 2px 2px 4px rgba(166, 180, 200, 0.4), inset -2px -2px 4px rgba(255, 255, 255, 0.8)" }} />
-                  <div className="w-2/3 h-3.5 bg-primary/20 rounded-md" style={{ boxShadow: "2px 2px 5px rgba(166, 180, 200, 0.4)" }} />
-                </div>
-                <p className="text-xs text-slate-500 mt-4">Estetika permukaan timbul lembut dengan bayangan ganda (*dual soft drop-shadow*).</p>
-              </button>
-
-            </div>
-          </div>
-
           {/* Pilihan Tipografi / Font */}
-          <div className="space-y-3 pt-6 border-t border-slate-200 dark:border-slate-800/80">
+          <div className="space-y-3">
             <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Pilihan Font & Tipografi</Label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 

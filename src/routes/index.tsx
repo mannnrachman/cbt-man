@@ -29,7 +29,6 @@ import {
 import { useEffect, useState } from "react";
 import { LoginModal } from "@/components/LoginModal";
 import type { Ujian } from "@/lib/cbt/types";
-import { useThemeStore } from "@/lib/cbt/theme-store";
 
 type SearchParams = {
 	login?: boolean;
@@ -157,7 +156,6 @@ function Landing() {
 
 	const [appLogo, setAppLogo] = useState("");
 	const [appName, setAppName] = useState("CBT-MAN");
-	const setAppTheme = useThemeStore((s) => s.setTheme);
 	
 	useEffect(() => {
 		loadPublicBootConfig().then(cfg => {
@@ -226,7 +224,6 @@ function Landing() {
 
 	const toggleTheme = () => {
 		const nextTheme = theme === "light" ? "dark" : "light";
-		if (nextTheme === "dark") setAppTheme("default");
 		setTheme(nextTheme);
 		localStorage.setItem("theme", nextTheme);
 		if (nextTheme === "dark") {

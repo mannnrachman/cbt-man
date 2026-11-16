@@ -9,7 +9,6 @@ import { LogOut, Sparkles, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import { configRepo, hydrateRepos } from "@/lib/cbt/repos";
-import { useThemeStore } from "@/lib/cbt/theme-store";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 
@@ -33,7 +32,6 @@ function PesertaLayout() {
 	const navigate = useNavigate();
 	const appLogo = configRepo.get().appLogo;
 	const appName = configRepo.get().appName;
-	const setAppTheme = useThemeStore((s) => s.setTheme);
 
 	const location = useLocation();
 	const isKerjakan = location.pathname.endsWith("/kerjakan");
@@ -56,7 +54,6 @@ function PesertaLayout() {
 
 	const toggleTheme = () => {
 		const nextTheme = theme === "light" ? "dark" : "light";
-		if (nextTheme === "dark") setAppTheme("default");
 		setTheme(nextTheme);
 		localStorage.setItem("theme", nextTheme);
 		if (nextTheme === "dark") document.documentElement.classList.add("dark");

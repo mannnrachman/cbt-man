@@ -32,6 +32,8 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Removed
 
+- Tema "Neumorphism" dan pemilihnya di Pengaturan dihapus; antarmuka kini hanya terang dan gelap. Pilihan tema tersimpan di peramban lama diabaikan dan tampilan kembali ke default; pilihan font tetap tersimpan.
+
 ## [0.2.3] - 2026-10-14
 
 ### Changed
