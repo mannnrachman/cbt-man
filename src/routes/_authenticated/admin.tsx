@@ -62,14 +62,14 @@ type RouteUser = { role: Role };
 type NavItem = {
   to: string;
   label: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
   exact?: boolean;
 };
 
 type NavGroup = {
   id: string;
   label: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
   items: NavItem[];
 };
 
@@ -210,14 +210,14 @@ function SidebarLink({ item, isActive, sidebarCollapsed }: { item: NavItem; isAc
       aria-current={isActive ? "page" : undefined}
       title={sidebarCollapsed ? item.label : undefined}
       className={cn(
-        "flex items-center gap-3 rounded-md border-l-2 px-3 py-2 text-ui transition-colors",
+        "flex items-center gap-3 rounded-md border-l-2 px-3 py-2.5 text-ui transition-colors",
         sidebarCollapsed && "lg:justify-center lg:px-0",
         isActive
           ? "border-primary bg-accent font-medium text-foreground"
           : "border-transparent text-muted-foreground hover:bg-accent hover:text-foreground",
       )}
     >
-      <Icon className="h-4 w-4 shrink-0" />
+      <Icon strokeWidth={2.25} className={cn("h-6 w-6 shrink-0", isActive && "text-primary")} />
       <span className={cn("leading-snug", sidebarCollapsed && "lg:sr-only")}>{item.label}</span>
     </Link>
   );
@@ -318,8 +318,8 @@ function AdminLayout() {
 
         {/* Sidebar */}
         <aside className={cn(
-            "shell-sidebar w-64 shrink-0 border-r border-border bg-card transition-[width] duration-200 lg:sticky lg:top-0 lg:block lg:h-screen lg:overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-            sidebarCollapsed ? "lg:w-16" : "lg:w-64",
+            "shell-sidebar w-72 shrink-0 border-r border-border bg-card transition-[width] duration-200 lg:sticky lg:top-0 lg:block lg:h-screen lg:overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+            sidebarCollapsed ? "lg:w-16" : "lg:w-72",
             mobileMenuOpen ? "fixed inset-y-0 left-0 z-50 h-screen overflow-y-auto" : "hidden",
           )} id="admin-sidebar">
             <div className={cn(
@@ -379,7 +379,7 @@ function AdminLayout() {
                       title={sidebarCollapsed ? group.label : undefined}
                       onClick={() => setOpenGroupId(isOpen ? undefined : group.id)}
                       className={cn(
-                        "flex w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-left text-ui font-medium transition-colors",
+                        "flex w-full items-center justify-between gap-3 rounded-md px-3 py-2.5 text-left text-ui font-medium transition-colors",
                         sidebarCollapsed && "lg:justify-center lg:px-0",
                         group.items.some((item) => isNavItemActive(item, pathname))
                           ? "text-foreground"
@@ -387,7 +387,7 @@ function AdminLayout() {
                       )}
                     >
                       <span className="flex min-w-0 items-center gap-3">
-                        <GroupIcon className="h-4 w-4 shrink-0" />
+                        <GroupIcon strokeWidth={2.25} className="h-6 w-6 shrink-0" />
                         <span className={cn("truncate", sidebarCollapsed && "lg:sr-only")}>{group.label}</span>
                       </span>
                       <ChevronDown

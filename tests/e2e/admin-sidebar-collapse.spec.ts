@@ -19,7 +19,7 @@ test("admin sidebar can collapse to an icon rail and expand again", async ({ pag
 	const expandButton = page.getByRole("button", { name: "Lebarkan sidebar" });
 	await expandButton.focus();
 	await page.keyboard.press("Space");
-	await expect(sidebar).toHaveCSS("width", "256px");
+	await expect(sidebar).toHaveCSS("width", "288px");
 	const navigation = page.getByRole("navigation", { name: "Navigasi administrasi" });
 	const breadcrumb = page.getByRole("navigation", { name: "Breadcrumb" });
 	await page.getByRole("link", { name: "Struktur Akademik", exact: true }).click();
