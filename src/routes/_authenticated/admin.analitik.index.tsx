@@ -67,12 +67,12 @@ export function AnalitikIndex() {
           </div>
         </Link>
         <Link to="/admin/analitik/analisis">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-xl flex items-center gap-4 hover:border-accent/50 hover:shadow-sm transition-all group cursor-pointer h-full">
-            <div className="h-12 w-12 shrink-0 bg-accent/10 rounded-xl flex items-center justify-center group-hover:bg-accent/20 transition-colors">
-              <Target className="h-6 w-6 text-accent" />
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-xl flex items-center gap-4 hover:border-primary/50 hover:shadow-sm transition-all group cursor-pointer h-full">
+            <div className="h-12 w-12 shrink-0 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+              <Target className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <div className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-accent transition-colors">Analisis Butir Soal</div>
+              <div className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-primary transition-colors">Analisis Butir Soal</div>
               <div className="text-xs text-slate-500 mt-0.5">Laporan evaluasi Tingkat Kesukaran (TK) dan Daya Pembeda (DK) per soal.</div>
             </div>
           </div>

@@ -52,12 +52,15 @@
  * The @theme inline block maps CSS custom properties to Tailwind utility
  * classes (e.g. --color-primary -> bg-primary, text-primary).
  *
- * The :root and .dark blocks define the actual color values using oklch.
- * All colors MUST use oklch format.
+ * The :root and .dark blocks define the actual color values. Hex or oklch values
+ * belong only in those two blocks; components use the utilities, never raw colors.
+ * The shadcn names (--primary, --muted, ...) are mapped onto the semantic palette
+ * in the shared :root, .dark block below.
  *
  * To add a new semantic color:
  * 1. Add the variable to :root (light value) and .dark (dark value)
  * 2. Register it in @theme inline as --color-<name>: var(--<name>)
+ * 3. Add its contrast pair to tests/unit/ui-contrast.test.mjs
  */
 
 @theme inline {
@@ -114,6 +117,34 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
+  /* Semantic tokens (see docs/redesign/03-spesifikasi-desain.md) */
+  --color-ground: var(--ground);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-line: var(--line);
+  --color-brand: var(--brand);
+  --color-action: var(--action);
+  --color-action-ink: var(--action-ink);
+  --color-danger: var(--danger);
+  --color-warn: var(--warn);
+  --shadow-overlay: var(--shadow-overlay);
+
+  /* Type scale: text-display, text-title, text-heading, text-body, text-ui, text-label */
+  --text-display: 2rem;
+  --text-display--line-height: 2.5rem;
+  --text-title: 1.5rem;
+  --text-title--line-height: 2rem;
+  --text-heading: 1.125rem;
+  --text-heading--line-height: 1.75rem;
+  --text-body: 1rem;
+  --text-body--line-height: 1.625rem;
+  --text-ui: 0.875rem;
+  --text-ui--line-height: 1.25rem;
+  --text-label: 0.8125rem;
+  --text-label--line-height: 1.125rem;
+
   /* Emil Kowalski's Spring Physics Easing */
   --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-bouncy: cubic-bezier(0.87, 0, 0.13, 1);
@@ -132,77 +163,84 @@
   --neo-radius: var(--radius);
   --neo-hover: var(--accent);
 
-  --radius: 0.625rem;
-  --background: #FCFBFC;
-  --foreground: oklch(0.2 0.02 150);
-  --card: #ffffff;
-  --card-foreground: oklch(0.2 0.02 150);
-  --popover: #ffffff;
-  --popover-foreground: oklch(0.2 0.02 150);
-  --primary: #03A559;
-  --primary-foreground: #ffffff;
-  --secondary: oklch(0.96 0.01 150);
-  --secondary-foreground: oklch(0.3 0.04 150);
-  --muted: oklch(0.96 0.01 150);
-  --muted-foreground: oklch(0.5 0.03 150);
-  --accent: #EAB308;
-  --accent-foreground: #ffffff;
-  --destructive: oklch(0.58 0.22 27);
-  --destructive-foreground: #ffffff;
-  --success: #03A559;
-  --warning: #FFC107;
-  --border: oklch(0.92 0.01 150);
-  --input: oklch(0.92 0.01 150);
-  --ring: #03A559;
-  --chart-1: #03A559;
-  --chart-2: #3B82F6;
-  --chart-3: #EAB308;
-  --chart-4: oklch(0.6 0.2 25);
-  --chart-5: oklch(0.55 0.15 220);
-  --sidebar: #FCFBFC;
-  --sidebar-foreground: oklch(0.25 0.02 150);
-  --sidebar-primary: #03A559;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: oklch(0.95 0.04 150);
-  --sidebar-accent-foreground: oklch(0.35 0.12 150);
-  --sidebar-border: oklch(0.92 0.01 150);
-  --sidebar-ring: #03A559;
+  --radius: 0.75rem;
+
+  /*
+   * Semantic palette (light). Hex values live only in these two blocks.
+   * Contrast is asserted by tests/unit/ui-contrast.test.mjs.
+   * --brand is for the logo, status marks and charts; it is 3.08:1 on --ground,
+   * so it is never used for text. --action carries buttons, links and focus.
+   */
+  --ground: #fafaf7;
+  --surface: #ffffff;
+  --surface-2: #f1f2ee;
+  --ink: #14201a;
+  --ink-muted: #5c665f;
+  /* --ink at 13%. Static rgb() on purpose: color-mix() gets a solid-ink fallback in older browsers. */
+  --line: rgb(20 32 26 / 0.13);
+  --brand: #03a559;
+  --action: #047a43;
+  --action-ink: #ffffff;
+  --danger: #b42318;
+  --danger-ink: #ffffff;
+  --warn: #8a5a00;
+  --shadow-overlay: 0 0 0 1px var(--line), 0 8px 24px rgb(0 0 0 / 0.12);
 }
 
-
 .dark {
-  --background: oklch(0.12 0.02 150);
-  --foreground: #FCFBFC;
-  --card: oklch(0.15 0.02 150);
-  --card-foreground: #FCFBFC;
-  --popover: oklch(0.15 0.02 150);
-  --popover-foreground: #FCFBFC;
-  --primary: #03A559;
-  --primary-foreground: #ffffff;
-  --secondary: oklch(0.25 0.03 150);
-  --secondary-foreground: #FCFBFC;
-  --muted: oklch(0.25 0.03 150);
-  --muted-foreground: oklch(0.7 0.03 150);
-  --accent: #EAB308;
-  --accent-foreground: #ffffff;
-  --destructive: oklch(0.7 0.19 22);
-  --destructive-foreground: #FCFBFC;
-  --border: oklch(0.25 0.03 150);
-  --input: oklch(0.25 0.03 150);
-  --ring: #03A559;
-  --chart-1: #03A559;
-  --chart-2: #3B82F6;
-  --chart-3: #EAB308;
-  --chart-4: oklch(0.62 0.26 303);
-  --chart-5: oklch(0.64 0.24 16);
-  --sidebar: oklch(0.12 0.02 150);
-  --sidebar-foreground: #FCFBFC;
-  --sidebar-primary: #03A559;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: oklch(0.25 0.03 150);
-  --sidebar-accent-foreground: #FCFBFC;
-  --sidebar-border: oklch(0.25 0.03 150);
-  --sidebar-ring: #03A559;
+  --ground: #101613;
+  --surface: #18201c;
+  --surface-2: #212a25;
+  --ink: #e8ede9;
+  --ink-muted: #9aa39d;
+  --line: rgb(232 237 233 / 0.16); /* --ink at 16% */
+  --brand: #03a559;
+  --action: #2fc47c;
+  --action-ink: #101613;
+  --danger: #f4796e;
+  --danger-ink: #101613;
+  --warn: #ebb04c;
+  --shadow-overlay: 0 0 0 1px var(--line), 0 8px 24px rgb(0 0 0 / 0.5);
+}
+
+/* Map the shadcn token names the UI primitives already use onto the semantic palette. */
+:root,
+.dark {
+  --background: var(--ground);
+  --foreground: var(--ink);
+  --card: var(--surface);
+  --card-foreground: var(--ink);
+  --popover: var(--surface);
+  --popover-foreground: var(--ink);
+  --primary: var(--action);
+  --primary-foreground: var(--action-ink);
+  --secondary: var(--surface-2);
+  --secondary-foreground: var(--ink);
+  --muted: var(--surface-2);
+  --muted-foreground: var(--ink-muted);
+  /* --accent is the neutral hover/selected fill; it used to be yellow. */
+  --accent: var(--surface-2);
+  --accent-foreground: var(--ink);
+  --destructive: var(--danger);
+  --destructive-foreground: var(--danger-ink);
+  --success: var(--action);
+  --warning: var(--warn);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--action);
+  --chart-1: var(--brand);
+  --chart-2: var(--ink);
+  --chart-3: var(--ink-muted);
+  --chart-4: var(--warn);
+  --chart-5: var(--danger);
+  --sidebar: var(--surface);
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--action);
+  --sidebar-primary-foreground: var(--action-ink);
+  --sidebar-accent: var(--surface-2);
+  --sidebar-accent-foreground: var(--ink);
+  --sidebar-border: var(--line);
+  --sidebar-ring: var(--action);
 }
 
 @layer base {
@@ -273,7 +311,7 @@
   --card-foreground: oklch(0.25 0.02 240);
   --popover: #f0f3f8;
   --popover-foreground: oklch(0.25 0.02 240);
-  --primary: #03a559;
+  --primary: #047a43;
   --primary-foreground: #ffffff;
   --secondary: #e2e8f0;
   --secondary-foreground: oklch(0.25 0.02 240);
@@ -283,23 +321,23 @@
   --accent-foreground: oklch(0.25 0.02 240);
   --border: #d5dce6;
   --input: #e6ebf2;
-  --ring: #03a559;
+  --ring: #047a43;
 
   --sidebar: #e8edf4;
   --sidebar-foreground: oklch(0.25 0.02 240);
-  --sidebar-primary: #03a559;
+  --sidebar-primary: #047a43;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #dee4ed;
   --sidebar-accent-foreground: oklch(0.25 0.02 240);
   --sidebar-border: #d5dce6;
-  --sidebar-ring: #03a559;
+  --sidebar-ring: #047a43;
 
   /* Neumorphism Shadow Variables */
   --neo-shadow: 5px 5px 12px rgba(166, 180, 200, 0.55), -5px -5px 12px rgba(255, 255, 255, 0.9);
   --neo-border-width: 1px;
   --neo-border-color: rgba(255, 255, 255, 0.7);
   --neo-bg: #f0f3f8;
-  --neo-accent: #03a559;
+  --neo-accent: #047a43;
   --neo-text: oklch(0.25 0.02 240);
   --neo-radius: 0.875rem;
   --neo-hover: #e6ebf2;
