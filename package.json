@@ -18,6 +18,7 @@
     "prisma:seed": "prisma db seed",
     "check:pr-hygiene": "node scripts/check-pr-hygiene.mjs",
     "check:prisma": "node scripts/verify-prisma-schema.mjs",
+    "check:ui": "node scripts/check-ui-tokens.mjs",
     "check:domain-preflight": "node scripts/preflight-domain-migration.mjs",
     "report:legacy-sessions": "node scripts/report-legacy-sessions.mjs",
     "remediate:legacy-module-courses": "node scripts/remediate-legacy-module-courses.mjs",
