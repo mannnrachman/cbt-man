@@ -64,7 +64,7 @@ for (const [scheme, selector] of [
 
 /** The shared block that maps shadcn names onto the semantic palette. */
 function sharedMapping() {
-  const open = css.indexOf("\n:root,\n.dark {");
+  const open = css.indexOf("\n:root,\n.dark,");
   assert.notEqual(open, -1, "shared :root, .dark mapping block not found in styles.css");
   return css.slice(open, css.indexOf("\n}", open));
 }
@@ -88,4 +88,43 @@ test("chart colours come from the palette, so none can be violet", () => {
   const charts = [...block.matchAll(/--chart-\d:\s*([^;]+);/g)].map((m) => m[1].trim());
   assert.equal(charts.length, 5);
   for (const value of charts) assert.ok(/^var\(--[a-z-]+\)$/.test(value), `--chart value "${value}" is not a palette token`);
+});
+
+// The admin sidebar and header keep a dark chrome in both colour schemes (see styles.css).
+function readBlock(pattern) {
+  const m = css.match(pattern);
+  assert.ok(m, `block ${pattern} not found in styles.css`);
+  const tokens = {};
+  for (const t of m[0].matchAll(/--([a-z0-9-]+):\s*(#[0-9a-fA-F]{6})\s*;/g)) tokens[t[1]] = t[2];
+  return tokens;
+}
+
+const SHARED = /\n\.shell-sidebar,\n\.shell-header \{[\s\S]*?\n\}/;
+const chrome = {
+  sidebar: { ...readBlock(SHARED), ...readBlock(/\n\.shell-sidebar \{\n  --ground[\s\S]*?\n\}/) },
+  header: { ...readBlock(SHARED), ...readBlock(/\n\.shell-header \{\n  --ground[\s\S]*?\n\}/) },
+};
+
+for (const [region, tokens] of Object.entries(chrome)) {
+  for (const [fg, bg, min] of [
+    ["ink", "surface", 7],
+    ["ink", "surface-2", 7],
+    ["ink-muted", "surface", 4.5],
+    ["ink-muted", "surface-2", 4.5],
+    ["action", "surface", 4.5],
+    ["action", "surface-2", 4.5],
+    ["danger", "surface", 4.5],
+    ["warn", "surface", 4.5],
+  ]) {
+    test(`chrome ${region}: ${fg} on ${bg} is at least ${min}:1`, () => {
+      assert.ok(tokens[fg] && tokens[bg], `missing --${fg} or --${bg} for ${region}`);
+      const ratio = contrast(tokens[fg], tokens[bg]);
+      assert.ok(ratio >= min, `${tokens[fg]} on ${tokens[bg]} is ${ratio.toFixed(2)}:1, needs ${min}:1`);
+    });
+  }
+}
+
+test("the header is dark blue and the sidebar is near-black", () => {
+  assert.equal(chrome.header.surface.toLowerCase(), "#10264a");
+  assert.equal(chrome.sidebar.surface.toLowerCase(), "#0f1714");
 });

@@ -318,7 +318,7 @@ function AdminLayout() {
 
         {/* Sidebar */}
         <aside className={cn(
-            "w-64 shrink-0 border-r border-border bg-card transition-[width] duration-200 lg:sticky lg:top-0 lg:block lg:h-screen lg:overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+            "shell-sidebar w-64 shrink-0 border-r border-border bg-card transition-[width] duration-200 lg:sticky lg:top-0 lg:block lg:h-screen lg:overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
             sidebarCollapsed ? "lg:w-16" : "lg:w-64",
             mobileMenuOpen ? "fixed inset-y-0 left-0 z-50 h-screen overflow-y-auto" : "hidden",
           )} id="admin-sidebar">
@@ -420,7 +420,7 @@ function AdminLayout() {
 
         <div className="flex min-h-screen flex-1 flex-col min-w-0">
 
-          <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-card px-4 lg:px-6">
+          <header className="shell-header sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-card px-4 lg:px-6">
             <div className="flex min-w-0 items-center gap-3">
               <Button
                 variant="ghost"
