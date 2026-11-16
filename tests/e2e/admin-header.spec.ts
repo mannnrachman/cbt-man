@@ -2,9 +2,9 @@ import { expect, test } from "@playwright/test";
 
 test("admin header shows the current page and account identity", async ({ page }) => {
 	await page.goto("/login-admin");
-	await page.getByLabel("Username Staf").fill("admin");
-	await page.getByLabel("Kata Sandi").fill(process.env.ADMIN_PASSWORD ?? "e2e-smoke");
-	await page.getByRole("button", { name: "Masuk ke Panel Staf" }).click();
+	await page.getByLabel("Nama pengguna").fill("admin");
+	await page.getByLabel("Kata sandi", { exact: true }).fill(process.env.ADMIN_PASSWORD ?? "e2e-smoke");
+	await page.getByRole("button", { name: "Masuk", exact: true }).click();
 	await expect(page).toHaveURL(/\/admin$/);
 
 	const breadcrumb = page.getByRole("navigation", { name: "Breadcrumb" });

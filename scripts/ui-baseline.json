@@ -7,7 +7,6 @@
   "src/components/cbt/landing/ExamTabs.tsx": 24,
   "src/components/cbt/NilaiNormal.tsx": 66,
   "src/components/cbt/RichEditor.tsx": 4,
-  "src/components/LoginModal.tsx": 69,
   "src/components/ui/chart.tsx": 3,
   "src/components/ui/sonner.tsx": 1,
   "src/routes/__root.tsx": 2,
@@ -52,6 +51,5 @@
   "src/routes/_authenticated/peserta.ujian.$id.hasil.tsx": 223,
   "src/routes/_authenticated/peserta.ujian.$id.index.tsx": 169,
   "src/routes/_authenticated/peserta.ujian.$id.kerjakan.tsx": 340,
-  "src/routes/index.tsx": 243,
-  "src/routes/login-admin.tsx": 114
+  "src/routes/index.tsx": 243
 }
