@@ -23,6 +23,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 - Daftar paket ujian, halaman peserta ujian, dan halaman token memakai token warna dan komponen `Button`/`Input`: tombol aksi baris yang sebelumnya tautan berkelas kini `Button`, ubin ikon status dihapus, dan pencarian memakai `Input` berlabel. Tombol "Paket Baru" tidak lagi mengubah ukuran sendiri.
 - Editor paket ujian memakai token warna dan komponen dasar baru; susunan dan logikanya tidak berubah.
 - Bank soal (modul, topik, daftar soal) dan editor teks kaya memakai token warna; tidak ada perubahan perilaku.
+- Halaman impor soal (Excel, Word) dan manajer berkas memakai token warna; tidak ada perubahan perilaku.
 - `cn()` mengenali skala ukuran huruf baru (`text-ui`, `text-body`, dst.) agar `tailwind-merge` tidak menghapus warna teks.
 - `npm run check:ui` (juga di CI) menolak warna palet mentah, teks di bawah 13 px, huruf kapital berjarak, gradien, kaca buram, bayangan, dan animasi hias di `src/**/*.tsx`. Jumlah pelanggaran per berkas dicatat di `scripts/ui-baseline.json` dan hanya boleh turun.
 

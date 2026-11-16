@@ -226,16 +226,9 @@ function ImportWord() {
             </Button>
           </div>
 
-          <div className="rounded bg-muted/30 p-3 text-xs">
+          <div className="rounded bg-muted/30 p-3 text-label">
             <p className="font-medium">Format yang didukung (per blok dipisah baris kosong):</p>
-            <pre className="mt-1 whitespace-pre-wrap">{`1. Ibukota Indonesia adalah?
-A. Bandung
-B. Jakarta
-C. Medan
-D. Surabaya
-Jawaban: B
-
-2. Jelaskan fotosintesis.`}</pre>
+            <pre className="mt-1 whitespace-pre-wrap">{`1. Ibukota Indonesia adalah? A. Bandung B. Jakarta C. Medan D. Surabaya B 2. Jelaskan fotosintesis.`}</pre>
             <p className="mt-1 text-muted-foreground">
               Soal tanpa opsi A/B/C dianggap essay. Multi-jawaban: <code>Jawaban: A,C</code>.
             </p>
@@ -259,12 +252,12 @@ Jawaban: B
             <div className="space-y-3 p-3">
               {parsed.map((p, i) => (
                 <div key={i} className="rounded border p-3 text-sm">
-                  <div className="mb-1 text-xs text-muted-foreground">
+                  <div className="mb-1 text-label text-muted-foreground">
                     #{i + 1} · {p.tipe}
                   </div>
                   <RichView html={p.detail} />
                   {p.jawaban.length > 0 && (
-                    <ul className="ml-4 mt-1 list-disc text-xs">
+                    <ul className="ml-4 mt-1 list-disc text-label">
                       {p.jawaban.map((j, idx) => (
                         <li key={j.id} className={j.benar ? "text-success font-medium" : ""}>
                           {String.fromCharCode(65 + idx)}. {j.detail} {j.benar && "✓"}
