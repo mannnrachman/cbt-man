@@ -34,7 +34,7 @@ function TopikPage() {
 
   if (!modul) return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
-      <p className="text-slate-500 mb-4">Modul tidak ditemukan.</p>
+      <p className="text-muted-foreground mb-4">Modul tidak ditemukan.</p>
       <Button asChild variant="outline"><Link to="/admin/modul">Kembali ke Bank Soal</Link></Button>
     </div>
   );
@@ -69,18 +69,18 @@ function TopikPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-10 animate-in fade-in duration-500 pb-12 pt-4">
+    <div className="max-w-6xl mx-auto space-y-10 duration-500 pb-12 pt-4">
       {/* Header Section */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-end justify-between border-b border-slate-200 dark:border-white/10 pb-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end justify-between border-b border-border pb-6">
         <div className="space-y-1">
           <Link to="/admin/modul" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 w-fit mb-3">
             ← Kembali ke Bank Soal
           </Link>
           <div className="flex items-center gap-2">
-            <BookOpen className="h-6 w-6 text-slate-400" />
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{modul.nama}</h1>
+            <BookOpen className="h-6 w-6 text-muted-foreground" />
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">{modul.nama}</h1>
           </div>
-          <p className="text-sm text-slate-600 dark:text-slate-400">
+          <p className="text-sm text-muted-foreground">
             Kelola topik/bab untuk modul ini. Setiap topik dapat berisi puluhan hingga ratusan soal.
           </p>
         </div>
@@ -88,45 +88,45 @@ function TopikPage() {
 
       {/* Creation Row */}
       {canEdit ? (
-        <form onSubmit={(e) => { e.preventDefault(); add(); }} className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center gap-3">
+        <form onSubmit={(e) => { e.preventDefault(); add(); }} className="bg-muted p-4 rounded-lg border border-border flex flex-col sm:flex-row items-center gap-3">
           <Input 
-            placeholder="Ketik nama topik baru (misal: Bab 1: Pengantar)" 
+            placeholder="Ketik nama topik baru Bab Pengantar)" 
             value={nama} 
             onChange={(e) => setNama(e.target.value)} 
-            className="flex-1 bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800"
+            className="flex-1 bg-card border-border"
           />
           <Button type="submit" disabled={!nama.trim()} className="w-full sm:w-auto font-semibold">
             <Plus className="mr-2 h-4 w-4" />Tambah Topik
           </Button>
         </form>
       ) : (
-        <div className="flex items-center gap-3 rounded-xl border border-amber-200/50 bg-amber-50/50 dark:bg-amber-950/20 p-4 text-sm text-amber-700 dark:text-amber-400">
+        <div className="flex items-center gap-3 rounded-lg border border-warn/50 bg-warn/50 p-4 text-sm text-warn">
           <Lock className="h-4 w-4" />
           Mode hanya-baca. Anda hanya dapat melihat topik yang ditugaskan kepada Anda.
         </div>
       )}
 
       {/* Sleek List Section */}
-      <section className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500">Daftar Topik ({topiks.length})</h2>
+      <section className="bg-card rounded-lg border border-border overflow-hidden">
+        <div className="px-6 py-4 border-b border-border bg-muted/50">
+          <h2 className="text-label font-semibold text-muted-foreground">Daftar Topik ({topiks.length})</h2>
         </div>
         
-        <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800">
+        <div className="flex flex-col divide-y divide-border">
           {topiks.map((t) => {
             const count = soalRepo.all().filter((s) => s.topikId === t.id).length;
             return (
-              <div key={t.id} className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:px-6 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors gap-4">
+              <div key={t.id} className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:px-6 hover:bg-muted transition-colors gap-4">
                 
                 <div className="flex-1 flex items-center gap-4">
-                  <div className="h-10 w-10 shrink-0 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center border border-slate-200 dark:border-slate-700">
-                    <Layers className="h-4 w-4 text-slate-500" />
+                  <div className="h-10 w-10 shrink-0 rounded-full bg-muted flex items-center justify-center border border-border">
+                    <Layers className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <div className="space-y-1">
-                    <Link to="/admin/topik/$id/soal" params={{ id: t.id }} className="text-base font-semibold text-slate-900 dark:text-slate-100 hover:text-primary transition-colors block">
+                    <Link to="/admin/topik/$id/soal" params={{ id: t.id }} className="text-base font-semibold text-foreground hover:text-primary transition-colors block">
                       {t.nama}
                     </Link>
-                    <div className="text-xs font-medium text-slate-500">
+                    <div className="text-label font-medium text-muted-foreground">
                       {count} Soal Terdaftar
                     </div>
                   </div>
@@ -135,15 +135,15 @@ function TopikPage() {
                 <div className="flex items-center gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                   {canEdit && (
                     <>
-                      <Button size="sm" variant="ghost" className="h-8 text-slate-500 hover:text-slate-900 dark:hover:text-white" onClick={() => openEdit(t)}>
+                      <Button size="sm" variant="ghost" className="h-8 text-muted-foreground hover:text-foreground" onClick={() => openEdit(t)}>
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="ghost" className="h-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950" onClick={() => remove(t.id)}>
+                      <Button size="sm" variant="ghost" className="h-8 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => remove(t.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </>
                   )}
-                  <Button size="sm" className="h-8 shadow-sm" asChild>
+                  <Button size="sm" className="h-8" asChild>
                     <Link to="/admin/topik/$id/soal" params={{ id: t.id }}>
                       Kelola Soal <ChevronRight className="ml-1 h-3.5 w-3.5" />
                     </Link>
@@ -154,7 +154,7 @@ function TopikPage() {
           })}
           
           {topiks.length === 0 && (
-            <div className="py-12 text-center text-slate-400">
+            <div className="py-12 text-center text-muted-foreground">
               Belum ada topik yang dibuat.
             </div>
           )}

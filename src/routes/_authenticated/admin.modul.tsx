@@ -190,8 +190,8 @@ function ModulPage() {
       {canEdit && (
         <AdminPageContent className="p-4">
           <div className="mb-4">
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Buat Modul Baru</h2>
-            <p className="mt-1 text-xs text-muted-foreground">Tambahkan modul dan hubungkan dengan mata kuliah.</p>
+            <h2 className="text-sm font-semibold text-foreground">Buat Modul Baru</h2>
+            <p className="mt-1 text-label text-muted-foreground">Tambahkan modul dan hubungkan dengan mata kuliah.</p>
           </div>
           <form
             onSubmit={(e) => { e.preventDefault(); add(); }}
@@ -203,7 +203,7 @@ function ModulPage() {
                 id="new-module-name"
                 value={nama}
                 onChange={(e) => setNama(e.target.value)}
-                placeholder="Contoh: Modul Pemrograman Dasar"
+                placeholder="Modul Pemrograman Dasar"
               />
             </div>
             <div className="space-y-1.5">
@@ -238,24 +238,24 @@ function ModulPage() {
             const mkName = m.mataKuliahId ? mkList.find((x) => x.id === m.mataKuliahId)?.nama : null;
 
             return (
-              <div key={m.id} className="group relative flex flex-col justify-between p-5 rounded-[20px] border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 hover:border-primary/40 dark:hover:border-primary/40 shadow-sm hover:shadow-sleek transition-all duration-300 ease-spring gap-4 overflow-hidden">
+              <div key={m.id} className="group relative flex flex-col justify-between p-5 rounded-lg border border-border bg-card hover:border-primary/40 dark:hover:border-primary/40 transition-all duration-300 ease-spring gap-4 overflow-hidden">
                 <div className="flex items-start gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 dark:bg-primary/10 text-primary group-hover:bg-primary/15 dark:group-hover:bg-primary/20 transition-colors duration-300 ease-spring">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 dark:bg-primary/10 text-primary group-hover:bg-primary/15 dark:group-hover:bg-primary/20 transition-colors duration-300 ease-spring">
                     <FileText className="h-6 w-6 translate-y-[-0.5px]" />
                   </div>
                   <div className="flex-1 min-w-0 space-y-1.5 pt-1">
-                    <Link to="/admin/modul/$id/topik" params={{ id: m.id }} className="text-base font-semibold text-slate-900 dark:text-slate-100 hover:text-primary dark:hover:text-primary transition-colors duration-300 ease-spring line-clamp-2 after:absolute after:inset-0">
+                    <Link to="/admin/modul/$id/topik" params={{ id: m.id }} className="text-base font-semibold text-foreground hover:text-primary dark:hover:text-primary transition-colors duration-300 ease-spring line-clamp-2 after:absolute after:inset-0">
                       {m.nama}
                     </Link>
                     {mkName ? (
                       <div className="relative z-10">
-                        <span className="px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-[10px] font-bold tracking-widest uppercase text-slate-500">
+                        <span className="px-2.5 py-0.5 rounded-md bg-muted text-label font-semibold text-muted-foreground">
                           {mkName}
                         </span>
                       </div>
                     ) : (
                       <div className="relative z-10">
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-950/40 text-[10px] font-bold tracking-wider uppercase text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900/50">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-warn/10 text-label font-semibold text-warn border border-warn/30">
                           <AlertTriangle className="h-3 w-3" /> Tanpa Mata Kuliah
                         </span>
                       </div>
@@ -263,23 +263,23 @@ function ModulPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between mt-2 pt-4 border-t border-slate-100 dark:border-slate-800/60">
-                  <div className="flex items-center gap-4 text-xs font-medium text-slate-500">
-                    <span className="flex items-center gap-1.5"><FileText className="w-4 h-4 text-slate-400 translate-y-[-0.5px]"/> {t.length} Topik</span>
-                    <span className="flex items-center gap-1.5"><ChevronRight className="w-4 h-4 text-slate-400 translate-y-[-0.5px]"/> {sCount} Soal</span>
+                <div className="flex items-center justify-between mt-2 pt-4 border-t border-border">
+                  <div className="flex items-center gap-4 text-label font-medium text-muted-foreground">
+                    <span className="flex items-center gap-1.5"><FileText className="w-4 h-4 text-muted-foreground translate-y-[-0.5px]"/> {t.length} Topik</span>
+                    <span className="flex items-center gap-1.5"><ChevronRight className="w-4 h-4 text-muted-foreground translate-y-[-0.5px]"/> {sCount} Soal</span>
                   </div>
 
                   <div className="flex items-center gap-1 relative z-10">
                     {canEdit && (
-                      <Button size="icon" variant="ghost" className="h-8 w-8 text-slate-400 hover:text-primary hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors duration-300" onClick={() => { setEditingModul(m); setEditDialogOpen(true); }} title="Edit Modul">
+                      <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors duration-300" onClick={() => { setEditingModul(m); setEditDialogOpen(true); }} title="Edit Modul">
                         <Pencil className="h-4 w-4" />
                       </Button>
                     )}
-                    <Button size="icon" variant="ghost" className="h-8 w-8 text-slate-400 hover:text-primary hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors duration-300" onClick={() => exportBank(m)} title="Export JSON">
+                    <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors duration-300" onClick={() => exportBank(m)} title="Export JSON">
                       <Download className="h-4 w-4" />
                     </Button>
                     {canEdit && (
-                      <Button size="icon" variant="ghost" className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 dark:hover:text-red-400 transition-colors duration-300" onClick={() => remove(m.id)} title="Hapus">
+                      <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors duration-300" onClick={() => remove(m.id)} title="Hapus">
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     )}
@@ -289,9 +289,9 @@ function ModulPage() {
             );
           })}
           {shown.length === 0 && (
-            <div className="col-span-full p-12 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[20px]">
-              <div className="flex flex-col items-center justify-center gap-2 text-slate-500">
-                <FileText className="h-8 w-8 text-slate-300" />
+            <div className="col-span-full p-12 text-center border-2 border-dashed border-border rounded-lg">
+              <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                <FileText className="h-8 w-8 text-muted-foreground" />
                 <p className="text-sm font-medium">Belum ada modul bank soal.</p>
               </div>
             </div>
@@ -367,7 +367,7 @@ function EditModulDialog({
             <Input
               value={nama}
               onChange={(e) => setNama(e.target.value)}
-              placeholder="Contoh: Modul Pemrograman Dasar"
+              placeholder="Modul Pemrograman Dasar"
             />
           </div>
           <div className="space-y-2">

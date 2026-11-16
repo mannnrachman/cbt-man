@@ -216,7 +216,7 @@ export function RichEditor({
       <div className="flex flex-wrap items-center gap-1 border-b p-1">
         {[
           { i: Bold, t: "Tebal", c: () => exec("bold") },
-          { i: Italic, t: "Miring", c: () => exec("italic") },
+          { i: Italic, t: "Miring", c: () => exec("") },
           { i: Underline, t: "Garis bawah", c: () => exec("underline") },
           { i: List, t: "Bullet", c: () => exec("insertUnorderedList") },
           { i: ListOrdered, t: "Numbered", c: () => exec("insertOrderedList") },
@@ -231,7 +231,7 @@ export function RichEditor({
             <Icon className="h-4 w-4" />
           </Button>
         ))}
-        <span className="ml-2 text-xs text-muted-foreground">
+        <span className="ml-2 text-label text-muted-foreground">
           Tip: <code>$x^2$</code> rumus inline · <code>$$...$$</code> display
         </span>
       </div>
@@ -293,7 +293,7 @@ function FilePicker({
                 key={f.id}
                 type="button"
                 onClick={() => onPick(f)}
-                className="flex flex-col items-center gap-1 rounded border p-2 text-left text-xs hover:bg-muted"
+                className="flex flex-col items-center gap-1 rounded border p-2 text-left text-label hover:bg-muted"
               >
                 {urls[f.id] ? (
                   <img src={urls[f.id]} alt={f.name} className="h-20 w-full object-contain" />
