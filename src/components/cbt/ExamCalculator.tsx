@@ -51,12 +51,12 @@ export function ExamCalculator() {
   };
 
   const sciBtn =
-    "h-8 px-1 text-label font-semibold bg-muted hover:bg-muted text-foreground transition-colors";
+    "h-8 px-1 text-label font-semibold bg-muted hover:bg-accent text-foreground transition-colors";
   const memBtn =
     "h-8 px-1 text-label font-semibold bg-warn/10 hover:bg-warn/10 text-warn transition-colors";
   const numBtn = "h-10 text-sm font-semibold transition-colors";
   const opBtn =
-    "h-10 text-sm font-semibold bg-muted text-muted-foreground hover:bg-muted transition-colors";
+    "h-10 text-sm font-semibold bg-muted text-muted-foreground hover:bg-accent transition-colors";
   const delBtn =
     "h-10 text-label font-semibold bg-warn/10 text-warn hover:bg-warn/10 transition-colors";
   const acBtn =

@@ -113,6 +113,7 @@
   --color-ground: var(--ground);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
+  --color-hover: var(--hover);
   --color-ink: var(--ink);
   --color-ink-muted: var(--ink-muted);
   --color-line: var(--line);
@@ -156,6 +157,7 @@
   --ground: #fafaf7;
   --surface: #ffffff;
   --surface-2: #f1f2ee;
+  --hover: #d9e3dc; /* hover and selected fill: 1.31:1 against --surface, ink on it 12.8:1 */
   --ink: #14201a;
   --ink-muted: #5c665f;
   /* --ink at 13%. Static rgb() on purpose: color-mix() gets a solid-ink fallback in older browsers. */
@@ -173,6 +175,7 @@
   --ground: #101613;
   --surface: #18201c;
   --surface-2: #212a25;
+  --hover: #2a3832; /* 1.35:1 against --surface, ink on it 10.4:1 */
   --ink: #e8ede9;
   --ink-muted: #9aa39d;
   --line: rgb(232 237 233 / 0.16); /* --ink at 16% */
@@ -204,7 +207,8 @@
   --shadow-overlay: 0 0 0 1px var(--line), 0 8px 24px rgb(0 0 0 / 0.5);
   --ground: #10264a;
   --surface: #10264a;
-  --surface-2: #24487f; /* hover and selected fill: 1.65:1 against --surface, ink on it 7.7:1 */
+  --surface-2: #1b3763;
+  --hover: #2b5290; /* 1.94:1 against --surface, ink on it 6.5:1 */
   --ink-muted: #c4cfe0;
 }
 
@@ -226,7 +230,7 @@
   --muted: var(--surface-2);
   --muted-foreground: var(--ink-muted);
   /* --accent is the neutral hover/selected fill; it used to be yellow. */
-  --accent: var(--surface-2);
+  --accent: var(--hover);
   --accent-foreground: var(--ink);
   --destructive: var(--danger);
   --destructive-foreground: var(--danger-ink);
@@ -244,7 +248,7 @@
   --sidebar-foreground: var(--ink);
   --sidebar-primary: var(--action);
   --sidebar-primary-foreground: var(--action-ink);
-  --sidebar-accent: var(--surface-2);
+  --sidebar-accent: var(--hover);
   --sidebar-accent-foreground: var(--ink);
   --sidebar-border: var(--line);
   --sidebar-ring: var(--action);

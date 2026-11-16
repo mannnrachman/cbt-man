@@ -114,7 +114,7 @@ function EvaluasiUjianList() {
                     key={sesi.id}
                     to="/admin/evaluasi/$id" 
                     params={{ id: sesi.id }}
-                    className="group flex flex-col sm:flex-row sm:items-center justify-between p-5 hover:bg-muted transition-colors cursor-pointer"
+                    className="group flex flex-col sm:flex-row sm:items-center justify-between p-5 hover:bg-accent transition-colors cursor-pointer"
                   >
                     <div className="flex flex-col min-w-0">
                       <span className="font-semibold text-sm text-foreground group-hover:text-muted-foreground transition-colors">

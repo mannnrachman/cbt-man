@@ -172,7 +172,7 @@ function RolesPage() {
                         {ts.map((t) => (
                           <label
                             key={t.id}
-                            className="flex items-center gap-1.5 rounded border px-2 py-1 text-label hover:bg-muted cursor-pointer"
+                            className="flex items-center gap-1.5 rounded border px-2 py-1 text-label hover:bg-accent cursor-pointer"
                           >
                             <Checkbox
                               checked={u.allowedTopikIds.length === 0 || u.allowedTopikIds.includes(t.id)}

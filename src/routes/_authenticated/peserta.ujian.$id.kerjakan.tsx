@@ -563,7 +563,7 @@ function RouteComponent() {
                           "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-background", // a11y focus ring
                           isChecked 
                             ? "border-2 border-primary bg-primary/10"
-                            : "border-foreground/30 bg-card hover:bg-muted"
+                            : "border-foreground/30 bg-card hover:bg-accent"
                         )}
                       >
                         <input
@@ -619,7 +619,7 @@ function RouteComponent() {
                   "flex h-11 flex-1 cursor-pointer select-none items-center justify-center gap-2 rounded-md border px-4 text-ui font-medium transition-colors sm:flex-none",
                   currentJawaban.ragu
                     ? "border-2 border-warn bg-warn/10 text-warn"
-                    : "border-foreground/30 bg-card text-foreground hover:bg-muted"
+                    : "border-foreground/30 bg-card text-foreground hover:bg-accent"
                 )}>
                   <input 
                     type="checkbox" 

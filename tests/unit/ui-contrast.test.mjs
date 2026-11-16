@@ -35,6 +35,8 @@ const pairs = [
   ["ink-muted", "ground", 4.5, "secondary text on the page"],
   ["ink-muted", "surface", 4.5, "secondary text on cards"],
   ["ink-muted", "surface-2", 4.5, "secondary text on table heads"],
+  ["ink", "hover", 7, "text on a hovered or selected row"],
+  ["ink-muted", "hover", 4.5, "muted text on a hovered or selected row"],
   ["action-ink", "action", 4.5, "primary button label"],
   ["action", "ground", 4.5, "links on the page"],
   ["action", "surface", 4.5, "links on cards"],
@@ -79,7 +81,7 @@ test("the brand green is never the text or button colour", () => {
 
 test("--accent is a neutral fill, not a hue", () => {
   const block = sharedMapping();
-  assert.ok(/--accent:\s*var\(--surface-2\)/.test(block), "--accent must map to --surface-2");
+  assert.ok(/--accent:\s*var\(--hover\)/.test(block), "--accent must map to --hover");
   assert.ok(/--accent-foreground:\s*var\(--ink\)/.test(block), "--accent-foreground must map to --ink");
 });
 
@@ -109,8 +111,10 @@ for (const [region, tokens] of Object.entries(chrome)) {
   for (const [fg, bg, min] of [
     ["ink", "surface", 7],
     ["ink", "surface-2", 7],
+    ["ink", "hover", 6],
     ["ink-muted", "surface", 4.5],
     ["ink-muted", "surface-2", 4.5],
+    ["ink-muted", "hover", 4.5],
     ["action", "surface", 4.5],
     ["danger", "surface", 4.5],
     ["warn", "surface", 4.5],
@@ -125,7 +129,7 @@ for (const [region, tokens] of Object.entries(chrome)) {
 
 test("the hover fill is clearly lighter than the chrome surface", () => {
   for (const tokens of Object.values(chrome)) {
-    assert.ok(contrast(tokens["surface-2"], tokens.surface) >= 1.5, "hover fill must be visibly different from the surface");
+    assert.ok(contrast(tokens.hover, tokens.surface) >= 1.5, "hover fill must be visibly different from the surface");
   }
 });
 

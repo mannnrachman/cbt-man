@@ -154,7 +154,7 @@ function UsersPage() {
               </TableHeader>
               <TableBody>
                 {shown.map((u) => (
-                  <TableRow key={u.id} className="hover:bg-muted">
+                  <TableRow key={u.id} className="hover:bg-accent">
                     <TableCell className="font-medium text-foreground">{u.username}</TableCell>
                     <TableCell className="text-muted-foreground">{u.namaLengkap}</TableCell>
                     <TableCell className="text-center">

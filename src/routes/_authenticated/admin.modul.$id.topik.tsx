@@ -116,7 +116,7 @@ function TopikPage() {
           {topiks.map((t) => {
             const count = soalRepo.all().filter((s) => s.topikId === t.id).length;
             return (
-              <div key={t.id} className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:px-6 hover:bg-muted transition-colors gap-4">
+              <div key={t.id} className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:px-6 hover:bg-accent transition-colors gap-4">
                 
                 <div className="flex-1 flex items-center gap-4">
                   <div className="h-10 w-10 shrink-0 rounded-full bg-muted flex items-center justify-center border border-border">

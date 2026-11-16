@@ -257,7 +257,7 @@ function SoalPage() {
                 </span>
               </div>
               <div className="flex items-center gap-1.5">
-                <Button size="sm" variant="ghost" className="h-8 px-3 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted font-medium" onClick={() => { setEditing(s); setOpen(true); }}>
+                <Button size="sm" variant="ghost" className="h-8 px-3 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent font-medium" onClick={() => { setEditing(s); setOpen(true); }}>
                   <Pencil className="h-3.5 w-3.5 sm:mr-2" /> <span className="hidden sm:inline">Edit</span>
                 </Button>
                 <div className="w-px h-5 bg-muted mx-1"></div>

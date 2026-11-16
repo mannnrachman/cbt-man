@@ -247,7 +247,7 @@ function PesertaPage() {
               </TableHeader>
               <TableBody>
                 {shown.map((p) => (
-                  <TableRow key={p.id} className="hover:bg-muted">
+                  <TableRow key={p.id} className="hover:bg-accent">
                     <TableCell className="text-center">
                       <Checkbox
                         checked={selectedIds.includes(p.id)}

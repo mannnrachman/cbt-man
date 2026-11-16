@@ -53,7 +53,7 @@ export function NilaiNormalTable() {
               return (
                 <tr
                   key={idx}
-                  className="even:bg-muted/60 hover:bg-muted transition-colors"
+                  className="even:bg-muted/60 hover:bg-accent transition-colors"
                 >
                   <td className="px-3.5 py-2.5">
                     <div className="font-semibold text-foreground">{item.tes}</div>

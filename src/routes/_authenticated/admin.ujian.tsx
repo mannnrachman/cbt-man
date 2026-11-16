@@ -103,7 +103,7 @@ function UjianList() {
     return (
       <div
         key={u.id}
-        className="group flex flex-col gap-3 border-b bg-card p-3 transition-colors last:border-b-0 hover:bg-muted sm:flex-row sm:items-center sm:justify-between sm:p-4"
+        className="group flex flex-col gap-3 border-b bg-card p-3 transition-colors last:border-b-0 hover:bg-accent sm:flex-row sm:items-center sm:justify-between sm:p-4"
       >
         <Link
           to="/admin/ujian/$id"
@@ -189,7 +189,7 @@ function UjianList() {
               className={`flex items-center gap-2 px-4 py-2 rounded-md text-ui font-medium whitespace-nowrap transition-colors ${
                 activeTab === tab.id 
                   ? "bg-muted text-foreground" 
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  : "text-muted-foreground hover:text-foreground hover:bg-accent"
               }`}
             >
               {tab.label}

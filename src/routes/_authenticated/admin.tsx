@@ -349,7 +349,7 @@ function AdminLayout() {
                   aria-label={sidebarCollapsed ? "Lebarkan sidebar" : "Ciutkan sidebar"}
                   aria-controls="admin-sidebar"
                   aria-pressed={sidebarCollapsed}
-                  className="hidden h-8 w-8 shrink-0 text-muted-foreground hover:bg-muted hover:text-foreground lg:inline-flex"
+                  className="hidden h-8 w-8 shrink-0 text-muted-foreground hover:bg-accent hover:text-foreground lg:inline-flex"
                   onClick={() => setSidebarCollapsed((collapsed) => !collapsed)}
                 >
                   {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}

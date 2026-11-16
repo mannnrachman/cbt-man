@@ -272,7 +272,7 @@ function ImportPage() {
           </div>
 
           <div className="flex flex-wrap gap-3 pt-2">
-            <Button variant="outline" onClick={downloadTemplate} className="h-10 font-semibold border-border hover:bg-muted text-muted-foreground">
+            <Button variant="outline" onClick={downloadTemplate} className="h-10 font-semibold border-border hover:bg-accent text-muted-foreground">
               <Download className="mr-2 h-4 w-4" /> Download Template Standar (.xlsx)
             </Button>
             
@@ -391,7 +391,7 @@ function ImportPage() {
                 </thead>
                 <tbody className="divide-y divide-border">
                   {preview.map((r, i) => (
-                    <tr key={i} className="hover:bg-muted transition-colors">
+                    <tr key={i} className="hover:bg-accent transition-colors">
                       <td className="p-3 text-center font-mono font-medium text-muted-foreground">{i + 1}</td>
                       <td className="p-3 max-w-md font-medium text-foreground truncate">{r.soal?.detail ?? "-"}</td>
                       <td className="p-3 font-semibold text-muted-foreground">{r.soal?.tipe ?? "-"}</td>

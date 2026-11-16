@@ -593,17 +593,17 @@ function PanduanPage() {
           </div>
 
           <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 shrink-0 text-label font-semibold">
-            <Button variant="outline" size="sm" asChild className="rounded-lg h-8 px-3 text-label border-border bg-card text-foreground hover:bg-muted hover:text-foreground transition-colors">
+            <Button variant="outline" size="sm" asChild className="rounded-lg h-8 px-3 text-label border-border bg-card text-foreground hover:bg-accent hover:text-foreground transition-colors">
               <Link to="/admin/modul">
                 <Layers className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" /> Bank Soal
               </Link>
             </Button>
-            <Button variant="outline" size="sm" asChild className="rounded-lg h-8 px-3 text-label border-border bg-card text-foreground hover:bg-muted hover:text-foreground transition-colors">
+            <Button variant="outline" size="sm" asChild className="rounded-lg h-8 px-3 text-label border-border bg-card text-foreground hover:bg-accent hover:text-foreground transition-colors">
               <Link to="/admin/peserta/online">
                 <BookOpen className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" /> Monitoring
               </Link>
             </Button>
-            <Button variant="outline" size="sm" asChild className="rounded-lg h-8 px-3 text-label border-border bg-card text-foreground hover:bg-muted hover:text-foreground transition-colors">
+            <Button variant="outline" size="sm" asChild className="rounded-lg h-8 px-3 text-label border-border bg-card text-foreground hover:bg-accent hover:text-foreground transition-colors">
               <Link to="/admin/evaluasi">
                 <FileText className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" /> Evaluasi
               </Link>
@@ -648,7 +648,7 @@ function PanduanPage() {
                               className={`w-full justify-start text-left text-label font-normal h-8 rounded-lg transition-colors cursor-pointer ${
                                 isActive 
                                   ? "bg-primary text-primary-foreground font-semibold shadow-none" 
-                                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                                  : "text-muted-foreground hover:text-foreground hover:bg-accent"
                               }`}
                             >
                               <span className="truncate">{art.title}</span>
@@ -708,7 +708,7 @@ function PanduanPage() {
                 <Button
                   variant="outline"
                   onClick={() => handleNavigate(prevDoc.id)}
-                  className="w-full sm:w-auto h-auto p-3 justify-start rounded-lg border-border bg-card text-foreground hover:bg-muted hover:text-foreground cursor-pointer transition-colors"
+                  className="w-full sm:w-auto h-auto p-3 justify-start rounded-lg border-border bg-card text-foreground hover:bg-accent hover:text-foreground cursor-pointer transition-colors"
                 >
                   <ChevronLeft className="h-4 w-4 mr-2 text-muted-foreground" />
                   <div className="text-left">
@@ -722,7 +722,7 @@ function PanduanPage() {
                 <Button
                   variant="outline"
                   onClick={() => handleNavigate(nextDoc.id)}
-                  className="w-full sm:w-auto h-auto p-3 justify-end rounded-lg border-border bg-card text-foreground hover:bg-muted hover:text-foreground cursor-pointer text-right ml-auto transition-colors"
+                  className="w-full sm:w-auto h-auto p-3 justify-end rounded-lg border-border bg-card text-foreground hover:bg-accent hover:text-foreground cursor-pointer text-right ml-auto transition-colors"
                 >
                   <div className="text-right">
                     <span className="text-label text-muted-foreground font-normal block">Bab Selanjutnya</span>
@@ -779,7 +779,7 @@ function Strong({ children }: { children: React.ReactNode }) {
 
 function DocMenuLink({ to, children }: { to: string; children: React.ReactNode }) {
   return (
-    <Button variant="outline" size="sm" asChild className="rounded-lg font-semibold h-8 px-3 text-label border border-border bg-card text-foreground hover:bg-muted hover:text-foreground transition-colors">
+    <Button variant="outline" size="sm" asChild className="rounded-lg font-semibold h-8 px-3 text-label border border-border bg-card text-foreground hover:bg-accent hover:text-foreground transition-colors">
       <Link to={to} className="inline-flex items-center gap-1.5">
         {children} <ExternalLink className="h-3 w-3 opacity-60" />
       </Link>

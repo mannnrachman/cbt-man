@@ -293,7 +293,7 @@ function FilePicker({
                 key={f.id}
                 type="button"
                 onClick={() => onPick(f)}
-                className="flex flex-col items-center gap-1 rounded border p-2 text-left text-label hover:bg-muted"
+                className="flex flex-col items-center gap-1 rounded border p-2 text-left text-label hover:bg-accent"
               >
                 {urls[f.id] ? (
                   <img src={urls[f.id]} alt={f.name} className="h-20 w-full object-contain" />

@@ -151,7 +151,7 @@ function OnlinePage() {
               const isCritical = sisaMs > 0 && sisaMs < 300000;
               
               return (
-                <div key={s.id} className="group p-4 flex flex-col xl:flex-row xl:items-center justify-between gap-6 transition-all duration-300 ease-spring hover:bg-muted">
+                <div key={s.id} className="group p-4 flex flex-col xl:flex-row xl:items-center justify-between gap-6 transition-all duration-300 ease-spring hover:bg-accent">
                   
                   {/* User Info & Progress Group */}
                   <div className="flex flex-col md:flex-row md:items-center gap-6 flex-1 min-w-0">

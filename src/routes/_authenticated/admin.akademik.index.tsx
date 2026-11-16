@@ -161,7 +161,7 @@ function FakultasSection({ data, onUpdated }: { data: UnitAkademik[]; onUpdated:
             {filtered.map((f) => (
               <div
                 key={f.id}
-                className="flex items-center justify-between p-3.5 px-5 hover:bg-muted transition-colors"
+                className="flex items-center justify-between p-3.5 px-5 hover:bg-accent transition-colors"
               >
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-muted-foreground border border-border">
@@ -335,7 +335,7 @@ function ProdiSection({
               return (
                 <div
                   key={p.id}
-                  className="flex items-center justify-between p-3.5 px-5 hover:bg-muted transition-colors"
+                  className="flex items-center justify-between p-3.5 px-5 hover:bg-accent transition-colors"
                 >
                   <div className="flex items-center gap-3">
                     <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-muted-foreground border border-border">
@@ -538,7 +538,7 @@ function KelasSection({
               return (
                 <div
                   key={k.id}
-                  className="flex items-center justify-between p-3.5 px-5 hover:bg-muted transition-colors"
+                  className="flex items-center justify-between p-3.5 px-5 hover:bg-accent transition-colors"
                 >
                   <div className="flex items-center gap-3">
                     <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary border border-primary/30">

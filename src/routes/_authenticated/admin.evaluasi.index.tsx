@@ -148,7 +148,7 @@ function EvaluasiList() {
                     key={ujian.id} 
                     to="/admin/evaluasi/ujian/$id" 
                     params={{ id: ujian.id }}
-                    className="group block transition-all duration-300 ease-spring hover:bg-muted cursor-pointer"
+                    className="group block transition-all duration-300 ease-spring hover:bg-accent cursor-pointer"
                   >
                     <div className="grid grid-cols-12 gap-4 px-6 py-4 items-center">
                       

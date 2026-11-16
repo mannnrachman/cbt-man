@@ -268,7 +268,7 @@ function ToggleRow({
   badge?: string;
 }) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-5 hover:bg-muted transition-colors">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-5 hover:bg-accent transition-colors">
       <div className="flex-1">
         <div className="flex items-center gap-3 mb-1">
           <h3 className="text-sm font-semibold text-foreground">{label}</h3>

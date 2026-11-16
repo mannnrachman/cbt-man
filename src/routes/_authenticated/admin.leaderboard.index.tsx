@@ -32,7 +32,7 @@ function LeaderboardIndex() {
                   key={u.id}
                   to="/admin/leaderboard/$id"
                   params={{ id: u.id }}
-                  className="flex items-center justify-between p-4 hover:bg-muted transition-colors group"
+                  className="flex items-center justify-between p-4 hover:bg-accent transition-colors group"
                 >
                   <div className="flex flex-col gap-1 min-w-0 pr-4">
                     <div className="flex items-center gap-2">

@@ -123,7 +123,7 @@ function EvaluasiSesi() {
           
           <button 
             onClick={fillZeroForEmpty} 
-            className="inline-flex items-center gap-1.5 text-label font-semibold bg-muted hover:bg-muted text-foreground px-4 py-2 rounded-lg transition-colors border border-border self-start sm:self-auto"
+            className="inline-flex items-center gap-1.5 text-label font-semibold bg-muted hover:bg-accent text-foreground px-4 py-2 rounded-lg transition-colors border border-border self-start sm:self-auto"
           >
             <AlertTriangle className="h-3.5 w-3.5 text-muted-foreground" />
             Beri 0 untuk yang Kosong

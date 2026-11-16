@@ -147,7 +147,7 @@ function ToolsPage() {
 
           
           {/* Export Backup Row */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 hover:bg-muted transition-colors">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 hover:bg-accent transition-colors">
             <div className="flex-1 space-y-1">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 rounded bg-muted text-muted-foreground">
@@ -165,7 +165,7 @@ function ToolsPage() {
           </div>
 
           {/* Restore Backup Row */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 hover:bg-muted transition-colors">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 hover:bg-accent transition-colors">
             <div className="flex-1 space-y-1">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 rounded bg-warn/10 text-warn">
@@ -208,7 +208,7 @@ function ToolsPage() {
 
           
           {/* Seed Data Row */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 hover:bg-muted transition-colors">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 hover:bg-accent transition-colors">
             <div className="flex-1 space-y-1">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 rounded bg-muted text-muted-foreground">
