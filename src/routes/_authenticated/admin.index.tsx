@@ -122,11 +122,11 @@ function CommandCenter() {
       </section>
 
       {pendingTasks.length > 0 && (
-        <section className="space-y-3" aria-labelledby="dash-tindak-lanjut">
+        <section className="space-y-4 rounded-lg border bg-card p-5" aria-labelledby="dash-tindak-lanjut">
           <h2 id="dash-tindak-lanjut" className="text-heading font-medium text-foreground">Perlu ditindaklanjuti</h2>
-          <ul className="divide-y rounded-lg border bg-card">
+          <ul className="divide-y border-t">
             {pendingTasks.map((task) => (
-              <li key={task.id} className="flex flex-col justify-between gap-3 p-4 sm:flex-row sm:items-center">
+              <li key={task.id} className="flex flex-col justify-between gap-3 py-4 sm:flex-row sm:items-center">
                 <div className="space-y-0.5">
                   <p className="font-medium text-foreground">{task.title}</p>
                   <p className="text-ui text-muted-foreground">{task.desc}</p>
@@ -140,10 +140,10 @@ function CommandCenter() {
         </section>
       )}
 
-      <section className="space-y-3" aria-labelledby="dash-berlangsung">
+      <section className="space-y-4 rounded-lg border bg-card p-5" aria-labelledby="dash-berlangsung">
         <h2 id="dash-berlangsung" className="text-heading font-medium text-foreground">Ujian berlangsung</h2>
         {activeExams.length === 0 ? (
-          <p className="rounded-lg border bg-card p-6 text-ui text-muted-foreground">
+          <p className="text-ui text-muted-foreground">
             Tidak ada ujian yang sedang berlangsung.
             {canAccess("/admin/ujian") && (
               <>
@@ -155,9 +155,9 @@ function CommandCenter() {
             )}
           </p>
         ) : (
-          <ul className="divide-y rounded-lg border bg-card">
+          <ul className="divide-y border-t">
             {activeExams.slice(0, MAX_ACTIVE_ROWS).map((exam) => (
-              <li key={exam.id} className="flex flex-col justify-between gap-3 p-4 sm:flex-row sm:items-center">
+              <li key={exam.id} className="flex flex-col justify-between gap-3 py-4 sm:flex-row sm:items-center">
                 <div className="space-y-1">
                   <p className="font-medium text-foreground">{exam.nama}</p>
                   <p className="text-ui text-muted-foreground">
@@ -189,14 +189,14 @@ function CommandCenter() {
       </section>
 
       {upcomingExams.length > 0 && (
-        <section className="space-y-3" aria-labelledby="dash-mendatang">
+        <section className="space-y-4 rounded-lg border bg-card p-5" aria-labelledby="dash-mendatang">
           <div className="flex items-baseline justify-between">
             <h2 id="dash-mendatang" className="text-heading font-medium text-foreground">Ujian mendatang</h2>
             <p className="text-ui text-muted-foreground">{upcomingExamCount} terjadwal</p>
           </div>
-          <ul className="divide-y rounded-lg border bg-card">
+          <ul className="divide-y border-t">
             {upcomingExams.map((exam) => (
-              <li key={exam.id} className="flex flex-col justify-between gap-1 p-4 sm:flex-row sm:items-center">
+              <li key={exam.id} className="flex flex-col justify-between gap-1 py-4 sm:flex-row sm:items-center">
                 <p className="font-medium text-foreground">{exam.nama}</p>
                 <p className="text-ui tabular-nums text-muted-foreground" suppressHydrationWarning>
                   {new Date(exam.beginAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", ...jakarta })},{" "}

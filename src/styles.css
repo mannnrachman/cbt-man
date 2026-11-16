@@ -189,12 +189,11 @@
 }
 
 /*
- * Admin chrome: the sidebar and the header share one dark blue in both colour schemes.
- * Each region re-declares the dark palette locally, so every control inside it (buttons,
+ * Admin chrome: the sidebar is dark blue in both colour schemes; the header is transparent
+ * and follows the page. The sidebar re-declares the dark palette locally, so every control inside it (buttons,
  * badges, links, focus rings) picks light-on-dark tokens without per-component classes.
  */
-.shell-sidebar,
-.shell-header {
+.shell-sidebar {
   color-scheme: dark;
   --ink: #e8ede9;
   --line: rgb(232 237 233 / 0.16);
@@ -215,8 +214,7 @@
 /* Map the shadcn token names the UI primitives already use onto the semantic palette. */
 :root,
 .dark,
-.shell-sidebar,
-.shell-header {
+.shell-sidebar {
   --background: var(--ground);
   --foreground: var(--ink);
   --card: var(--surface);

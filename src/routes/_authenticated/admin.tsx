@@ -62,14 +62,14 @@ type RouteUser = { role: Role };
 type NavItem = {
   to: string;
   label: string;
-  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number; "aria-hidden"?: boolean | "true" | "false" }>;
   exact?: boolean;
 };
 
 type NavGroup = {
   id: string;
   label: string;
-  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number; "aria-hidden"?: boolean | "true" | "false" }>;
   items: NavItem[];
 };
 
@@ -267,6 +267,7 @@ function AdminLayout() {
   );
   const activeNavItem = activeGroup?.items.find((item) => isNavItemActive(item, pathname))
     ?? (isNavItemActive(dashboardNavItem, pathname) ? dashboardNavItem : undefined);
+  const HeaderIcon = activeNavItem?.icon ?? dashboardNavItem.icon;
   const userInitials = user.namaLengkap
     .trim()
     .split(/\s+/)
@@ -420,29 +421,37 @@ function AdminLayout() {
 
         <div className="flex min-h-screen flex-1 flex-col min-w-0">
 
-          <header className="shell-header sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-card px-4 lg:px-6">
+          <header className="sticky top-0 z-30 flex items-center justify-between gap-4 bg-background px-4 py-4 lg:px-6">
             <div className="flex min-w-0 items-center gap-3">
               <Button
                 variant="ghost"
                 size="icon"
                 title="Buka menu navigasi"
                 aria-label="Buka menu navigasi"
-                className="lg:hidden"
+                className="shrink-0 lg:hidden"
                 onClick={() => setMobileMenuOpen(true)}
               >
                 <Menu className="h-5 w-5" />
               </Button>
-              <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-2">
-                {activeGroup && (
-                  <>
-                    <span className="hidden max-w-48 truncate text-label font-medium text-muted-foreground sm:inline">{activeGroup.label}</span>
-                    <ChevronRight aria-hidden="true" className="hidden h-3.5 w-3.5 shrink-0 text-muted-foreground sm:block" />
-                  </>
-                )}
-                <span aria-current="page" className="truncate text-ui font-medium text-foreground">
+              <HeaderIcon aria-hidden="true" strokeWidth={2.25} className="hidden h-8 w-8 shrink-0 text-primary sm:block" />
+              <div className="min-w-0">
+                <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5 text-label text-muted-foreground">
+                  {activeGroup && (
+                    <>
+                      <span className="hidden max-w-48 truncate sm:inline">{activeGroup.label}</span>
+                      <ChevronRight aria-hidden="true" className="hidden h-3.5 w-3.5 shrink-0 sm:block" />
+                    </>
+                  )}
+                  <span aria-current="page" className="truncate">
+                    {activeNavItem?.label ?? "Administrasi"}
+                  </span>
+                </nav>
+                {/* AdminPageHeader portals the page's own title and description in here. */}
+                <div id="admin-page-title" className="peer min-w-0" />
+                <p className="hidden truncate text-title font-semibold tracking-tight text-foreground peer-empty:block">
                   {activeNavItem?.label ?? "Administrasi"}
-                </span>
-              </nav>
+                </p>
+              </div>
             </div>
             <div className="flex shrink-0 items-center gap-2">
               <div role="group" aria-label={`Akun ${user.namaLengkap}`} className="hidden max-w-[300px] items-center gap-2 px-2 sm:flex">

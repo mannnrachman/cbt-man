@@ -101,10 +101,9 @@ function readBlock(pattern) {
   return tokens;
 }
 
-const SHARED = /\n\.shell-sidebar,\n\.shell-header \{[\s\S]*?\n\}/;
+const SHARED = /\n\.shell-sidebar \{\n  color-scheme[\s\S]*?\n\}/;
 const chrome = {
   sidebar: readBlock(SHARED),
-  header: readBlock(SHARED),
 };
 
 for (const [region, tokens] of Object.entries(chrome)) {
@@ -133,7 +132,7 @@ test("the hover fill is clearly lighter than the chrome surface", () => {
   }
 });
 
-test("the header and the sidebar share the same dark blue", () => {
-  assert.equal(chrome.header.surface.toLowerCase(), "#10264a");
-  assert.equal(chrome.sidebar.surface.toLowerCase(), chrome.header.surface.toLowerCase());
+test("the sidebar is dark blue and the header has no palette of its own", () => {
+  assert.equal(chrome.sidebar.surface.toLowerCase(), "#10264a");
+  assert.ok(!css.includes(".shell-header"), "the header is transparent and follows the page tokens");
 });
