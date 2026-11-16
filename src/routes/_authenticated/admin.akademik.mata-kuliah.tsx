@@ -132,7 +132,7 @@ function MataKuliahPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-xl font-bold tracking-tight text-foreground">Daftar Mata Kuliah</h2>
+          <h2 className="text-xl font-semibold tracking-tight text-foreground">Daftar Mata Kuliah</h2>
           <p className="text-sm text-muted-foreground">
             Kelola mata kuliah untuk penjadwalan ujian.
           </p>
@@ -147,13 +147,13 @@ function MataKuliahPage() {
               className="pl-9 h-9 text-sm"
             />
           </div>
-          <Button onClick={handleAdd} size="sm" className="shadow-sm h-9 shrink-0">
+          <Button onClick={handleAdd} size="sm" className="h-9 shrink-0">
             <Plus className="mr-2 h-4 w-4" /> Tambah MK
           </Button>
         </div>
       </div>
 
-      <Card className="shadow-sm border-border overflow-hidden">
+      <Card className="border-border overflow-hidden">
         <Table>
           <TableHeader className="bg-muted/30">
             <TableRow>
@@ -175,7 +175,7 @@ function MataKuliahPage() {
                   <TableCell>
                     <Badge
                       variant="outline"
-                      className="font-mono font-bold text-xs uppercase bg-muted/50 text-foreground border-border"
+                      className="font-mono font-semibold text-label bg-muted/50 text-foreground border-border"
                     >
                       {item.kode}
                     </Badge>
@@ -186,7 +186,7 @@ function MataKuliahPage() {
                       <span>{item.nama}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-xs text-muted-foreground">
+                  <TableCell className="text-label text-muted-foreground">
                     <div className="space-y-0.5">
                       <div className="font-medium text-foreground">{unit?.nama ?? "-"}</div>
                       <div>
@@ -195,7 +195,7 @@ function MataKuliahPage() {
                     </div>
                   </TableCell>
                   <TableCell className="text-center">
-                    <Badge variant="secondary" className="font-bold text-xs">
+                    <Badge variant="secondary" className="font-semibold text-label">
                       {item.sks} SKS
                     </Badge>
                   </TableCell>

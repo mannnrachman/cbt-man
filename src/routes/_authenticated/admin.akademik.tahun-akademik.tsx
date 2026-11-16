@@ -79,15 +79,15 @@ function TahunAkademikPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-xl font-bold tracking-tight text-foreground">Daftar Tahun Akademik</h2>
+          <h2 className="text-xl font-semibold tracking-tight text-foreground">Daftar Tahun Akademik</h2>
           <p className="text-sm text-muted-foreground">Kelola periode waktu perkuliahan institusi.</p>
         </div>
-        <Button onClick={handleAdd} size="sm" className="shadow-sm">
+        <Button onClick={handleAdd} size="sm" className="">
           <Plus className="mr-2 h-4 w-4" /> Tambah Tahun Akademik
         </Button>
       </div>
 
-      <Card className="shadow-sm border-border overflow-hidden">
+      <Card className="border-border overflow-hidden">
         <Table>
           <TableHeader className="bg-muted/30">
             <TableRow>
@@ -107,7 +107,7 @@ function TahunAkademikPage() {
                 </TableCell>
                 <TableCell>
                   {item.aktif ? (
-                    <Badge variant="default" className="bg-emerald-500 hover:bg-emerald-600 border-transparent shadow-none text-white">
+                    <Badge variant="default" className="bg-primary hover:bg-primary/90 border-transparent shadow-none text-primary-foreground">
                       <CheckCircle2 className="mr-1 h-3 w-3" /> Aktif
                     </Badge>
                   ) : (

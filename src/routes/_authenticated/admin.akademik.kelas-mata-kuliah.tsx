@@ -66,14 +66,14 @@ function KelasMataKuliahPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div><h1 className="text-xl font-bold">Kelas Mata Kuliah</h1><p className="text-sm text-muted-foreground">Atur kelas, pengampu, dan peserta untuk setiap mata kuliah.</p></div>
+        <div><h1 className="text-xl font-semibold">Kelas Mata Kuliah</h1><p className="text-sm text-muted-foreground">Atur kelas, pengampu, dan peserta untuk setiap mata kuliah.</p></div>
         <Button onClick={add}><Plus className="mr-2 h-4 w-4" />Tambah Kelas</Button>
       </div>
       <div className="grid gap-3 md:grid-cols-2">
         {items.map((item) => {
           const mk = mataKuliah.find((value) => value.id === item.mataKuliahId);
           const smt = semester.find((value) => value.id === item.semesterId);
-          return <Card key={item.id} className="p-4"><div className="flex items-start justify-between"><div><h2 className="font-semibold">{mk?.nama ?? "Mata kuliah tidak ditemukan"}</h2><p className="text-sm text-muted-foreground">{smt?.nama ?? "Tanpa semester"} · Kelas {item.kodeKelas || "-"}</p><p className="mt-2 text-xs text-muted-foreground">{item.pesertaIds.length} peserta · {item.pengampuIds.length} pengampu</p></div><div className="flex gap-1"><Button variant="ghost" size="icon" onClick={() => edit(item)}><Pencil className="h-4 w-4" /></Button><Button variant="ghost" size="icon" onClick={() => remove(item.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button></div></div></Card>;
+          return <Card key={item.id} className="p-4"><div className="flex items-start justify-between"><div><h2 className="font-semibold">{mk?.nama ?? "Mata kuliah tidak ditemukan"}</h2><p className="text-sm text-muted-foreground">{smt?.nama ?? "Tanpa semester"} · Kelas {item.kodeKelas || "-"}</p><p className="mt-2 text-label text-muted-foreground">{item.pesertaIds.length} peserta · {item.pengampuIds.length} pengampu</p></div><div className="flex gap-1"><Button variant="ghost" size="icon" onClick={() => edit(item)}><Pencil className="h-4 w-4" /></Button><Button variant="ghost" size="icon" onClick={() => remove(item.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button></div></div></Card>;
         })}
         {items.length === 0 && <Card className="p-8 text-center text-sm text-muted-foreground md:col-span-2">Belum ada kelas mata kuliah.</Card>}
       </div>

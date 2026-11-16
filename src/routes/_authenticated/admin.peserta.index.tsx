@@ -172,7 +172,7 @@ function PesertaPage() {
               {isImporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
               Import Excel
             </Button>
-            <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1"></div>
+            <div className="w-px h-6 bg-muted mx-1"></div>
             <Link to="/admin/akademik">
               <Button variant="outline" size="sm" className="h-9">
                 <UsersIcon className="mr-2 h-4 w-4" /> Unit Akademik
@@ -197,7 +197,7 @@ function PesertaPage() {
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative max-w-xs w-full">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input 
             placeholder="Cari nama atau username..." 
             value={query} 
@@ -222,11 +222,11 @@ function PesertaPage() {
       </div>
 
       <AdminPageContent className="p-0">
-        <Card className="border-0 shadow-none sm:border sm:shadow-sm">
+        <Card className="border-0 shadow-none sm:border">
           <CardContent className="p-0">
             <Table>
               <TableHeader>
-                <TableRow className="bg-slate-50/50 dark:bg-slate-900/50">
+                <TableRow className="bg-muted/50">
                   <TableHead className="w-12 text-center">
                     <Checkbox
                       checked={shown.length > 0 && shown.every((p) => selectedIds.includes(p.id))}
@@ -238,16 +238,16 @@ function PesertaPage() {
                       aria-label="Pilih semua peserta pada halaman ini"
                     />
                   </TableHead>
-                  <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Username</TableHead>
-                  <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Nama Lengkap</TableHead>
-                  <TableHead className="font-semibold text-slate-700 dark:text-slate-300 text-center">Grup / Kelas</TableHead>
-                  <TableHead className="font-semibold text-slate-700 dark:text-slate-300 text-center">Status</TableHead>
-                  <TableHead className="font-semibold text-slate-700 dark:text-slate-300 text-center">Aksi</TableHead>
+                  <TableHead className="font-semibold text-foreground">Username</TableHead>
+                  <TableHead className="font-semibold text-foreground">Nama Lengkap</TableHead>
+                  <TableHead className="font-semibold text-foreground text-center">Grup / Kelas</TableHead>
+                  <TableHead className="font-semibold text-foreground text-center">Status</TableHead>
+                  <TableHead className="font-semibold text-foreground text-center">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {shown.map((p) => (
-                  <TableRow key={p.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
+                  <TableRow key={p.id} className="hover:bg-muted">
                     <TableCell className="text-center">
                       <Checkbox
                         checked={selectedIds.includes(p.id)}
@@ -255,22 +255,22 @@ function PesertaPage() {
                         aria-label={`Pilih ${p.namaLengkap}`}
                       />
                     </TableCell>
-                    <TableCell className="font-medium text-slate-900 dark:text-slate-100">{p.username}</TableCell>
-                    <TableCell className="text-slate-600 dark:text-slate-400">{p.namaLengkap}</TableCell>
+                    <TableCell className="font-medium text-foreground">{p.username}</TableCell>
+                    <TableCell className="text-muted-foreground">{p.namaLengkap}</TableCell>
                     <TableCell className="text-center">
-                      <Badge variant="outline" className="bg-slate-50 dark:bg-slate-900 font-medium">
+                      <Badge variant="outline" className="bg-muted font-medium">
                         {units.find((g) => g.id === p.unitId)?.nama ?? "-"}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-center">
                       {p.aktif ? (
-                        <Badge variant="outline" className="font-medium shadow-none border-slate-200 dark:border-slate-800">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-2"></span>
+                        <Badge variant="outline" className="font-medium shadow-none border-border">
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary mr-2"></span>
                           Aktif
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="font-medium text-slate-500 shadow-none border-slate-200 dark:border-slate-800">
-                          <span className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-700 mr-2"></span>
+                        <Badge variant="outline" className="font-medium text-muted-foreground shadow-none border-border">
+                          <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30 mr-2"></span>
                           Nonaktif
                         </Badge>
                       )}
@@ -278,9 +278,9 @@ function PesertaPage() {
                     <TableCell className="text-center">
                       <div className="flex justify-center items-center gap-2">
                         <Button variant="outline" size="sm" onClick={() => { setEditing(p); setOpen(true); }} className="h-8 w-8 p-0">
-                          <Pencil className="h-4 w-4 text-slate-500" />
+                          <Pencil className="h-4 w-4 text-muted-foreground" />
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => setDeleteId(p.id)} className="h-8 w-8 p-0 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/50 hover:text-rose-600">
+                        <Button variant="ghost" size="sm" onClick={() => setDeleteId(p.id)} className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10 hover:text-destructive">
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -290,8 +290,8 @@ function PesertaPage() {
                 {shown.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={6} className="h-48 text-center">
-                      <div className="flex flex-col items-center justify-center text-slate-500">
-                        <FileX className="h-10 w-10 text-slate-300 dark:text-slate-600 mb-3" />
+                      <div className="flex flex-col items-center justify-center text-muted-foreground">
+                        <FileX className="h-10 w-10 text-muted-foreground mb-3" />
                         <p>Tidak ada data peserta yang sesuai.</p>
                       </div>
                     </TableCell>
@@ -302,8 +302,8 @@ function PesertaPage() {
             
             {/* Pagination Controls */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200 dark:border-slate-800">
-                <div className="text-sm text-slate-500">
+              <div className="flex items-center justify-between px-4 py-3 border-t border-border">
+                <div className="text-sm text-muted-foreground">
                   Menampilkan {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, filtered.length)} dari {filtered.length} peserta
                 </div>
                 <div className="flex items-center gap-1">
@@ -340,7 +340,7 @@ function PesertaPage() {
       <Dialog open={!!deleteId} onOpenChange={(v) => !v && setDeleteId(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-rose-600 flex items-center gap-2">
+            <DialogTitle className="text-destructive flex items-center gap-2">
               <Trash2 className="h-5 w-5" />
               Hapus Peserta
             </DialogTitle>

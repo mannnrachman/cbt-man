@@ -87,15 +87,15 @@ function SemesterPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-xl font-bold tracking-tight text-foreground">Daftar Semester</h2>
+          <h2 className="text-xl font-semibold tracking-tight text-foreground">Daftar Semester</h2>
           <p className="text-sm text-muted-foreground">Kelola semester berjalan di dalam tahun akademik.</p>
         </div>
-        <Button onClick={handleAdd} size="sm" className="shadow-sm">
+        <Button onClick={handleAdd} size="sm" className="">
           <Plus className="mr-2 h-4 w-4" /> Tambah Semester
         </Button>
       </div>
 
-      <Card className="shadow-sm border-border overflow-hidden">
+      <Card className="border-border overflow-hidden">
         <Table>
           <TableHeader className="bg-muted/30">
             <TableRow>
@@ -120,7 +120,7 @@ function SemesterPage() {
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-foreground">{ta.nama}</span>
                         {ta.aktif && (
-                          <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-600 border-emerald-500/20 font-semibold">
+                          <Badge variant="outline" className="text-label bg-primary/10 text-primary border-primary font-semibold">
                             Aktif
                           </Badge>
                         )}

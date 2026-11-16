@@ -49,7 +49,7 @@ function AkademikLayout() {
         <aside className="w-full lg:w-64 shrink-0 space-y-6">
           {TREE_MENU.map((group, idx) => (
             <div key={idx} className="space-y-2">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-2">
+              <h4 className="text-label font-semibold text-muted-foreground px-2">
                 {group.section}
               </h4>
               <nav className="flex flex-col space-y-1">

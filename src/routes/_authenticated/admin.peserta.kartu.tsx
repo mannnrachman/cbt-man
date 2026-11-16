@@ -69,11 +69,11 @@ function KartuPage() {
                 {appName} — Kartu Ujian
               </div>
               <div className="space-y-1 text-sm">
-                <div><span className="text-slate-500">Nama:</span> <strong>{p.namaLengkap}</strong></div>
-                <div><span className="text-slate-500">Username:</span> <code>{p.username}</code></div>
-                <div><span className="text-slate-500">Password awal:</span> <code>{p.username}123</code></div>
+                <div><span className="text-muted-foreground">Nama:</span> <strong>{p.namaLengkap}</strong></div>
+                <div><span className="text-muted-foreground">Username:</span> <code>{p.username}</code></div>
+                <div><span className="text-muted-foreground">Password awal:</span> <code>{p.username}123</code></div>
                 <div>
-                  <span className="text-slate-500">Unit:</span>{" "}
+                  <span className="text-muted-foreground">Unit:</span>{" "}
                   {u ? (
                     <span className="font-medium">
                       [{u.tipe === "prodi" ? "Prodi" : u.tipe === "fakultas" ? "Fakultas" : "Kelas"}] {u.nama}
@@ -87,7 +87,7 @@ function KartuPage() {
             </Card>
           );
         })}
-        {peserta.length === 0 && <div className="col-span-full text-center text-slate-500">Tidak ada peserta.</div>}
+        {peserta.length === 0 && <div className="col-span-full text-center text-muted-foreground">Tidak ada peserta.</div>}
       </div>
     </AdminPage>
   );

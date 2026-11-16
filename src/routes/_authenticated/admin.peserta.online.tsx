@@ -116,18 +116,18 @@ function OnlinePage() {
         action={
           <div className="flex items-center gap-8 text-sm">
             <div className="flex flex-col items-end">
-              <span className="text-[10px] font-medium uppercase tracking-widest text-slate-400 mb-0.5">Sesi Aktif</span>
-              <span className="text-xl font-medium text-slate-900 dark:text-white tabular-nums leading-none">{sesis.length}</span>
+              <span className="text-label font-medium text-muted-foreground mb-0.5">Sesi Aktif</span>
+              <span className="text-xl font-medium text-foreground tabular-nums leading-none">{sesis.length}</span>
             </div>
-            <div className="w-px h-8 bg-slate-200 dark:bg-slate-800" />
+            <div className="w-px h-8 bg-muted" />
             <div className="flex flex-col items-end">
-              <span className="text-[10px] font-medium uppercase tracking-widest text-slate-400 mb-0.5">Pelanggaran</span>
-              <span className="text-xl font-medium text-red-600 dark:text-red-400 tabular-nums leading-none">{totalPelanggaran}</span>
+              <span className="text-label font-medium text-muted-foreground mb-0.5">Pelanggaran</span>
+              <span className="text-xl font-medium text-destructive tabular-nums leading-none">{totalPelanggaran}</span>
             </div>
-            <div className="w-px h-8 bg-slate-200 dark:bg-slate-800" />
+            <div className="w-px h-8 bg-muted" />
             <div className="flex flex-col items-end">
-              <span className="text-[10px] font-medium uppercase tracking-widest text-slate-400 mb-0.5">Rata-rata Progress</span>
-              <span className="text-xl font-medium text-slate-900 dark:text-white tabular-nums leading-none">{Math.round(avgProgress)}%</span>
+              <span className="text-label font-medium text-muted-foreground mb-0.5">Rata-rata Progress</span>
+              <span className="text-xl font-medium text-foreground tabular-nums leading-none">{Math.round(avgProgress)}%</span>
             </div>
           </div>
         }
@@ -145,63 +145,63 @@ function OnlinePage() {
       </div>
 
       <AdminPageContent className="p-0">
-          <div className="divide-y divide-slate-100 dark:divide-slate-800/60">
+          <div className="divide-y divide-border">
             {sesis.map(({ s, u, ex, dijawab, totalSoal, progress }) => {
               const sisaMs = s.endsAt ? Math.max(0, s.endsAt - Date.now()) : 0;
               const isCritical = sisaMs > 0 && sisaMs < 300000;
               
               return (
-                <div key={s.id} className="group p-4 flex flex-col xl:flex-row xl:items-center justify-between gap-6 transition-all duration-300 ease-spring hover:bg-slate-50 dark:hover:bg-slate-800/30">
+                <div key={s.id} className="group p-4 flex flex-col xl:flex-row xl:items-center justify-between gap-6 transition-all duration-300 ease-spring hover:bg-muted">
                   
                   {/* User Info & Progress Group */}
                   <div className="flex flex-col md:flex-row md:items-center gap-6 flex-1 min-w-0">
                     {/* User Info */}
                     <div className="flex items-center gap-3 min-w-0 md:w-1/2 lg:w-1/3">
-                      <div className="flex h-8 w-8 shrink-0 rounded-full bg-slate-100 dark:bg-slate-800 items-center justify-center border border-slate-200 dark:border-slate-700">
-                        <Users className="h-3.5 w-3.5 text-slate-500" />
+                      <div className="flex h-8 w-8 shrink-0 rounded-full bg-muted items-center justify-center border border-border">
+                        <Users className="h-3.5 w-3.5 text-muted-foreground" />
                       </div>
                       <div className="min-w-0">
-                        <h3 className="font-medium text-sm text-slate-900 dark:text-slate-100 truncate group-hover:text-primary transition-colors duration-300 ease-spring">{u?.namaLengkap ?? "Unknown"}</h3>
-                        <div className="text-xs text-slate-500 truncate">{ex?.nama ?? "Unknown Exam"}</div>
+                        <h3 className="font-medium text-sm text-foreground truncate group-hover:text-primary transition-colors duration-300 ease-spring">{u?.namaLengkap ?? "Unknown"}</h3>
+                        <div className="text-label text-muted-foreground truncate">{ex?.nama ?? "Unknown Exam"}</div>
                       </div>
                     </div>
 
                     {/* Progress Bar */}
                     <div className="flex-1 w-full max-w-md">
-                      <div className="flex justify-between items-center text-xs text-slate-500 mb-1.5">
+                      <div className="flex justify-between items-center text-label text-muted-foreground mb-1.5">
                         <span>{dijawab} / {totalSoal} Soal</span>
-                        <span className="font-medium text-slate-700 dark:text-slate-300 tabular-nums">{Math.round(progress)}%</span>
+                        <span className="font-medium text-foreground tabular-nums">{Math.round(progress)}%</span>
                       </div>
-                      <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                      <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
                         <div className="bg-primary h-full rounded-full transition-all duration-500 ease-out" style={{ width: `${progress}%` }} />
                       </div>
                     </div>
                   </div>
 
                   {/* Status, Time & Actions Group */}
-                  <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 sm:gap-6 shrink-0 justify-between xl:justify-end mt-2 xl:mt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-800 pt-4 sm:pt-0">
+                  <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 sm:gap-6 shrink-0 justify-between xl:justify-end mt-2 xl:mt-0 border-t sm:border-t-0 border-border pt-4 sm:pt-0">
                     
                     <div className="flex items-center gap-6">
                       <div className="text-right">
-                        <div className="text-[10px] font-medium uppercase tracking-widest text-slate-400 mb-0.5">Sisa Waktu</div>
-                        <div className={`font-mono text-sm font-medium tabular-nums ${isCritical ? 'text-red-600 animate-pulse' : 'text-slate-700 dark:text-slate-300'}`}>
+                        <div className="text-label font-medium text-muted-foreground mb-0.5">Sisa Waktu</div>
+                        <div className={`font-mono text-sm font-medium tabular-nums ${isCritical ? 'text-destructive' : 'text-foreground'}`}>
                           {fmtSisa(sisaMs)}
                         </div>
                       </div>
 
                       <div className="w-24 text-right">
-                        <div className="text-[10px] font-medium uppercase tracking-widest text-slate-400 mb-1">Status</div>
+                        <div className="text-label font-medium text-muted-foreground mb-1">Status</div>
                         {s.pelanggaran > 0 ? (
-                          <div className="flex items-center justify-end gap-1.5 text-xs font-medium text-red-600 dark:text-red-400">
+                          <div className="flex items-center justify-end gap-1.5 text-label font-medium text-destructive">
                             <span className="relative flex h-2 w-2">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                              <span className="absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive"></span>
                             </span>
                             {s.pelanggaran} Insiden
                           </div>
                         ) : (
-                          <div className="flex items-center justify-end gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
-                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                          <div className="flex items-center justify-end gap-1.5 text-label font-medium text-muted-foreground">
+                            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                             Aman
                           </div>
                         )}
@@ -209,12 +209,12 @@ function OnlinePage() {
                     </div>
 
                     {/* Action Menu */}
-                    <div className="flex items-center sm:pl-4 sm:border-l border-slate-200 dark:border-slate-700 gap-2 w-full sm:w-auto justify-end">
-                      <Button onClick={() => handleForceSubmit(s)} variant="outline" size="sm" className="h-8 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 border-red-200 dark:border-red-900/50 flex-1 sm:flex-none">
+                    <div className="flex items-center sm:pl-4 sm:border-l border-border gap-2 w-full sm:w-auto justify-end">
+                      <Button onClick={() => handleForceSubmit(s)} variant="outline" size="sm" className="h-8 text-label text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30 flex-1 sm:flex-none">
                         <StopCircle className="mr-1.5 h-3.5 w-3.5" /> Paksa Selesai
                       </Button>
                       {s.pelanggaran > 0 && (
-                        <Button onClick={() => handleResetPelanggaran(s)} variant="outline" size="sm" className="h-8 text-xs flex-1 sm:flex-none">
+                        <Button onClick={() => handleResetPelanggaran(s)} variant="outline" size="sm" className="h-8 text-label flex-1 sm:flex-none">
                           <RefreshCcw className="mr-1.5 h-3.5 w-3.5" /> Reset
                         </Button>
                       )}
@@ -227,8 +227,8 @@ function OnlinePage() {
 
             {sesis.length === 0 && (
               <div className="py-12 flex flex-col items-center justify-center text-center">
-                <MonitorPlay className="h-8 w-8 text-slate-300 dark:text-slate-700 mb-3" />
-                <p className="text-slate-500 text-sm">Belum ada peserta yang aktif.</p>
+                <MonitorPlay className="h-8 w-8 text-muted-foreground mb-3" />
+                <p className="text-muted-foreground text-sm">Belum ada peserta yang aktif.</p>
               </div>
             )}
           </div>
