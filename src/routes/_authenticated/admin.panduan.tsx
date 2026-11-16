@@ -128,7 +128,7 @@ const articlesMap: Record<string, DocArticle> = {
     content: (onNavigate) => (
       <div className="space-y-8">
         <section id="tahapan" data-heading="tahapan" className="space-y-4">
-          <h2 className="text-lg font-bold text-foreground tracking-tight">5 Tahapan Pelaksanaan Ujian</h2>
+          <h2 className="text-lg font-semibold text-foreground tracking-tight">5 Tahapan Pelaksanaan Ujian</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Seluruh operasional ujian pada sistem CBT mengikuti 5 langkah berurutan yang saling terhubung:
           </p>
@@ -144,17 +144,17 @@ const articlesMap: Record<string, DocArticle> = {
               <Card 
                 key={s.step} 
                 onClick={() => onNavigate(s.target)} 
-                className="group border-border bg-card text-card-foreground hover:bg-muted/80 transition-all text-center cursor-pointer shadow-none rounded-xl"
+                className="group border-border bg-card text-card-foreground hover:bg-muted/80 transition-all text-center cursor-pointer shadow-none rounded-lg"
               >
                 <CardContent className="p-4 flex flex-col items-center">
-                  <Badge variant="outline" className="h-7 w-7 rounded-full p-0 flex items-center justify-center font-mono font-bold text-xs mb-2 border-border text-foreground group-hover:border-foreground/30 transition-colors">
+                  <Badge variant="outline" className="h-7 w-7 rounded-full p-0 flex items-center justify-center font-mono font-semibold text-label mb-2 border-border text-foreground group-hover:border-foreground/30 transition-colors">
                     {s.step}
                   </Badge>
-                  <div className="font-semibold text-foreground text-xs transition-colors flex items-center gap-1">
+                  <div className="font-semibold text-foreground text-label transition-colors flex items-center gap-1">
                     {s.label}
                     <ArrowUpRight className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
-                  <div className="text-muted-foreground text-[11px] mt-0.5">{s.sub}</div>
+                  <div className="text-muted-foreground text-label mt-0.5">{s.sub}</div>
                 </CardContent>
               </Card>
             ))}
@@ -166,7 +166,7 @@ const articlesMap: Record<string, DocArticle> = {
         </DocCallout>
 
         <section id="akses-cepat" data-heading="akses-cepat" className="space-y-4 pt-4">
-          <h2 className="text-lg font-bold text-foreground tracking-tight">Pintasan Halaman Utama</h2>
+          <h2 className="text-lg font-semibold text-foreground tracking-tight">Pintasan Halaman Utama</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Akses langsung halaman kerja aplikasi melalui pintasan resmi di bawah:
           </p>
@@ -194,11 +194,11 @@ const articlesMap: Record<string, DocArticle> = {
     content: () => (
       <div className="space-y-8">
         <section id="struktur-hierarki" data-heading="struktur-hierarki" className="space-y-3">
-          <h2 className="text-lg font-bold text-foreground tracking-tight">Struktur Hierarki Soal</h2>
+          <h2 className="text-lg font-semibold text-foreground tracking-tight">Struktur Hierarki Soal</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Bank soal menggunakan susunan berjenjang: <Strong>Mata Kuliah → Modul → Topik → Soal</Strong>.
           </p>
-          <Card className="border-border bg-muted/40 p-4 text-xs font-mono space-y-1.5 shadow-none rounded-xl">
+          <Card className="border-border bg-muted/40 p-4 text-label font-mono space-y-1.5 shadow-none rounded-lg">
             <div className="text-foreground font-semibold">📚 Mata Kuliah (Subjek Utama)</div>
             <div className="pl-4 text-muted-foreground">└─ 📦 Modul</div>
             <div className="pl-8 text-muted-foreground">└─ 📂 Topik (Bab / Pokok Bahasan)</div>
@@ -208,7 +208,7 @@ const articlesMap: Record<string, DocArticle> = {
         </section>
 
         <section id="langkah-pembuatan" data-heading="langkah-pembuatan" className="space-y-4">
-          <h2 className="text-lg font-bold text-foreground tracking-tight">Langkah Pembuatan</h2>
+          <h2 className="text-lg font-semibold text-foreground tracking-tight">Langkah Pembuatan</h2>
           <StepList steps={[
             <>Buka <DocMenuLink to="/admin/modul">Bank Soal</DocMenuLink> di menu navigasi utama.</>,
             <>Klik tombol <Strong>+ Buat Modul</Strong> dan masukkan nama mata kuliah.</>,
@@ -218,19 +218,19 @@ const articlesMap: Record<string, DocArticle> = {
         </section>
 
         <section id="tipe-soal" data-heading="tipe-soal" className="space-y-3">
-          <h2 className="text-lg font-bold text-foreground tracking-tight">Tipe Soal yang Didukung</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-            <Card className="border-border bg-card p-4 space-y-1 shadow-none rounded-xl">
-              <CardTitle className="text-xs font-semibold text-foreground">Pilihan Ganda (PG)</CardTitle>
-              <CardDescription className="text-[11px] text-muted-foreground leading-normal">Satu jawaban benar. Koreksi otomatis.</CardDescription>
+          <h2 className="text-lg font-semibold text-foreground tracking-tight">Tipe Soal yang Didukung</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-label">
+            <Card className="border-border bg-card p-4 space-y-1 shadow-none rounded-lg">
+              <CardTitle className="text-label font-semibold text-foreground">Pilihan Ganda (PG)</CardTitle>
+              <CardDescription className="text-label text-muted-foreground leading-normal">Satu jawaban benar. Koreksi otomatis.</CardDescription>
             </Card>
-            <Card className="border-border bg-card p-4 space-y-1 shadow-none rounded-xl">
-              <CardTitle className="text-xs font-semibold text-foreground">PG Kompleks (Multi)</CardTitle>
-              <CardDescription className="text-[11px] text-muted-foreground leading-normal">Beberapa jawaban benar. Koreksi otomatis.</CardDescription>
+            <Card className="border-border bg-card p-4 space-y-1 shadow-none rounded-lg">
+              <CardTitle className="text-label font-semibold text-foreground">PG Kompleks (Multi)</CardTitle>
+              <CardDescription className="text-label text-muted-foreground leading-normal">Beberapa jawaban benar. Koreksi otomatis.</CardDescription>
             </Card>
-            <Card className="border-border bg-card p-4 space-y-1 shadow-none rounded-xl">
-              <CardTitle className="text-xs font-semibold text-foreground">Essay Uraian</CardTitle>
-              <CardDescription className="text-[11px] text-muted-foreground leading-normal">Jawaban teks bebas. Penilaian manual admin/dosen.</CardDescription>
+            <Card className="border-border bg-card p-4 space-y-1 shadow-none rounded-lg">
+              <CardTitle className="text-label font-semibold text-foreground">Essay Uraian</CardTitle>
+              <CardDescription className="text-label text-muted-foreground leading-normal">Jawaban teks bebas. Penilaian manual admin/dosen.</CardDescription>
             </Card>
           </div>
         </section>
@@ -251,7 +251,7 @@ const articlesMap: Record<string, DocArticle> = {
     content: () => (
       <div className="space-y-8">
         <section id="konfigurasi-paket" data-heading="konfigurasi-paket" className="space-y-4">
-          <h2 className="text-lg font-bold text-foreground tracking-tight">Konfigurasi Ujian Baru</h2>
+          <h2 className="text-lg font-semibold text-foreground tracking-tight">Konfigurasi Ujian Baru</h2>
           <StepList steps={[
             <>Buka <DocMenuLink to="/admin/ujian">Paket Ujian</DocMenuLink> → klik <Strong>+ Buat Ujian Baru</Strong>.</>,
             <>Isi judul ujian, deskripsi/petunjuk, dan tentukan durasi maksimal pengerjaan (dalam menit).</>,
@@ -280,21 +280,21 @@ const articlesMap: Record<string, DocArticle> = {
     content: () => (
       <div className="space-y-8">
         <section id="rentang-waktu" data-heading="rentang-waktu" className="space-y-3">
-          <h2 className="text-lg font-bold text-foreground tracking-tight">Rentang Waktu Akses</h2>
+          <h2 className="text-lg font-semibold text-foreground tracking-tight">Rentang Waktu Akses</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Setiap ujian memiliki dua parameter jadwal utama:
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-            <Card className="border-border bg-card p-4 space-y-1.5 shadow-none rounded-xl">
-              <CardTitle className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Rentang Waktu</CardTitle>
-              <CardContent className="p-0 text-xs text-muted-foreground space-y-1">
+            <Card className="border-border bg-card p-4 space-y-1.5 shadow-none rounded-lg">
+              <CardTitle className="text-label font-semibold text-muted-foreground">Rentang Waktu</CardTitle>
+              <CardContent className="p-0 text-label text-muted-foreground space-y-1">
                 <div>• <Strong>Waktu Mulai</Strong>: Akses sesi pengerjaan dibuka.</div>
                 <div>• <Strong>Waktu Selesai</Strong>: Batas akhir peserta memulai ujian.</div>
               </CardContent>
             </Card>
-            <Card className="border-border bg-card p-4 space-y-1.5 shadow-none rounded-xl">
-              <CardTitle className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Token Akses</CardTitle>
-              <CardContent className="p-0 text-xs text-muted-foreground space-y-1">
+            <Card className="border-border bg-card p-4 space-y-1.5 shadow-none rounded-lg">
+              <CardTitle className="text-label font-semibold text-muted-foreground">Token Akses</CardTitle>
+              <CardContent className="p-0 text-label text-muted-foreground space-y-1">
                 <div>• Kode acak yang wajib diisi peserta sebelum mulai.</div>
                 <div>• Bagikan token secara langsung di ruang ujian.</div>
               </CardContent>
@@ -322,31 +322,31 @@ const articlesMap: Record<string, DocArticle> = {
     content: () => (
       <div className="space-y-8">
         <section id="fitur-pengawas" data-heading="fitur-pengawas" className="space-y-4">
-          <h2 className="text-lg font-bold text-foreground tracking-tight">Fitur Dashboard Pengawas</h2>
+          <h2 className="text-lg font-semibold text-foreground tracking-tight">Fitur Dashboard Pengawas</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Buka menu <DocMenuLink to="/admin/peserta/online">Monitoring Live</DocMenuLink> saat ujian berlangsung.
           </p>
 
-          <Card className="border-border overflow-hidden shadow-none rounded-xl">
+          <Card className="border-border overflow-hidden shadow-none rounded-lg">
             <Table>
               <TableHeader className="bg-muted/50">
                 <TableRow className="border-border">
-                  <TableHead className="font-semibold text-muted-foreground text-xs">Fitur Monitoring</TableHead>
-                  <TableHead className="font-semibold text-muted-foreground text-xs">Fungsi Utama</TableHead>
+                  <TableHead className="font-semibold text-muted-foreground text-label">Fitur Monitoring</TableHead>
+                  <TableHead className="font-semibold text-muted-foreground text-label">Fungsi Utama</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody className="bg-card">
                 <TableRow className="border-border">
-                  <TableCell className="font-medium text-foreground text-xs">Status Online & Progress</TableCell>
-                  <TableCell className="text-muted-foreground text-xs">Melihat keaktifan koneksi dan jumlah soal yang telah dijawab.</TableCell>
+                  <TableCell className="font-medium text-foreground text-label">Status Online & Progress</TableCell>
+                  <TableCell className="text-muted-foreground text-label">Melihat keaktifan koneksi dan jumlah soal yang telah dijawab.</TableCell>
                 </TableRow>
                 <TableRow className="border-border">
-                  <TableCell className="font-medium text-foreground text-xs">Deteksi Pelanggaran</TableCell>
-                  <TableCell className="text-muted-foreground text-xs">Mencatat indikasi kecurangan (pindah tab / keluar layar).</TableCell>
+                  <TableCell className="font-medium text-foreground text-label">Deteksi Pelanggaran</TableCell>
+                  <TableCell className="text-muted-foreground text-label">Mencatat indikasi kecurangan (pindah tab / keluar layar).</TableCell>
                 </TableRow>
                 <TableRow className="border-border">
-                  <TableCell className="font-medium text-foreground text-xs">Aksi Pengawas</TableCell>
-                  <TableCell className="text-muted-foreground text-xs">Fitur paksa kumpulkan, tambah waktu pengerjaan, atau riset insiden.</TableCell>
+                  <TableCell className="font-medium text-foreground text-label">Aksi Pengawas</TableCell>
+                  <TableCell className="text-muted-foreground text-label">Fitur paksa kumpulkan, tambah waktu pengerjaan, atau riset insiden.</TableCell>
                 </TableRow>
               </TableBody>
             </Table>
@@ -354,7 +354,7 @@ const articlesMap: Record<string, DocArticle> = {
         </section>
 
         <section id="aksi-interaktif" data-heading="aksi-interaktif" className="space-y-3">
-          <h2 className="text-lg font-bold text-foreground tracking-tight">Aksi Pengawas</h2>
+          <h2 className="text-lg font-semibold text-foreground tracking-tight">Aksi Pengawas</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Pengawas dapat melakukan aksi langsung dari dasbor: <Strong>Paksa Kumpulkan</Strong>, <Strong>Tambah Waktu</Strong>, atau <Strong>Riset Insiden</Strong>.
           </p>
@@ -375,7 +375,7 @@ const articlesMap: Record<string, DocArticle> = {
     content: () => (
       <div className="space-y-8">
         <section id="penilaian-manual" data-heading="penilaian-manual" className="space-y-4">
-          <h2 className="text-lg font-bold text-foreground tracking-tight">Proses Evaluasi Essay</h2>
+          <h2 className="text-lg font-semibold text-foreground tracking-tight">Proses Evaluasi Essay</h2>
           <StepList steps={[
             <>Buka <DocMenuLink to="/admin/evaluasi">Evaluasi Essay</DocMenuLink>.</>,
             <>Pilih peserta dan berikan skor sesuai bobot maksimal soal.</>,
@@ -400,14 +400,14 @@ const articlesMap: Record<string, DocArticle> = {
     content: () => (
       <div className="space-y-8">
         <section id="format-excel" data-heading="format-excel" className="space-y-3">
-          <h2 className="text-lg font-bold text-foreground tracking-tight">Impor Berkas Excel (.xlsx)</h2>
+          <h2 className="text-lg font-semibold text-foreground tracking-tight">Impor Berkas Excel (.xlsx)</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Gunakan template resmi dari menu Bank Soal. Pastikan nama kolom sesuai: <Strong>Nomor, Pertanyaan, Pilihan A–E, Kunci, Bobot</Strong>.
           </p>
         </section>
 
         <section id="format-word" data-heading="format-word" className="space-y-3">
-          <h2 className="text-lg font-bold text-foreground tracking-tight">Impor Berkas Word (.docx)</h2>
+          <h2 className="text-lg font-semibold text-foreground tracking-tight">Impor Berkas Word (.docx)</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Gunakan penomoran standar angka (1., 2.) dan pilihan (A., B., C.). Kunci jawaban dapat ditandai dengan cetak tebal (*bold*).
           </p>
@@ -429,14 +429,14 @@ const articlesMap: Record<string, DocArticle> = {
     content: () => (
       <div className="space-y-8">
         <section id="akun-peserta" data-heading="akun-peserta" className="space-y-3">
-          <h2 className="text-lg font-bold text-foreground tracking-tight">Manajemen Akun Peserta</h2>
+          <h2 className="text-lg font-semibold text-foreground tracking-tight">Manajemen Akun Peserta</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Daftarkan peserta melalui <DocMenuLink to="/admin/peserta">Akun Peserta</DocMenuLink> atau impor masal dari file Excel.
           </p>
         </section>
 
         <section id="matriks-rbac" data-heading="matriks-rbac" className="space-y-3">
-          <h2 className="text-lg font-bold text-foreground tracking-tight">Hak Akses Role (RBAC)</h2>
+          <h2 className="text-lg font-semibold text-foreground tracking-tight">Hak Akses Role (RBAC)</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Atur wewenang khusus Admin Jurusan dan Evaluator di menu <DocMenuLink to="/admin/users/roles">Hak Akses Role</DocMenuLink>.
           </p>
@@ -457,7 +457,7 @@ const articlesMap: Record<string, DocArticle> = {
     content: () => (
       <div className="space-y-8">
         <section id="pencadangan" data-heading="pencadangan" className="space-y-3">
-          <h2 className="text-lg font-bold text-foreground tracking-tight">Pencadangan & Pemulihan</h2>
+          <h2 className="text-lg font-semibold text-foreground tracking-tight">Pencadangan & Pemulihan</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Buka menu <DocMenuLink to="/admin/tools">Alat Sistem</DocMenuLink> untuk mengunduh snapshot JSON atau memulihkan database.
           </p>
@@ -478,7 +478,7 @@ const articlesMap: Record<string, DocArticle> = {
     content: () => (
       <div className="space-y-8">
         <section id="pertanyaan-umum" data-heading="pertanyaan-umum" className="space-y-4">
-          <h2 className="text-lg font-bold text-foreground tracking-tight">Pertanyaan yang Sering Diajukan</h2>
+          <h2 className="text-lg font-semibold text-foreground tracking-tight">Pertanyaan yang Sering Diajukan</h2>
           
           <div className="space-y-3">
             <FaqAccordion q="Peserta tidak bisa masuk menggunakan Token">
@@ -580,7 +580,7 @@ function PanduanPage() {
       />
 
       {/* QUICK SEARCH BAR (Linear Neutral Surface) */}
-      <Card className="border-border bg-card text-card-foreground shadow-none rounded-xl">
+      <Card className="border-border bg-card text-card-foreground shadow-none rounded-lg">
         <CardContent className="p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
@@ -588,22 +588,22 @@ function PanduanPage() {
               placeholder="Cari kata kunci dokumen..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 h-9 text-xs bg-background border-border text-foreground focus-visible:ring-1 focus-visible:ring-slate-400 dark:focus-visible:ring-slate-600 focus-visible:border-slate-400"
+              className="pl-9 h-9 text-label bg-background border-border text-foreground focus-visible:ring-1 focus-visible:ring-border focus-visible:border-border"
             />
           </div>
 
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 shrink-0 text-xs font-semibold">
-            <Button variant="outline" size="sm" asChild className="rounded-lg h-8 px-3 text-xs border-border bg-card text-foreground hover:bg-muted hover:text-foreground transition-colors">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 shrink-0 text-label font-semibold">
+            <Button variant="outline" size="sm" asChild className="rounded-lg h-8 px-3 text-label border-border bg-card text-foreground hover:bg-muted hover:text-foreground transition-colors">
               <Link to="/admin/modul">
                 <Layers className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" /> Bank Soal
               </Link>
             </Button>
-            <Button variant="outline" size="sm" asChild className="rounded-lg h-8 px-3 text-xs border-border bg-card text-foreground hover:bg-muted hover:text-foreground transition-colors">
+            <Button variant="outline" size="sm" asChild className="rounded-lg h-8 px-3 text-label border-border bg-card text-foreground hover:bg-muted hover:text-foreground transition-colors">
               <Link to="/admin/peserta/online">
                 <BookOpen className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" /> Monitoring
               </Link>
             </Button>
-            <Button variant="outline" size="sm" asChild className="rounded-lg h-8 px-3 text-xs border-border bg-card text-foreground hover:bg-muted hover:text-foreground transition-colors">
+            <Button variant="outline" size="sm" asChild className="rounded-lg h-8 px-3 text-label border-border bg-card text-foreground hover:bg-muted hover:text-foreground transition-colors">
               <Link to="/admin/evaluasi">
                 <FileText className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" /> Evaluasi
               </Link>
@@ -616,7 +616,7 @@ function PanduanPage() {
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         
         {/* COLUMN 1: LEFT DOCS CATEGORY SIDEBAR (Linear Style) */}
-        <Card className="w-full lg:w-64 shrink-0 border-border bg-card text-card-foreground shadow-none rounded-xl">
+        <Card className="w-full lg:w-64 shrink-0 border-border bg-card text-card-foreground shadow-none rounded-lg">
           <CardContent className="p-4 space-y-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
@@ -624,15 +624,15 @@ function PanduanPage() {
                 placeholder="Filter dokumen..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 h-9 text-xs bg-background border-border text-foreground focus-visible:ring-1 focus-visible:ring-slate-400 dark:focus-visible:ring-slate-600 focus-visible:border-slate-400"
+                className="pl-9 h-9 text-label bg-background border-border text-foreground focus-visible:ring-1 focus-visible:ring-border focus-visible:border-border"
               />
             </div>
-            <nav aria-label="Kategori Panduan" className="space-y-4 text-xs">
+            <nav aria-label="Kategori Panduan" className="space-y-4 text-label">
               {filteredCategories.map((cat) => {
                 const IconComp = cat.icon;
                 return (
                   <div key={cat.id} className="space-y-1">
-                    <div className="flex items-center gap-1.5 font-semibold text-[11px] text-muted-foreground px-2 py-1">
+                    <div className="flex items-center gap-1.5 font-semibold text-label text-muted-foreground px-2 py-1">
                       <IconComp className="h-3.5 w-3.5 shrink-0 opacity-70" />
                       <span>{cat.label}</span>
                     </div>
@@ -645,7 +645,7 @@ function PanduanPage() {
                               variant={isActive ? "default" : "ghost"}
                               size="sm"
                               onClick={() => handleNavigate(art.id)}
-                              className={`w-full justify-start text-left text-xs font-normal h-8 rounded-lg transition-colors cursor-pointer ${
+                              className={`w-full justify-start text-left text-label font-normal h-8 rounded-lg transition-colors cursor-pointer ${
                                 isActive 
                                   ? "bg-primary text-primary-foreground font-semibold shadow-none" 
                                   : "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -665,27 +665,27 @@ function PanduanPage() {
         </Card>
 
         {/* COLUMN 2: CENTER DOCS READING CANVAS (Vercel Neutral Canvas) */}
-        <Card className="flex-1 min-w-0 border-border bg-card text-card-foreground shadow-none rounded-xl">
+        <Card className="flex-1 min-w-0 border-border bg-card text-card-foreground shadow-none rounded-lg">
           <CardHeader className="p-6 sm:p-8 border-b border-border space-y-3">
             
             {/* Official shadcn Breadcrumb */}
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbLink className="text-xs text-muted-foreground">Dokumentasi</BreadcrumbLink>
+                  <BreadcrumbLink className="text-label text-muted-foreground">Dokumentasi</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbLink className="text-xs text-muted-foreground">{activeDoc.categoryLabel}</BreadcrumbLink>
+                  <BreadcrumbLink className="text-label text-muted-foreground">{activeDoc.categoryLabel}</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbPage className="text-xs font-semibold text-foreground">{activeDoc.title}</BreadcrumbPage>
+                  <BreadcrumbPage className="text-label font-semibold text-foreground">{activeDoc.title}</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
 
-            <CardTitle className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+            <CardTitle className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
               {activeDoc.title}
             </CardTitle>
             <CardDescription className="text-sm text-muted-foreground leading-relaxed">
@@ -703,7 +703,7 @@ function PanduanPage() {
             <div className="h-px w-full bg-border pt-4" />
 
             {/* Bottom Docusaurus Pagination Bar (Linear Style Buttons) */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 text-xs font-semibold">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 text-label font-semibold">
               {prevDoc ? (
                 <Button
                   variant="outline"
@@ -712,7 +712,7 @@ function PanduanPage() {
                 >
                   <ChevronLeft className="h-4 w-4 mr-2 text-muted-foreground" />
                   <div className="text-left">
-                    <span className="text-[10px] text-muted-foreground font-normal block">Bab Sebelumnya</span>
+                    <span className="text-label text-muted-foreground font-normal block">Bab Sebelumnya</span>
                     <span className="font-semibold text-foreground">{prevDoc.title}</span>
                   </div>
                 </Button>
@@ -725,7 +725,7 @@ function PanduanPage() {
                   className="w-full sm:w-auto h-auto p-3 justify-end rounded-lg border-border bg-card text-foreground hover:bg-muted hover:text-foreground cursor-pointer text-right ml-auto transition-colors"
                 >
                   <div className="text-right">
-                    <span className="text-[10px] text-muted-foreground font-normal block">Bab Selanjutnya</span>
+                    <span className="text-label text-muted-foreground font-normal block">Bab Selanjutnya</span>
                     <span className="font-semibold text-foreground">{nextDoc.title}</span>
                   </div>
                   <ChevronRight className="h-4 w-4 ml-2 text-muted-foreground" />
@@ -738,9 +738,9 @@ function PanduanPage() {
 
         {/* COLUMN 3: RIGHT IN-PAGE TOC (Raycast/Linear Scrollspy) */}
         {activeDoc.toc.length > 0 && (
-          <Card className="hidden xl:block w-56 shrink-0 sticky top-24 self-start border-border bg-card text-card-foreground shadow-none rounded-xl">
-            <CardContent className="p-4 text-xs space-y-3">
-              <div className="font-semibold uppercase tracking-wider text-[10px] text-muted-foreground px-2">
+          <Card className="hidden xl:block w-56 shrink-0 sticky top-24 self-start border-border bg-card text-card-foreground shadow-none rounded-lg">
+            <CardContent className="p-4 text-label space-y-3">
+              <div className="font-semibold text-label text-muted-foreground px-2">
                 Daftar Isi Halaman
               </div>
               <ul className="space-y-1">
@@ -779,7 +779,7 @@ function Strong({ children }: { children: React.ReactNode }) {
 
 function DocMenuLink({ to, children }: { to: string; children: React.ReactNode }) {
   return (
-    <Button variant="outline" size="sm" asChild className="rounded-lg font-semibold h-8 px-3 text-xs border border-border bg-card text-foreground hover:bg-muted hover:text-foreground transition-colors">
+    <Button variant="outline" size="sm" asChild className="rounded-lg font-semibold h-8 px-3 text-label border border-border bg-card text-foreground hover:bg-muted hover:text-foreground transition-colors">
       <Link to={to} className="inline-flex items-center gap-1.5">
         {children} <ExternalLink className="h-3 w-3 opacity-60" />
       </Link>
@@ -791,8 +791,8 @@ function StepList({ steps }: { steps: React.ReactNode[] }) {
   return (
     <ol className="space-y-3 mb-6">
       {steps.map((step, i) => (
-        <li key={i} className="flex gap-3 text-xs sm:text-sm">
-          <Badge variant="outline" className="shrink-0 h-5 w-5 rounded-full p-0 flex items-center justify-center font-mono font-bold text-[10px] mt-0.5 border-border text-foreground">
+        <li key={i} className="flex gap-3 text-label sm:text-sm">
+          <Badge variant="outline" className="shrink-0 h-5 w-5 rounded-full p-0 flex items-center justify-center font-mono font-semibold text-label mt-0.5 border-border text-foreground">
             {i + 1}
           </Badge>
           <span className="flex-1 text-foreground leading-relaxed">{step}</span>
@@ -822,12 +822,12 @@ function DocCallout({
   const isDestructive = type === "danger";
 
   return (
-    <Alert variant={isDestructive ? "destructive" : "default"} className="rounded-xl border-border bg-muted/40 text-foreground p-4 space-y-1 shadow-none">
+    <Alert variant={isDestructive ? "destructive" : "default"} className="rounded-lg border-border bg-muted/40 text-foreground p-4 space-y-1 shadow-none">
       <IconComp className="h-4 w-4 shrink-0 text-foreground" />
-      <AlertTitle className="font-semibold text-xs text-foreground">
+      <AlertTitle className="font-semibold text-label text-foreground">
         {title || type}
       </AlertTitle>
-      <AlertDescription className="text-xs text-muted-foreground leading-relaxed">
+      <AlertDescription className="text-label text-muted-foreground leading-relaxed">
         {children}
       </AlertDescription>
     </Alert>
@@ -838,11 +838,11 @@ function FaqAccordion({ q, children }: { q: string; children: React.ReactNode })
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <Card className="border-border bg-card text-card-foreground shadow-none rounded-xl overflow-hidden transition-colors">
+    <Card className="border-border bg-card text-card-foreground shadow-none rounded-lg overflow-hidden transition-colors">
       <Button 
         variant="ghost"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full p-4 h-auto flex items-center justify-between text-left font-semibold text-xs sm:text-sm text-foreground hover:bg-muted/50 transition-colors cursor-pointer rounded-none"
+        className="w-full p-4 h-auto flex items-center justify-between text-left font-semibold text-label sm:text-sm text-foreground hover:bg-muted/50 transition-colors cursor-pointer rounded-none"
       >
         <span className="flex items-center gap-2.5">
           <HelpCircle className="h-4 w-4 text-muted-foreground shrink-0" /> {q}
@@ -850,7 +850,7 @@ function FaqAccordion({ q, children }: { q: string; children: React.ReactNode })
         <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${isOpen ? "rotate-90 text-foreground" : ""}`} />
       </Button>
       {isOpen && (
-        <CardContent className="px-4 pb-4 pt-2 text-xs text-muted-foreground leading-relaxed border-t border-border bg-muted/20">
+        <CardContent className="px-4 pb-4 pt-2 text-label text-muted-foreground leading-relaxed border-t border-border bg-muted/20">
           <div className="pl-6">{children}</div>
         </CardContent>
       )}

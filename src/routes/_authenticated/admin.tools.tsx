@@ -138,42 +138,42 @@ function ToolsPage() {
       {/* Section 1: Backup & Restore */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-12">
         <div className="space-y-2 lg:col-span-1">
-          <h2 id="backup-heading" className="text-lg font-semibold text-slate-900 dark:text-white">Pencadangan Data</h2>
-          <p className="text-sm text-slate-500 leading-relaxed">
+          <h2 id="backup-heading" className="text-lg font-semibold text-foreground">Pencadangan Data</h2>
+          <p className="text-sm text-muted-foreground leading-relaxed">
             Amankan data aplikasi secara berkala atau pulihkan dari cadangan sebelumnya. Cadangan mencakup seluruh pengguna, soal, ujian, dan konfigurasi.
           </p>
         </div>
-        <div role="region" aria-labelledby="backup-heading" className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
+        <div role="region" aria-labelledby="backup-heading" className="lg:col-span-2 bg-card rounded-lg border border-border overflow-hidden divide-y divide-border">
 
           
           {/* Export Backup Row */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 hover:bg-muted transition-colors">
             <div className="flex-1 space-y-1">
               <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+                <div className="p-1.5 rounded bg-muted text-muted-foreground">
                   <Download className="h-4 w-4" />
                 </div>
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Unduh Berkas Cadangan</h3>
+                <h3 className="text-sm font-semibold text-foreground">Unduh Berkas Cadangan</h3>
               </div>
-              <p className="text-xs text-slate-500 pl-8">Menghasilkan berkas JSON tunggal berisi snapshot pangkalan data saat ini.</p>
+              <p className="text-label text-muted-foreground pl-8">Menghasilkan berkas JSON tunggal berisi snapshot pangkalan data saat ini.</p>
             </div>
             <div className="shrink-0">
-              <Button onClick={handleDownloadBackup} disabled={isDownloading} className="w-full sm:w-auto shadow-sm">
+              <Button onClick={handleDownloadBackup} disabled={isDownloading} className="w-full sm:w-auto">
                 Unduh Backup
               </Button>
             </div>
           </div>
 
           {/* Restore Backup Row */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 hover:bg-muted transition-colors">
             <div className="flex-1 space-y-1">
               <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">
+                <div className="p-1.5 rounded bg-warn/10 text-warn">
                   <Upload className="h-4 w-4" />
                 </div>
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Pulihkan dari Cadangan</h3>
+                <h3 className="text-sm font-semibold text-foreground">Pulihkan dari Cadangan</h3>
               </div>
-              <p className="text-xs text-slate-500 pl-8">Pilih berkas JSON cadangan. Struktur data akan divalidasi terlebih dahulu.</p>
+              <p className="text-label text-muted-foreground pl-8">Pilih berkas JSON cadangan. Struktur data akan divalidasi terlebih dahulu.</p>
             </div>
             <div className="shrink-0 flex gap-2">
               <input
@@ -185,7 +185,7 @@ function ToolsPage() {
 
                 onChange={handleFile}
               />
-              <Button variant="outline" onClick={() => fileRef.current?.click()} className="w-full sm:w-auto bg-white dark:bg-slate-950">
+              <Button variant="outline" onClick={() => fileRef.current?.click()} className="w-full sm:w-auto bg-card">
                 Pilih Berkas JSON...
               </Button>
             </div>
@@ -194,47 +194,47 @@ function ToolsPage() {
         </div>
       </div>
 
-      <div className="h-px w-full bg-slate-200 dark:bg-slate-800/60 my-10" />
+      <div className="h-px w-full bg-muted my-10" />
 
       {/* Section 2: Pemeliharaan Pangkalan Data */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-12">
         <div className="space-y-2 lg:col-span-1">
-          <h2 id="advanced-heading" className="text-lg font-semibold text-slate-900 dark:text-white">Pengelolaan Lanjut</h2>
-          <p className="text-sm text-slate-500 leading-relaxed">
+          <h2 id="advanced-heading" className="text-lg font-semibold text-foreground">Pengelolaan Lanjut</h2>
+          <p className="text-sm text-muted-foreground leading-relaxed">
             Aksi-aksi kritikal untuk memanipulasi pangkalan data sistem secara langsung.
           </p>
         </div>
-        <div role="region" aria-labelledby="advanced-heading" className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
+        <div role="region" aria-labelledby="advanced-heading" className="lg:col-span-2 bg-card rounded-lg border border-border overflow-hidden divide-y divide-border">
 
           
           {/* Seed Data Row */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 hover:bg-muted transition-colors">
             <div className="flex-1 space-y-1">
               <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                <div className="p-1.5 rounded bg-muted text-muted-foreground">
                   <RefreshCw className="h-4 w-4" />
                 </div>
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Inisialisasi Data Demo</h3>
+                <h3 className="text-sm font-semibold text-foreground">Inisialisasi Data Demo</h3>
               </div>
-              <p className="text-xs text-slate-500 pl-8">Isi pangkalan data kosong dengan sampel otomatis (pengguna, soal, ujian).</p>
+              <p className="text-label text-muted-foreground pl-8">Isi pangkalan data kosong dengan sampel otomatis (pengguna, soal, ujian).</p>
             </div>
             <div className="shrink-0">
-              <Button variant="outline" onClick={handleSeed} disabled={isSeeding} className="w-full sm:w-auto bg-white dark:bg-slate-950">
+              <Button variant="outline" onClick={handleSeed} disabled={isSeeding} className="w-full sm:w-auto bg-card">
                 Muat Seed Data
               </Button>
             </div>
           </div>
 
           {/* Reset Data Row */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 bg-red-50/30 dark:bg-red-950/10 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 bg-destructive/30 hover:bg-destructive/10 transition-colors">
             <div className="flex-1 space-y-1">
               <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
+                <div className="p-1.5 rounded bg-destructive/10 text-destructive">
                   <AlertTriangle className="h-4 w-4" />
                 </div>
-                <h3 className="text-sm font-semibold text-red-700 dark:text-red-400">Zona Berbahaya: Hapus Semua Data</h3>
+                <h3 className="text-sm font-semibold text-destructive">Zona Berbahaya: Hapus Semua Data</h3>
               </div>
-              <p className="text-xs font-medium text-red-700 dark:text-red-400 pl-8">Tindakan ini akan mengosongkan seluruh pangkalan data. Tidak dapat dibatalkan!</p>
+              <p className="text-label font-medium text-destructive pl-8">Tindakan ini akan mengosongkan seluruh pangkalan data. Tidak dapat dibatalkan!</p>
 
             </div>
             <div className="shrink-0">
@@ -258,7 +258,7 @@ function ToolsPage() {
           </DialogHeader>
           {preview && (
             <div className="rounded border bg-muted/30 p-3 text-sm">
-              <div className="mb-2 text-xs text-muted-foreground">
+              <div className="mb-2 text-label text-muted-foreground">
                 Diekspor: {new Date(preview.exportedAt).toLocaleString()}
               </div>
               <ul className="grid grid-cols-2 gap-1">
@@ -338,7 +338,7 @@ function ToolsPage() {
           </DialogHeader>
           <div className="max-h-80 overflow-auto rounded border bg-muted/30 text-sm">
             <table className="w-full">
-              <thead className="sticky top-0 bg-muted text-left text-xs">
+              <thead className="sticky top-0 bg-muted text-left text-label">
                 <tr>
                   <th className="p-2">#</th>
                   <th className="p-2">Path</th>
@@ -350,9 +350,9 @@ function ToolsPage() {
                 {validationErrors?.map((iss, i) => (
                   <tr key={i} className="border-t align-top">
                     <td className="p-2 text-muted-foreground">{i + 1}</td>
-                    <td className="p-2 font-mono text-xs">{iss.path}</td>
+                    <td className="p-2 font-mono text-label">{iss.path}</td>
                     <td className="p-2">{iss.message}</td>
-                    <td className="p-2 font-mono text-xs text-muted-foreground">{iss.code}</td>
+                    <td className="p-2 font-mono text-label text-muted-foreground">{iss.code}</td>
                   </tr>
                 ))}
               </tbody>

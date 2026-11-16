@@ -117,7 +117,7 @@ function UsersPage() {
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative max-w-xs w-full">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input 
             placeholder="Cari nama atau username..." 
             value={query} 
@@ -139,41 +139,41 @@ function UsersPage() {
       </div>
 
       <AdminPageContent className="p-0">
-        <Card className="border-0 shadow-none sm:border sm:shadow-sm">
+        <Card className="border-0 shadow-none sm:border">
           <CardContent className="p-0">
             <Table>
               <TableHeader>
-                <TableRow className="bg-slate-50/50 dark:bg-slate-900/50">
-                  <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Username</TableHead>
-                  <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Nama Lengkap</TableHead>
-                  <TableHead className="font-semibold text-slate-700 dark:text-slate-300 text-center">Peran</TableHead>
-                  <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Unit / Jurusan</TableHead>
-                  <TableHead className="font-semibold text-slate-700 dark:text-slate-300 text-center">Status</TableHead>
-                  <TableHead className="font-semibold text-slate-700 dark:text-slate-300 text-center">Aksi</TableHead>
+                <TableRow className="bg-muted/50">
+                  <TableHead className="font-semibold text-foreground">Username</TableHead>
+                  <TableHead className="font-semibold text-foreground">Nama Lengkap</TableHead>
+                  <TableHead className="font-semibold text-foreground text-center">Peran</TableHead>
+                  <TableHead className="font-semibold text-foreground">Unit / Jurusan</TableHead>
+                  <TableHead className="font-semibold text-foreground text-center">Status</TableHead>
+                  <TableHead className="font-semibold text-foreground text-center">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {shown.map((u) => (
-                  <TableRow key={u.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
-                    <TableCell className="font-medium text-slate-900 dark:text-slate-100">{u.username}</TableCell>
-                    <TableCell className="text-slate-600 dark:text-slate-400">{u.namaLengkap}</TableCell>
+                  <TableRow key={u.id} className="hover:bg-muted">
+                    <TableCell className="font-medium text-foreground">{u.username}</TableCell>
+                    <TableCell className="text-muted-foreground">{u.namaLengkap}</TableCell>
                     <TableCell className="text-center">
-                      <Badge variant="outline" className="bg-slate-50 dark:bg-slate-900 font-medium">
+                      <Badge variant="outline" className="bg-muted font-medium">
                         {u.role === "super_admin" ? "Super Admin" : u.role === "admin_prodi" ? "Admin Jurusan" : u.role === "evaluator" ? "Evaluator" : u.role}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-sm text-slate-600 dark:text-slate-400">
+                    <TableCell className="text-sm text-muted-foreground">
                       {u.role === "super_admin" ? "Semua Unit (Global)" : units.find((unit) => unit.id === u.unitId)?.nama ?? "Tanpa Unit"}
                     </TableCell>
                     <TableCell className="text-center">
                       {u.aktif ? (
-                        <Badge variant="outline" className="font-medium shadow-none border-slate-200 dark:border-slate-800">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-2"></span>
+                        <Badge variant="outline" className="font-medium shadow-none border-border">
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary mr-2"></span>
                           Aktif
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="font-medium text-slate-500 shadow-none border-slate-200 dark:border-slate-800">
-                          <span className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-700 mr-2"></span>
+                        <Badge variant="outline" className="font-medium text-muted-foreground shadow-none border-border">
+                          <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30 mr-2"></span>
                           Nonaktif
                         </Badge>
                       )}
@@ -181,12 +181,12 @@ function UsersPage() {
                     <TableCell className="text-center">
                       <div className="flex justify-center items-center gap-2">
                         <Button variant="outline" size="sm" onClick={() => { setEditing(u); setOpen(true); }} className="h-8 w-8 p-0">
-                          <Pencil className="h-4 w-4 text-slate-500" />
+                          <Pencil className="h-4 w-4 text-muted-foreground" />
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => setLogoutId(u.id)} className="h-8 w-8 p-0 text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/50 hover:text-amber-600">
+                        <Button variant="ghost" size="sm" onClick={() => setLogoutId(u.id)} className="h-8 w-8 p-0 text-warn hover:bg-warn/10 hover:text-warn">
                           <LogOut className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => setDeleteId(u.id)} className="h-8 w-8 p-0 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/50 hover:text-rose-600">
+                        <Button variant="ghost" size="sm" onClick={() => setDeleteId(u.id)} className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10 hover:text-destructive">
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -196,8 +196,8 @@ function UsersPage() {
                 {shown.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={6} className="h-48 text-center">
-                      <div className="flex flex-col items-center justify-center text-slate-500">
-                        <FileX className="h-10 w-10 text-slate-300 dark:text-slate-600 mb-3" />
+                      <div className="flex flex-col items-center justify-center text-muted-foreground">
+                        <FileX className="h-10 w-10 text-muted-foreground mb-3" />
                         <p>Tidak ada data pengguna yang sesuai.</p>
                       </div>
                     </TableCell>
@@ -208,8 +208,8 @@ function UsersPage() {
             
             {/* Pagination Controls */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200 dark:border-slate-800">
-                <div className="text-sm text-slate-500">
+              <div className="flex items-center justify-between px-4 py-3 border-t border-border">
+                <div className="text-sm text-muted-foreground">
                   Menampilkan {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, filtered.length)} dari {filtered.length} admin
                 </div>
                 <div className="flex items-center gap-1">
@@ -247,7 +247,7 @@ function UsersPage() {
       <Dialog open={!!deleteId} onOpenChange={(v) => !v && setDeleteId(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-rose-600 flex items-center gap-2">
+            <DialogTitle className="text-destructive flex items-center gap-2">
               <Trash2 className="h-5 w-5" />
               Hapus Pengguna
             </DialogTitle>
@@ -266,7 +266,7 @@ function UsersPage() {
       <Dialog open={!!logoutId} onOpenChange={(v) => !v && setLogoutId(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-amber-600 flex items-center gap-2">
+            <DialogTitle className="text-warn flex items-center gap-2">
               <LogOut className="h-5 w-5" />
               Hentikan Sesi
             </DialogTitle>
@@ -276,7 +276,7 @@ function UsersPage() {
           </DialogHeader>
           <DialogFooter className="mt-4">
             <Button variant="outline" onClick={() => setLogoutId(null)}>Batal</Button>
-            <Button onClick={confirmLogout} className="bg-amber-600 hover:bg-amber-700 text-white">Hentikan Sesi</Button>
+            <Button onClick={confirmLogout} className="bg-warn hover:bg-warn/90 text-background">Hentikan Sesi</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
