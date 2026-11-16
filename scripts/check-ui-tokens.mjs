@@ -1,6 +1,6 @@
 // Guards the UI system described in docs/redesign: colours come from tokens, text is at least
 // 13px, no gradients/glass/pulses. Violations are counted per file against scripts/ui-baseline.json,
-// which may only go down: a file over its baseline fails, a file under it passes with a note.
+// which may only go down (it is empty now: every file is at zero). A file over its baseline fails.
 //
 //   npm run check:ui                       check against the baseline
 //   npm run check:ui -- --write-baseline   record current counts (use after cleaning a file)

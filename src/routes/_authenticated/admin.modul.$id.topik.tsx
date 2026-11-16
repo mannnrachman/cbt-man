@@ -100,7 +100,7 @@ function TopikPage() {
           </Button>
         </form>
       ) : (
-        <div className="flex items-center gap-3 rounded-lg border border-warn/50 bg-warn/50 p-4 text-sm text-warn">
+        <div className="flex items-center gap-3 rounded-lg border border-warn/50 bg-warn/10 p-4 text-sm text-warn">
           <Lock className="h-4 w-4" />
           Mode hanya-baca. Anda hanya dapat melihat topik yang ditugaskan kepada Anda.
         </div>

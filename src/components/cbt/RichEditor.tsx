@@ -195,7 +195,7 @@ export function RichEditor({
     const code = window.prompt("Kode:");
     if (!code) return;
     insertHtml(
-      `<pre class="bg-muted p-2 rounded text-xs"><code>${code.replace(/</g, "&lt;")}</code></pre>`,
+      `<pre class="bg-muted p-2 rounded text-label"><code>${code.replace(/</g, "&lt;")}</code></pre>`,
     );
   }
 

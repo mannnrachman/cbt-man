@@ -47,6 +47,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Removed
 
+- Utilitas CSS `.shadow-sleek` dan `.shadow-popover-sleek` serta easing `--ease-bouncy` dihapus karena tidak dipakai lagi; baseline `scripts/ui-baseline.json` kini kosong, sehingga `npm run check:ui` menolak setiap pola lama di `src/**/*.tsx` tanpa pengecualian.
 - Tema "Neumorphism" dan pemilihnya di Pengaturan dihapus; antarmuka kini hanya terang dan gelap. Pilihan tema tersimpan di peramban lama diabaikan dan tampilan kembali ke default; pilihan font tetap tersimpan.
 
 ## [0.2.3] - 2026-10-14

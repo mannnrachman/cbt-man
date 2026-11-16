@@ -226,7 +226,7 @@ function ToolsPage() {
           </div>
 
           {/* Reset Data Row */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 bg-destructive/30 hover:bg-destructive/10 transition-colors">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 bg-destructive/10 hover:bg-destructive/20 transition-colors">
             <div className="flex-1 space-y-1">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 rounded bg-destructive/10 text-destructive">

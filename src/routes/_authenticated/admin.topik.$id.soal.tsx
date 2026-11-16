@@ -50,7 +50,7 @@ function SoalPage() {
   );
   
   if (!allowed) return (
-    <div className="flex items-center gap-3 rounded-lg border border-destructive/50 bg-destructive/50 p-4 text-sm text-destructive mt-6 max-w-4xl mx-auto">
+    <div className="flex items-center gap-3 rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive mt-6 max-w-4xl mx-auto">
       Anda tidak memiliki akses ke topik <strong>{topik.nama}</strong>. Hubungi admin.
       <Link to="/admin/modul" className="font-semibold underline ml-2">← Kembali ke Modul</Link>
     </div>
@@ -210,7 +210,7 @@ function SoalPage() {
               size="sm"
               variant="outline"
               onClick={() => setMoveDialogOpen(true)}
-              className="h-8 text-label font-semibold border-border bg-primary/40 hover:bg-primary/90 text-muted-foreground"
+              className="h-8 text-label font-semibold border-border bg-primary/10 hover:bg-primary/20 text-foreground"
             >
               <FolderOutput className="mr-1.5 h-3.5 w-3.5" /> Pindah Terpilih ({selectedIds.length})
             </Button>
@@ -279,7 +279,7 @@ function SoalPage() {
                   {s.jawaban.map((j, idx) => (
                     <div key={j.id} className={`flex items-start gap-4 p-4 rounded-lg border transition-all ${
                       j.benar 
-                        ? 'bg-primary/80 border-primary dark:shadow-none' 
+                        ? 'bg-primary/10 border-primary dark:shadow-none' 
                         : 'bg-card border-border hover:border-border'
                     }`}>
                       <span className={`flex shrink-0 items-center justify-center w-7 h-7 rounded-md font-mono text-sm font-semibold ${

@@ -335,7 +335,7 @@ function ImportPage() {
           </ul>
         </div>
 
-        <div className="rounded-lg border border-warn/60 bg-warn/40 p-5 space-y-3">
+        <div className="rounded-lg border border-warn/60 bg-warn/10 p-5 space-y-3">
           <div className="flex items-center gap-2 font-semibold text-sm text-warn">
             <ImagePlus className="h-4 w-4 text-warn" />
             Cara Mudah Memasukkan Gambar
