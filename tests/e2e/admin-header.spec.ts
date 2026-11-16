@@ -14,7 +14,7 @@ test("admin header shows the current page and account identity", async ({ page }
 	await expect(account).toContainText("Rahmawati Kusuma, M.Pd");
 	await expect(account).toContainText("super_admin");
 	await page.getByRole("button", { name: "Ganti tema" }).click();
-	await expect(page.locator("header")).toHaveCSS("background-color", "rgb(255, 255, 255)");
+	await expect(page.locator("header")).toHaveCSS("background-color", "rgb(24, 32, 28)");
 
 	await page.goto("/admin/modul");
 	await expect(breadcrumb).toContainText("Bank Soal & Berkas");

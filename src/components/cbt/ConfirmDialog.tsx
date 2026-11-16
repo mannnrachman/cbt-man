@@ -51,7 +51,7 @@ export function ConfirmDialog(props: {
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="sm:max-w-md">
 				<DialogHeader>
-				<DialogTitle className={`flex items-center gap-2 ${destructive ? "text-rose-600" : "text-foreground"}`}>
+				<DialogTitle className={`flex items-center gap-2 ${destructive ? "text-destructive" : "text-foreground"}`}>
 					{icon ?? <Trash2 className="h-5 w-5" />}
 					{title}
 				</DialogTitle>

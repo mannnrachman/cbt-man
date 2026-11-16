@@ -18,9 +18,9 @@ export function AdminPageHeader({
   return (
     <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
       <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-zinc-100">{title}</h1>
+        <h1 className="text-title font-medium tracking-tight text-foreground">{title}</h1>
 
-        {description && <p className="text-sm text-slate-500">{description}</p>}
+        {description && <p className="text-ui text-muted-foreground">{description}</p>}
       </div>
       {action && <div className="flex flex-wrap items-center gap-2 shrink-0">{action}</div>}
     </div>
@@ -30,7 +30,7 @@ export function AdminPageHeader({
 export function AdminPageContent({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div 
-      className={cn("rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 overflow-hidden shadow-sm", className)} 
+      className={cn("rounded-lg border border-border bg-card overflow-hidden", className)} 
       {...props} 
     />
   )
