@@ -40,6 +40,5 @@
   "src/routes/_authenticated/admin.ujian.$id.tsx": 139,
   "src/routes/_authenticated/admin.ujian.tsx": 99,
   "src/routes/_authenticated/admin.users.roles.tsx": 15,
-  "src/routes/_authenticated/admin.users.tsx": 53,
-  "src/routes/_authenticated/peserta.ujian.$id.hasil.tsx": 223
+  "src/routes/_authenticated/admin.users.tsx": 53
 }
