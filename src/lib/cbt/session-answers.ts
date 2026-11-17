@@ -1,4 +1,5 @@
 import type { JawabanSesi, SesiUjian, Soal, Ujian } from "./types";
+import { canRevealResult } from "./state-machines.ts";
 
 type ParticipantAnswer = Pick<JawabanSesi, "soalId" | "jawabanIds" | "jawabanEssay" | "ragu">;
 
@@ -13,7 +14,7 @@ export function participantSessionQuestions(
   const currentById = new Map(currentQuestions.map((item) => [item.id, item]));
   return sessions.flatMap((session) => {
     const exam = examById.get(session.ujianId);
-    const canReveal = session.status === "selesai" && !!exam?.showResult && !!exam.showResultDetail;
+    const canReveal = canRevealResult(session, exam);
     const snapshotById = new Map(session.soalSnapshot.map((item) => [item.id, item]));
     return session.soalIds.flatMap((id) => {
       const source = snapshotById.get(id) ?? currentById.get(id);

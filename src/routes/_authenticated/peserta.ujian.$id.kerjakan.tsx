@@ -1,6 +1,13 @@
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import { soalBySessionId, sesiRepo, ujianRepo, getParticipantSessionState, invalidateReposCache, hydrateRepos, saveParticipantSession } from "@/lib/cbt/repos";
 import { armExamAlarm, startExamAlarm, stopExamAlarm } from "@/lib/cbt/exam-alarm";
+import {
+  examScreenPhase,
+  nextSaveState,
+  SAVE_STATE_LABELS,
+  type SaveEvent,
+  type SaveState,
+} from "@/lib/cbt/state-machines";
 import { reportExamViolation } from "@/lib/server/sesi/functions";
 import type { SesiUjian, Ujian } from "@/lib/cbt/types";
 import { cn } from "@/lib/utils";
@@ -73,6 +80,8 @@ function RouteComponent() {
   const [idx, setIdx] = useState(0);
   const [now, setNow] = useState(Date.now());
   const [pollingError, setPollingError] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<SaveState>("clean");
+  const dispatchSave = (event: SaveEvent) => setSaveStatus((prev) => nextSaveState(prev, event));
   const submittingRef = useRef(false);
   const saveTimer = useRef<NodeJS.Timeout | null>(null);
 
@@ -290,6 +299,7 @@ function RouteComponent() {
 
   function updateJawaban(partial: Partial<SesiUjian["jawaban"][0]>) {
     if (!sesi) return;
+    dispatchSave("edit");
     const nextSesi = { ...sesi };
     nextSesi.jawaban = [...nextSesi.jawaban];
     nextSesi.jawaban[idx] = { ...nextSesi.jawaban[idx], ...partial };
@@ -301,7 +311,9 @@ function RouteComponent() {
 
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
+      dispatchSave("flush");
       void saveParticipantSession(nextSesi).then((result) => {
+        dispatchSave(result.ok ? "success" : "failure");
         if (result.ok || sesiRef.current !== nextSesi) return;
         const restored = sesiRepo.byId(nextSesi.id) ?? null;
         sesiRef.current = restored;
@@ -336,7 +348,9 @@ function RouteComponent() {
       saveTimer.current = null;
       if (sesiRef.current) {
         const pending = sesiRef.current;
+        dispatchSave("flush");
         void saveParticipantSession(pending).then((result) => {
+          dispatchSave(result.ok ? "success" : "failure");
           if (result.ok || sesiRef.current !== pending) return;
           const restored = sesiRepo.byId(pending.id) ?? null;
           sesiRef.current = restored;
@@ -355,12 +369,15 @@ function RouteComponent() {
         clearTimeout(saveTimer.current);
         saveTimer.current = null;
       }
+      dispatchSave("flush");
       const result = await saveParticipantSession(sesiRef.current, true);
       if (!result.ok) {
+        dispatchSave("failure");
         toast.error("Gagal menyimpan jawaban. Coba kumpulkan lagi.");
         submittingRef.current = false;
         return;
       }
+      dispatchSave("success");
       // Re-hydrate from the server so the hasil page reads the authoritative
       // server-computed score and the post-submit snapshot (answer keys and
       // pembahasan are only exposed after selesai when the exam allows it).
@@ -380,12 +397,28 @@ function RouteComponent() {
         params: { id: ujian.id },
       });
     } catch {
+      dispatchSave("failure");
       toast.error("Gagal menyimpan jawaban. Coba kumpulkan lagi.");
       submittingRef.current = false;
     }
   }
 
-  if (examLocked) {
+  const soalId = sesi?.soalIds[idx];
+  const soal = sesi && soalId ? soalBySessionId(sesi.id, soalId) : undefined;
+  const j = sesi?.jawaban[idx];
+  // Render order is owned by the explicit exam-screen machine
+  // (src/lib/cbt/state-machines.ts): locked → no-user → no-exam → loading →
+  // no-session → no-question → running.
+  const phase = examScreenPhase({
+    examLocked,
+    user,
+    ujian,
+    sesiDicari,
+    sesi,
+    soalReady: Boolean(soal && j),
+  });
+
+  if (phase === "locked") {
     return (
       <div className="flex h-screen items-center justify-center bg-background p-6">
         <div
@@ -401,16 +434,13 @@ function RouteComponent() {
     );
   }
 
-  if (!user) return <div className="p-8 text-center font-medium">Anda harus login.</div>;
-  if (!ujian) return <div className="p-8 text-center font-medium">Data ujian tidak ditemukan.</div>;
-  if (!sesiDicari) return <div className="flex h-screen items-center justify-center bg-background"><div className="flex flex-col items-center gap-4"><div className="h-10 w-10 rounded-full border-4 border-primary border-t-transparent animate-spin" /><p className="text-ui text-muted-foreground">Menyiapkan ujian…</p></div></div>;
-  if (!sesi) return <div className="p-8 text-center font-medium">Sesi tidak valid.</div>;
-
-  const soalId = sesi.soalIds[idx];
-  const soal = soalId ? soalBySessionId(sesi.id, soalId) : undefined;
-  const j = sesi.jawaban[idx];
-
-  if (!soal || !j) return <div className="p-8 text-center font-medium">Soal bermasalah.</div>;
+  if (phase === "no-user") return <div className="p-8 text-center font-medium">Anda harus login.</div>;
+  if (phase === "no-exam") return <div className="p-8 text-center font-medium">Data ujian tidak ditemukan.</div>;
+  if (phase === "loading") return <div className="flex h-screen items-center justify-center bg-background"><div className="flex flex-col items-center gap-4"><div className="h-10 w-10 rounded-full border-4 border-primary border-t-transparent animate-spin" /><p className="text-ui text-muted-foreground">Menyiapkan ujian…</p></div></div>;
+  if (phase === "no-session") return <div className="p-8 text-center font-medium">Sesi tidak valid.</div>;
+  if (phase === "no-question") return <div className="p-8 text-center font-medium">Soal bermasalah.</div>;
+  // phase === "running": narrow the optionals for the render below
+  if (!user || !ujian || !sesi || !soal || !j) return null;
 
   const currentSesi = sesi;
   const currentSoal = soal;
@@ -472,6 +502,18 @@ function RouteComponent() {
                   </span>
                 </span>
               </div>
+
+              {saveStatus !== "clean" && (
+                <p
+                  role="status"
+                  className={cn(
+                    "max-w-[10rem] text-right text-label font-medium leading-tight",
+                    saveStatus === "failed" ? "text-warn" : "text-muted-foreground",
+                  )}
+                >
+                  {SAVE_STATE_LABELS[saveStatus]}
+                </p>
+              )}
 
               {pollingError && (
                 <p role="status" className="max-w-[9rem] text-right text-label font-medium leading-tight text-warn sm:text-label">

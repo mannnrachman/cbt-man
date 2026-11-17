@@ -17,6 +17,7 @@ import {
   isExamAvailable,
 } from "@/lib/cbt/availability";
 import { isParticipantAssignedToExam } from "@/lib/cbt/access";
+import { isSessionFinished, isSessionResumable } from "@/lib/cbt/state-machines";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -126,15 +127,13 @@ function PreUjianContent({
   const examAllowed = isExamAvailable(ujian);
   const sesiBerlangsung = sesiRepo
     .all()
-    .find((s) => s.ujianId === ujian.id && s.pesertaId === user.id && s.status === "sedang" &&
-      s.endsAt !== undefined && s.endsAt > Date.now() &&
-      (ujian.endAt === undefined || ujian.endAt > Date.now()));
+    .find((s) => s.ujianId === ujian.id && s.pesertaId === user.id && isSessionResumable(s, ujian));
   const canOpen = examAllowed;
   const blockedMessage = getExamAvailabilityMessage(availability, ujian);
 
   const sesiSelesai = sesiRepo
     .all()
-    .find((s) => s.ujianId === ujian.id && s.pesertaId === user.id && s.status === "selesai");
+    .find((s) => s.ujianId === ujian.id && s.pesertaId === user.id && isSessionFinished(s.status));
 
   async function mulai() {
     if (!canOpen) {

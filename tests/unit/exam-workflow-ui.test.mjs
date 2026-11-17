@@ -75,8 +75,9 @@ test("participant UI does not offer resume after the exam window closes", () => 
 
   assert.match(dashboard, /const isStartable = availability === "active" \|\| availability === "open"/);
   assert.match(preExam, /const canOpen = examAllowed/);
-  assert.match(preExam, /s\.endsAt !== undefined && s\.endsAt > Date\.now\(\)/);
-  assert.match(preExam, /ujian\.endAt === undefined \|\| ujian\.endAt > Date\.now\(\)/);
+  // resume eligibility lives in the explicit session machine (isSessionResumable),
+  // whose window semantics are pinned in state-machines.test.mjs
+  assert.match(preExam, /isSessionResumable\(s, ujian\)/);
 });
 
 test("creating an exam opens its setup editor immediately", () => {

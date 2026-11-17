@@ -14,6 +14,11 @@ import {
 import { isParticipantAssignedToExam } from "@/lib/cbt/access";
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import { getExamAvailabilityStatus } from "@/lib/cbt/availability";
+import {
+	PARTICIPANT_EXAM_VIEW_LABELS,
+	participantExamView,
+	participantExamViewTone,
+} from "@/lib/cbt/state-machines";
 import { sesiRepo, ujianRepo } from "@/lib/cbt/repos";
 import { useMemo, useState } from "react";
 import { RichView } from "@/components/cbt/RichEditor";
@@ -113,7 +118,7 @@ function PesertaDashboard() {
 								const selesai = status === "selesai";
 								const availability = getExamAvailabilityStatus(u);
 								const isStartable = availability === "active" || availability === "open";
-								const isDitutup = availability === "ended" && !selesai;
+								const examView = participantExamView(u, s);
 								const opensAt = u.beginAt
 									? new Date(Number(u.beginAt)).toLocaleString("id-ID", { dateStyle: "long", timeStyle: "short", timeZone: "Asia/Jakarta" })
 									: null;
@@ -132,20 +137,14 @@ function PesertaDashboard() {
 											{u.topicSets.reduce((a, b) => a + b.jumlah, 0)} soal
 										</TableCell>
 										<TableCell>
-											{selesai ? (
-												<StatusBadge tone="active">Selesai</StatusBadge>
-											) : status === "sedang" ? (
-												<StatusBadge tone="warn">Sedang dikerjakan</StatusBadge>
-											) : isStartable ? (
-												<StatusBadge tone="active">Dibuka</StatusBadge>
-											) : availability === "upcoming" ? (
-												<StatusBadge tone="neutral">
+											{examView === "belum-dibuka" ? (
+												<StatusBadge tone={participantExamViewTone(examView)}>
 													<span suppressHydrationWarning>Dibuka {opensAt ?? "menunggu jadwal"}</span>
 												</StatusBadge>
-											) : isDitutup ? (
-												<StatusBadge tone="danger">Ditutup</StatusBadge>
 											) : (
-												<StatusBadge>Belum dibuka</StatusBadge>
+												<StatusBadge tone={participantExamViewTone(examView)}>
+													{PARTICIPANT_EXAM_VIEW_LABELS[examView]}
+												</StatusBadge>
 											)}
 										</TableCell>
 										<TableCell className="text-right">
