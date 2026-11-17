@@ -87,11 +87,11 @@ function AuditPage() {
               <tbody>
                 {rows.map((row) => (
                   <tr key={row.id} className="border-b last:border-0 hover:bg-muted/30">
-                    <td className="whitespace-nowrap p-3 text-muted-foreground">{new Date(row.createdAt).toLocaleString()}</td>
-                    <td className="p-3"><div>{row.userId}</div><div className="text-label text-muted-foreground">{row.userRole}</div></td>
-                    <td className="p-3 font-medium">{row.action}</td>
-                    <td className="p-3">{row.entity}{row.entityId ? <span className="ml-1 text-label text-muted-foreground">({row.entityId})</span> : null}</td>
-                    <td className="max-w-[24rem] truncate p-3 font-mono text-label text-muted-foreground">{row.details ?? "—"}</td>
+                    <td className="whitespace-nowrap p-3 text-muted-foreground">{new Date(row.createdAt).toLocaleString("id-ID", { dateStyle: "short", timeStyle: "short", timeZone: "Asia/Jakarta" })}</td>
+                    <td className="max-w-[12rem] p-3"><div className="truncate">{row.userId}</div><div className="text-label text-muted-foreground">{row.userRole}</div></td>
+                    <td className="whitespace-nowrap p-3 font-medium">{row.action}</td>
+                    <td className="max-w-[12rem] truncate p-3">{row.entity}{row.entityId ? <span className="ml-1 text-label text-muted-foreground">({row.entityId})</span> : null}</td>
+                    <td className="max-w-[14rem] truncate p-3 font-mono text-label text-muted-foreground lg:max-w-[24rem]">{row.details ?? "—"}</td>
                   </tr>
                 ))}
               </tbody>
