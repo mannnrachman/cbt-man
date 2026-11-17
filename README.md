@@ -100,6 +100,11 @@ wajib diberikan secara eksplisit; script tidak mengandalkan `.env`. Pastikan
 sendiri file yang dikonfirmasi bukan database production: path lokal dan
 `NODE_ENV` tidak membuktikan isi database aman untuk demo.
 
+> **Peringatan:** penyiapan ini memakai **seluruh** baris `soal` di database
+> target. Soal privat atau belum dipublikasikan di database itu akan dapat
+> dikerjakan oleh peserta demo. Jalankan hanya pada database yang seluruh isi
+> bank soalnya boleh dilihat peserta demo.
+
 Perintah ini memakai bank soal yang tersedia dan unit peserta aktif, tanpa
 menghapus sesi atau jawaban. Paket tidak memiliki batas tanggal; setiap sesi
 berdurasi 180 menit. Untuk mencoba ulang setelah selesai, reset sesi melalui

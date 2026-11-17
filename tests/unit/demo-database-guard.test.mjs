@@ -1,12 +1,13 @@
 import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, writeFileSync, readFileSync, symlinkSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { test } from "node:test";
 import { confirmedDemoDatabaseUrl } from "../../scripts/lib/demo-database-guard.mjs";
 
 test("demo database requires explicit development and the canonical local target", () => {
-  const scratch = join(process.env.HOME, "tmp/cbt-man/demo-database-guard");
+  const scratch = join(tmpdir(), "cbt-man-demo-database-guard");
   mkdirSync(scratch, { recursive: true });
   const dir = mkdtempSync(join(scratch, "case-"));
   try {
