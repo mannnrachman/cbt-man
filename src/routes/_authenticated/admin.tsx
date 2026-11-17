@@ -213,7 +213,7 @@ function SidebarLink({ item, isActive, sidebarCollapsed }: { item: NavItem; isAc
         "flex items-center gap-3 rounded-md border-l-2 px-3 py-2.5 text-ui transition-colors",
         sidebarCollapsed && "lg:justify-center lg:px-0",
         isActive
-          ? "border-primary bg-accent font-medium text-foreground"
+          ? "border-transparent bg-accent font-medium text-foreground"
           : "border-transparent text-muted-foreground hover:bg-accent hover:text-foreground",
       )}
     >
