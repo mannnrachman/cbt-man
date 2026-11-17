@@ -79,8 +79,8 @@ function UjianList() {
   }
 
   const now = Date.now();
-  
-  const filteredList = list.filter(u => 
+
+  const filteredList = list.filter(u =>
     u.nama.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -159,14 +159,14 @@ function UjianList() {
     { id: "selesai", label: "Selesai", count: selesai.length },
   ] as const;
 
-  const currentList = 
+  const currentList =
     activeTab === "persiapan" ? persiapan :
     activeTab === "berlangsung" ? berlangsung :
     activeTab === "selesai" ? selesai : filteredList;
 
   return (
     <AdminPage className="">
-      
+
       <AdminPageHeader
         title="Manajemen Paket Ujian"
         description="Kelola pembuatan ujian, soal, dan akses peserta."
@@ -187,8 +187,8 @@ function UjianList() {
               aria-label={tab.label}
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-4 py-2 rounded-md text-ui font-medium whitespace-nowrap transition-colors ${
-                activeTab === tab.id 
-                  ? "bg-muted text-foreground" 
+                activeTab === tab.id
+                  ? "bg-muted text-foreground"
                   : "text-muted-foreground hover:text-foreground hover:bg-accent"
               }`}
             >
@@ -202,7 +202,7 @@ function UjianList() {
             </button>
           ))}
         </div>
-        
+
         <div className="relative w-full md:w-64 px-1.5 md:px-0 pb-1.5 md:pb-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input

@@ -452,8 +452,8 @@ function RouteComponent() {
   const danger = remaining < 300_000; // < 5 minutes
   const critical = remaining < 60_000; // < 1 minute
 
-  const textSizeClass = 
-    fontSize === "sm" ? "text-sm sm:text-base prose-sm" : 
+  const textSizeClass =
+    fontSize === "sm" ? "text-sm sm:text-base prose-sm" :
     fontSize === "lg" ? "text-xl sm:text-2xl prose-xl" : "text-base sm:text-lg prose-base";
 
   return (
@@ -462,10 +462,10 @@ function RouteComponent() {
 
         {/* LEFT PANEL: MAIN EXAM AREA */}
         <div className="flex-1 flex flex-col min-w-0 bg-card relative z-10">
-          
+
           {/* Top Sticky Header */}
           <div className="sticky top-0 z-20 bg-card border-b border-border px-4 sm:px-8 py-3 sm:py-4 flex items-center justify-between transition-colors">
-            
+
             <div className="min-w-0">
               <p className="max-w-[22rem] truncate text-ui font-medium text-foreground" title={ujian.nama}>{ujian.nama}</p>
               <p className="text-label text-muted-foreground tabular-nums">Soal {idx + 1} dari {currentSesi.soalIds.length}</p>
@@ -488,8 +488,8 @@ function RouteComponent() {
               {/* Timer */}
               <div className={cn(
                 "flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1.5 rounded-lg border transition-colors",
-                critical ? "bg-destructive text-destructive-foreground border-destructive" : 
-                danger ? "bg-destructive/10 text-destructive border-destructive/30" : 
+                critical ? "bg-destructive text-destructive-foreground border-destructive" :
+                danger ? "bg-destructive/10 text-destructive border-destructive/30" :
                 "bg-muted text-foreground border-border"
               )}>
                 <Clock className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
@@ -547,13 +547,13 @@ function RouteComponent() {
             <div className="max-w-5xl mx-auto px-5 sm:px-10 py-6 sm:py-10 pb-32">
 
               {/* Question Text */}
-              <div 
+              <div
                 aria-live="polite"
                 className={cn("prose prose-slate dark:prose-invert max-w-none mb-10 text-foreground leading-loose", textSizeClass)}
               >
                 <RichView html={currentSoal.detail} />
               </div>
-              
+
               {/* Audio Player if present */}
               {currentSoal.audioFileId && (
                 <div className="mb-10 rounded-lg border border-border bg-card p-6">
@@ -598,12 +598,12 @@ function RouteComponent() {
                     const optLetter = String.fromCharCode(65 + i);
 
                     return (
-                      <label 
+                      <label
                         key={oid}
                         className={cn(
                           "group relative flex items-start p-4 sm:p-5 rounded-lg border cursor-pointer transition-colors",
                           "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-background", // a11y focus ring
-                          isChecked 
+                          isChecked
                             ? "border-2 border-primary bg-primary/10"
                             : "border-foreground/30 bg-card hover:bg-accent"
                         )}
@@ -615,7 +615,7 @@ function RouteComponent() {
                           checked={isChecked}
                           onChange={() => toggleOption(oid)}
                         />
-                        
+
                         <div className="flex shrink-0 items-center justify-center mt-0.5 sm:mt-1 mr-4 sm:mr-6">
                           <div className={cn(
                             "flex h-8 w-8 items-center justify-center rounded-md border font-semibold transition-colors sm:h-9 sm:w-9",
@@ -663,8 +663,8 @@ function RouteComponent() {
                     ? "border-2 border-warn bg-warn/10 text-warn"
                     : "border-foreground/30 bg-card text-foreground hover:bg-accent"
                 )}>
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     className="w-5 h-5 rounded cursor-pointer"
                     checked={currentJawaban.ragu}
                     onChange={(e) => updateJawaban({ ragu: e.target.checked })}
@@ -864,7 +864,7 @@ function RouteComponent() {
               <X className="w-5 h-5" />
             </button>
           </div>
-          
+
           <div className="flex-1 overflow-y-auto p-6">
             <div className="max-w-xl mx-auto">
               {ujian.allowCalculator && (
@@ -954,7 +954,7 @@ function RouteComponent() {
               )}
 
               <div className="mt-12 pb-12">
-                <Button 
+                <Button
                   size="lg"
                   className="w-full"
                   variant="outline"

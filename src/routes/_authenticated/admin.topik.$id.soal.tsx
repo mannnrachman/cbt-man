@@ -48,7 +48,7 @@ function SoalPage() {
       <Button asChild variant="outline"><Link to="/admin/modul">Kembali ke Bank Soal</Link></Button>
     </div>
   );
-  
+
   if (!allowed) return (
     <div className="flex items-center gap-3 rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive mt-6 max-w-4xl mx-auto">
       Anda tidak memiliki akses ke topik <strong>{topik.nama}</strong>. Hubungi admin.
@@ -56,8 +56,8 @@ function SoalPage() {
     </div>
   );
 
-  function refresh() { 
-    setSoals(soalRepo.all().filter((s) => s.topikId === topikId)); 
+  function refresh() {
+    setSoals(soalRepo.all().filter((s) => s.topikId === topikId));
     setSelectedIds([]);
   }
   async function remove(id: string) {
@@ -112,7 +112,7 @@ function SoalPage() {
     <div className="relative min-h-screen">
       {/* Subtle radial glow background */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] -z-10" />
-      
+
       <div className="mx-auto max-w-6xl space-y-12 duration-700 pb-32 pt-16 px-4 sm:px-6 lg:px-8">
         {/* Studio-Tier Header Section */}
         <div className="flex flex-col gap-8 md:flex-row md:items-end justify-between">
@@ -126,7 +126,7 @@ function SoalPage() {
                 {modul.nama}
               </Link>
             </div>
-            
+
             <div className="flex flex-col gap-3">
               <h1 className="text-5xl md:text-6xl font-semibold tracking-tighter text-foreground leading-none">
                 {topik.nama}
@@ -145,11 +145,11 @@ function SoalPage() {
       <div className="p-2.5 bg-card rounded-lg border border-border flex flex-col md:flex-row gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input 
-            className="pl-11 h-12 bg-card border-transparent hover:border-border focus:border-border rounded-lg transition-all shadow-none text-base" 
-            placeholder="Cari kata kunci dalam soal…" 
-            value={query} 
-            onChange={(e) => setQuery(e.target.value)} 
+          <Input
+            className="pl-11 h-12 bg-card border-transparent hover:border-border focus:border-border rounded-lg transition-all shadow-none text-base"
+            placeholder="Cari kata kunci dalam soal…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
           />
         </div>
         <div className="flex flex-col sm:flex-row gap-2">
@@ -267,24 +267,24 @@ function SoalPage() {
                 </Button>
               </div>
             </div>
-            
+
             {/* Content */}
             <div className="p-6 sm:p-8 space-y-6">
               <div className="text-base prose prose-slate dark:prose-invert max-w-none prose-p:leading-relaxed prose-headings:tracking-tight">
                 <RichView html={s.detail} />
               </div>
-              
+
               {s.tipe !== "essay" && (
                 <div className="grid gap-3 mt-4">
                   {s.jawaban.map((j, idx) => (
                     <div key={j.id} className={`flex items-start gap-4 p-4 rounded-lg border transition-all ${
-                      j.benar 
-                        ? 'bg-primary/10 border-primary dark:shadow-none' 
+                      j.benar
+                        ? 'bg-primary/10 border-primary dark:shadow-none'
                         : 'bg-card border-border hover:border-border'
                     }`}>
                       <span className={`flex shrink-0 items-center justify-center w-7 h-7 rounded-md font-mono text-sm font-semibold ${
-                        j.benar 
-                          ? 'bg-primary text-primary-foreground' 
+                        j.benar
+                          ? 'bg-primary text-primary-foreground'
                           : 'bg-muted text-muted-foreground'
                       }`}>
                         {String.fromCharCode(65 + idx)}
@@ -304,7 +304,7 @@ function SoalPage() {
             </div>
           </div>
         ))}
-        
+
         {shown.length === 0 && (
           <div className="py-24 text-center bg-card rounded-lg border border-dashed border-border">
             <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-muted mb-4">
@@ -317,7 +317,7 @@ function SoalPage() {
       </div>
 
       <SoalDialog open={open} onOpenChange={setOpen} editing={editing} topikId={topikId} onSaved={refresh} />
-      
+
       {/* Move Selected Questions Dialog */}
       <Dialog open={moveDialogOpen} onOpenChange={setMoveDialogOpen}>
         <DialogContent className="max-w-md">

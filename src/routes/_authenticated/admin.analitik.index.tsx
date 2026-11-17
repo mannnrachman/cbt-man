@@ -16,7 +16,7 @@ export const Route = createFileRoute("/_authenticated/admin/analitik/")({
 export function AnalitikIndex() {
   const user = useAuthStore((s) => s.user);
   const ujians = visibleUjians(user);
-  
+
   // High level stats
   const semuaUjian = ujianRepo.all();
   const semuaSesi = sesiRepo.all();
@@ -101,7 +101,7 @@ export function AnalitikIndex() {
             {ujians.map((u) => {
               const sesiLengkap = semuaSesi.filter((s) => s.ujianId === u.id && s.status === "selesai").length;
               const mk = u.mataKuliahId ? mataKuliahRepo.byId(u.mataKuliahId) : null;
-              
+
               const skors = semuaSesi.filter(s => s.ujianId === u.id && s.status === "selesai" && s.skorTotal !== undefined).map(s => s.skorTotal!);
               const avg = skors.length > 0 ? Math.round(skors.reduce((a,b)=>a+b, 0) / skors.length) : 0;
               const maxSkor = u.poinBenar * (u.topicSets || []).reduce((a, b) => a + b.jumlah, 0);
@@ -109,14 +109,14 @@ export function AnalitikIndex() {
               const progress = peserta.length > 0 ? Math.round((sesiLengkap / peserta.length) * 100) : 0;
 
               return (
-                <Link 
-                  key={u.id} 
-                  to="/admin/analitik/$id" 
+                <Link
+                  key={u.id}
+                  to="/admin/analitik/$id"
                   params={{ id: u.id }}
                   className="group block transition-all duration-300 ease-spring hover:bg-accent cursor-pointer"
                 >
                   <div className="grid grid-cols-12 gap-4 px-6 py-4 items-center">
-                    
+
                     {/* Col 1: Exam Info */}
                     <div className="col-span-12 sm:col-span-5 flex items-start gap-3">
                       <div className="mt-0.5">
@@ -145,9 +145,9 @@ export function AnalitikIndex() {
                         <span className="text-foreground">{progress}%</span>
                       </div>
                       <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
-                        <div 
-                          className={`h-full rounded-full transition-all duration-500 ease-out ${progress === 100 ? 'bg-primary' : 'bg-primary'}`} 
-                          style={{ width: `${progress}%` }} 
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ease-out ${progress === 100 ? 'bg-primary' : 'bg-primary'}`}
+                          style={{ width: `${progress}%` }}
                         />
                       </div>
                     </div>

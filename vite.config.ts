@@ -33,7 +33,7 @@ export default defineConfig({
   },
   server: {
     host: "::",
-    port: 8080,
+    port: 8090,
     // Don't watch the Playwright test artifacts directory. Each test
     // run writes screenshots / traces / videos into
     // `tests/output/...`; if Vite treats those as source changes it

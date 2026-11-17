@@ -89,10 +89,10 @@ function TopikPage() {
       {/* Creation Row */}
       {canEdit ? (
         <form onSubmit={(e) => { e.preventDefault(); add(); }} className="bg-muted p-4 rounded-lg border border-border flex flex-col sm:flex-row items-center gap-3">
-          <Input 
-            placeholder="Ketik nama topik baru Bab Pengantar)" 
-            value={nama} 
-            onChange={(e) => setNama(e.target.value)} 
+          <Input
+            placeholder="Ketik nama topik baru Bab Pengantar)"
+            value={nama}
+            onChange={(e) => setNama(e.target.value)}
             className="flex-1 bg-card border-border"
           />
           <Button type="submit" disabled={!nama.trim()} className="w-full sm:w-auto font-semibold">
@@ -111,13 +111,13 @@ function TopikPage() {
         <div className="px-6 py-4 border-b border-border bg-muted/50">
           <h2 className="text-label font-semibold text-muted-foreground">Daftar Topik ({topiks.length})</h2>
         </div>
-        
+
         <div className="flex flex-col divide-y divide-border">
           {topiks.map((t) => {
             const count = soalRepo.all().filter((s) => s.topikId === t.id).length;
             return (
               <div key={t.id} className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:px-6 hover:bg-accent transition-colors gap-4">
-                
+
                 <div className="flex-1 flex items-center gap-4">
                   <div className="h-10 w-10 shrink-0 rounded-full bg-muted flex items-center justify-center border border-border">
                     <Layers className="h-4 w-4 text-muted-foreground" />
@@ -152,7 +152,7 @@ function TopikPage() {
               </div>
             );
           })}
-          
+
           {topiks.length === 0 && (
             <div className="py-12 text-center text-muted-foreground">
               Belum ada topik yang dibuat.
