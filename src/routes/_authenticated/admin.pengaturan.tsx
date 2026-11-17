@@ -75,14 +75,14 @@ function PengaturanPage() {
       />
 
       {/* Section 1: Identitas Aplikasi */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-12">
-        <div className="space-y-2 lg:col-span-1">
+      <div className="space-y-6">
+        <div className="space-y-2">
           <h2 id="identitas-heading" className="text-lg font-semibold text-foreground">Identitas Aplikasi</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Informasi ini akan ditampilkan di halaman login dan pada panel atas dasbor aplikasi.
           </p>
         </div>
-        <div role="region" aria-labelledby="identitas-heading" className="lg:col-span-2 bg-card rounded-lg border border-border overflow-hidden">
+        <div role="region" aria-labelledby="identitas-heading" className="bg-card rounded-lg border border-border overflow-hidden">
           <div className="p-6 space-y-6">
 
             <div className="space-y-2.5">
@@ -155,14 +155,14 @@ function PengaturanPage() {
       <div className="h-px w-full bg-muted my-10" />
 
       {/* Section 2: Kebijakan Ujian */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-12">
-        <div className="space-y-2 lg:col-span-1">
+      <div className="space-y-6">
+        <div className="space-y-2">
           <h2 id="kebijakan-heading" className="text-lg font-semibold text-foreground">Kebijakan Ujian</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Konfigurasi keamanan dan pembatasan akses perangkat untuk melindungi integritas pelaksanaan ujian.
           </p>
         </div>
-        <div role="region" aria-labelledby="kebijakan-heading" className="lg:col-span-2 bg-card rounded-lg border border-border overflow-hidden divide-y divide-border">
+        <div role="region" aria-labelledby="kebijakan-heading" className="bg-card rounded-lg border border-border overflow-hidden divide-y divide-border">
 
           <ToggleRow
             label="Kunci akses dari perangkat Mobile"
@@ -186,14 +186,14 @@ function PengaturanPage() {
       <div className="h-px w-full bg-muted my-10" />
 
       {/* Section 3: Tema & Tampilan */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-12">
-        <div className="space-y-2 lg:col-span-1">
+      <div className="space-y-6">
+        <div className="space-y-2">
           <h2 id="tema-heading" className="text-lg font-semibold text-foreground">Tema & Tampilan</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Sesuaikan gaya visual dan nuansa aplikasi. Tema dan tipografi ini akan diterapkan secara global untuk Anda.
           </p>
         </div>
-        <div role="region" aria-labelledby="tema-heading" className="lg:col-span-2 space-y-8">
+        <div role="region" aria-labelledby="tema-heading" className="space-y-8">
 
           {/* Pilihan Tipografi / Font */}
           <div className="space-y-3">

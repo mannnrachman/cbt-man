@@ -136,14 +136,14 @@ function ToolsPage() {
       />
 
       {/* Section 1: Backup & Restore */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-12">
-        <div className="space-y-2 lg:col-span-1">
+      <div className="space-y-6">
+        <div className="space-y-2">
           <h2 id="backup-heading" className="text-lg font-semibold text-foreground">Pencadangan Data</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Amankan data aplikasi secara berkala atau pulihkan dari cadangan sebelumnya. Cadangan mencakup seluruh pengguna, soal, ujian, dan konfigurasi.
           </p>
         </div>
-        <div role="region" aria-labelledby="backup-heading" className="lg:col-span-2 bg-card rounded-lg border border-border overflow-hidden divide-y divide-border">
+        <div role="region" aria-labelledby="backup-heading" className="bg-card rounded-lg border border-border overflow-hidden divide-y divide-border">
 
           
           {/* Export Backup Row */}
@@ -197,14 +197,14 @@ function ToolsPage() {
       <div className="h-px w-full bg-muted my-10" />
 
       {/* Section 2: Pemeliharaan Pangkalan Data */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-12">
-        <div className="space-y-2 lg:col-span-1">
+      <div className="space-y-6">
+        <div className="space-y-2">
           <h2 id="advanced-heading" className="text-lg font-semibold text-foreground">Pengelolaan Lanjut</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Aksi-aksi kritikal untuk memanipulasi pangkalan data sistem secara langsung.
           </p>
         </div>
-        <div role="region" aria-labelledby="advanced-heading" className="lg:col-span-2 bg-card rounded-lg border border-border overflow-hidden divide-y divide-border">
+        <div role="region" aria-labelledby="advanced-heading" className="bg-card rounded-lg border border-border overflow-hidden divide-y divide-border">
 
           
           {/* Seed Data Row */}
