@@ -23,12 +23,13 @@ export const RULES = [
   {
     id: "hex-colour",
     hint: "hex colours belong in src/styles.css only",
-    re: /(?<![\w-])(?:[a-z0-9-]+:)*(?:bg|text|border|ring|from|via|to|fill|stroke|shadow|outline)-\[#[0-9a-fA-F]{3,8}\]/g,
+    re: /(?<![\w-])(?:[a-z0-9-]+:)*(?:bg|text|border(?:-[trblxyse])?|divide|ring|from|via|to|fill|stroke|shadow|outline|decoration|accent|caret)-\[#[0-9a-fA-F]{3,8}\]/g,
   },
   {
     id: "small-text",
     hint: "no text under 13px: use text-label (13) or text-ui (14)",
-    re: /(?<![\w-])(?:[a-z0-9-]+:)*text-(?:xs|\[(?:[0-9]|1[0-2])(?:\.\d+)?px\])(?![\w-])/g,
+    // px below 13, or rem below 0.8125 (13px at the 16px root).
+    re: /(?<![\w-])(?:[a-z0-9-]+:)*text-(?:xs|\[(?:[0-9]|1[0-2])(?:\.\d+)?px\]|\[0?\.(?:[0-7]\d*|8(?:0\d*|1(?:[01]\d*|2(?:[0-4]\d*)?)?)?)rem\])(?![\w-])/g,
   },
   {
     id: "uppercase",
@@ -58,7 +59,8 @@ export const RULES = [
   {
     id: "italic",
     hint: "italic only for quotations",
-    re: /(?<![\w-])(?:[a-z0-9-]+:)*italic(?![\w-])/g,
+    // The editor's exec("italic") command is not a class.
+    re: /(?<![\w-]|(?:exec|execCommand)\(\s*["'])(?:[a-z0-9-]+:)*italic(?![\w-])/g,
   },
   {
     id: "shadow",

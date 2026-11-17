@@ -106,7 +106,7 @@ export function ExamCalculator() {
         aria-label="Hasil kalkulator"
         className="flex h-20 flex-col items-end justify-between overflow-hidden rounded-lg bg-foreground p-3 text-right font-mono text-background"
       >
-        <div className="h-4 w-full truncate text-label text-muted-foreground">
+        <div className="h-4 w-full truncate text-label text-background/70">
           {state.accumulator !== null && state.operator
             ? `${state.accumulator} ${renderOperator(state.operator)}`
             : ""}

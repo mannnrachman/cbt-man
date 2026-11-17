@@ -230,12 +230,12 @@ function EvaluasiSesi() {
         <div className="flex items-center gap-5 sm:gap-8 bg-foreground text-background px-6 sm:px-8 py-3.5 rounded-md border border-white/10">
           
           <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
-            <div className="text-label font-semibold text-muted-foreground">
+            <div className="text-label font-semibold text-background/70">
               {totalUngraded === 0 ? "Selesai Dinilai" : `${totalUngraded} Belum Dinilai`}
             </div>
-            <div className="hidden sm:block w-1.5 h-1.5 rounded-full bg-muted-foreground"></div>
+            <div className="hidden sm:block w-1.5 h-1.5 rounded-full bg-background/50"></div>
             <div className="text-sm">
-              <span className="text-muted-foreground">Total:</span> <span className="font-semibold text-lg leading-none">{sesi.skorTotal ?? 0}</span> <span className="text-muted-foreground font-medium">/ {sesi.maxSkor ?? 0}</span>
+              <span className="text-background/70">Total:</span> <span className="font-semibold text-lg leading-none">{sesi.skorTotal ?? 0}</span> <span className="text-background/70 font-medium">/ {sesi.maxSkor ?? 0}</span>
             </div>
           </div>
           

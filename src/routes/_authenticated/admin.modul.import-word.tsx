@@ -228,7 +228,14 @@ function ImportWord() {
 
           <div className="rounded bg-muted/30 p-3 text-label">
             <p className="font-medium">Format yang didukung (per blok dipisah baris kosong):</p>
-            <pre className="mt-1 whitespace-pre-wrap">{`1. Ibukota Indonesia adalah? A. Bandung B. Jakarta C. Medan D. Surabaya B 2. Jelaskan fotosintesis.`}</pre>
+            <pre className="mt-1 whitespace-pre-wrap">{`1. Ibukota Indonesia adalah?
+A. Bandung
+B. Jakarta
+C. Medan
+D. Surabaya
+Jawaban: B
+
+2. Jelaskan fotosintesis.`}</pre>
             <p className="mt-1 text-muted-foreground">
               Soal tanpa opsi A/B/C dianggap essay. Multi-jawaban: <code>Jawaban: A,C</code>.
             </p>

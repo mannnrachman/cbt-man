@@ -210,7 +210,7 @@ function SoalPage() {
               size="sm"
               variant="outline"
               onClick={() => setMoveDialogOpen(true)}
-              className="h-8 text-label font-semibold border-border bg-primary/10 hover:bg-primary/20 text-foreground"
+              className="h-8 text-label font-semibold border-background/20 bg-foreground/80 hover:bg-muted-foreground text-background"
             >
               <FolderOutput className="mr-1.5 h-3.5 w-3.5" /> Pindah Terpilih ({selectedIds.length})
             </Button>

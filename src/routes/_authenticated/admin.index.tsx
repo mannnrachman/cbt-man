@@ -56,13 +56,27 @@ function CommandCenter() {
     .sort((a, b) => a.beginAt - b.beginAt);
   const upcomingExamCount = upcoming.length;
   const upcomingExams = upcoming.slice(0, 4);
-  const finishedExams = semuaUjian.filter((u) => u.endAt && now > u.endAt);
+  // Same outstanding-work rule as /admin/evaluasi: finished sessions with an
+  // essay answer that has no numeric score yet.
+  const essaySoalIds = new Set(soalList.filter((s) => s.tipe === "essay").map((s) => s.id));
+  const visibleUjianIds = new Set(semuaUjian.map((u) => u.id));
+  const ujianMenungguNilai = new Set(
+    sesiRepo
+      .all()
+      .filter(
+        (s) =>
+          s.status === "selesai" &&
+          visibleUjianIds.has(s.ujianId) &&
+          s.jawaban.some((j) => essaySoalIds.has(j.soalId) && typeof j.skor !== "number"),
+      )
+      .map((s) => s.ujianId),
+  ).size;
 
-  const pendingTasks = finishedExams.length > 0 && canAccess("/admin/evaluasi")
+  const pendingTasks = ujianMenungguNilai > 0 && canAccess("/admin/evaluasi")
     ? [{
         id: "eval-reports",
-        title: "Ujian selesai menunggu evaluasi",
-        desc: `${finishedExams.length} ujian sudah selesai dan siap dinilai dan direkap.`,
+        title: "Jawaban essay menunggu penilaian",
+        desc: `${ujianMenungguNilai} ujian memiliki jawaban essay yang belum dinilai.`,
         action: "Buka evaluasi",
         route: "/admin/evaluasi" as const,
       }]

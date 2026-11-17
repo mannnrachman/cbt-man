@@ -3,9 +3,10 @@ import { soalBySessionId, sesiRepo, ujianRepo, getParticipantSessionState, inval
 import { armExamAlarm, startExamAlarm, stopExamAlarm } from "@/lib/cbt/exam-alarm";
 import {
   examScreenPhase,
-  nextSaveState,
+  nextSaveTracker,
+  SAVE_INITIAL,
   SAVE_STATE_LABELS,
-  type SaveEvent,
+  type SaveAction,
   type SaveState,
 } from "@/lib/cbt/state-machines";
 import { reportExamViolation } from "@/lib/server/sesi/functions";
@@ -80,8 +81,16 @@ function RouteComponent() {
   const [idx, setIdx] = useState(0);
   const [now, setNow] = useState(Date.now());
   const [pollingError, setPollingError] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<SaveState>("clean");
-  const dispatchSave = (event: SaveEvent) => setSaveStatus((prev) => nextSaveState(prev, event));
+  const [saveTracker, setSaveTracker] = useState(SAVE_INITIAL);
+  const saveStatus: SaveState = saveTracker.state;
+  const saveSeq = useRef(0);
+  const dispatchSave = (action: SaveAction) => setSaveTracker((prev) => nextSaveTracker(prev, action));
+  // Starts a tracked save; the returned callback reports only this save's outcome.
+  const beginSave = () => {
+    const id = ++saveSeq.current;
+    dispatchSave({ type: "flush", id });
+    return (ok: boolean) => dispatchSave({ type: ok ? "success" : "failure", id });
+  };
   const submittingRef = useRef(false);
   const saveTimer = useRef<NodeJS.Timeout | null>(null);
 
@@ -299,7 +308,7 @@ function RouteComponent() {
 
   function updateJawaban(partial: Partial<SesiUjian["jawaban"][0]>) {
     if (!sesi) return;
-    dispatchSave("edit");
+    dispatchSave({ type: "edit" });
     const nextSesi = { ...sesi };
     nextSesi.jawaban = [...nextSesi.jawaban];
     nextSesi.jawaban[idx] = { ...nextSesi.jawaban[idx], ...partial };
@@ -311,9 +320,9 @@ function RouteComponent() {
 
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
-      dispatchSave("flush");
+      const done = beginSave();
       void saveParticipantSession(nextSesi).then((result) => {
-        dispatchSave(result.ok ? "success" : "failure");
+        done(result.ok);
         if (result.ok || sesiRef.current !== nextSesi) return;
         const restored = sesiRepo.byId(nextSesi.id) ?? null;
         sesiRef.current = restored;
@@ -348,9 +357,9 @@ function RouteComponent() {
       saveTimer.current = null;
       if (sesiRef.current) {
         const pending = sesiRef.current;
-        dispatchSave("flush");
+        const done = beginSave();
         void saveParticipantSession(pending).then((result) => {
-          dispatchSave(result.ok ? "success" : "failure");
+          done(result.ok);
           if (result.ok || sesiRef.current !== pending) return;
           const restored = sesiRepo.byId(pending.id) ?? null;
           sesiRef.current = restored;
@@ -364,20 +373,20 @@ function RouteComponent() {
   async function submit(reason?: string) {
     if (submittingRef.current || !ujian || !sesiRef.current) return;
     submittingRef.current = true;
+    let done: ((ok: boolean) => void) | null = null;
     try {
       if (saveTimer.current) {
         clearTimeout(saveTimer.current);
         saveTimer.current = null;
       }
-      dispatchSave("flush");
+      done = beginSave();
       const result = await saveParticipantSession(sesiRef.current, true);
+      done(result.ok);
       if (!result.ok) {
-        dispatchSave("failure");
         toast.error("Gagal menyimpan jawaban. Coba kumpulkan lagi.");
         submittingRef.current = false;
         return;
       }
-      dispatchSave("success");
       // Re-hydrate from the server so the hasil page reads the authoritative
       // server-computed score and the post-submit snapshot (answer keys and
       // pembahasan are only exposed after selesai when the exam allows it).
@@ -397,7 +406,7 @@ function RouteComponent() {
         params: { id: ujian.id },
       });
     } catch {
-      dispatchSave("failure");
+      done?.(false);
       toast.error("Gagal menyimpan jawaban. Coba kumpulkan lagi.");
       submittingRef.current = false;
     }

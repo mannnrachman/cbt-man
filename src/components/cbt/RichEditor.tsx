@@ -216,7 +216,7 @@ export function RichEditor({
       <div className="flex flex-wrap items-center gap-1 border-b p-1">
         {[
           { i: Bold, t: "Tebal", c: () => exec("bold") },
-          { i: Italic, t: "Miring", c: () => exec("") },
+          { i: Italic, t: "Miring", c: () => exec("italic") },
           { i: Underline, t: "Garis bawah", c: () => exec("underline") },
           { i: List, t: "Bullet", c: () => exec("insertUnorderedList") },
           { i: ListOrdered, t: "Numbered", c: () => exec("insertOrderedList") },

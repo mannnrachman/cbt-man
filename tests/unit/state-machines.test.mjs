@@ -19,7 +19,8 @@ import {
   isTokenClaimableBy,
   canRevealResult,
   examScreenPhase,
-  nextSaveState,
+  nextSaveTracker,
+  SAVE_INITIAL,
   SAVE_STATE_LABELS,
   authPhaseOfUser,
   AUTH_INITIAL_PHASE,
@@ -145,35 +146,42 @@ test("exam screen phase preserves the kerjakan render order", () => {
 });
 
 test("autosave reducer tracks edit -> flush -> saved/failed without losing newer edits", () => {
-  let s = "clean";
-  s = nextSaveState(s, "edit");
-  assert.equal(s, "dirty");
-  s = nextSaveState(s, "flush");
-  assert.equal(s, "saving");
-  s = nextSaveState(s, "success");
-  assert.equal(s, "saved");
-  s = nextSaveState(s, "edit");
-  assert.equal(s, "dirty");
-  s = nextSaveState(s, "flush");
-  assert.equal(s, "saving");
-  s = nextSaveState(s, "failure");
-  assert.equal(s, "failed");
-  s = nextSaveState(s, "edit");
-  assert.equal(s, "dirty", "retry after failure starts over");
-  s = nextSaveState(s, "reset");
-  assert.equal(s, "clean");
+  const run = (...actions) => actions.reduce(nextSaveTracker, SAVE_INITIAL).state;
+  const edit = { type: "edit" };
+  const flush = (id) => ({ type: "flush", id });
+  const ok = (id) => ({ type: "success", id });
+  const fail = (id) => ({ type: "failure", id });
+
+  assert.equal(run(edit), "dirty");
+  assert.equal(run(edit, flush(1)), "saving");
+  assert.equal(run(edit, flush(1), ok(1)), "saved");
+  assert.equal(run(edit, flush(1), fail(1)), "failed");
+  assert.equal(run(edit, flush(1), fail(1), edit), "dirty");
+  assert.equal(run(edit, flush(1), { type: "reset" }), "clean");
+  assert.equal(run(flush(1), ok(1)), "clean", "a flush with nothing dirty changes nothing");
 
   // a newer edit landing while a save is in flight keeps the state dirty on late success
-  let seq = "clean";
-  seq = nextSaveState(seq, "edit");
-  seq = nextSaveState(seq, "flush");
-  seq = nextSaveState(seq, "edit");
-  seq = nextSaveState(seq, "success");
-  assert.equal(seq, "dirty", "late success must not mark the newer edit as saved");
+  assert.equal(run(edit, flush(1), edit, ok(1)), "dirty");
 
   for (const state of ["clean", "dirty", "saving", "saved", "failed"]) {
     assert.equal(typeof SAVE_STATE_LABELS[state], "string");
   }
+});
+
+test("autosave ignores completions of an older save once a newer one started", () => {
+  const run = (...actions) => actions.reduce(nextSaveTracker, SAVE_INITIAL).state;
+  // A pending, B edited and flushed, A succeeds, then B fails: the failure must show.
+  const seq = [{ type: "edit" }, { type: "flush", id: 1 }, { type: "edit" }, { type: "flush", id: 2 }];
+  assert.equal(run(...seq, { type: "success", id: 1 }), "saving", "A's success must not mark B as saved");
+  assert.equal(run(...seq, { type: "success", id: 1 }, { type: "failure", id: 2 }), "failed");
+  assert.equal(run(...seq, { type: "failure", id: 1 }, { type: "success", id: 2 }), "saved");
+});
+
+test("autosave recovers when a failed save is retried without another edit", () => {
+  const run = (...actions) => actions.reduce(nextSaveTracker, SAVE_INITIAL).state;
+  const failed = [{ type: "edit" }, { type: "flush", id: 1 }, { type: "failure", id: 1 }];
+  assert.equal(run(...failed, { type: "flush", id: 2 }), "saving");
+  assert.equal(run(...failed, { type: "flush", id: 2 }, { type: "success", id: 2 }), "saved");
 });
 
 test("auth phase starts unknown and resolves from the user object", () => {

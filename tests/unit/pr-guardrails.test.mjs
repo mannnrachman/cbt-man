@@ -56,11 +56,26 @@ test("admin layout reads the authenticated route context instead of nullable cli
 
 test("admin demo credentials are development-only", () => {
   const login = readFileSync("src/routes/login-admin.tsx", "utf8");
-  const devGuard = login.indexOf("import.meta.env.DEV &&");
-  const firstCredential = login.indexOf("admin123");
-  assert.ok(devGuard !== -1, "login-admin must gate demo credentials on import.meta.env.DEV");
-  assert.ok(firstCredential > devGuard, "demo credentials may only appear after the DEV guard");
-  assert.equal(login.indexOf("evaluator123") > devGuard, true);
+  const open = login.indexOf("{import.meta.env.DEV && (");
+  assert.ok(open !== -1, "login-admin must gate demo credentials on import.meta.env.DEV");
+  // Find the end of the guarded JSX expression by balancing parentheses.
+  let depth = 0;
+  let close = -1;
+  for (let i = login.indexOf("(", open); i < login.length; i++) {
+    if (login[i] === "(") depth++;
+    else if (login[i] === ")" && --depth === 0) {
+      close = i;
+      break;
+    }
+  }
+  assert.ok(close > open, "DEV guard expression must be closed");
+  for (const secret of ["admin123", "evaluator123"]) {
+    let at = login.indexOf(secret);
+    assert.ok(at !== -1, `${secret} expected in the DEV block`);
+    for (; at !== -1; at = login.indexOf(secret, at + 1)) {
+      assert.ok(at > open && at < close, `${secret} at ${at} is outside the DEV block`);
+    }
+  }
 });
 
 test("file delete action matches the super-admin server boundary", () => {

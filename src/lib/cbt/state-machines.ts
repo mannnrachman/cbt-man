@@ -222,24 +222,38 @@ export function examScreenPhase(input: {
 }
 
 // ---------------- 8. Autosave reducer (kerjakan header indicator) ----------------
-// clean → dirty (edit) → saving (flush) → saved | failed. A new edit while a
-// save is in flight goes back to dirty; a late success then keeps dirty so
-// the pending newer save still shows.
+// clean → dirty (edit) → saving (flush #id) → saved | failed. Every flush carries
+// an id and only the completion of the latest flush counts: a newer edit or a
+// newer flush makes earlier completions stale, so they cannot mark newer
+// answers as saved (or failed). A flush after a failure retries the save.
 
 export const SAVE_STATES = ["clean", "dirty", "saving", "saved", "failed"] as const;
 export type SaveState = (typeof SAVE_STATES)[number];
-export type SaveEvent = "edit" | "flush" | "success" | "failure" | "reset";
+export type SaveTracker = { readonly state: SaveState; readonly pending: number | null };
+export type SaveAction =
+	| { type: "edit" }
+	| { type: "flush"; id: number }
+	| { type: "success"; id: number }
+	| { type: "failure"; id: number }
+	| { type: "reset" };
 
-const SAVE_TRANSITIONS: Readonly<Record<SaveState, Readonly<Record<SaveEvent, SaveState>>>> = {
-	clean: { edit: "dirty", flush: "clean", success: "clean", failure: "clean", reset: "clean" },
-	dirty: { edit: "dirty", flush: "saving", success: "dirty", failure: "dirty", reset: "clean" },
-	saving: { edit: "dirty", flush: "saving", success: "saved", failure: "failed", reset: "clean" },
-	saved: { edit: "dirty", flush: "saved", success: "saved", failure: "saved", reset: "clean" },
-	failed: { edit: "dirty", flush: "failed", success: "failed", failure: "failed", reset: "clean" },
-};
+export const SAVE_INITIAL: SaveTracker = { state: "clean", pending: null };
 
-export function nextSaveState(state: SaveState, event: SaveEvent): SaveState {
-	return SAVE_TRANSITIONS[state][event];
+export function nextSaveTracker(tracker: SaveTracker, action: SaveAction): SaveTracker {
+	switch (action.type) {
+		case "edit":
+			return { state: "dirty", pending: null };
+		case "reset":
+			return SAVE_INITIAL;
+		case "flush":
+			// clean/saved have nothing to write; dirty/saving/failed start (or retry) a save.
+			if (tracker.state === "clean" || tracker.state === "saved") return tracker;
+			return { state: "saving", pending: action.id };
+		case "success":
+		case "failure":
+			if (tracker.pending !== action.id) return tracker;
+			return { state: action.type === "success" ? "saved" : "failed", pending: null };
+	}
 }
 
 export const SAVE_STATE_LABELS: Record<SaveState, string> = {
@@ -247,7 +261,7 @@ export const SAVE_STATE_LABELS: Record<SaveState, string> = {
 	dirty: "Belum tersimpan",
 	saving: "Menyimpan…",
 	saved: "Tersimpan",
-	failed: "Gagal menyimpan — akan dicoba lagi",
+	failed: "Gagal menyimpan — periksa koneksi lalu jawab ulang",
 };
 
 // ---------------- 9. Auth phase ----------------

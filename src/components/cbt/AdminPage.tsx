@@ -29,7 +29,7 @@ export function AdminPageHeader({
   const heading = (
     <div className="min-w-0">
       <h1 className="truncate text-title font-semibold tracking-tight text-foreground">{title}</h1>
-      {description && <p className="truncate text-ui text-muted-foreground">{description}</p>}
+      {description && <p className="text-ui text-muted-foreground">{description}</p>}
     </div>
   )
 

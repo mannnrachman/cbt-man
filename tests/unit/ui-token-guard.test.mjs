@@ -57,3 +57,17 @@ test("a new file with violations fails against an empty baseline", () => {
   const { failures } = compare({ "src/new.tsx": { total: 1, byRule: { italic: 1 } } }, {});
   assert.equal(failures.length, 1);
 });
+
+test("flags hex colours on directional borders", () => {
+  assert.equal(hits('<div className="border-t-[#fff] border-x-[#03A559] divide-[#000]" />')["hex-colour"], 3);
+});
+
+test("flags rem font sizes under 13px but not 13px and up", () => {
+  assert.equal(hits('<p className="text-[0.75rem] text-[.5rem] text-[0.8rem] text-[0.8124rem]" />')["small-text"], 4);
+  assert.equal(scan('<p className="text-[0.8125rem] text-[0.875rem] text-[1rem]" />').total, 0);
+});
+
+test("the editor italic command is not an italic class", () => {
+  assert.equal(scan('c: () => exec("italic"), d: document.execCommand(\'italic\')').total, 0);
+  assert.equal(hits('<em className="italic" />')["italic"], 1);
+});
