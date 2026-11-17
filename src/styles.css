@@ -189,9 +189,10 @@
 }
 
 /*
- * Admin chrome: the sidebar is dark blue in both colour schemes; the header is transparent
- * and follows the page. The sidebar re-declares the dark palette locally, so every control inside it (buttons,
- * badges, links, focus rings) picks light-on-dark tokens without per-component classes.
+ * Admin chrome: the sidebar is a deep green-charcoal in both colour schemes, echoing the
+ * brand green; the header is transparent and follows the page. The sidebar re-declares the
+ * dark palette locally, so every control inside it (buttons, badges, links, focus rings)
+ * picks light-on-dark tokens without per-component classes.
  */
 .shell-sidebar {
   color-scheme: dark;
@@ -204,11 +205,11 @@
   --danger-ink: #101613;
   --warn: #ebb04c;
   --shadow-overlay: 0 0 0 1px var(--line), 0 8px 24px rgb(0 0 0 / 0.5);
-  --ground: #10264a;
-  --surface: #10264a;
-  --surface-2: #1b3763;
-  --hover: #2b5290; /* 1.94:1 against --surface, ink on it 6.5:1 */
-  --ink-muted: #c4cfe0;
+  --ground: #14201a;
+  --surface: #14201a;
+  --surface-2: #1d2b24;
+  --hover: #31453a; /* 1.63:1 against --surface, ink on it 8.7:1 */
+  --ink-muted: #a8b2ab;
 }
 
 /* Map the shadcn token names the UI primitives already use onto the semantic palette. */

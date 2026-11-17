@@ -132,7 +132,7 @@ test("the hover fill is clearly lighter than the chrome surface", () => {
   }
 });
 
-test("the sidebar is dark blue and the header has no palette of its own", () => {
-  assert.equal(chrome.sidebar.surface.toLowerCase(), "#10264a");
+test("the sidebar is deep green-charcoal and the header has no palette of its own", () => {
+  assert.equal(chrome.sidebar.surface.toLowerCase(), "#14201a");
   assert.ok(!css.includes(".shell-header"), "the header is transparent and follows the page tokens");
 });
