@@ -34,5 +34,8 @@ test("admin routes do not keep native confirm() for destructive actions", () => 
   }
 
   const peserta = read("src/routes/_authenticated/peserta.tsx");
-  assert.match(peserta, /confirm\("Keluar dari ujian/);
+  assert.doesNotMatch(peserta, /if\s*\(\s*!confirm\(/, "peserta.tsx must not use native confirm()");
+  assert.doesNotMatch(peserta, /window\.confirm\(/, "peserta.tsx must not use window.confirm()");
+  assert.match(peserta, /useConfirmDialog/, "peserta exit button must use the designed ConfirmDialog");
+  assert.match(peserta, /Keluar dari ujian\?/);
 });

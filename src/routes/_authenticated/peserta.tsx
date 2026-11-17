@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-router";
 import { LogOut, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useConfirmDialog } from "@/components/cbt/ConfirmDialog";
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import { configRepo, hydrateRepos } from "@/lib/cbt/repos";
 import { cn } from "@/lib/utils";
@@ -37,6 +38,8 @@ function PesertaLayout() {
 	const isKerjakan = location.pathname.endsWith("/kerjakan");
 
 	const [theme, setTheme] = useState<"light" | "dark">("light");
+
+	const { confirm, dialog } = useConfirmDialog();
 
 	useEffect(() => {
 		const stored = localStorage.getItem("theme");
@@ -91,7 +94,14 @@ function PesertaLayout() {
 						title="Keluar"
 						onClick={async () => {
 							if (isKerjakan) {
-								if (!confirm("Keluar dari ujian? Waktu akan terus berjalan.")) return;
+								const ok = await confirm({
+									title: "Keluar dari ujian?",
+									description: "Waktu akan terus berjalan.",
+									confirmLabel: "Keluar",
+									icon: <LogOut className="h-5 w-5" />,
+									destructive: false,
+								});
+								if (!ok) return;
 							}
 							await logout();
 							navigate({ to: "/login" });
@@ -104,6 +114,7 @@ function PesertaLayout() {
 			<main className="flex-1 w-full flex flex-col min-h-0 relative z-10">
 				<Outlet />
 			</main>
+		{dialog}
 		</div>
 	);
 }

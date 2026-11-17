@@ -16,6 +16,7 @@ export type ConfirmDialogRequest = {
 	confirmLabel?: string;
 	cancelLabel?: string;
 	destructive?: boolean;
+	icon?: ReactNode;
 };
 
 type PendingRequest = ConfirmDialogRequest & {
@@ -105,6 +106,7 @@ export function useConfirmDialog(): {
 			confirmLabel={pending?.confirmLabel}
 			cancelLabel={pending?.cancelLabel}
 			destructive={pending?.destructive}
+			icon={pending?.icon}
 			onOpenChange={(open) => {
 				if (!open) close(false);
 			}}
