@@ -158,7 +158,9 @@ test("autosave reducer tracks edit -> flush -> saved/failed without losing newer
   assert.equal(run(edit, flush(1), fail(1)), "failed");
   assert.equal(run(edit, flush(1), fail(1), edit), "dirty");
   assert.equal(run(edit, flush(1), { type: "reset" }), "clean");
-  assert.equal(run(flush(1), ok(1)), "clean", "a flush with nothing dirty changes nothing");
+  assert.equal(run(flush(1)), "saving", "a flush without a prior edit is still tracked");
+  assert.equal(run(flush(1), fail(1)), "failed", "its failure is not hidden");
+  assert.equal(run(edit, flush(1), ok(1), flush(2), fail(2)), "failed");
 
   // a newer edit landing while a save is in flight keeps the state dirty on late success
   assert.equal(run(edit, flush(1), edit, ok(1)), "dirty");

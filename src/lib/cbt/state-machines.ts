@@ -246,8 +246,8 @@ export function nextSaveTracker(tracker: SaveTracker, action: SaveAction): SaveT
 		case "reset":
 			return SAVE_INITIAL;
 		case "flush":
-			// clean/saved have nothing to write; dirty/saving/failed start (or retry) a save.
-			if (tracker.state === "clean" || tracker.state === "saved") return tracker;
+			// Every flush is tracked, including one from clean/saved (submit or question
+			// navigation without an edit), so its failure is not hidden.
 			return { state: "saving", pending: action.id };
 		case "success":
 		case "failure":
