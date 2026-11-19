@@ -51,28 +51,28 @@ export function ExamCalculator() {
   };
 
   const sciBtn =
-    "h-8 px-1 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 transition-colors";
+    "h-8 px-1 text-label font-semibold bg-muted hover:bg-accent text-foreground transition-colors";
   const memBtn =
-    "h-8 px-1 text-xs font-semibold bg-amber-50 hover:bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:hover:bg-amber-900/60 dark:text-amber-300 transition-colors";
+    "h-8 px-1 text-label font-semibold bg-warn/10 hover:bg-warn/10 text-warn transition-colors";
   const numBtn = "h-10 text-sm font-semibold transition-colors";
   const opBtn =
-    "h-10 text-sm font-semibold bg-sky-50 text-sky-800 hover:bg-sky-100 dark:bg-sky-950/50 dark:text-sky-300 dark:hover:bg-sky-900/60 transition-colors";
+    "h-10 text-sm font-semibold bg-muted text-muted-foreground hover:bg-accent transition-colors";
   const delBtn =
-    "h-10 text-xs font-semibold bg-orange-50 text-orange-700 hover:bg-orange-100 dark:bg-orange-950/40 dark:text-orange-300 transition-colors";
+    "h-10 text-label font-semibold bg-warn/10 text-warn hover:bg-warn/10 transition-colors";
   const acBtn =
-    "h-10 text-xs font-semibold bg-rose-50 text-rose-700 hover:bg-rose-100 dark:bg-rose-950/40 dark:text-rose-300 font-bold transition-colors";
-  const eqBtn = "h-10 text-sm font-bold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors";
+    "h-10 text-label font-semibold bg-destructive/10 text-destructive hover:bg-destructive/10 transition-colors";
+  const eqBtn = "h-10 text-sm font-semibold bg-foreground text-background hover:bg-foreground/85 transition-colors";
 
   return (
-    <div className="mx-auto flex w-full max-w-sm flex-col gap-2.5 rounded-xl border bg-card p-3 shadow-sm select-none">
+    <div className="mx-auto flex w-full max-w-sm flex-col gap-2.5 rounded-lg border bg-card p-3 select-none">
       {/* Top Bar: Mode Indicator & Memory Indicator */}
-      <div className="flex items-center justify-between px-1 text-xs font-medium text-muted-foreground">
+      <div className="flex items-center justify-between px-1 text-label font-medium text-muted-foreground">
         <div className="flex items-center gap-1.5">
           <Button
             type="button"
             variant="outline"
             size="sm"
-            className="h-6 px-2 text-[11px] font-bold"
+            className="h-6 px-2 text-label font-semibold"
             onClick={() => setState(toggleDegMode)}
             aria-label={`Ubah ke mode ${state.degMode ? "Radian" : "Derajat"}`}
           >
@@ -82,7 +82,7 @@ export function ExamCalculator() {
             type="button"
             variant={showShift ? "default" : "outline"}
             size="sm"
-            className="h-6 px-2 text-[11px] font-bold"
+            className="h-6 px-2 text-label font-semibold"
             onClick={() => setShowShift((prev) => !prev)}
             aria-label="Fungsi sekunder 2nd"
           >
@@ -90,9 +90,9 @@ export function ExamCalculator() {
           </Button>
         </div>
 
-        <div className="flex items-center gap-1.5 text-[11px]">
+        <div className="flex items-center gap-1.5 text-label">
           {state.memory !== 0 && (
-            <span className="rounded bg-amber-100 px-1.5 py-0.5 font-bold text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+            <span className="rounded bg-warn/10 px-1.5 py-0.5 font-semibold text-warn">
               M
             </span>
           )}
@@ -104,14 +104,14 @@ export function ExamCalculator() {
       <output
         aria-live="polite"
         aria-label="Hasil kalkulator"
-        className="flex h-20 flex-col items-end justify-between overflow-hidden rounded-lg bg-slate-900 p-3 text-right font-mono text-white dark:bg-slate-950"
+        className="flex h-20 flex-col items-end justify-between overflow-hidden rounded-lg bg-foreground p-3 text-right font-mono text-background"
       >
-        <div className="h-4 w-full truncate text-xs text-slate-400">
+        <div className="h-4 w-full truncate text-label text-background/70">
           {state.accumulator !== null && state.operator
             ? `${state.accumulator} ${renderOperator(state.operator)}`
             : ""}
         </div>
-        <span className="w-full truncate text-2xl font-semibold tracking-wider">
+        <span className="w-full truncate text-2xl font-semibold">
           {state.display}
         </span>
       </output>

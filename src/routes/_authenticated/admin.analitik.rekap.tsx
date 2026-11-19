@@ -96,18 +96,18 @@ function RekapPage() {
 
   return (
     <div className="space-y-6 pb-12">
-      <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6 rounded-xl border shadow-sm">
+      <div className="p-6 rounded-lg border">
         <Link to="/admin/analitik" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 w-fit mb-3">
           ← Kembali ke daftar analitik
         </Link>
-        <h1 className="text-2xl font-bold tracking-tight">Rekap Hasil Ujian</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Rekap Hasil Ujian</h1>
         <p className="text-sm text-muted-foreground mt-1">Saring dan ekspor hasil ujian peserta ke dalam format Microsoft Excel.</p>
       </div>
 
       <Card>
         <CardContent className="grid grid-cols-2 gap-3 p-4 lg:grid-cols-5">
           <div>
-            <label className="text-xs font-medium text-muted-foreground">Ujian</label>
+            <label className="text-label font-medium text-muted-foreground">Ujian</label>
             <Select value={ujianId} onValueChange={setUjianId}>
               <SelectTrigger className="mt-1">
                 <SelectValue />
@@ -126,7 +126,7 @@ function RekapPage() {
             </Select>
           </div>
           <div>
-            <label className="text-xs font-medium text-muted-foreground">Unit Akademik</label>
+            <label className="text-label font-medium text-muted-foreground">Unit Akademik</label>
             <Select value={unitId} onValueChange={setUnitId}>
               <SelectTrigger className="mt-1">
                 <SelectValue />
@@ -142,11 +142,11 @@ function RekapPage() {
             </Select>
           </div>
           <div>
-            <label className="text-xs font-medium text-muted-foreground">Dari tanggal</label>
+            <label className="text-label font-medium text-muted-foreground">Dari tanggal</label>
             <Input type="date" value={dari} onChange={(e) => setDari(e.target.value)} className="mt-1" />
           </div>
           <div>
-            <label className="text-xs font-medium text-muted-foreground">Sampai tanggal</label>
+            <label className="text-label font-medium text-muted-foreground">Sampai tanggal</label>
             <Input type="date" value={sampai} onChange={(e) => setSampai(e.target.value)} className="mt-1" />
           </div>
           <div className="flex items-end">
@@ -158,16 +158,16 @@ function RekapPage() {
         </CardContent>
       </Card>
 
-      <Card className="shadow-sm border ring-1 ring-border/50 overflow-hidden">
+      <Card className="border ring-1 ring-border/50 overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50 hover:bg-muted/50">
-              <TableHead className="py-3.5 font-semibold text-xs text-muted-foreground uppercase tracking-wider">Nama Peserta</TableHead>
-              <TableHead className="py-3.5 font-semibold text-xs text-muted-foreground uppercase tracking-wider">Unit Akademik</TableHead>
-              <TableHead className="py-3.5 font-semibold text-xs text-muted-foreground uppercase tracking-wider">Ujian (Mata Kuliah)</TableHead>
-              <TableHead className="py-3.5 font-semibold text-xs text-muted-foreground uppercase tracking-wider">Skor Akhir</TableHead>
-              <TableHead className="py-3.5 font-semibold text-xs text-muted-foreground uppercase tracking-wider">Persentase</TableHead>
-              <TableHead className="py-3.5 font-semibold text-xs text-muted-foreground uppercase tracking-wider">Waktu Penyelesaian</TableHead>
+              <TableHead className="py-3.5 font-semibold text-label text-muted-foreground">Nama Peserta</TableHead>
+              <TableHead className="py-3.5 font-semibold text-label text-muted-foreground">Unit Akademik</TableHead>
+              <TableHead className="py-3.5 font-semibold text-label text-muted-foreground">Ujian (Mata Kuliah)</TableHead>
+              <TableHead className="py-3.5 font-semibold text-label text-muted-foreground">Skor Akhir</TableHead>
+              <TableHead className="py-3.5 font-semibold text-label text-muted-foreground">Persentase</TableHead>
+              <TableHead className="py-3.5 font-semibold text-label text-muted-foreground">Waktu Penyelesaian</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -175,7 +175,7 @@ function RekapPage() {
               <TableRow key={i} className="hover:bg-muted/30 transition-colors">
                 <TableCell className="p-4">
                   <div className="font-semibold text-foreground">{r.nama}</div>
-                  <div className="text-xs text-muted-foreground font-mono mt-0.5">{r.username}</div>
+                  <div className="text-label text-muted-foreground font-mono mt-0.5">{r.username}</div>
                 </TableCell>
                 <TableCell className="p-4">
                   <Badge variant="outline" className="font-medium">
@@ -185,25 +185,25 @@ function RekapPage() {
                 <TableCell className="p-4">
                   <div className="font-medium text-foreground">{r.ujian}</div>
                   {r.mataKuliah !== "-" && (
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
+                    <div className="flex items-center gap-1 text-label text-muted-foreground mt-0.5">
                       <BookOpen className="h-3.5 w-3.5" />
                       {r.mataKuliah}
                     </div>
                   )}
                 </TableCell>
-                <TableCell className="p-4 font-bold text-base">
-                  {r.skor} <span className="text-xs font-normal text-muted-foreground">/ {r.maks}</span>
+                <TableCell className="p-4 font-semibold text-base">
+                  {r.skor} <span className="text-label font-normal text-muted-foreground">/ {r.maks}</span>
                 </TableCell>
                 <TableCell className="p-4">
                   <Badge
                     variant={r.persen >= 75 ? "default" : r.persen >= 50 ? "secondary" : "destructive"}
-                    className="gap-1 font-bold"
+                    className="gap-1 font-semibold"
                   >
                     <BadgeCheck className="h-3.5 w-3.5" /> {r.persen}%
                   </Badge>
                 </TableCell>
                 <TableCell className="p-4">
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1.5 text-label text-muted-foreground">
                     <CalendarDays className="h-3.5 w-3.5" />
                     {r.tanggal}
                   </div>

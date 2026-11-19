@@ -11,7 +11,7 @@ export function getExamStatus(beginAt: number | undefined, endAt: number | undef
     return {
       text: "Ujian Sedang Berlangsung",
       color:
-        "bg-green-500/10 text-green-600 dark:text-green-400 border-green-200/50 dark:border-green-900/30",
+        "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200/50 dark:border-blue-900/30",
     };
   } else {
     return {
@@ -47,7 +47,7 @@ export function getExamCountdown(beginAt: number | undefined, endAt: number | un
     return {
       text: `${formatted} (Sisa)`,
       color:
-        "text-green-600 dark:text-green-400 font-bold font-mono animate-pulse",
+        "text-blue-600 dark:text-blue-400 font-bold font-mono animate-pulse",
     };
   } else {
     const diffSeconds = Math.floor((beginAt - now) / 1000);

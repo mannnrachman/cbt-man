@@ -81,16 +81,16 @@ function EvaluasiList() {
           totalBelumEssay > 0 ? (
             <div className="flex items-center gap-8 text-sm">
               <div className="flex flex-col items-end">
-                <span className="text-[10px] font-medium uppercase tracking-widest text-slate-400 mb-0.5">Butuh Penilaian</span>
-                <span className="text-xl font-medium text-slate-900 dark:text-white tabular-nums leading-none">
-                  {items.filter(i => i.belumSesi > 0).length} <span className="text-sm text-slate-400 font-medium ml-1">Ujian</span>
+                <span className="text-label font-medium text-muted-foreground mb-0.5">Butuh Penilaian</span>
+                <span className="text-xl font-medium text-foreground tabular-nums leading-none">
+                  {items.filter(i => i.belumSesi > 0).length} <span className="text-sm text-muted-foreground font-medium ml-1">Ujian</span>
                 </span>
               </div>
-              <div className="w-px h-8 bg-slate-200 dark:bg-slate-800" />
+              <div className="w-px h-8 bg-muted" />
               <div className="flex flex-col items-end">
-                <span className="text-[10px] font-medium uppercase tracking-widest text-slate-400 mb-0.5">Belum Dinilai</span>
-                <span className="text-xl font-medium text-amber-600 dark:text-amber-500 tabular-nums leading-none">
-                  {totalBelumEssay} <span className="text-sm text-amber-600/70 dark:text-amber-500/70 font-medium ml-1">Jawaban</span>
+                <span className="text-label font-medium text-muted-foreground mb-0.5">Belum Dinilai</span>
+                <span className="text-xl font-medium text-warn tabular-nums leading-none">
+                  {totalBelumEssay} <span className="text-sm text-warn font-medium ml-1">Jawaban</span>
                 </span>
               </div>
             </div>
@@ -100,20 +100,20 @@ function EvaluasiList() {
 
       {/* Filter / Search Bar */}
       <div className="relative mb-6 max-w-sm">
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input 
           placeholder="Cari nama ujian atau mata kuliah..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-10 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800"
+          className="pl-10 bg-card border-border"
         />
       </div>
 
       {/* Data List (Concentric Borders Math & Advanced Soft Shadow) */}
-      <div className="p-1.5 rounded-[20px] border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 shadow-sleek">
-        <div className="rounded-2xl overflow-hidden bg-white dark:bg-slate-900 flex flex-col">
+      <div className="p-1.5 rounded-lg border border-border bg-card">
+        <div className="rounded-lg overflow-hidden bg-card flex flex-col">
           {/* Table Header */}
-          <div className="grid grid-cols-12 gap-4 px-6 py-3 border-b border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900/50 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+          <div className="grid grid-cols-12 gap-4 px-6 py-3 border-b border-border bg-muted/50 text-label font-semibold text-muted-foreground">
             <div className="col-span-12 sm:col-span-5">Daftar Ujian</div>
             <div className="hidden sm:block sm:col-span-2">Mata Kuliah</div>
             <div className="hidden sm:block sm:col-span-3">Progres Penilaian</div>
@@ -124,20 +124,20 @@ function EvaluasiList() {
             <div className="py-24 text-center flex flex-col items-center">
               {search ? (
                 <>
-                  <Search className="h-10 w-10 text-slate-300 dark:text-slate-600 mb-3" />
-                  <span className="text-slate-900 dark:text-slate-100 font-bold">Pencarian Tidak Ditemukan</span>
-                  <span className="text-sm text-slate-500 mt-1">Coba kata kunci lain.</span>
+                  <Search className="h-10 w-10 text-muted-foreground mb-3" />
+                  <span className="text-foreground font-semibold">Pencarian Tidak Ditemukan</span>
+                  <span className="text-sm text-muted-foreground mt-1">Coba kata kunci lain.</span>
                 </>
               ) : (
                 <>
-                  <CheckCircle2 className="h-10 w-10 text-emerald-500 mb-3 opacity-80" />
-                  <span className="text-slate-900 dark:text-slate-100 font-bold">Semua Essay Telah Dinilai</span>
-                  <span className="text-sm text-slate-500 dark:text-slate-400 mt-1">Tidak ada jawaban essay yang menunggu penilaian.</span>
+                  <CheckCircle2 className="h-10 w-10 text-foreground mb-3 opacity-80" />
+                  <span className="text-foreground font-semibold">Semua Essay Telah Dinilai</span>
+                  <span className="text-sm text-muted-foreground mt-1">Tidak ada jawaban essay yang menunggu penilaian.</span>
                 </>
               )}
             </div>
           ) : (
-            <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800/60">
+            <div className="flex flex-col divide-y divide-border">
               {items.map(({ ujian, mk, totalSesi, belumSesi, totalEssay, belumEssay }) => {
                 const isWarning = belumSesi > 0;
                 const gradedEssay = totalEssay - belumEssay;
@@ -148,22 +148,22 @@ function EvaluasiList() {
                     key={ujian.id} 
                     to="/admin/evaluasi/ujian/$id" 
                     params={{ id: ujian.id }}
-                    className="group block transition-all duration-300 ease-spring hover:bg-slate-50 dark:hover:bg-slate-800/30 cursor-pointer"
+                    className="group block transition-all duration-300 ease-spring hover:bg-accent cursor-pointer"
                   >
                     <div className="grid grid-cols-12 gap-4 px-6 py-4 items-center">
                       
                       {/* Col 1: Exam Info */}
                       <div className="col-span-12 sm:col-span-5 flex items-center gap-3.5">
-                        <div className="flex items-center justify-center h-10 w-10 shrink-0 rounded-[10px] bg-slate-100 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/50 group-hover:bg-primary/10 group-hover:border-primary/20 transition-all duration-300 ease-spring">
-                          <ClipboardCheck className="h-5 w-5 text-slate-500 group-hover:text-primary transition-all duration-300 ease-spring" />
+                        <div className="flex items-center justify-center h-10 w-10 shrink-0 rounded-[10px] bg-muted border border-border group-hover:bg-primary/10 group-hover:border-primary/20 transition-all duration-300 ease-spring">
+                          <ClipboardCheck className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-all duration-300 ease-spring" />
                         </div>
                         <div className="min-w-0">
-                          <div className="font-medium text-sm text-slate-900 dark:text-slate-100 truncate group-hover:text-primary transition-colors duration-300 ease-spring">
+                          <div className="font-medium text-sm text-foreground truncate group-hover:text-primary transition-colors duration-300 ease-spring">
                             {ujian.nama}
                           </div>
-                          <div className="flex items-center gap-2 mt-0.5 text-[11px] text-slate-500">
+                          <div className="flex items-center gap-2 mt-0.5 text-label text-muted-foreground">
                             <span className="font-mono">{ujian.id.substring(0, 8)}</span>
-                            <span className="text-slate-300 dark:text-slate-700">•</span>
+                            <span className="text-muted-foreground">•</span>
                             <span className="flex items-center gap-1">
                               <Calendar className="h-3 w-3 translate-y-[-0.5px]" /> {formatDate(ujian.beginAt)}
                             </span>
@@ -174,22 +174,22 @@ function EvaluasiList() {
                       {/* Col 2: Subject Context */}
                       <div className="hidden sm:flex sm:col-span-2 items-center">
                         {mk ? (
-                          <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-[11px] font-bold text-slate-600 dark:text-slate-400 truncate max-w-full">
+                          <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-muted text-label font-semibold text-muted-foreground truncate max-w-full">
                             <BookOpen className="h-3 w-3 shrink-0 translate-y-[-0.5px]" />
                             <span className="truncate">{mk.nama}</span>
                           </span>
                         ) : (
-                          <span className="text-xs text-slate-400 italic">Tanpa mata kuliah</span>
+                          <span className="text-label text-muted-foreground">Tanpa mata kuliah</span>
                         )}
                       </div>
 
                       {/* Col 3: Grading Progress */}
                       <div className="hidden sm:flex sm:col-span-3 flex-col justify-center">
-                        <div className="flex items-center justify-between text-[11px] font-medium text-slate-500 mb-1.5 tabular-nums">
+                        <div className="flex items-center justify-between text-label font-medium text-muted-foreground mb-1.5 tabular-nums">
                           <span>{gradedEssay} / {totalEssay} dinilai</span>
-                          <span className="text-slate-700 dark:text-slate-300">{Math.round(progressPct)}%</span>
+                          <span className="text-foreground">{Math.round(progressPct)}%</span>
                         </div>
-                        <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                        <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
                           <div 
                             className="h-full rounded-full transition-all duration-500 ease-out bg-primary"
                             style={{ width: `${progressPct}%` }} 
@@ -200,15 +200,15 @@ function EvaluasiList() {
                       {/* Col 4: Status & Action */}
                       <div className="hidden sm:flex sm:col-span-2 items-center justify-end gap-4">
                         {isWarning ? (
-                          <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-600 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/40 px-2.5 py-1 rounded-md">
+                          <div className="flex items-center gap-1.5 text-label font-semibold text-warn bg-warn/10 border border-warn/30 px-2.5 py-1 rounded-md">
                             Perlu Dinilai
                           </div>
                         ) : (
-                          <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/40 px-2.5 py-1 rounded-md">
+                          <div className="flex items-center gap-1.5 text-label font-semibold text-primary bg-primary/10 border border-primary/30 px-2.5 py-1 rounded-md">
                             Selesai
                           </div>
                         )}
-                        <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-500 group-hover:translate-x-0.5 transition-all duration-300 ease-spring shrink-0" />
+                        <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-muted-foreground transition-all duration-300 ease-spring shrink-0" />
                       </div>
                     </div>
                   </Link>

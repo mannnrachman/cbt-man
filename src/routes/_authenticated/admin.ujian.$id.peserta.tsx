@@ -102,7 +102,7 @@ function PesertaUjian() {
               <Button
                 variant="outline"
                 size="sm"
-                className="border-rose-200 dark:border-rose-900 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                className="border-destructive/30 text-destructive hover:bg-destructive/10"
                 onClick={() => setDeleteAllOpen(true)}
               >
                 <Trash2 className="mr-1.5 h-4 w-4" /> Hapus Semua Sesi ({sesis.length})
@@ -118,12 +118,12 @@ function PesertaUjian() {
       <AdminPageContent>
         <CardContent className="space-y-4 p-4 sm:p-5">
           <div>
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Peserta yang berhak ikut</h2>
-            <p className="mt-1 text-xs text-muted-foreground">Filter daftar berdasarkan unit atau cari nama peserta.</p>
+            <h2 className="text-sm font-semibold text-foreground">Peserta yang berhak ikut</h2>
+            <p className="mt-1 text-label text-muted-foreground">Filter daftar berdasarkan unit atau cari nama peserta.</p>
           </div>
           <div className="grid gap-3 sm:grid-cols-[minmax(0,280px)_minmax(0,1fr)] sm:items-end">
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Unit</label>
+              <label className="text-label font-medium text-muted-foreground">Unit</label>
               <Select value={selectedUnit} onValueChange={setSelectedUnit}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Filter Unit" />
@@ -137,9 +137,9 @@ function PesertaUjian() {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Cari peserta</label>
+              <label className="text-label font-medium text-muted-foreground">Cari peserta</label>
               <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   type="search"
                   aria-label="Cari peserta"
@@ -152,11 +152,11 @@ function PesertaUjian() {
             </div>
           </div>
           <div className="flex flex-wrap gap-2 border-t pt-3">
-            <span className="text-xs font-medium text-muted-foreground">Unit aktif:</span>
+            <span className="text-label font-medium text-muted-foreground">Unit aktif:</span>
             {unitYangIkut.length > 0 ? unitYangIkut.map((u) => (
-              <span key={u.id} className="rounded-md bg-accent px-2 py-1 text-xs font-medium">{u.nama}</span>
+              <span key={u.id} className="rounded-md bg-accent px-2 py-1 text-label font-medium">{u.nama}</span>
             )) : (
-              <span className="text-xs text-muted-foreground">Belum ada unit peserta</span>
+              <span className="text-label text-muted-foreground">Belum ada unit peserta</span>
             )}
           </div>
         </CardContent>
@@ -166,7 +166,7 @@ function PesertaUjian() {
         <CardContent className="p-0">
           <div className="overflow-x-auto">
           <table className="min-w-[760px] w-full text-sm">
-            <thead className="border-b bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
+            <thead className="border-b bg-muted/40 text-left text-label text-muted-foreground">
               <tr>
                 <th className="w-14 p-4">#</th>
                 <th className="p-4">Username</th>
@@ -182,22 +182,22 @@ function PesertaUjian() {
                 return (
                   <tr key={p.id} className="border-b last:border-0 hover:bg-muted/30">
                     <td className="p-4 text-muted-foreground">{i + 1}</td>
-                    <td className="p-4 font-mono text-xs">{p.username}</td>
+                    <td className="p-4 font-mono text-label">{p.username}</td>
                     <td className="p-4 font-medium">{p.namaLengkap}</td>
                     <td className="p-4">{units.find((u) => u.id === p.unitId)?.nama ?? "-"}</td>
                     <td className="p-4">
                       {!session && (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded text-label font-medium bg-muted text-muted-foreground">
                           Belum Mulai
                         </span>
                       )}
                       {session?.status === "sedang" && (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-medium bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-label font-medium bg-warn/10 text-warn border border-warn/30">
                           <Clock className="h-3 w-3 animate-spin" /> Sedang Ujian
                         </span>
                       )}
                       {session?.status === "selesai" && (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-label font-medium bg-primary/10 text-primary border border-primary/30">
                           <CheckCircle2 className="h-3 w-3" /> Selesai {typeof session.skorTotal === "number" ? `· Skor: ${session.skorTotal}` : ""}
                         </span>
                       )}
@@ -207,14 +207,14 @@ function PesertaUjian() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-8 text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs gap-1 font-medium"
+                          className="h-8 text-destructive hover:text-destructive hover:bg-destructive/10 text-label gap-1 font-medium"
                           onClick={() => setDeleteSessionId(session.id)}
                           title="Hapus sesi ini agar peserta dapat ujian ulang"
                         >
                           <RotateCcw className="h-3.5 w-3.5" /> Hapus Sesi
                         </Button>
                       ) : (
-                        <span className="text-xs text-muted-foreground">-</span>
+                        <span className="text-label text-muted-foreground">-</span>
                       )}
                     </td>
                   </tr>

@@ -83,7 +83,7 @@ function ImportPage() {
         "Opsi E": "Steve Jobs",
         "Kunci Jawaban": "C",
         "Tingkat Kesulitan": 1,
-        Pembahasan: "Vint Cerf dan Bob Kahn merancang protokol TCP/IP dan jaringan ARPANET.",
+        Pembahasan: "Vint Cerf dan Bob Kahn merancang protokol TCP/IP jaringan ARPANET.",
       },
       {
         No: 2,
@@ -152,7 +152,7 @@ function ImportPage() {
     
     setImageMap(newMap);
     setIsUploadingImages(false);
-    toast.success(`${success} gambar berhasil diunggah. Tulis nama file (contoh: ${files[0]?.name ?? 'gambar.jpg'}) di kolom 'Gambar' Excel Anda.`);
+    toast.success(`${success} gambar berhasil diunggah. Tulis nama file ${files[0]?.name ?? 'gambar.jpg'}) di kolom 'Gambar' Excel Anda.`);
   }
 
   async function loadFile(file: File) {
@@ -216,23 +216,23 @@ function ImportPage() {
   return (
     <div className="space-y-6 max-w-5xl pb-12">
       <div>
-        <Link to="/admin/modul" className="text-sm font-medium text-slate-500 hover:text-primary transition-colors">
+        <Link to="/admin/modul" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
           ← Kembali ke Bank Soal
         </Link>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mt-1">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-1">
           Import Soal dari Excel
         </h1>
-        <p className="text-sm text-slate-500 dark:text-slate-400">
+        <p className="text-sm text-muted-foreground">
           Upload file spreadsheet Excel dengan format standar untuk menambahkan banyak soal sekaligus.
         </p>
       </div>
 
       {/* Target Module & Topic Selection */}
-      <Card className="border-slate-200 dark:border-slate-800 shadow-sm">
+      <Card className="border-border">
         <CardContent className="space-y-4 p-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label htmlFor="import-modul" className="text-xs font-bold uppercase tracking-wider text-slate-500">Modul Tujuan</label>
+              <label htmlFor="import-modul" className="text-label font-semibold text-muted-foreground">Modul Tujuan</label>
               <Select
                 disabled={isBusy}
                 value={modulId}
@@ -255,7 +255,7 @@ function ImportPage() {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label htmlFor="import-topik" className="text-xs font-bold uppercase tracking-wider text-slate-500">Topik / Bab Tujuan *</label>
+              <label htmlFor="import-topik" className="text-label font-semibold text-muted-foreground">Topik / Bab Tujuan *</label>
               <Select value={topikId} onValueChange={setTopikId} disabled={isBusy || topiks.length === 0}>
                 <SelectTrigger id="import-topik" className="h-10">
                   <SelectValue placeholder={topiks.length === 0 ? "Modul ini belum memiliki topik" : "Pilih topik"} />
@@ -272,11 +272,11 @@ function ImportPage() {
           </div>
 
           <div className="flex flex-wrap gap-3 pt-2">
-            <Button variant="outline" onClick={downloadTemplate} className="h-10 font-semibold border-indigo-200 dark:border-indigo-900/50 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300">
+            <Button variant="outline" onClick={downloadTemplate} className="h-10 font-semibold border-border hover:bg-accent text-muted-foreground">
               <Download className="mr-2 h-4 w-4" /> Download Template Standar (.xlsx)
             </Button>
             
-            <div className="h-10 w-px bg-slate-200 dark:bg-slate-800 mx-1 hidden sm:block"></div>
+            <div className="h-10 w-px bg-muted mx-1 hidden sm:block"></div>
 
             <input
               ref={imageRef}
@@ -294,7 +294,7 @@ function ImportPage() {
               variant="outline" 
               onClick={() => imageRef.current?.click()} 
               disabled={isBusy}
-              className="h-10 font-semibold border-amber-200 dark:border-amber-900/50 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-700 dark:text-amber-400"
+              className="h-10 font-semibold border-warn/30 hover:bg-warn/10 text-warn"
             >
               {isUploadingImages ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ImagePlus className="mr-2 h-4 w-4" />}
               {Object.keys(imageMap).length > 0 ? `${Object.keys(imageMap).length} Gambar Tersimpan` : "Upload Gambar (Opsional)"}
@@ -312,7 +312,7 @@ function ImportPage() {
                 e.target.value = "";
               }}
             />
-            <Button disabled={isBusy} onClick={() => fileRef.current?.click()} className="h-10 font-semibold bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-500">
+            <Button disabled={isBusy} onClick={() => fileRef.current?.click()} className="h-10 font-semibold bg-foreground hover:bg-foreground/90">
               <Upload className="mr-2 h-4 w-4" /> {isReading ? "Membaca Excel..." : "Pilih File Excel"}
             </Button>
           </div>
@@ -321,12 +321,12 @@ function ImportPage() {
 
       {/* Prominent UX Standard & Constraint Guide */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="rounded-2xl border border-indigo-100 dark:border-indigo-950/60 bg-indigo-50/40 dark:bg-indigo-950/20 p-5 space-y-3">
-          <div className="flex items-center gap-2 font-bold text-sm text-indigo-900 dark:text-indigo-300">
-            <Info className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+        <div className="rounded-lg border border-border bg-muted/40 p-5 space-y-3">
+          <div className="flex items-center gap-2 font-semibold text-sm text-muted-foreground">
+            <Info className="h-4 w-4 text-muted-foreground" />
             Format Standar Excel (Horizontal)
           </div>
-          <ul className="text-xs text-indigo-950/80 dark:text-indigo-200/80 space-y-1.5 list-disc pl-4 leading-relaxed">
+          <ul className="text-label text-muted-foreground space-y-1.5 list-disc pl-4 leading-relaxed">
             <li><strong>Soal</strong>: Tuliskan teks pertanyaan soal.</li>
             <li><strong>Opsi A s/d Opsi E</strong>: Isikan teks pilihan jawaban. Kosongkan untuk soal <em>Essay</em>.</li>
             <li><strong>Kunci Jawaban</strong>: Isikan huruf opsi (<code>A</code>, <code>B</code>, dll.) atau teks jawaban (misal <code>Benar</code>). Untuk <em>Multi Jawaban</em> isikan terpisah koma (contoh: <code>A, C</code>). Kosongkan untuk soal <em>Essay</em>.</li>
@@ -335,34 +335,34 @@ function ImportPage() {
           </ul>
         </div>
 
-        <div className="rounded-2xl border border-amber-200/60 dark:border-amber-900/50 bg-amber-50/40 dark:bg-amber-950/20 p-5 space-y-3">
-          <div className="flex items-center gap-2 font-bold text-sm text-amber-900 dark:text-amber-300">
-            <ImagePlus className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+        <div className="rounded-lg border border-warn/60 bg-warn/10 p-5 space-y-3">
+          <div className="flex items-center gap-2 font-semibold text-sm text-warn">
+            <ImagePlus className="h-4 w-4 text-warn" />
             Cara Mudah Memasukkan Gambar
           </div>
-          <p className="text-xs text-amber-950/80 dark:text-amber-200/80 leading-relaxed">
+          <p className="text-label text-warn leading-relaxed">
             Gambar yang di-<em>copy-paste</em> langsung ke dalam sel Excel <strong>TIDAK DAPAT DIBACA</strong> oleh sistem. 
             <strong>Solusi Praktis:</strong> 
-            Klik tombol <strong className="text-amber-700 dark:text-amber-400">Upload Gambar</strong> di atas, lalu pilih gambar-gambar dari komputer Anda. Setelah itu, cukup ketikkan <strong>nama file</strong> (contoh: <code>gambar1.jpg</code>) di kolom <strong>Gambar</strong> pada Excel. Sistem akan otomatis menyambungkannya!
+            Klik tombol <strong className="text-warn">Upload Gambar</strong> di atas, lalu pilih gambar-gambar dari komputer Anda. Setelah itu, cukup ketikkan <strong>nama file</strong> (contoh: <code>gambar1.jpg</code>) di kolom <strong>Gambar</strong> pada Excel. Sistem akan otomatis menyambungkannya!
           </p>
         </div>
       </div>
 
       {/* Preview Section */}
       {preview.length > 0 && (
-        <Card className="border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        <Card className="border-border overflow-hidden">
           <CardContent className="p-0">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 p-4 bg-slate-50/50 dark:bg-slate-900/50">
-              <div className="text-sm font-medium text-slate-700 dark:text-slate-300">
+            <div className="flex items-center justify-between border-b border-border p-4 bg-muted/50">
+              <div className="text-sm font-medium text-foreground">
                 Preview: <strong>{preview.length}</strong> baris ·{" "}
-                <span className="text-emerald-600 dark:text-emerald-400 font-bold">{preview.filter((r) => r.valid).length} valid</span> ·{" "}
-                <span className="text-rose-600 dark:text-rose-400 font-bold">{preview.filter((r) => !r.valid).length} error</span>
+                <span className="text-primary font-semibold">{preview.filter((r) => r.valid).length} valid</span> ·{" "}
+                <span className="text-destructive font-semibold">{preview.filter((r) => !r.valid).length} error</span>
               </div>
               <Button
                 size="sm"
                 onClick={commit}
                 disabled={!preview.some((r) => r.valid) || isBusy}
-                className="font-semibold bg-emerald-600 hover:bg-emerald-700 text-white"
+                className="font-semibold bg-foreground hover:bg-foreground/85 text-background"
               >
                 {isSaving ? (
                   <>
@@ -378,8 +378,8 @@ function ImportPage() {
               </Button>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead className="border-b border-slate-100 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-800/40 text-left font-bold text-slate-500">
+              <table className="w-full text-label">
+                <thead className="border-b border-border bg-muted/50 text-left font-semibold text-muted-foreground">
                   <tr>
                     <th className="p-3 w-12 text-center">#</th>
                     <th className="p-3">Pertanyaan</th>
@@ -389,21 +389,21 @@ function ImportPage() {
                     <th className="p-3 w-40">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                <tbody className="divide-y divide-border">
                   {preview.map((r, i) => (
-                    <tr key={i} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
-                      <td className="p-3 text-center font-mono font-medium text-slate-400">{i + 1}</td>
-                      <td className="p-3 max-w-md font-medium text-slate-900 dark:text-slate-100 truncate">{r.soal?.detail ?? "-"}</td>
-                      <td className="p-3 uppercase font-bold text-slate-500">{r.soal?.tipe ?? "-"}</td>
+                    <tr key={i} className="hover:bg-accent transition-colors">
+                      <td className="p-3 text-center font-mono font-medium text-muted-foreground">{i + 1}</td>
+                      <td className="p-3 max-w-md font-medium text-foreground truncate">{r.soal?.detail ?? "-"}</td>
+                      <td className="p-3 font-semibold text-muted-foreground">{r.soal?.tipe ?? "-"}</td>
                       <td className="p-3 capitalize">{r.soal?.kesulitan ?? "-"}</td>
                       <td className="p-3 font-mono">{r.soal?.jawaban?.length ?? 0} opsi</td>
                       <td className="p-3">
                         {r.valid ? (
-                          <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold">
+                          <span className="inline-flex items-center gap-1 text-primary font-semibold">
                             <Check className="h-3.5 w-3.5" /> Ready
                           </span>
                         ) : (
-                          <span className="text-rose-600 dark:text-rose-400 font-medium">
+                          <span className="text-destructive font-medium">
                             ✗ {r.error}
                           </span>
                         )}

@@ -99,11 +99,11 @@ function AnalisisPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 pb-12">
-      <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6 rounded-xl border shadow-sm">
+      <div className="p-6 rounded-lg border">
         <Link to="/admin/analitik" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 w-fit mb-3">
           ← Kembali ke daftar analitik
         </Link>
-        <h1 className="text-2xl font-bold tracking-tight">Analisis Butir Soal</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Analisis Butir Soal</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Analisis komprehensif tingkat kesukaran, indeks diskriminasi (metode upper-lower 27%), dan efektivitas daya pengecoh opsi.
         </p>
@@ -112,7 +112,7 @@ function AnalisisPage() {
       <Card>
         <CardContent className="flex flex-wrap items-end gap-3 p-4">
           <div className="min-w-[260px]">
-            <label className="text-xs font-medium text-muted-foreground">Paket ujian</label>
+            <label className="text-label font-medium text-muted-foreground">Paket ujian</label>
             <Select value={ujianId} onValueChange={setUjianId}>
               <SelectTrigger className="mt-1">
                 <SelectValue />
@@ -133,7 +133,7 @@ function AnalisisPage() {
             <Download className="mr-1.5 h-4 w-4" />
             Export Excel
           </Button>
-          <span className="text-xs text-muted-foreground self-center">
+          <span className="text-label text-muted-foreground self-center">
             {sesis.length} sesi selesai · {stats.length} soal dianalisis
           </span>
         </CardContent>
@@ -143,38 +143,38 @@ function AnalisisPage() {
         {stats.map((s, i) => {
           const soal = soals.find((x) => x.id === s.soalId);
           return (
-            <Card key={s.soalId} className="shadow-sm border ring-1 ring-border/30 overflow-hidden">
+            <Card key={s.soalId} className="border ring-1 ring-border/30 overflow-hidden">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b bg-muted/20 p-4">
                 <div className="flex items-center gap-2">
-                  <Badge variant="default" className="font-bold">#{i + 1}</Badge>
-                  <Badge variant="outline" className="uppercase font-semibold tracking-wider text-[10px]">
+                  <Badge variant="default" className="font-semibold">#{i + 1}</Badge>
+                  <Badge variant="outline" className="font-semibold text-label">
                     {soal?.tipe}
                   </Badge>
                 </div>
-                <div className="flex flex-wrap items-center gap-3 text-xs">
-                  <div className="flex items-center gap-1.5 bg-background border px-2.5 py-1 rounded-lg shadow-sm">
+                <div className="flex flex-wrap items-center gap-3 text-label">
+                  <div className="flex items-center gap-1.5 bg-background border px-2.5 py-1 rounded-lg">
                     <Target className="h-3.5 w-3.5 text-muted-foreground" />
                     <span className="font-medium text-muted-foreground">TK:</span>
                     <strong className="text-foreground">{Math.round(s.tingkatKesukaran * 1000) / 10}%</strong>
                     <Badge
                       variant={s.tingkatKesukaran > 0.7 ? "default" : s.tingkatKesukaran < 0.3 ? "destructive" : "secondary"}
-                      className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0"
+                      className="text-label font-semibold px-1.5 py-0"
                     >
                       {labelKesukaran(s.tingkatKesukaran)}
                     </Badge>
                   </div>
-                  <div className="flex items-center gap-1.5 bg-background border px-2.5 py-1 rounded-lg shadow-sm">
+                  <div className="flex items-center gap-1.5 bg-background border px-2.5 py-1 rounded-lg">
                     <PercentSquare className="h-3.5 w-3.5 text-muted-foreground" />
                     <span className="font-medium text-muted-foreground">DK:</span>
                     <strong className="text-foreground">{Math.round(s.indeksDiskriminasi * 100) / 100}</strong>
                     <Badge
                       variant={s.indeksDiskriminasi >= 0.4 ? "default" : s.indeksDiskriminasi <= 0.19 ? "destructive" : "secondary"}
-                      className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0"
+                      className="text-label font-semibold px-1.5 py-0"
                     >
                       {labelDiskriminasi(s.indeksDiskriminasi)}
                     </Badge>
                   </div>
-                  <div className="flex items-center gap-1.5 bg-background border px-2.5 py-1 rounded-lg shadow-sm">
+                  <div className="flex items-center gap-1.5 bg-background border px-2.5 py-1 rounded-lg">
                     <AlertCircle className="h-3.5 w-3.5 text-muted-foreground" />
                     <strong>{s.jumlahBenar}</strong> <span className="text-muted-foreground">/ {s.jumlahMengerjakan} benar</span>
                   </div>
@@ -182,8 +182,8 @@ function AnalisisPage() {
               </div>
               <CardContent className="p-4 space-y-4">
                 {soal && (
-                  <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800">
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2 block">
+                  <div className="p-4 rounded-lg bg-muted border border-border">
+                    <span className="text-label font-semibold text-muted-foreground mb-2 block">
                       Pertanyaan Soal
                     </span>
                     <div className="prose prose-slate dark:prose-invert max-w-none text-foreground text-base md:text-[15px] font-medium leading-relaxed">
@@ -193,21 +193,21 @@ function AnalisisPage() {
                 )}
 
                 {soal && soal.tipe !== "essay" && (
-                  <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-4 mt-2">
+                  <div className="grid grid-cols-2 gap-2 text-label sm:grid-cols-4 mt-2">
                     {soal.jawaban.map((o, idx) => (
                       <div
                         key={o.id}
                         className={`rounded-lg border p-2 flex items-center justify-between ${
-                          o.benar ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400 font-medium" : "bg-muted/20 border-border"
+                          o.benar ? "bg-primary/10 border-primary text-primary font-medium" : "bg-muted/20 border-border"
                         }`}
                       >
                         <div>
-                          <span className="font-mono bg-background border px-1.5 py-0.5 rounded shadow-sm mr-1.5 text-foreground">
+                          <span className="font-mono bg-background border px-1.5 py-0.5 rounded mr-1.5 text-foreground">
                             {String.fromCharCode(65 + idx)}
                           </span>
                           <span className="text-muted-foreground">dipilih:</span> <strong className="text-foreground">{s.dayaPengecoh[o.id] ?? 0}</strong>
                         </div>
-                        {o.benar && <Badge variant="default" className="text-[10px] bg-emerald-600">Kunci</Badge>}
+                        {o.benar && <Badge variant="default" className="text-label bg-primary">Kunci</Badge>}
                       </div>
                     ))}
                   </div>

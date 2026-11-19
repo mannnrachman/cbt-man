@@ -36,10 +36,10 @@ function Leaderboard() {
               const mm = Math.floor(dur / 60), ss = dur % 60;
               return (
                 <tr key={s.id} className="border-b last:border-0">
-                  <td className="p-3 font-bold">{i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : i + 1}</td>
+                  <td className="p-3 font-semibold">{i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : i + 1}</td>
                   <td className="p-3">{u?.namaLengkap}</td>
                   <td className="p-3 font-medium">{s.skorTotal} / {s.maxSkor}</td>
-                  <td className="p-3 text-xs">{mm}m {ss}s</td>
+                  <td className="p-3 text-label">{mm}m {ss}s</td>
                 </tr>
               );
             })}

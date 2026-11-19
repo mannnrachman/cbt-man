@@ -16,6 +16,7 @@ export type ConfirmDialogRequest = {
 	confirmLabel?: string;
 	cancelLabel?: string;
 	destructive?: boolean;
+	icon?: ReactNode;
 };
 
 type PendingRequest = ConfirmDialogRequest & {
@@ -51,7 +52,7 @@ export function ConfirmDialog(props: {
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="sm:max-w-md">
 				<DialogHeader>
-				<DialogTitle className={`flex items-center gap-2 ${destructive ? "text-rose-600" : "text-foreground"}`}>
+				<DialogTitle className={`flex items-center gap-2 ${destructive ? "text-destructive" : "text-foreground"}`}>
 					{icon ?? <Trash2 className="h-5 w-5" />}
 					{title}
 				</DialogTitle>
@@ -105,6 +106,7 @@ export function useConfirmDialog(): {
 			confirmLabel={pending?.confirmLabel}
 			cancelLabel={pending?.cancelLabel}
 			destructive={pending?.destructive}
+			icon={pending?.icon}
 			onOpenChange={(open) => {
 				if (!open) close(false);
 			}}

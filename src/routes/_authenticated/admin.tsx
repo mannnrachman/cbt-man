@@ -8,7 +8,6 @@ import {
 } from "@tanstack/react-router";
 import { useAuthStore } from "@/lib/cbt/auth-store";
 import { configRepo, hydrateRepos } from "@/lib/cbt/repos";
-import { useThemeStore } from "@/lib/cbt/theme-store";
 import { type AppConfig, type NavKey, type Role } from "@/lib/cbt/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -63,14 +62,14 @@ type RouteUser = { role: Role };
 type NavItem = {
   to: string;
   label: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number; "aria-hidden"?: boolean | "true" | "false" }>;
   exact?: boolean;
 };
 
 type NavGroup = {
   id: string;
   label: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number; "aria-hidden"?: boolean | "true" | "false" }>;
   items: NavItem[];
 };
 
@@ -211,14 +210,14 @@ function SidebarLink({ item, isActive, sidebarCollapsed }: { item: NavItem; isAc
       aria-current={isActive ? "page" : undefined}
       title={sidebarCollapsed ? item.label : undefined}
       className={cn(
-        "flex items-center gap-3 rounded-lg px-3 py-2 text-xs transition-colors duration-150 md:text-sm",
+        "flex items-center gap-3 rounded-md border-l-2 px-3 py-2.5 text-ui font-semibold transition-colors",
         sidebarCollapsed && "lg:justify-center lg:px-0",
         isActive
-          ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 font-semibold shadow-sm"
-          : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-slate-100",
+          ? "border-transparent bg-accent text-foreground"
+          : "border-transparent text-muted-foreground hover:bg-accent hover:text-foreground",
       )}
     >
-      <Icon className="h-4 w-4 shrink-0" />
+      <Icon strokeWidth={2.25} className={cn("h-6 w-6 shrink-0", isActive && "text-foreground")} />
       <span className={cn("leading-snug", sidebarCollapsed && "lg:sr-only")}>{item.label}</span>
     </Link>
   );
@@ -249,7 +248,6 @@ function AdminLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const cfg = configRepo.get();
   const appName = cfg.appName;
-  const setAppTheme = useThemeStore((s) => s.setTheme);
 
   const [theme, setTheme] = useState("light");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -269,6 +267,7 @@ function AdminLayout() {
   );
   const activeNavItem = activeGroup?.items.find((item) => isNavItemActive(item, pathname))
     ?? (isNavItemActive(dashboardNavItem, pathname) ? dashboardNavItem : undefined);
+  const HeaderIcon = activeNavItem?.icon ?? dashboardNavItem.icon;
   const userInitials = user.namaLengkap
     .trim()
     .split(/\s+/)
@@ -295,7 +294,6 @@ function AdminLayout() {
 
   const toggleTheme = () => {
     const next = theme === "light" ? "dark" : "light";
-    if (next === "dark") setAppTheme("default");
     setTheme(next);
     localStorage.setItem("theme", next);
     if (next === "dark") document.documentElement.classList.add("dark");
@@ -308,40 +306,40 @@ function AdminLayout() {
   }, [pathname, visibleNavGroups]);
 
   return (
-    <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+    <div className="min-h-screen bg-background text-foreground">
       <div className="flex">
         
         {/* Mobile Menu Overlay */}
         {mobileMenuOpen && (
           <div 
-            className="fixed inset-0 z-40 bg-slate-900/40 lg:hidden backdrop-blur-sm transition-opacity"
+            className="fixed inset-0 z-40 bg-black/50 lg:hidden"
             onClick={() => setMobileMenuOpen(false)}
           />
         )}
 
         {/* Sidebar */}
         <aside className={cn(
-            "w-64 shrink-0 border-r border-slate-200 bg-white transition-[width] duration-200 dark:border-slate-800 dark:bg-slate-950 lg:sticky lg:top-0 lg:block lg:h-screen lg:overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-            sidebarCollapsed ? "lg:w-16" : "lg:w-64",
-            mobileMenuOpen ? "fixed inset-y-0 left-0 z-50 h-screen overflow-y-auto shadow-xl" : "hidden",
+            "shell-sidebar w-72 shrink-0 border-r border-border bg-card transition-[width] duration-200 lg:sticky lg:top-0 lg:block lg:h-screen lg:overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+            sidebarCollapsed ? "lg:w-16" : "lg:w-72",
+            mobileMenuOpen ? "fixed inset-y-0 left-0 z-50 h-screen overflow-y-auto" : "hidden",
           )} id="admin-sidebar">
             <div className={cn(
-              "flex h-16 items-center border-b border-slate-200 dark:border-slate-800",
-              sidebarCollapsed ? "justify-between px-2 lg:flex-col lg:justify-center lg:gap-1" : "justify-between px-5",
+              "flex h-16 items-center border-b border-border",
+              sidebarCollapsed ? "justify-between px-2 lg:h-auto lg:flex-col lg:justify-center lg:gap-2 lg:py-3" : "justify-between px-5",
             )}>
-              <div className={cn("flex min-w-0 items-center gap-3", sidebarCollapsed && "lg:justify-center")} title={sidebarCollapsed ? appName : undefined}>
+              <div className={cn("flex min-w-0 items-center gap-3 rounded-lg bg-primary px-3 py-1.5 text-primary-foreground", sidebarCollapsed && "lg:justify-center lg:px-1.5")} title={sidebarCollapsed ? appName : undefined}>
                 {cfg.appLogo ? (
-                  <img src={cfg.appLogo} alt="Logo" className={cn("h-7 w-auto object-contain", sidebarCollapsed && "lg:h-7 lg:w-7")} />
+                  <img src={cfg.appLogo} alt="" className={cn("h-7 w-auto object-contain", sidebarCollapsed && "lg:h-7 lg:w-7")} />
                 ) : (
-                  <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground font-bold text-base shadow-sm">
-                    Z
+                  <span aria-hidden="true" className="grid h-8 w-8 place-items-center rounded-md bg-primary-foreground text-primary text-ui font-semibold">
+                    {appName.trim().charAt(0).toUpperCase() || "C"}
                   </span>
                 )}
-                <span className={cn("truncate text-base font-bold tracking-tight text-slate-900 dark:text-slate-100", sidebarCollapsed && "lg:hidden")}>{appName}</span>
+                <span className={cn("truncate text-base font-semibold tracking-tight text-primary-foreground", sidebarCollapsed && "lg:hidden")}>{appName}</span>
               </div>
               <div className="flex items-center gap-1">
                 {mobileMenuOpen && (
-                  <Button variant="ghost" size="icon" title="Tutup menu navigasi" aria-label="Tutup menu navigasi" className="lg:hidden h-8 w-8 text-slate-500 hover:text-slate-900" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" size="icon" title="Tutup menu navigasi" aria-label="Tutup menu navigasi" className="lg:hidden h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>
                     <X className="h-5 w-5" />
                   </Button>
                 )}
@@ -352,7 +350,7 @@ function AdminLayout() {
                   aria-label={sidebarCollapsed ? "Lebarkan sidebar" : "Ciutkan sidebar"}
                   aria-controls="admin-sidebar"
                   aria-pressed={sidebarCollapsed}
-                  className="hidden h-8 w-8 shrink-0 text-slate-500 hover:bg-slate-100 hover:text-slate-900 lg:inline-flex dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-100"
+                  className="hidden h-8 w-8 shrink-0 text-muted-foreground hover:bg-accent hover:text-foreground lg:inline-flex"
                   onClick={() => setSidebarCollapsed((collapsed) => !collapsed)}
                 >
                   {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
@@ -382,15 +380,15 @@ function AdminLayout() {
                       title={sidebarCollapsed ? group.label : undefined}
                       onClick={() => setOpenGroupId(isOpen ? undefined : group.id)}
                       className={cn(
-                        "flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wider transition-colors duration-150",
+                        "flex w-full items-center justify-between gap-3 rounded-md px-3 py-2.5 text-left text-ui font-semibold transition-colors",
                         sidebarCollapsed && "lg:justify-center lg:px-0",
                         group.items.some((item) => isNavItemActive(item, pathname))
-                          ? "bg-slate-100 text-slate-900 dark:bg-slate-900 dark:text-slate-100"
-                          : "text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-100",
+                          ? "text-foreground"
+                          : "text-muted-foreground hover:bg-accent hover:text-foreground",
                       )}
                     >
                       <span className="flex min-w-0 items-center gap-3">
-                        <GroupIcon className="h-4 w-4 shrink-0" />
+                        <GroupIcon strokeWidth={2.25} className="h-6 w-6 shrink-0" />
                         <span className={cn("truncate", sidebarCollapsed && "lg:sr-only")}>{group.label}</span>
                       </span>
                       <ChevronDown
@@ -404,7 +402,7 @@ function AdminLayout() {
                     </button>
 
                     {isOpen && (
-                      <div id={panelId} className={cn("ml-4 mt-1 flex flex-col gap-1 border-l border-slate-200 pl-2 dark:border-slate-800", sidebarCollapsed && "lg:ml-0 lg:border-l-0 lg:pl-0")}>
+                      <div id={panelId} className={cn("ml-4 mt-1 flex flex-col gap-1 border-l border-border pl-2", sidebarCollapsed && "lg:ml-0 lg:border-l-0 lg:pl-0")}>
                         {group.items.map((item) => (
                           <SidebarLink
                             key={item.to}
@@ -423,56 +421,59 @@ function AdminLayout() {
 
         <div className="flex min-h-screen flex-1 flex-col min-w-0">
 
-          <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 shadow-sm lg:px-6 dark:border-slate-800">
+          <header className="sticky top-0 z-30 flex items-center justify-between gap-4 bg-background px-4 py-4 lg:px-6">
             <div className="flex min-w-0 items-center gap-3">
               <Button
                 variant="ghost"
                 size="icon"
                 title="Buka menu navigasi"
                 aria-label="Buka menu navigasi"
-                className="lg:hidden h-9 w-9 rounded-lg bg-[#e6f5f3] hover:bg-[#d4efec]"
+                className="shrink-0 lg:hidden"
                 onClick={() => setMobileMenuOpen(true)}
               >
-                <span className="grid h-7 w-7 place-items-center rounded-md bg-[#0f766e]"><Menu className="h-4 w-4 text-white" /></span>
+                <Menu className="h-5 w-5" />
               </Button>
-              <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 shadow-sm">
-                {activeGroup && (
-                  <>
-                    <span className="hidden max-w-48 truncate text-xs font-medium text-slate-500 sm:inline">{activeGroup.label}</span>
-                    <ChevronRight aria-hidden="true" className="hidden h-3.5 w-3.5 shrink-0 text-slate-400 sm:block" />
-                  </>
-                )}
-                <span aria-current="page" className="truncate text-sm font-semibold text-slate-900">
+              <HeaderIcon aria-hidden="true" strokeWidth={2.25} className="hidden h-8 w-8 shrink-0 text-foreground sm:block" />
+              <div className="min-w-0">
+                <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5 text-label text-muted-foreground">
+                  {activeGroup && (
+                    <>
+                      <span className="hidden max-w-48 truncate sm:inline">{activeGroup.label}</span>
+                      <ChevronRight aria-hidden="true" className="hidden h-3.5 w-3.5 shrink-0 sm:block" />
+                    </>
+                  )}
+                  <span aria-current="page" className="truncate">
+                    {activeNavItem?.label ?? "Administrasi"}
+                  </span>
+                </nav>
+                {/* AdminPageHeader portals the page's own title and description in here. */}
+                <div id="admin-page-title" className="peer min-w-0" />
+                <p className="hidden truncate text-title font-semibold tracking-tight text-foreground peer-empty:block">
                   {activeNavItem?.label ?? "Administrasi"}
-                </span>
-              </nav>
+                </p>
+              </div>
             </div>
             <div className="flex shrink-0 items-center gap-2">
-              <div role="group" aria-label={`Akun ${user.namaLengkap}`} className="hidden max-w-[260px] items-center gap-2 rounded-xl border border-slate-200 bg-white px-2 py-1 shadow-sm sm:flex">
-                <span aria-hidden="true" className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#0f766e] text-xs font-bold text-white">
+              <div role="group" aria-label={`Akun ${user.namaLengkap}`} className="hidden max-w-[300px] items-center gap-2 px-2 sm:flex">
+                <span aria-hidden="true" className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary text-label font-semibold text-primary-foreground">
                   {userInitials}
                 </span>
-                <span className="max-w-36 truncate text-sm font-semibold text-slate-900">{user.namaLengkap}</span>
-                <Badge variant="outline" className="shrink-0 border-[#0f9b8e]/30 bg-[#0f9b8e]/10 px-2 text-[10px] font-semibold uppercase text-[#0b5f58]">
+                <span className="max-w-36 truncate text-ui font-medium text-foreground">{user.namaLengkap}</span>
+                <Badge variant="outline" className="shrink-0">
                   {user.role}
                 </Badge>
               </div>
               <Button
-                variant="ghost"
+                variant="outline"
                 size="icon"
-                className="h-9 w-9 rounded-lg bg-slate-100 hover:bg-slate-200"
                 onClick={toggleTheme}
                 title="Ganti tema"
                 aria-label="Ganti tema"
               >
-                <span className="grid h-7 w-7 place-items-center rounded-md bg-[#0f766e]">
-                  {theme === "dark" ? <Sun className="h-4 w-4 text-white" /> : <Moon className="h-4 w-4 text-white" />}
-                </span>
+                {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
               <Button
                 variant="outline"
-                size="sm"
-                className="h-9 border-slate-200 bg-white text-xs font-medium text-slate-800 transition-colors hover:border-slate-300 hover:bg-slate-50"
                 title="Keluar"
                 aria-label="Keluar"
                 onClick={async () => {
@@ -480,7 +481,7 @@ function AdminLayout() {
                   window.location.assign("/login-admin");
                 }}
               >
-                <span className="grid h-6 w-6 place-items-center rounded-md bg-[#0f766e]"><LogOut className="h-3.5 w-3.5 text-white" /></span>
+                <LogOut className="h-4 w-4" />
                 <span className="hidden sm:inline">Keluar</span>
               </Button>
             </div>

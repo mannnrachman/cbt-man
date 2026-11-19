@@ -38,36 +38,36 @@ function UnitAkademikExplorer() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <FolderTree className="h-5 w-5 text-primary" />
+          <h2 className="text-xl font-semibold tracking-tight text-foreground flex items-center gap-2">
+            <FolderTree className="h-5 w-5 text-foreground" />
             Struktur Organisasi Akademik
           </h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <p className="text-label text-muted-foreground mt-0.5">
             Kelola hierarki Fakultas, Program Studi, dan Kelas / Rombel perkuliahan.
           </p>
         </div>
       </div>
 
       <Tabs defaultValue="fakultas" className="w-full">
-        <TabsList className="grid grid-cols-3 w-full max-w-md h-10 p-1 bg-slate-100 dark:bg-slate-800">
-          <TabsTrigger value="fakultas" className="text-xs font-semibold flex items-center gap-1.5">
+        <TabsList className="grid grid-cols-3 w-full max-w-md h-10 p-1 bg-muted">
+          <TabsTrigger value="fakultas" className="text-label font-semibold flex items-center gap-1.5">
             <Building2 className="h-3.5 w-3.5" />
             Fakultas
-            <span className="ml-1 px-1.5 py-0.2 rounded-full bg-slate-200 dark:bg-slate-700 text-[10px]">
+            <span className="ml-1 px-1.5 py-0.2 rounded-md bg-muted text-label">
               {fakultasList.length}
             </span>
           </TabsTrigger>
-          <TabsTrigger value="prodi" className="text-xs font-semibold flex items-center gap-1.5">
+          <TabsTrigger value="prodi" className="text-label font-semibold flex items-center gap-1.5">
             <Library className="h-3.5 w-3.5" />
             Program Studi
-            <span className="ml-1 px-1.5 py-0.2 rounded-full bg-slate-200 dark:bg-slate-700 text-[10px]">
+            <span className="ml-1 px-1.5 py-0.2 rounded-md bg-muted text-label">
               {prodiList.length}
             </span>
           </TabsTrigger>
-          <TabsTrigger value="kelas" className="text-xs font-semibold flex items-center gap-1.5">
+          <TabsTrigger value="kelas" className="text-label font-semibold flex items-center gap-1.5">
             <Users className="h-3.5 w-3.5" />
             Kelas / Rombel
-            <span className="ml-1 px-1.5 py-0.2 rounded-full bg-slate-200 dark:bg-slate-700 text-[10px]">
+            <span className="ml-1 px-1.5 py-0.2 rounded-md bg-muted text-label">
               {kelasList.length}
             </span>
           </TabsTrigger>
@@ -140,38 +140,38 @@ function FakultasSection({ data, onUpdated }: { data: UnitAkademik[]; onUpdated:
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-      <Card className="lg:col-span-2 border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
-        <CardHeader className="bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800 pb-3 flex flex-row items-center justify-between gap-4">
+      <Card className="lg:col-span-2 border-border overflow-hidden">
+        <CardHeader className="bg-muted/50 border-b border-border pb-3 flex flex-row items-center justify-between gap-4">
           <CardTitle className="text-base font-semibold flex items-center gap-2">
-            <Building2 className="h-4 w-4 text-primary" />
+            <Building2 className="h-4 w-4 text-foreground" />
             Daftar Fakultas ({filtered.length})
           </CardTitle>
           <div className="relative w-48 sm:w-64">
-            <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
+            <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
             <Input
               placeholder="Cari fakultas..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-8 pl-8 text-xs"
+              className="h-8 pl-8 text-label"
             />
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="divide-y divide-slate-100 dark:divide-slate-800/80">
+          <div className="divide-y divide-border">
             {filtered.map((f) => (
               <div
                 key={f.id}
-                className="flex items-center justify-between p-3.5 px-5 hover:bg-slate-50/70 dark:hover:bg-slate-900/50 transition-colors"
+                className="flex items-center justify-between p-3.5 px-5 hover:bg-accent transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 border border-blue-100 dark:border-blue-900/40">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-muted-foreground border border-border">
                     <Building2 className="h-4 w-4" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                    <h4 className="text-sm font-semibold text-foreground">
                       {f.nama}
                     </h4>
-                    <span className="text-[11px] text-muted-foreground uppercase tracking-wider font-mono">
+                    <span className="text-label text-muted-foreground font-mono">
                       ID: {f.id}
                     </span>
                   </div>
@@ -180,7 +180,7 @@ function FakultasSection({ data, onUpdated }: { data: UnitAkademik[]; onUpdated:
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="h-8 w-8 text-slate-500 hover:text-primary"
+                    className="h-8 w-8 text-muted-foreground hover:text-primary"
                     onClick={() => setForm({ id: f.id, nama: f.nama })}
                     title="Edit"
                   >
@@ -189,7 +189,7 @@ function FakultasSection({ data, onUpdated }: { data: UnitAkademik[]; onUpdated:
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="h-8 w-8 text-slate-500 hover:text-destructive"
+                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
                     onClick={() => remove(f.id)}
                     title="Hapus"
                   >
@@ -199,7 +199,7 @@ function FakultasSection({ data, onUpdated }: { data: UnitAkademik[]; onUpdated:
               </div>
             ))}
             {filtered.length === 0 && (
-              <div className="p-8 text-center text-xs text-muted-foreground">
+              <div className="p-8 text-center text-label text-muted-foreground">
                 Belum ada data fakultas. Tambahkan melalui form di samping.
               </div>
             )}
@@ -207,24 +207,24 @@ function FakultasSection({ data, onUpdated }: { data: UnitAkademik[]; onUpdated:
         </CardContent>
       </Card>
 
-      <Card className="border-slate-200 dark:border-slate-800 shadow-xs">
-        <CardHeader className="bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800 pb-3">
+      <Card className="border-border">
+        <CardHeader className="bg-muted/50 border-b border-border pb-3">
           <CardTitle className="text-base font-semibold">
             {form.id ? "Edit Fakultas" : "Tambah Fakultas Baru"}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-5 space-y-4">
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium">Nama Fakultas *</Label>
+            <Label className="text-label font-medium">Nama Fakultas *</Label>
             <Input
-              placeholder="Contoh: Fakultas Kedokteran"
+              placeholder="Fakultas Kedokteran"
               value={form.nama}
               onChange={(e) => setForm({ ...form, nama: e.target.value })}
-              className="text-xs"
+              className="text-label"
             />
           </div>
           <div className="flex gap-2 pt-2">
-            <Button onClick={save} disabled={submitting} className="flex-1 text-xs h-9">
+            <Button onClick={save} disabled={submitting} className="flex-1 text-label h-9">
               <Plus className="mr-1.5 h-3.5 w-3.5" />
               {form.id ? "Simpan Perubahan" : "Tambahkan"}
             </Button>
@@ -232,7 +232,7 @@ function FakultasSection({ data, onUpdated }: { data: UnitAkademik[]; onUpdated:
               <Button
                 variant="outline"
                 onClick={() => setForm({ id: "", nama: "" })}
-                className="text-xs h-9"
+                className="text-label h-9"
               >
                 Batal
               </Button>
@@ -312,43 +312,43 @@ function ProdiSection({
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-      <Card className="lg:col-span-2 border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
-        <CardHeader className="bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800 pb-3 flex flex-row items-center justify-between gap-4">
+      <Card className="lg:col-span-2 border-border overflow-hidden">
+        <CardHeader className="bg-muted/50 border-b border-border pb-3 flex flex-row items-center justify-between gap-4">
           <CardTitle className="text-base font-semibold flex items-center gap-2">
-            <Library className="h-4 w-4 text-primary" />
+            <Library className="h-4 w-4 text-foreground" />
             Daftar Program Studi ({filtered.length})
           </CardTitle>
           <div className="relative w-48 sm:w-64">
-            <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
+            <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
             <Input
               placeholder="Cari program studi..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-8 pl-8 text-xs"
+              className="h-8 pl-8 text-label"
             />
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="divide-y divide-slate-100 dark:divide-slate-800/80">
+          <div className="divide-y divide-border">
             {filtered.map((p) => {
               const parentFak = fakultas.find((f) => f.id === p.parentId);
               return (
                 <div
                   key={p.id}
-                  className="flex items-center justify-between p-3.5 px-5 hover:bg-slate-50/70 dark:hover:bg-slate-900/50 transition-colors"
+                  className="flex items-center justify-between p-3.5 px-5 hover:bg-accent transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 border border-indigo-100 dark:border-indigo-900/40">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-muted-foreground border border-border">
                       <Library className="h-4 w-4" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                      <h4 className="text-sm font-semibold text-foreground">
                         {p.nama}
                       </h4>
-                      <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-2 mt-0.5 text-label text-muted-foreground">
                         <span>
                           Fakultas:{" "}
-                          <strong className="text-slate-700 dark:text-slate-300 font-medium">
+                          <strong className="text-foreground font-medium">
                             {parentFak?.nama || "(Tanpa Fakultas)"}
                           </strong>
                         </span>
@@ -359,7 +359,7 @@ function ProdiSection({
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="h-8 w-8 text-slate-500 hover:text-primary"
+                      className="h-8 w-8 text-muted-foreground hover:text-primary"
                       onClick={() =>
                         setForm({ id: p.id, nama: p.nama, fakultasId: p.parentId || "none" })
                       }
@@ -370,7 +370,7 @@ function ProdiSection({
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="h-8 w-8 text-slate-500 hover:text-destructive"
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
                       onClick={() => remove(p.id)}
                       title="Hapus"
                     >
@@ -381,7 +381,7 @@ function ProdiSection({
               );
             })}
             {filtered.length === 0 && (
-              <div className="p-8 text-center text-xs text-muted-foreground">
+              <div className="p-8 text-center text-label text-muted-foreground">
                 Belum ada data program studi. Tambahkan melalui form di samping.
               </div>
             )}
@@ -389,29 +389,29 @@ function ProdiSection({
         </CardContent>
       </Card>
 
-      <Card className="border-slate-200 dark:border-slate-800 shadow-xs">
-        <CardHeader className="bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800 pb-3">
+      <Card className="border-border">
+        <CardHeader className="bg-muted/50 border-b border-border pb-3">
           <CardTitle className="text-base font-semibold">
             {form.id ? "Edit Program Studi" : "Tambah Program Studi"}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-5 space-y-4">
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium">Nama Program Studi *</Label>
+            <Label className="text-label font-medium">Nama Program Studi *</Label>
             <Input
-              placeholder="Contoh: S1 Pendidikan Dokter"
+              placeholder="S1 Pendidikan Dokter"
               value={form.nama}
               onChange={(e) => setForm({ ...form, nama: e.target.value })}
-              className="text-xs"
+              className="text-label"
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium">Fakultas Induk *</Label>
+            <Label className="text-label font-medium">Fakultas Induk *</Label>
             <Select
               value={form.fakultasId}
               onValueChange={(val) => setForm({ ...form, fakultasId: val })}
             >
-              <SelectTrigger className="text-xs h-9">
+              <SelectTrigger className="text-label h-9">
                 <SelectValue placeholder="Pilih Fakultas" />
               </SelectTrigger>
               <SelectContent>
@@ -419,7 +419,7 @@ function ProdiSection({
                   Pilih Fakultas
                 </SelectItem>
                 {fakultas.map((f) => (
-                  <SelectItem key={f.id} value={f.id} className="text-xs">
+                  <SelectItem key={f.id} value={f.id} className="text-label">
                     {f.nama}
                   </SelectItem>
                 ))}
@@ -427,7 +427,7 @@ function ProdiSection({
             </Select>
           </div>
           <div className="flex gap-2 pt-2">
-            <Button onClick={save} disabled={submitting} className="flex-1 text-xs h-9">
+            <Button onClick={save} disabled={submitting} className="flex-1 text-label h-9">
               <Plus className="mr-1.5 h-3.5 w-3.5" />
               {form.id ? "Simpan Perubahan" : "Tambahkan"}
             </Button>
@@ -435,7 +435,7 @@ function ProdiSection({
               <Button
                 variant="outline"
                 onClick={() => setForm({ id: "", nama: "", fakultasId: "none" })}
-                className="text-xs h-9"
+                className="text-label h-9"
               >
                 Batal
               </Button>
@@ -515,43 +515,43 @@ function KelasSection({
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-      <Card className="lg:col-span-2 border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
-        <CardHeader className="bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800 pb-3 flex flex-row items-center justify-between gap-4">
+      <Card className="lg:col-span-2 border-border overflow-hidden">
+        <CardHeader className="bg-muted/50 border-b border-border pb-3 flex flex-row items-center justify-between gap-4">
           <CardTitle className="text-base font-semibold flex items-center gap-2">
-            <Users className="h-4 w-4 text-primary" />
+            <Users className="h-4 w-4 text-foreground" />
             Daftar Kelas / Rombel ({filtered.length})
           </CardTitle>
           <div className="relative w-48 sm:w-64">
-            <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
+            <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
             <Input
               placeholder="Cari kelas..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-8 pl-8 text-xs"
+              className="h-8 pl-8 text-label"
             />
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="divide-y divide-slate-100 dark:divide-slate-800/80">
+          <div className="divide-y divide-border">
             {filtered.map((k) => {
               const parentProdi = prodi.find((p) => p.id === k.parentId);
               return (
                 <div
                   key={k.id}
-                  className="flex items-center justify-between p-3.5 px-5 hover:bg-slate-50/70 dark:hover:bg-slate-900/50 transition-colors"
+                  className="flex items-center justify-between p-3.5 px-5 hover:bg-accent transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 border border-emerald-100 dark:border-emerald-900/40">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary border border-primary/30">
                       <Users className="h-4 w-4" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                      <h4 className="text-sm font-semibold text-foreground">
                         {k.nama}
                       </h4>
-                      <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-2 mt-0.5 text-label text-muted-foreground">
                         <span>
                           Prodi:{" "}
-                          <strong className="text-slate-700 dark:text-slate-300 font-medium">
+                          <strong className="text-foreground font-medium">
                             {parentProdi?.nama || "(Tanpa Prodi)"}
                           </strong>
                         </span>
@@ -562,7 +562,7 @@ function KelasSection({
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="h-8 w-8 text-slate-500 hover:text-primary"
+                      className="h-8 w-8 text-muted-foreground hover:text-primary"
                       onClick={() =>
                         setForm({ id: k.id, nama: k.nama, prodiId: k.parentId || "none" })
                       }
@@ -573,7 +573,7 @@ function KelasSection({
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="h-8 w-8 text-slate-500 hover:text-destructive"
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
                       onClick={() => remove(k.id)}
                       title="Hapus"
                     >
@@ -584,7 +584,7 @@ function KelasSection({
               );
             })}
             {filtered.length === 0 && (
-              <div className="p-8 text-center text-xs text-muted-foreground">
+              <div className="p-8 text-center text-label text-muted-foreground">
                 Belum ada data kelas / rombel. Tambahkan melalui form di samping.
               </div>
             )}
@@ -592,29 +592,29 @@ function KelasSection({
         </CardContent>
       </Card>
 
-      <Card className="border-slate-200 dark:border-slate-800 shadow-xs">
-        <CardHeader className="bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800 pb-3">
+      <Card className="border-border">
+        <CardHeader className="bg-muted/50 border-b border-border pb-3">
           <CardTitle className="text-base font-semibold">
             {form.id ? "Edit Kelas / Rombel" : "Tambah Kelas Baru"}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-5 space-y-4">
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium">Nama Kelas / Rombel *</Label>
+            <Label className="text-label font-medium">Nama Kelas / Rombel *</Label>
             <Input
-              placeholder="Contoh: Kelas A (2026)"
+              placeholder="Kelas A (2026)"
               value={form.nama}
               onChange={(e) => setForm({ ...form, nama: e.target.value })}
-              className="text-xs"
+              className="text-label"
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium">Program Studi Induk *</Label>
+            <Label className="text-label font-medium">Program Studi Induk *</Label>
             <Select
               value={form.prodiId}
               onValueChange={(val) => setForm({ ...form, prodiId: val })}
             >
-              <SelectTrigger className="text-xs h-9">
+              <SelectTrigger className="text-label h-9">
                 <SelectValue placeholder="Pilih Program Studi" />
               </SelectTrigger>
               <SelectContent>
@@ -622,7 +622,7 @@ function KelasSection({
                   Pilih Program Studi
                 </SelectItem>
                 {prodi.map((p) => (
-                  <SelectItem key={p.id} value={p.id} className="text-xs">
+                  <SelectItem key={p.id} value={p.id} className="text-label">
                     {p.nama}
                   </SelectItem>
                 ))}
@@ -630,7 +630,7 @@ function KelasSection({
             </Select>
           </div>
           <div className="flex gap-2 pt-2">
-            <Button onClick={save} disabled={submitting} className="flex-1 text-xs h-9">
+            <Button onClick={save} disabled={submitting} className="flex-1 text-label h-9">
               <Plus className="mr-1.5 h-3.5 w-3.5" />
               {form.id ? "Simpan Perubahan" : "Tambahkan"}
             </Button>
@@ -638,7 +638,7 @@ function KelasSection({
               <Button
                 variant="outline"
                 onClick={() => setForm({ id: "", nama: "", prodiId: "none" })}
-                className="text-xs h-9"
+                className="text-label h-9"
               >
                 Batal
               </Button>

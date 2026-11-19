@@ -61,37 +61,37 @@ function AuditPage() {
         title="Audit Trail"
         description="Riwayat tindakan penting sistem. Halaman ini hanya-baca untuk penelusuran perubahan."
       />
-      <div className="mb-4 grid gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+      <div className="mb-4 grid gap-3 rounded-lg border border-border bg-card p-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
         <label className="grid gap-1 text-sm font-medium">
           Entitas
-          <Input value={entity} onChange={(event) => { setEntity(event.target.value); setPage(1); }} placeholder="contoh: ujian" />
+          <Input value={entity} onChange={(event) => { setEntity(event.target.value); setPage(1); }} placeholder="ujian" />
         </label>
         <label className="grid gap-1 text-sm font-medium">
           Aksi
-          <Input value={action} onChange={(event) => { setAction(event.target.value); setPage(1); }} placeholder="contoh: backup.restore" />
+          <Input value={action} onChange={(event) => { setAction(event.target.value); setPage(1); }} placeholder="backup.restore" />
         </label>
         <Button variant="outline" onClick={() => { setEntity(""); setAction(""); setPage(1); }}>
           Bersihkan filter
         </Button>
       </div>
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="overflow-hidden rounded-lg border border-border bg-card">
         {loading ? <p role="status" className="p-8 text-center text-sm text-muted-foreground">Memuat audit log...</p> : null}
         {error ? <p role="alert" className="p-8 text-center text-sm text-destructive">{error}</p> : null}
         {!loading && !error && rows.length === 0 ? <p className="p-8 text-center text-sm text-muted-foreground">Belum ada catatan audit.</p> : null}
         {!loading && !error && rows.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="border-b bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
+              <thead className="border-b bg-muted/50 text-label text-muted-foreground">
                 <tr><th className="p-3">Waktu</th><th className="p-3">Aktor</th><th className="p-3">Aksi</th><th className="p-3">Entitas</th><th className="p-3">Detail</th></tr>
               </thead>
               <tbody>
                 {rows.map((row) => (
                   <tr key={row.id} className="border-b last:border-0 hover:bg-muted/30">
-                    <td className="whitespace-nowrap p-3 text-muted-foreground">{new Date(row.createdAt).toLocaleString()}</td>
-                    <td className="p-3"><div>{row.userId}</div><div className="text-xs text-muted-foreground">{row.userRole}</div></td>
-                    <td className="p-3 font-medium">{row.action}</td>
-                    <td className="p-3">{row.entity}{row.entityId ? <span className="ml-1 text-xs text-muted-foreground">({row.entityId})</span> : null}</td>
-                    <td className="max-w-[24rem] truncate p-3 font-mono text-xs text-muted-foreground">{row.details ?? "—"}</td>
+                    <td className="whitespace-nowrap p-3 text-muted-foreground">{new Date(row.createdAt).toLocaleString("id-ID", { dateStyle: "short", timeStyle: "short", timeZone: "Asia/Jakarta" })}</td>
+                    <td className="max-w-[12rem] p-3"><div className="break-all">{row.userId}</div><div className="text-label text-muted-foreground">{row.userRole}</div></td>
+                    <td className="whitespace-nowrap p-3 font-medium">{row.action}</td>
+                    <td className="max-w-[12rem] break-all p-3">{row.entity}{row.entityId ? <span className="ml-1 text-label text-muted-foreground">({row.entityId})</span> : null}</td>
+                    <td className="max-w-[14rem] truncate p-3 font-mono text-label text-muted-foreground lg:max-w-[24rem]">{row.details ?? "—"}</td>
                   </tr>
                 ))}
               </tbody>

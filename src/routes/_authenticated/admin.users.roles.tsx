@@ -85,13 +85,13 @@ function RolesPage() {
   return (
     <AdminPage>
       <div>
-        <Link to="/admin/users" className="text-sm text-slate-500 hover:underline">
+        <Link to="/admin/users" className="text-sm text-muted-foreground hover:underline">
           ← Pengguna
         </Link>
       </div>
       <AdminPageHeader
         title="Hak Akses Role"
-        description="Atur menu yang bisa diakses Admin Jurusan dan Evaluator, serta topik mana yang boleh mereka kelola."
+        description="Atur menu yang bisa diakses Admin Jurusan dan Evaluator, serta topik mana boleh mereka kelola."
       />
 
       <Card>
@@ -137,14 +137,14 @@ function RolesPage() {
         <CardContent className="space-y-4 p-6">
           <h3 className="font-medium">Topik yang boleh dikelola Admin Jurusan & Evaluator</h3>
           {managers.length === 0 && (
-            <p className="text-sm text-slate-500">Belum ada Admin Jurusan atau Evaluator.</p>
+            <p className="text-sm text-muted-foreground">Belum ada Admin Jurusan atau Evaluator.</p>
           )}
           {managers.map((u) => (
             <div key={u.id} className="rounded border p-3">
               <div className="mb-2 font-medium flex items-center justify-between">
                 <div>
                   {u.namaLengkap}{" "}
-                  <span className="text-xs text-slate-500">
+                  <span className="text-label text-muted-foreground">
                     ({u.role === "admin_prodi" ? "Admin Jurusan" : "Evaluator"})
                   </span>
                 </div>
@@ -155,10 +155,10 @@ function RolesPage() {
                   if (ts.length === 0) return null;
                   const allSelected = u.allowedTopikIds.length === 0 || ts.every((t) => u.allowedTopikIds.includes(t.id));
                   return (
-                    <div key={m.id} className="border-t border-slate-100 dark:border-slate-800/80 pt-2 first:border-t-0 first:pt-0">
+                    <div key={m.id} className="border-t border-border pt-2 first:border-t-0 first:pt-0">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{m.nama}</span>
-                        <div className="flex items-center gap-2 text-[11px]">
+                        <span className="text-label font-semibold text-foreground">{m.nama}</span>
+                        <div className="flex items-center gap-2 text-label">
                           <button
                             type="button"
                             onClick={() => patchTopik(u, ts.map((t) => t.id), allSelected ? "remove" : "add")}
@@ -172,7 +172,7 @@ function RolesPage() {
                         {ts.map((t) => (
                           <label
                             key={t.id}
-                            className="flex items-center gap-1.5 rounded border px-2 py-1 text-xs hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
+                            className="flex items-center gap-1.5 rounded border px-2 py-1 text-label hover:bg-accent cursor-pointer"
                           >
                             <Checkbox
                               checked={u.allowedTopikIds.length === 0 || u.allowedTopikIds.includes(t.id)}
@@ -187,7 +187,7 @@ function RolesPage() {
                 })}
               </div>
               {u.allowedTopikIds.length === 0 && (
-                <p className="mt-2 text-xs text-slate-500">
+                <p className="mt-2 text-label text-muted-foreground">
                   (Kosong = boleh akses semua topik)
                 </p>
               )}

@@ -43,9 +43,9 @@ test.beforeEach(async ({ page }) => {
   });
   await prisma.modul.create({ data: { id: `${modulId}-empty`, nama: `${modulId}-empty` } });
   await page.goto("/login-admin");
-  await page.getByLabel("Username Staf").fill("admin");
-  await page.getByLabel("Kata Sandi").fill(process.env.ADMIN_PASSWORD ?? "e2e-smoke");
-  await page.getByRole("button", { name: "Masuk ke Panel Staf" }).click();
+  await page.getByLabel("Nama pengguna").fill("admin");
+  await page.getByLabel("Kata sandi", { exact: true }).fill(process.env.ADMIN_PASSWORD ?? "e2e-smoke");
+  await page.getByRole("button", { name: "Masuk", exact: true }).click();
   await expect(page).toHaveURL(/\/admin$/);
   await page.goto("/admin/modul/import");
   await page.getByRole("combobox").first().click();

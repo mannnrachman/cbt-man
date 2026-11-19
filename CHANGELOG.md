@@ -8,10 +8,42 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Added
 
+- Pengaturan > Tema & Tampilan kini memiliki pilihan warna tema (Biru bawaan, Hitam, Hijau), ukuran font (Kecil 15 px, Normal 16 px, Besar 18 px, Sangat besar 20 px), dan jenis font (SN Pro, Sistem, Serif, Monospace). Pilihan disimpan per browser di `localStorage` dan diterapkan sebelum render pertama lewat skrip kecil di `<head>`, sehingga tidak berkedip; sebelumnya pilihan font hanya berlaku setelah halaman Pengaturan dibuka. Tidak ada perubahan server atau Prisma. Kontras setiap palet tema (termasuk sidebar, terang dan gelap) diuji di `tests/unit/ui-contrast.test.mjs`.
+
 ### Changed
+
+- Warna bawaan berpindah dari hijau ke biru: aksen `#2F4FC4`, sidebar admin biru tua `#2A45B0` (navy `#16214F` di mode gelap) dengan teks menu semibold, dan logo/nama aplikasi di dalam kotak putih. Tombol utama (`Button` default/primary) kini memakai warna teks utama (hitam di mode terang, putih di mode gelap), dan ikon yang tadinya berwarna aksen kini memakai warna teks utama. Angka pada kartu ringkasan dashboard diperbesar menjadi 48 px. Palet hijau lama tetap tersedia sebagai pilihan tema Hijau.
+- Palet warna dipindah ke token semantik di `src/styles.css` (terang dan gelap). Tombol utama, tautan, dan cincin fokus memakai token aksen `--action` (biru `#2F4FC4` pada palet bawaan terang, biru muda pada palet gelap, hijau `#047A43` hanya pada tema Hijau), kuning tidak lagi menjadi warna hover/terpilih (kini abu netral), dan ungu dihapus dari palet grafik mode gelap. Kartu "Analisis Butir Soal" di halaman Analitik memakai warna aksen yang sama dengan kartu di sebelahnya.
+- Tes unit `tests/unit/ui-contrast.test.mjs` memeriksa rasio kontras token terang dan gelap pada setiap `npm run test:unit`.
+- Komponen dasar (`Button`, `Input`, `Textarea`, `Select`, `Label`, `Card`, `Badge`, `Table`, `Dialog`, `Tabs`, `Checkbox`, `Switch`, `Alert`) mengikuti sistem baru: tinggi kontrol 40 px (44 px untuk `size="lg"`), tepi kolom isian dengan kontras 3:1, tanpa bayangan kecuali lapisan melayang, tanpa animasi masuk dialog/menu, teks tidak di bawah 13 px. Efek tekan global `scale(0.97)` pada semua tombol dan tautan diganti geser 1 px pada tombol. Tombol mendapat nama varian `primary`, `danger`; `default`, `outline`, `destructive` tetap berlaku.
+- Halaman masuk staf dan formulir masuk peserta dirancang ulang: satu kolom polos tanpa latar gradien, kaca buram, atau animasi masuk. Teks disederhanakan ("Masuk sebagai staf", "Nama pengguna", "Kata sandi", tombol "Masuk") dan setelah masuk berhasil staf langsung dialihkan tanpa jeda 500 ms dan tanpa toast. Pesan galat login tidak berubah makna.
+- Beranda jadwal ujian dirancang ulang: tabel langsung di atas latar polos tanpa kartu kaca, latar gradien, pil "LIVE SYSTEM", atau denyut animasi. Tombol "Login Peserta" pindah ke bilah atas agar selalu terlihat, status ujian memakai satu bentuk lencana, dan semua teks berukuran minimal 13 px. Komponen landing `ExamTabs` dan `ExamScheduleTable` yang tidak dipakai dihapus.
+- Portal peserta dan halaman pra-ujian dirancang ulang: daftar ujian berupa tabel dengan kolom status berteks (Dibuka, Sedang dikerjakan, Selesai, Ditutup) dan satu tombol aksi per baris; halaman pra-ujian memisahkan petunjuk, aturan, dan panel token dengan persetujuan memakai komponen `Checkbox` berlabel. Sapaan berwarna, pil "Live System", dan tombol berhuruf besar dihapus. Logika akses, token, dan pembuatan sesi tidak berubah.
+- Halaman pengerjaan ujian dirancang ulang tanpa mengubah logika autosave, timer, penguncian sesi, atau pemblokiran shortcut: bilah atas tanpa kaca buram, timer dengan label teks ("Sisa waktu", "Kurang dari 5 menit", "Kurang dari 1 menit"), pilihan jawaban dengan huruf bertanda, navigasi soal yang membedakan status dengan bentuk dan teks (tanda `?` untuk ragu-ragu, `aria-label` memuat status) selain warna, dan tombol berbahasa biasa ("Soal sebelumnya", "Soal berikutnya", "Tandai ragu-ragu", "Kumpulkan ujian"). Dialog konfirmasi kumpul tetap dan kini berbunyi "Ya, kumpulkan".
+- Halaman hasil peserta dirancang ulang: skor sebagai angka besar dengan rincian di bawahnya (tanpa cincin berwarna dan ikon piala), pembahasan per soal dengan status "Benar"/"Salah" berteks, serta penanda "Kunci jawaban" dan "Jawaban Anda" pada pilihan. Aturan kapan nilai dan pembahasan ditampilkan tidak berubah.
+- Kerangka admin dirancang ulang: sidebar dengan item aktif berlatar `bg-accent` tanpa garis hijau di kiri, label grup berhuruf kalimat, breadcrumb tanpa kotak, dan kontrol bilah atas (menu, tema, keluar) tanpa petak hijau berisi ikon putih. Bilah atas kini mengikuti tema gelap (sebelumnya tetap putih), tooltip logo/inisial tidak lagi "Z" tetap melainkan huruf pertama nama aplikasi. Judul halaman memakai skala `text-title`.
+- Dashboard admin dirancang ulang: tanpa banner sambutan gelap, kartu KPI berikon warna-warni, dan kotak ikon. Urutannya kini ringkasan angka, hal yang perlu ditindaklanjuti, ujian berlangsung (maksimal 6 baris dengan tautan ke semua ujian), dan ujian mendatang. Semua pemeriksaan akses `canAccess` per tautan tetap.
+- Daftar paket ujian, halaman peserta ujian, dan halaman token memakai token warna dan komponen `Button`/`Input`: tombol aksi baris yang sebelumnya tautan berkelas kini `Button`, ubin ikon status dihapus, dan pencarian memakai `Input` berlabel. Tombol "Paket Baru" tidak lagi mengubah ukuran sendiri.
+- Editor paket ujian memakai token warna dan komponen dasar baru; susunan dan logikanya tidak berubah.
+- Bank soal (modul, topik, daftar soal) dan editor teks kaya memakai token warna; tidak ada perubahan perilaku.
+- Halaman impor soal (Excel, Word) dan manajer berkas memakai token warna; tidak ada perubahan perilaku.
+- Halaman akademik (struktur, mata kuliah, semester, tahun, kelas) serta peserta (daftar, kartu, online) memakai token warna; tidak ada perubahan perilaku.
+- Halaman evaluasi, analitik, dan leaderboard memakai token warna; tidak ada perubahan perilaku atau rumus.
+- Halaman pengguna, peran, pengaturan, alat, audit, panduan, serta halaman galat dasar, grafik, dan toast memakai token warna; tidak ada perubahan perilaku.
+- Layar pengerjaan ujian kini menampilkan indikator autosave di bilah atas (Belum tersimpan / Menyimpan… / Tersimpan / Gagal menyimpan) yang digerakkan oleh state machine eksplisit baru di `src/lib/cbt/state-machines.ts`; logika penyimpanan tidak berubah.
+- Halaman `admin/pengaturan` dan `admin/tools`: judul section kini berada di atas konten dengan lebar penuh, bukan menyamping di kolom kiri dengan konten di sebelah kanan.
+- Tabel `admin/audit` kini muat di layar sempit tanpa menggeser otomatis: kolom waktu memakai format singkat (WIB), kolom aktor/entitas dipotong dengan ellipsis, dan kolom detail menyempit di layar kecil (`max-w-[14rem]`, melebar kembali di `lg`).
+- Tombol "Keluar" di shell peserta saat mengerjakan ujian tidak lagi memakai `confirm()` bawaan browser, melainkan dialog konfirmasi desain sistem (`useConfirmDialog`) dengan judul "Keluar dari ujian?" dan pesan "Waktu akan terus berjalan.".
+- Sidebar admin berlatar biru tua `#2A45B0` pada mode terang dan navy lebih gelap `#16214F` pada mode gelap. Ia mendeklarasi ulang palet secara lokal (`.shell-sidebar` di `src/styles.css`), jadi tombol, lencana, dan cincin fokus di dalamnya otomatis memakai token putih-di-atas-biru tanpa kelas per komponen; warna hover/terpilih `#1A2D7A` (terang) dan `#2B3B86` (gelap) jelas lebih gelap dari latar dengan teks putih di atasnya; rasio kontrasnya diperiksa di `tests/unit/ui-contrast.test.mjs`. Tema Hijau dan Hitam mengganti warna sidebar lewat blok `data-accent`.
+- Warna hover dan item terpilih memakai token `--hover` tersendiri yang jelas lebih terang/gelap dari latar: terang `#D9E3DC` (1,31:1 terhadap putih), gelap `#2A3832`, dan di sidebar/header biru `#1A2D7A` (terang) atau `#2B3B86` (gelap). Hover baris tabel, menu, tombol hantu, dan item sidebar kini memakainya (`hover:bg-accent`, sebelumnya `hover:bg-muted` yang nyaris tak terlihat). Teks di atasnya diperiksa di `tests/unit/ui-contrast.test.mjs`.
+- Ikon sidebar admin diperbesar menjadi 24 px dengan goresan lebih tebal (2,25), jarak antar-item lebih lega, dan ikon item aktif berwarna aksen. Sidebar dilebarkan dari 256 px ke 288 px agar label terpanjang ("Akademik & Pengguna") tidak terpotong.
+- Bilah atas admin kini transparan (mengikuti latar halaman) dan menampilkan ikon, judul, dan deskripsi halaman yang sedang dibuka; `AdminPageHeader` memindahkan judulnya ke sana dan tombol aksi tetap di atas konten. Breadcrumb menjadi baris kecil di atas judul. Bagian dashboard (tindak lanjut, ujian berlangsung, ujian mendatang) masing-masing dibungkus kotak. Sidebar tetap biru tua.
+- `cn()` mengenali skala ukuran huruf baru (`text-ui`, `text-body`, dst.) agar `tailwind-merge` tidak menghapus warna teks.
+- `npm run check:ui` (juga di CI) menolak warna palet mentah, teks di bawah 13 px, huruf kapital berjarak, gradien, kaca buram, bayangan, dan animasi hias di `src/**/*.tsx`. Jumlah pelanggaran per berkas dicatat di `scripts/ui-baseline.json` dan hanya boleh turun.
 
 ### Fixed
 
+- Preferensi tampilan (jenis font, ukuran font, warna tema) tetap berlaku di sesi browser saat `localStorage` menolak penulisan (kuota penuh atau mode privat): penyimpanan gagal tidak lagi menghentikan pembaruan tampilan; pilihan hanya tidak bertahan setelah halaman dimuat ulang.
 - Demo Live Preview memakai jumlah soal aktual per topik, mencakup semua jenis soal serta alat bantu, dan tidak kedaluwarsa. Penyiapan ulang lokal mempertahankan sesi dan jawaban.
 
 - Impor soal Excel memakai topik yang dipilih saat menyimpan, memeriksa hasil setiap penyimpanan, dan mempertahankan baris yang belum tersimpan untuk dicoba ulang. File yang gagal dibaca menghapus preview lama dan menampilkan pesan error.
@@ -26,6 +58,9 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 ### Deprecated
 
 ### Removed
+
+- Utilitas CSS `.shadow-sleek` dan `.shadow-popover-sleek` serta easing `--ease-bouncy` dihapus karena tidak dipakai lagi; baseline `scripts/ui-baseline.json` kini kosong, sehingga `npm run check:ui` menolak setiap pola lama di `src/**/*.tsx` tanpa pengecualian.
+- Tema "Neumorphism" dan pemilihnya di Pengaturan dihapus; antarmuka kini hanya terang dan gelap. Pilihan tema tersimpan di peramban lama diabaikan dan tampilan kembali ke default; pilihan font tetap tersimpan.
 
 ## [0.2.3] - 2026-10-14
 

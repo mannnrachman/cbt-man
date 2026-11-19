@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Settings, Upload, Image as ImageIcon, Save } from "lucide-react";
 import { toast } from "sonner";
 import { AdminPage, AdminPageHeader } from "@/components/cbt/AdminPage";
-import { useThemeStore, ThemeType } from "@/lib/cbt/theme-store";
+import { useThemeStore, type Accent, type FontSize, type FontType } from "@/lib/cbt/theme-store";
 import { CheckCircle2 } from "lucide-react";
 
 
@@ -28,7 +28,7 @@ export const Route = createFileRoute("/_authenticated/admin/pengaturan")({
 
 function PengaturanPage() {
   const [cfg, setCfg] = useState(configRepo.get());
-  const { theme, setTheme, font, setFont } = useThemeStore();
+  const { font, setFont, fontSize, setFontSize, accent, setAccent } = useThemeStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function save() {
@@ -68,40 +68,40 @@ function PengaturanPage() {
         title="Pengaturan Aplikasi"
         description="Konfigurasi institusi, keamanan, browser ujian, dan branding CBT."
         action={
-          <Button onClick={save} className="h-10 px-8 shadow-sm">
+          <Button onClick={save} className="h-10 px-8">
             Simpan Semua
           </Button>
         }
       />
 
       {/* Section 1: Identitas Aplikasi */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-12">
-        <div className="space-y-2 lg:col-span-1">
-          <h2 id="identitas-heading" className="text-lg font-semibold text-slate-900 dark:text-white">Identitas Aplikasi</h2>
-          <p className="text-sm text-slate-500 leading-relaxed">
+      <div className="space-y-6">
+        <div className="space-y-2">
+          <h2 id="identitas-heading" className="text-lg font-semibold text-foreground">Identitas Aplikasi</h2>
+          <p className="text-sm text-muted-foreground leading-relaxed">
             Informasi ini akan ditampilkan di halaman login dan pada panel atas dasbor aplikasi.
           </p>
         </div>
-        <div role="region" aria-labelledby="identitas-heading" className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        <div role="region" aria-labelledby="identitas-heading" className="bg-card rounded-lg border border-border overflow-hidden">
           <div className="p-6 space-y-6">
 
             <div className="space-y-2.5">
-              <Label className="text-slate-700 dark:text-slate-300 font-semibold">Nama Aplikasi</Label>
+              <Label className="text-foreground font-semibold">Nama Aplikasi</Label>
               <Input
                 value={cfg.appName}
                 onChange={(e) => setCfg({ ...cfg, appName: e.target.value })}
-                className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800"
+                className="bg-muted border-border"
               />
             </div>
 
             <div className="space-y-2.5">
-              <Label className="text-slate-700 dark:text-slate-300 font-semibold">Logo Aplikasi</Label>
+              <Label className="text-foreground font-semibold">Logo Aplikasi</Label>
               <div className="flex flex-col sm:flex-row gap-6 items-start">
-                <div className="h-20 w-20 shrink-0 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 flex items-center justify-center overflow-hidden">
+                <div className="h-20 w-20 shrink-0 rounded-lg border border-border bg-muted flex items-center justify-center overflow-hidden">
                   {cfg.appLogo ? (
                     <img src={cfg.appLogo} alt="Logo" className="h-12 w-12 object-contain" onError={(e) => (e.currentTarget.style.display = 'none')} onLoad={(e) => (e.currentTarget.style.display = 'block')} />
                   ) : (
-                    <ImageIcon className="h-8 w-8 text-slate-300" />
+                    <ImageIcon className="h-8 w-8 text-muted-foreground" />
                   )}
                 </div>
                 <div className="flex-1 space-y-3 w-full">
@@ -110,7 +110,7 @@ function PengaturanPage() {
                       value={cfg.appLogo ?? ""}
                       placeholder="https://... atau klik Upload"
                       onChange={(e) => setCfg({ ...cfg, appLogo: e.target.value })}
-                      className="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 font-mono text-xs"
+                      className="bg-muted border-border font-mono text-label"
                     />
                     <input
                       type="file"
@@ -120,30 +120,30 @@ function PengaturanPage() {
                       ref={fileInputRef}
                       onChange={handleLogoUpload}
                     />
-                    <Button type="button" variant="secondary" onClick={() => fileInputRef.current?.click()} className="shrink-0 shadow-sm border-slate-200 dark:border-slate-700">
+                    <Button type="button" variant="secondary" onClick={() => fileInputRef.current?.click()} className="shrink-0 border-border">
                       <Upload className="h-4 w-4 mr-2" /> Upload
                     </Button>
                   </div>
-                  <p className="text-xs text-slate-500">Mendukung format PNG/JPG. Gambar akan diubah ukurannya secara otomatis (max 200px).</p>
+                  <p className="text-label text-muted-foreground">Mendukung format PNG/JPG. Gambar akan diubah ukurannya secara otomatis (max 200px).</p>
                 </div>
               </div>
             </div>
 
             <div className="space-y-2.5">
-              <Label className="text-slate-700 dark:text-slate-300 font-semibold">Deskripsi Singkat</Label>
+              <Label className="text-foreground font-semibold">Deskripsi Singkat</Label>
               <Textarea
                 value={cfg.appDeskripsi}
                 onChange={(e) => setCfg({ ...cfg, appDeskripsi: e.target.value })}
-                className="min-h-[80px] bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800"
+                className="min-h-[80px] bg-muted border-border"
               />
             </div>
 
             <div className="space-y-2.5">
-              <Label className="text-slate-700 dark:text-slate-300 font-semibold">Pengumuman Halaman Login</Label>
+              <Label className="text-foreground font-semibold">Pengumuman Halaman Login</Label>
               <Textarea
                 value={cfg.pesanLogin}
                 onChange={(e) => setCfg({ ...cfg, pesanLogin: e.target.value })}
-                className="min-h-[80px] bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800"
+                className="min-h-[80px] bg-muted border-border"
                 placeholder="Ketik pengumuman atau instruksi untuk peserta..."
               />
             </div>
@@ -152,17 +152,17 @@ function PengaturanPage() {
         </div>
       </div>
 
-      <div className="h-px w-full bg-slate-200 dark:bg-slate-800/60 my-10" />
+      <div className="h-px w-full bg-muted my-10" />
 
       {/* Section 2: Kebijakan Ujian */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-12">
-        <div className="space-y-2 lg:col-span-1">
-          <h2 id="kebijakan-heading" className="text-lg font-semibold text-slate-900 dark:text-white">Kebijakan Ujian</h2>
-          <p className="text-sm text-slate-500 leading-relaxed">
+      <div className="space-y-6">
+        <div className="space-y-2">
+          <h2 id="kebijakan-heading" className="text-lg font-semibold text-foreground">Kebijakan Ujian</h2>
+          <p className="text-sm text-muted-foreground leading-relaxed">
             Konfigurasi keamanan dan pembatasan akses perangkat untuk melindungi integritas pelaksanaan ujian.
           </p>
         </div>
-        <div role="region" aria-labelledby="kebijakan-heading" className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
+        <div role="region" aria-labelledby="kebijakan-heading" className="bg-card rounded-lg border border-border overflow-hidden divide-y divide-border">
 
           <ToggleRow
             label="Kunci akses dari perangkat Mobile"
@@ -183,119 +183,117 @@ function PengaturanPage() {
         </div>
       </div>
 
-      <div className="h-px w-full bg-slate-200 dark:bg-slate-800/60 my-10" />
+      <div className="h-px w-full bg-muted my-10" />
 
       {/* Section 3: Tema & Tampilan */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-12">
-        <div className="space-y-2 lg:col-span-1">
-          <h2 id="tema-heading" className="text-lg font-semibold text-slate-900 dark:text-white">Tema & Tampilan</h2>
-          <p className="text-sm text-slate-500 leading-relaxed">
+      <div className="space-y-6">
+        <div className="space-y-2">
+          <h2 id="tema-heading" className="text-lg font-semibold text-foreground">Tema & Tampilan</h2>
+          <p className="text-sm text-muted-foreground leading-relaxed">
             Sesuaikan gaya visual dan nuansa aplikasi. Tema dan tipografi ini akan diterapkan secara global untuk Anda.
           </p>
         </div>
-        <div role="region" aria-labelledby="tema-heading" className="lg:col-span-2 space-y-8">
+        <div role="region" aria-labelledby="tema-heading" className="space-y-8">
 
-          {/* Pilihan Tema Visual */}
-          <div className="space-y-3">
-            <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Gaya Tema Visual</Label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-              {/* Theme: Modern (Default) */}
-              <button
-                type="button"
-                onClick={() => setTheme("default")}
-                aria-pressed={theme === "default"}
-                className={`text-left p-4 rounded-xl border-2 transition-all cursor-pointer ${theme === "default" ? "border-primary ring-2 ring-primary/20 bg-primary/5" : "border-slate-200 dark:border-slate-800 hover:border-primary/50 bg-white dark:bg-slate-900"}`}
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <div className="font-bold text-slate-900 dark:text-white">Modern (Default)</div>
-                  {theme === "default" && <CheckCircle2 className="h-5 w-5 text-primary" />}
-                </div>
-                <div className="h-20 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-2 shadow-sm flex flex-col gap-2">
-                  <div className="w-full h-3 bg-white dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-800 shadow-sm" />
-                  <div className="w-2/3 h-3 bg-primary/20 rounded" />
-                </div>
-                <p className="text-xs text-slate-500 mt-4">Bersih, profesional, standar SaaS modern.</p>
-              </button>
-
-              {/* Theme: Neumorphism (Soft UI) */}
-              <button
-                type="button"
-                onClick={() => setTheme("neumorphism")}
-                aria-pressed={theme === "neumorphism"}
-                className={`text-left p-4 rounded-xl border-2 transition-all cursor-pointer ${theme === "neumorphism" ? "border-primary ring-2 ring-primary/20 bg-[#f0f3f8]" : "border-slate-200 dark:border-slate-800 hover:border-primary/50 bg-[#f0f3f8]/60 dark:bg-slate-900"}`}
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <div className="font-bold text-slate-900 dark:text-white">Neumorphism (Soft UI)</div>
-                    <span className="text-[10px] font-semibold text-primary uppercase tracking-wide">Soft Extruded Surfaces</span>
+          {/* Warna tema */}
+          <fieldset className="space-y-3">
+            <legend className="text-label font-semibold text-muted-foreground">Warna Tema</legend>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              {ACCENT_OPTIONS.map((opt) => (
+                <OptionCard key={opt.value} selected={accent === opt.value} onSelect={() => setAccent(opt.value)}>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-semibold text-foreground">{opt.label}</span>
+                    {accent === opt.value && <CheckCircle2 aria-hidden="true" className="h-5 w-5 shrink-0 text-foreground" />}
                   </div>
-                  {theme === "neumorphism" && <CheckCircle2 className="h-5 w-5 text-primary" />}
-                </div>
-                <div className="h-20 rounded-xl bg-[#f0f3f8] border border-white/80 p-2.5 flex flex-col gap-2" style={{ boxShadow: "4px 4px 10px rgba(166, 180, 200, 0.6), -4px -4px 10px rgba(255, 255, 255, 0.9)" }}>
-                  <div className="w-full h-3.5 bg-[#f0f3f8] rounded-md border border-white/60" style={{ boxShadow: "inset 2px 2px 4px rgba(166, 180, 200, 0.4), inset -2px -2px 4px rgba(255, 255, 255, 0.8)" }} />
-                  <div className="w-2/3 h-3.5 bg-primary/20 rounded-md" style={{ boxShadow: "2px 2px 5px rgba(166, 180, 200, 0.4)" }} />
-                </div>
-                <p className="text-xs text-slate-500 mt-4">Estetika permukaan timbul lembut dengan bayangan ganda (*dual soft drop-shadow*).</p>
-              </button>
-
+                  <div aria-hidden="true" className="mt-3 flex h-10 overflow-hidden rounded-md border border-border">
+                    <span className="w-1/3" style={{ backgroundColor: opt.sidebar }} />
+                    <span className="flex-1" style={{ backgroundColor: opt.surface }} />
+                    <span className="w-1/4" style={{ backgroundColor: opt.action }} />
+                  </div>
+                  <p className="mt-2 text-label text-muted-foreground">{opt.desc}</p>
+                </OptionCard>
+              ))}
             </div>
-          </div>
+          </fieldset>
 
-          {/* Pilihan Tipografi / Font */}
-          <div className="space-y-3 pt-6 border-t border-slate-200 dark:border-slate-800/80">
-            <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Pilihan Font & Tipografi</Label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-              {/* Font: SN Pro */}
-              <button
-                type="button"
-                onClick={() => setFont("sn-pro")}
-                aria-pressed={font === "sn-pro"}
-                className={`text-left p-4 rounded-xl border-2 transition-all cursor-pointer ${font === "sn-pro" ? "border-primary ring-2 ring-primary/20 bg-primary/5" : "border-slate-200 dark:border-slate-800 hover:border-primary/50 bg-white dark:bg-slate-900"}`}
-              >
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <div className="font-bold text-slate-900 dark:text-white">SN Pro (Supernotes)</div>
-                    <span className="text-[10px] font-semibold text-primary uppercase tracking-wide">Modern & Readability</span>
+          {/* Ukuran font */}
+          <fieldset className="space-y-3">
+            <legend className="text-label font-semibold text-muted-foreground">Ukuran Font</legend>
+            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+              {SIZE_OPTIONS.map((opt) => (
+                <OptionCard key={opt.value} selected={fontSize === opt.value} onSelect={() => setFontSize(opt.value)}>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-semibold text-foreground">{opt.label}</span>
+                    {fontSize === opt.value && <CheckCircle2 aria-hidden="true" className="h-5 w-5 shrink-0 text-foreground" />}
                   </div>
-                  {font === "sn-pro" && <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />}
-                </div>
-                <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm" style={{ fontFamily: "'SN Pro', sans-serif" }}>
-                  <div className="text-sm font-bold text-slate-900 dark:text-white">Aa Bb Cc 123</div>
-                  <div className="text-xs text-slate-600 dark:text-slate-400 mt-1">Ujian Berbasis Komputer Modern</div>
-                </div>
-                <p className="text-xs text-slate-500 mt-3">Font friendly berbasis Nunito yang dioptimalkan khusus untuk membaca soal & antarmuka CBT.</p>
-              </button>
-
-              {/* Font: System Default */}
-              <button
-                type="button"
-                onClick={() => setFont("system")}
-                aria-pressed={font === "system"}
-                className={`text-left p-4 rounded-xl border-2 transition-all cursor-pointer ${font === "system" ? "border-primary ring-2 ring-primary/20 bg-primary/5" : "border-slate-200 dark:border-slate-800 hover:border-primary/50 bg-white dark:bg-slate-900"}`}
-              >
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <div className="font-bold text-slate-900 dark:text-white">Sistem Default (Standar Lama)</div>
-                    <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">Inter / System Sans</span>
-                  </div>
-                  {font === "system" && <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />}
-                </div>
-                <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
-                  <div className="text-sm font-bold text-slate-900 dark:text-white">Aa Bb Cc 123</div>
-                  <div className="text-xs text-slate-600 dark:text-slate-400 mt-1">Ujian Berbasis Komputer Modern</div>
-                </div>
-                <p className="text-xs text-slate-500 mt-3">Font sans-serif bawaan sistem operasi (Inter, Segoe UI, Roboto, San Francisco).</p>
-              </button>
-
+                  <div aria-hidden="true" className="mt-2 font-semibold text-foreground" style={{ fontSize: opt.sample }}>Aa 123</div>
+                  <p className="mt-1 text-label text-muted-foreground">{opt.px}</p>
+                </OptionCard>
+              ))}
             </div>
-          </div>
+          </fieldset>
+
+          {/* Jenis font */}
+          <fieldset className="space-y-3">
+            <legend className="text-label font-semibold text-muted-foreground">Jenis Font</legend>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {FONT_OPTIONS.map((opt) => (
+                <OptionCard key={opt.value} selected={font === opt.value} onSelect={() => setFont(opt.value)}>
+                  <div className="mb-3 flex items-start justify-between">
+                    <div>
+                      <div className="font-semibold text-foreground">{opt.label}</div>
+                      <span className="text-label font-semibold text-muted-foreground">{opt.tag}</span>
+                    </div>
+                    {font === opt.value && <CheckCircle2 aria-hidden="true" className="h-5 w-5 shrink-0 text-foreground" />}
+                  </div>
+                  <div aria-hidden="true" className="rounded-lg border border-border bg-muted p-3" style={{ fontFamily: opt.family }}>
+                    <div className="text-sm font-semibold text-foreground">Aa Bb Cc 123</div>
+                    <div className="mt-1 text-label text-muted-foreground">Ujian Berbasis Komputer Modern</div>
+                  </div>
+                  <p className="mt-3 text-label text-muted-foreground">{opt.desc}</p>
+                </OptionCard>
+              ))}
+            </div>
+          </fieldset>
 
         </div>
       </div>
 
     </AdminPage>
+  );
+}
+
+const ACCENT_OPTIONS: { value: Accent; label: string; desc: string; sidebar: string; surface: string; action: string }[] = [
+  { value: "biru", label: "Biru", desc: "Bawaan: sidebar biru tua dengan aksen biru.", sidebar: "#2a45b0", surface: "#f6f8fd", action: "#2f4fc4" },
+  { value: "hitam", label: "Hitam", desc: "Netral: sidebar hitam dengan aksen hitam.", sidebar: "#171717", surface: "#fafafa", action: "#111111" },
+  { value: "hijau", label: "Hijau", desc: "Sidebar hijau tua dengan aksen hijau.", sidebar: "#14532d", surface: "#fafaf7", action: "#047a43" },
+];
+
+const SIZE_OPTIONS: { value: FontSize; label: string; px: string; sample: string }[] = [
+  { value: "kecil", label: "Kecil", px: "15 px", sample: "0.9375rem" },
+  { value: "normal", label: "Normal", px: "16 px (bawaan)", sample: "1rem" },
+  { value: "besar", label: "Besar", px: "18 px", sample: "1.125rem" },
+  { value: "sangat-besar", label: "Sangat besar", px: "20 px", sample: "1.25rem" },
+];
+
+const SYSTEM_STACK = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+const FONT_OPTIONS: { value: FontType; label: string; tag: string; desc: string; family: string }[] = [
+  { value: "sn-pro", label: "SN Pro (Supernotes)", tag: "Modern & mudah dibaca", desc: "Font ramah yang dioptimalkan untuk membaca soal dan antarmuka CBT.", family: `'SN Pro', ${SYSTEM_STACK}` },
+  { value: "system", label: "Sistem Default", tag: "Inter / System Sans", desc: "Font sans-serif bawaan sistem operasi (Segoe UI, Roboto, San Francisco).", family: SYSTEM_STACK },
+  { value: "serif", label: "Serif", tag: "Georgia / Times", desc: "Huruf berkaki, nyaman untuk teks bacaan panjang.", family: "Georgia, 'Times New Roman', serif" },
+  { value: "mono", label: "Monospace", tag: "Lebar huruf sama", desc: "Semua huruf sama lebar; berguna untuk kode dan angka.", family: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" },
+];
+
+function OptionCard({ selected, onSelect, children }: { selected: boolean; onSelect: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      aria-pressed={selected}
+      className={`cursor-pointer rounded-lg border-2 p-4 text-left transition-colors ${selected ? "border-foreground bg-accent" : "border-border bg-card hover:border-foreground/40"}`}
+    >
+      {children}
+    </button>
   );
 }
 
@@ -315,20 +313,20 @@ function ToggleRow({
   badge?: string;
 }) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-5 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-5 hover:bg-accent transition-colors">
       <div className="flex-1">
         <div className="flex items-center gap-3 mb-1">
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">{label}</h3>
+          <h3 className="text-sm font-semibold text-foreground">{label}</h3>
           {badge && (
-            <span className="rounded-md border border-amber-200/60 bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+            <span className="rounded-md border border-warn/60 bg-warn/10 px-2 py-0.5 text-label font-semibold text-warn">
               {badge}
             </span>
           )}
         </div>
-        <p className="text-xs text-slate-500 leading-relaxed pr-6">{desc}</p>
+        <p className="text-label text-muted-foreground leading-relaxed pr-6">{desc}</p>
       </div>
       <div className="shrink-0 mt-3 sm:mt-0">
-        <Switch checked={checked} onCheckedChange={onChange} disabled={disabled} className="data-[state=checked]:bg-emerald-500" />
+        <Switch checked={checked} onCheckedChange={onChange} disabled={disabled} className="data-[state=checked]:bg-primary" />
       </div>
     </div>
   );

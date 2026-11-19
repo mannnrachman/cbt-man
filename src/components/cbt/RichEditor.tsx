@@ -195,7 +195,7 @@ export function RichEditor({
     const code = window.prompt("Kode:");
     if (!code) return;
     insertHtml(
-      `<pre class="bg-muted p-2 rounded text-xs"><code>${code.replace(/</g, "&lt;")}</code></pre>`,
+      `<pre class="bg-muted p-2 rounded text-label"><code>${code.replace(/</g, "&lt;")}</code></pre>`,
     );
   }
 
@@ -231,7 +231,7 @@ export function RichEditor({
             <Icon className="h-4 w-4" />
           </Button>
         ))}
-        <span className="ml-2 text-xs text-muted-foreground">
+        <span className="ml-2 text-label text-muted-foreground">
           Tip: <code>$x^2$</code> rumus inline · <code>$$...$$</code> display
         </span>
       </div>
@@ -293,7 +293,7 @@ function FilePicker({
                 key={f.id}
                 type="button"
                 onClick={() => onPick(f)}
-                className="flex flex-col items-center gap-1 rounded border p-2 text-left text-xs hover:bg-muted"
+                className="flex flex-col items-center gap-1 rounded border p-2 text-left text-label hover:bg-accent"
               >
                 {urls[f.id] ? (
                   <img src={urls[f.id]} alt={f.name} className="h-20 w-full object-contain" />

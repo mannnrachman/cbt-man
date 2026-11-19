@@ -1,37 +1,51 @@
 import * as React from "react"
+import { createPortal } from "react-dom"
 import { cn } from "@/lib/utils"
 
 export function AdminPage({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return <div className={cn("w-full space-y-6", className)} {...props} />
-
 }
 
-export function AdminPageHeader({ 
-  title, 
-  description, 
-  action 
-}: { 
-  title: React.ReactNode, 
-  description?: React.ReactNode, 
-  action?: React.ReactNode 
+/**
+ * The page title and description are shown in the admin shell header (the element with
+ * id "admin-page-title"), so the header always names the current page. Actions stay at the
+ * top of the content. Outside the admin shell the title renders in place.
+ */
+export function AdminPageHeader({
+  title,
+  description,
+  action,
+}: {
+  title: React.ReactNode
+  description?: React.ReactNode
+  action?: React.ReactNode
 }) {
-  return (
-    <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-zinc-100">{title}</h1>
+  // undefined: not mounted yet; null: no shell header on this page.
+  const [slot, setSlot] = React.useState<HTMLElement | null | undefined>(undefined)
+  React.useEffect(() => {
+    setSlot(document.getElementById("admin-page-title"))
+  }, [])
 
-        {description && <p className="text-sm text-slate-500">{description}</p>}
-      </div>
-      {action && <div className="flex flex-wrap items-center gap-2 shrink-0">{action}</div>}
+  const heading = (
+    <div className="min-w-0">
+      <h1 className="truncate text-title font-semibold tracking-tight text-foreground">{title}</h1>
+      {description && <p className="text-ui text-muted-foreground">{description}</p>}
     </div>
+  )
+
+  return (
+    <>
+      {slot ? createPortal(heading, slot) : slot === null ? heading : null}
+      {action && <div className="flex flex-wrap items-center justify-end gap-2">{action}</div>}
+    </>
   )
 }
 
 export function AdminPageContent({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div 
-      className={cn("rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 overflow-hidden shadow-sm", className)} 
-      {...props} 
+    <div
+      className={cn("rounded-lg border border-border bg-card overflow-hidden", className)}
+      {...props}
     />
   )
 }

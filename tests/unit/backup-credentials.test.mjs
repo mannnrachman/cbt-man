@@ -22,7 +22,11 @@ test("privileged backup preserves current credentials and rejects unsafe restore
   await db.prisma.tokenClaim.create({ data: { id: "claim", ujianId: "exam", pesertaId: "student", kode: "ABC", claimedAt: 2n } });
   const snapshot = load("src/lib/server/repos/snapshot.ts", {
     "@/lib/server/db/prisma": { prisma: db.prisma }, "@/lib/server/db/json": r.json,
-    "@/lib/cbt/session-answers": load("src/lib/cbt/session-answers.ts"), "@/lib/cbt/ujian-scope": r.scope, "./mappers": r.mappers,
+    "@/lib/cbt/session-answers": load("src/lib/cbt/session-answers.ts", {
+      "./state-machines.ts": load("src/lib/cbt/state-machines.ts", {
+        "./availability.ts": load("src/lib/cbt/availability.ts"),
+      }),
+    }), "@/lib/cbt/ujian-scope": r.scope, "./mappers": r.mappers,
   });
   const files = [{ id: "file", name: "test", mime: "text/plain", size: 1, createdAt: 1, extension: "txt", dataBase64: "YQ==" }];
   const server = load("src/lib/server/backup/functions.ts", {
