@@ -60,10 +60,10 @@ test("appearance setters survive localStorage write failures", async () => {
     const state = useThemeStore.getState();
     await withDocumentElement(async (attributes) => {
       assert.doesNotThrow(() => state.setFont("serif"));
-      assert.doesNotThrow(() => state.setFontSize("besar"));
-      assert.doesNotThrow(() => state.setAccent("hijau"));
       assert.equal(attributes.get("data-font"), "serif");
+      assert.doesNotThrow(() => state.setFontSize("besar"));
       assert.equal(attributes.get("data-font-size"), "besar");
+      assert.doesNotThrow(() => state.setAccent("hijau"));
       assert.equal(attributes.get("data-accent"), "hijau");
     });
     const after = useThemeStore.getState();
