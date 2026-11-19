@@ -8,8 +8,11 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Added
 
+- Pengaturan > Tema & Tampilan kini memiliki pilihan warna tema (Biru bawaan, Hitam, Hijau), ukuran font (Kecil 15 px, Normal 16 px, Besar 18 px, Sangat besar 20 px), dan jenis font (SN Pro, Sistem, Serif, Monospace). Pilihan disimpan per browser di `localStorage` dan diterapkan sebelum render pertama lewat skrip kecil di `<head>`, sehingga tidak berkedip; sebelumnya pilihan font hanya berlaku setelah halaman Pengaturan dibuka. Tidak ada perubahan server atau Prisma. Kontras setiap palet tema (termasuk sidebar, terang dan gelap) diuji di `tests/unit/ui-contrast.test.mjs`.
+
 ### Changed
 
+- Warna bawaan berpindah dari hijau ke biru: aksen `#2F4FC4`, sidebar admin biru tua `#2A45B0` (navy `#16214F` di mode gelap) dengan teks menu semibold, dan logo/nama aplikasi di dalam kotak putih. Tombol utama (`Button` default/primary) kini memakai warna teks utama (hitam di mode terang, putih di mode gelap), dan ikon yang tadinya berwarna aksen kini memakai warna teks utama. Angka pada kartu ringkasan dashboard diperbesar menjadi 48 px. Palet hijau lama tetap tersedia sebagai pilihan tema Hijau.
 - Palet warna dipindah ke token semantik di `src/styles.css` (terang dan gelap). Tombol utama dan tautan memakai hijau `#047A43` (kontras 5,4:1; sebelumnya 3,2:1 dengan teks putih), kuning tidak lagi menjadi warna hover/terpilih (kini abu netral), dan ungu dihapus dari palet grafik mode gelap. Kartu "Analisis Butir Soal" di halaman Analitik memakai hijau yang sama dengan kartu di sebelahnya.
 - Tes unit `tests/unit/ui-contrast.test.mjs` memeriksa rasio kontras token terang dan gelap pada setiap `npm run test:unit`.
 - Komponen dasar (`Button`, `Input`, `Textarea`, `Select`, `Label`, `Card`, `Badge`, `Table`, `Dialog`, `Tabs`, `Checkbox`, `Switch`, `Alert`) mengikuti sistem baru: tinggi kontrol 40 px (44 px untuk `size="lg"`), tepi kolom isian dengan kontras 3:1, tanpa bayangan kecuali lapisan melayang, tanpa animasi masuk dialog/menu, teks tidak di bawah 13 px. Efek tekan global `scale(0.97)` pada semua tombol dan tautan diganti geser 1 px pada tombol. Tombol mendapat nama varian `primary`, `danger`; `default`, `outline`, `destructive` tetap berlaku.

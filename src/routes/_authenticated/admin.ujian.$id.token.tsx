@@ -204,7 +204,7 @@ function TokenPage() {
       <Card className="border-border">
         <CardHeader className="bg-muted/50 border-b border-border pb-4">
           <CardTitle className="text-base flex items-center gap-2">
-            <KeyRound className="h-5 w-5 text-primary" />
+            <KeyRound className="h-5 w-5 text-foreground" />
             Buat Token Baru / Master Token
           </CardTitle>
         </CardHeader>
@@ -261,7 +261,7 @@ function TokenPage() {
               <div className="p-3 bg-muted/20 rounded-lg border space-y-3">
                 <div className="space-y-1.5">
                   <Label className="text-label font-medium flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-primary" /> Batas Waktu Kedaluwarsa
+                    <Clock className="w-3.5 h-3.5 text-foreground" /> Batas Waktu Kedaluwarsa
                   </Label>
                   <Input
                     type="datetime-local"

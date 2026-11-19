@@ -58,7 +58,7 @@ export function AnalitikIndex() {
         <Link to="/admin/analitik/rekap">
           <div className="bg-card border border-border p-4 rounded-lg flex items-center gap-4 hover:border-primary/50 transition-all group cursor-pointer h-full">
             <div className="h-12 w-12 shrink-0 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-              <Download className="h-6 w-6 text-primary" />
+              <Download className="h-6 w-6 text-foreground" />
             </div>
             <div>
               <div className="font-semibold text-foreground group-hover:text-primary transition-colors">Rekap Global & Export</div>
@@ -69,7 +69,7 @@ export function AnalitikIndex() {
         <Link to="/admin/analitik/analisis">
           <div className="bg-card border border-border p-4 rounded-lg flex items-center gap-4 hover:border-primary/50 transition-all group cursor-pointer h-full">
             <div className="h-12 w-12 shrink-0 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-              <Target className="h-6 w-6 text-primary" />
+              <Target className="h-6 w-6 text-foreground" />
             </div>
             <div>
               <div className="font-semibold text-foreground group-hover:text-primary transition-colors">Analisis Butir Soal</div>
@@ -120,7 +120,7 @@ export function AnalitikIndex() {
                     {/* Col 1: Exam Info */}
                     <div className="col-span-12 sm:col-span-5 flex items-start gap-3">
                       <div className="mt-0.5">
-                        <BarChart3 className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors duration-300 ease-spring" />
+                        <BarChart3 className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors duration-300 ease-spring" />
                       </div>
                       <div className="min-w-0">
                         <div className="font-medium text-sm text-foreground truncate group-hover:text-primary transition-colors duration-300 ease-spring">

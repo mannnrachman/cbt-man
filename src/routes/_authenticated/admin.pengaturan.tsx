@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Settings, Upload, Image as ImageIcon, Save } from "lucide-react";
 import { toast } from "sonner";
 import { AdminPage, AdminPageHeader } from "@/components/cbt/AdminPage";
-import { useThemeStore } from "@/lib/cbt/theme-store";
+import { useThemeStore, type Accent, type FontSize, type FontType } from "@/lib/cbt/theme-store";
 import { CheckCircle2 } from "lucide-react";
 
 
@@ -28,7 +28,7 @@ export const Route = createFileRoute("/_authenticated/admin/pengaturan")({
 
 function PengaturanPage() {
   const [cfg, setCfg] = useState(configRepo.get());
-  const { font, setFont } = useThemeStore();
+  const { font, setFont, fontSize, setFontSize, accent, setAccent } = useThemeStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function save() {
@@ -195,60 +195,105 @@ function PengaturanPage() {
         </div>
         <div role="region" aria-labelledby="tema-heading" className="space-y-8">
 
-          {/* Pilihan Tipografi / Font */}
-          <div className="space-y-3">
-            <Label className="text-label font-semibold text-muted-foreground">Pilihan Font & Tipografi</Label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-              {/* Font: SN Pro */}
-              <button
-                type="button"
-                onClick={() => setFont("sn-pro")}
-                aria-pressed={font === "sn-pro"}
-                className={`text-left p-4 rounded-lg border-2 transition-all cursor-pointer ${font === "sn-pro" ? "border-primary ring-2 ring-primary/20 bg-primary/5" : "border-border hover:border-primary/50 bg-card"}`}
-              >
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <div className="font-semibold text-foreground">SN Pro (Supernotes)</div>
-                    <span className="text-label font-semibold text-primary">Modern & Readability</span>
+          {/* Warna tema */}
+          <fieldset className="space-y-3">
+            <legend className="text-label font-semibold text-muted-foreground">Warna Tema</legend>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              {ACCENT_OPTIONS.map((opt) => (
+                <OptionCard key={opt.value} selected={accent === opt.value} onSelect={() => setAccent(opt.value)}>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-semibold text-foreground">{opt.label}</span>
+                    {accent === opt.value && <CheckCircle2 aria-hidden="true" className="h-5 w-5 shrink-0 text-foreground" />}
                   </div>
-                  {font === "sn-pro" && <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />}
-                </div>
-                <div className="p-3 rounded-lg bg-muted border border-border" style={{ fontFamily: "'SN Pro', sans-serif" }}>
-                  <div className="text-sm font-semibold text-foreground">Aa Bb Cc 123</div>
-                  <div className="text-label text-muted-foreground mt-1">Ujian Berbasis Komputer Modern</div>
-                </div>
-                <p className="text-label text-muted-foreground mt-3">Font friendly berbasis Nunito yang dioptimalkan khusus untuk membaca soal & antarmuka CBT.</p>
-              </button>
-
-              {/* Font: System Default */}
-              <button
-                type="button"
-                onClick={() => setFont("system")}
-                aria-pressed={font === "system"}
-                className={`text-left p-4 rounded-lg border-2 transition-all cursor-pointer ${font === "system" ? "border-primary ring-2 ring-primary/20 bg-primary/5" : "border-border hover:border-primary/50 bg-card"}`}
-              >
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <div className="font-semibold text-foreground">Sistem Default (Standar Lama)</div>
-                    <span className="text-label font-semibold text-muted-foreground">Inter / System Sans</span>
+                  <div aria-hidden="true" className="mt-3 flex h-10 overflow-hidden rounded-md border border-border">
+                    <span className="w-1/3" style={{ backgroundColor: opt.sidebar }} />
+                    <span className="flex-1" style={{ backgroundColor: opt.surface }} />
+                    <span className="w-1/4" style={{ backgroundColor: opt.action }} />
                   </div>
-                  {font === "system" && <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />}
-                </div>
-                <div className="p-3 rounded-lg bg-muted border border-border" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
-                  <div className="text-sm font-semibold text-foreground">Aa Bb Cc 123</div>
-                  <div className="text-label text-muted-foreground mt-1">Ujian Berbasis Komputer Modern</div>
-                </div>
-                <p className="text-label text-muted-foreground mt-3">Font sans-serif bawaan sistem operasi (Inter, Segoe UI, Roboto, San Francisco).</p>
-              </button>
-
+                  <p className="mt-2 text-label text-muted-foreground">{opt.desc}</p>
+                </OptionCard>
+              ))}
             </div>
-          </div>
+          </fieldset>
+
+          {/* Ukuran font */}
+          <fieldset className="space-y-3">
+            <legend className="text-label font-semibold text-muted-foreground">Ukuran Font</legend>
+            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+              {SIZE_OPTIONS.map((opt) => (
+                <OptionCard key={opt.value} selected={fontSize === opt.value} onSelect={() => setFontSize(opt.value)}>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-semibold text-foreground">{opt.label}</span>
+                    {fontSize === opt.value && <CheckCircle2 aria-hidden="true" className="h-5 w-5 shrink-0 text-foreground" />}
+                  </div>
+                  <div aria-hidden="true" className="mt-2 font-semibold text-foreground" style={{ fontSize: opt.sample }}>Aa 123</div>
+                  <p className="mt-1 text-label text-muted-foreground">{opt.px}</p>
+                </OptionCard>
+              ))}
+            </div>
+          </fieldset>
+
+          {/* Jenis font */}
+          <fieldset className="space-y-3">
+            <legend className="text-label font-semibold text-muted-foreground">Jenis Font</legend>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {FONT_OPTIONS.map((opt) => (
+                <OptionCard key={opt.value} selected={font === opt.value} onSelect={() => setFont(opt.value)}>
+                  <div className="mb-3 flex items-start justify-between">
+                    <div>
+                      <div className="font-semibold text-foreground">{opt.label}</div>
+                      <span className="text-label font-semibold text-muted-foreground">{opt.tag}</span>
+                    </div>
+                    {font === opt.value && <CheckCircle2 aria-hidden="true" className="h-5 w-5 shrink-0 text-foreground" />}
+                  </div>
+                  <div aria-hidden="true" className="rounded-lg border border-border bg-muted p-3" style={{ fontFamily: opt.family }}>
+                    <div className="text-sm font-semibold text-foreground">Aa Bb Cc 123</div>
+                    <div className="mt-1 text-label text-muted-foreground">Ujian Berbasis Komputer Modern</div>
+                  </div>
+                  <p className="mt-3 text-label text-muted-foreground">{opt.desc}</p>
+                </OptionCard>
+              ))}
+            </div>
+          </fieldset>
 
         </div>
       </div>
 
     </AdminPage>
+  );
+}
+
+const ACCENT_OPTIONS: { value: Accent; label: string; desc: string; sidebar: string; surface: string; action: string }[] = [
+  { value: "biru", label: "Biru", desc: "Bawaan: sidebar biru tua dengan aksen biru.", sidebar: "#2a45b0", surface: "#f6f8fd", action: "#2f4fc4" },
+  { value: "hitam", label: "Hitam", desc: "Netral: sidebar hitam dengan aksen hitam.", sidebar: "#171717", surface: "#fafafa", action: "#111111" },
+  { value: "hijau", label: "Hijau", desc: "Sidebar hijau tua dengan aksen hijau.", sidebar: "#14532d", surface: "#fafaf7", action: "#047a43" },
+];
+
+const SIZE_OPTIONS: { value: FontSize; label: string; px: string; sample: string }[] = [
+  { value: "kecil", label: "Kecil", px: "15 px", sample: "0.9375rem" },
+  { value: "normal", label: "Normal", px: "16 px (bawaan)", sample: "1rem" },
+  { value: "besar", label: "Besar", px: "18 px", sample: "1.125rem" },
+  { value: "sangat-besar", label: "Sangat besar", px: "20 px", sample: "1.25rem" },
+];
+
+const SYSTEM_STACK = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+const FONT_OPTIONS: { value: FontType; label: string; tag: string; desc: string; family: string }[] = [
+  { value: "sn-pro", label: "SN Pro (Supernotes)", tag: "Modern & mudah dibaca", desc: "Font ramah yang dioptimalkan untuk membaca soal dan antarmuka CBT.", family: `'SN Pro', ${SYSTEM_STACK}` },
+  { value: "system", label: "Sistem Default", tag: "Inter / System Sans", desc: "Font sans-serif bawaan sistem operasi (Segoe UI, Roboto, San Francisco).", family: SYSTEM_STACK },
+  { value: "serif", label: "Serif", tag: "Georgia / Times", desc: "Huruf berkaki, nyaman untuk teks bacaan panjang.", family: "Georgia, 'Times New Roman', serif" },
+  { value: "mono", label: "Monospace", tag: "Lebar huruf sama", desc: "Semua huruf sama lebar; berguna untuk kode dan angka.", family: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" },
+];
+
+function OptionCard({ selected, onSelect, children }: { selected: boolean; onSelect: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      aria-pressed={selected}
+      className={`cursor-pointer rounded-lg border-2 p-4 text-left transition-colors ${selected ? "border-foreground bg-accent" : "border-border bg-card hover:border-foreground/40"}`}
+    >
+      {children}
+    </button>
   );
 }
 

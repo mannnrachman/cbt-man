@@ -92,7 +92,7 @@ test("chart colours come from the palette, so none can be violet", () => {
   for (const value of charts) assert.ok(/^var\(--[a-z-]+\)$/.test(value), `--chart value "${value}" is not a palette token`);
 });
 
-// The admin sidebar and header keep a dark chrome in both colour schemes (see styles.css).
+// The admin sidebar and header keep a blue chrome in both colour schemes (see styles.css).
 function readBlock(pattern) {
   const m = css.match(pattern);
   assert.ok(m, `block ${pattern} not found in styles.css`);
@@ -102,8 +102,11 @@ function readBlock(pattern) {
 }
 
 const SHARED = /\n\.shell-sidebar \{\n  color-scheme[\s\S]*?\n\}/;
+const SHARED_DARK = /\n\.dark \.shell-sidebar \{[\s\S]*?\n\}/;
+// The dark-scheme block only overrides the surfaces; the text and accent tokens come from .shell-sidebar.
 const chrome = {
   sidebar: readBlock(SHARED),
+  "sidebar (dark scheme)": { ...readBlock(SHARED), ...readBlock(SHARED_DARK) },
 };
 
 for (const [region, tokens] of Object.entries(chrome)) {
@@ -126,13 +129,70 @@ for (const [region, tokens] of Object.entries(chrome)) {
   }
 }
 
-test("the hover fill is clearly lighter than the chrome surface", () => {
+test("the hover fill is clearly distinct from the chrome surface", () => {
   for (const tokens of Object.values(chrome)) {
     assert.ok(contrast(tokens.hover, tokens.surface) >= 1.5, "hover fill must be visibly different from the surface");
   }
 });
 
-test("the sidebar is deep green-charcoal and the header has no palette of its own", () => {
-  assert.equal(chrome.sidebar.surface.toLowerCase(), "#14201a");
+test("the sidebar is #2A45B0 blue and the header has no palette of its own", () => {
+  assert.equal(chrome.sidebar.surface.toLowerCase(), "#2a45b0");
   assert.ok(!css.includes(".shell-header"), "the header is transparent and follows the page tokens");
+});
+
+// Colour themes chosen in Settings > Tema & Tampilan (data-accent on <html>).
+function readSelectorBlock(selector) {
+  const open = css.indexOf(`\n${selector} {`);
+  assert.notEqual(open, -1, `${selector} block not found in styles.css`);
+  const block = css.slice(open, css.indexOf("\n}", open));
+  const tokens = {};
+  for (const m of block.matchAll(/--([a-z0-9-]+):\s*(#[0-9a-fA-F]{6})\s*;/g)) tokens[m[1]] = m[2];
+  return tokens;
+}
+
+for (const accent of ["hijau", "hitam"]) {
+  for (const scheme of ["light", "dark"]) {
+    const root = scheme === "light" ? `:root[data-accent="${accent}"]` : `:root.dark[data-accent="${accent}"]`;
+    const tokens = { ...readSelectorBlock(scheme === "light" ? ":root" : ".dark"), ...readSelectorBlock(root) };
+    for (const [fg, bg, min, label] of pairs) {
+      test(`${accent}/${scheme}: ${label} (${fg} on ${bg}) is at least ${min}:1`, () => {
+        const ratio = contrast(tokens[fg], tokens[bg]);
+        assert.ok(ratio >= min, `${tokens[fg]} on ${tokens[bg]} is ${ratio.toFixed(2)}:1, needs ${min}:1`);
+      });
+    }
+
+    const sidebar = {
+      ...readBlock(SHARED),
+      ...(scheme === "dark" ? readBlock(SHARED_DARK) : {}),
+      ...readSelectorBlock(`${root} .shell-sidebar`),
+    };
+    for (const [fg, bg, min] of [
+      ["ink", "surface", 7],
+      ["ink", "surface-2", 7],
+      ["ink", "hover", 6],
+      ["ink-muted", "surface", 4.5],
+      ["ink-muted", "surface-2", 4.5],
+      ["ink-muted", "hover", 4.5],
+      ["action", "surface", 4.5],
+      ["action-ink", "action", 4.5],
+      ["danger", "surface", 4.5],
+      ["warn", "surface", 4.5],
+    ]) {
+      test(`${accent}/${scheme} sidebar: ${fg} on ${bg} is at least ${min}:1`, () => {
+        const ratio = contrast(sidebar[fg], sidebar[bg]);
+        assert.ok(ratio >= min, `${sidebar[fg]} on ${sidebar[bg]} is ${ratio.toFixed(2)}:1, needs ${min}:1`);
+      });
+    }
+    test(`${accent}/${scheme} sidebar: hover fill is clearly distinct from the surface`, () => {
+      assert.ok(contrast(sidebar.hover, sidebar.surface) >= 1.5);
+    });
+  }
+}
+
+test("the saved-appearance init script and the store agree on the allowed values", () => {
+  const store = readFileSync(new URL("../../src/lib/cbt/theme-store.ts", import.meta.url), "utf8");
+  for (const accent of ["biru", "hitam", "hijau"]) assert.ok(store.includes(`"${accent}"`));
+  for (const accent of ["hijau", "hitam"]) assert.ok(css.includes(`:root[data-accent="${accent}"] {`), `${accent} palette missing`);
+  for (const size of ["kecil", "besar", "sangat-besar"]) assert.ok(css.includes(`data-font-size='${size}'`), `${size} size missing`);
+  for (const font of ["serif", "mono"]) assert.ok(css.includes(`[data-font='${font}']`), `${font} font missing`);
 });

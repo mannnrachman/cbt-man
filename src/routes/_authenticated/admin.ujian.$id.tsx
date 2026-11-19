@@ -414,7 +414,7 @@ function UjianEditor() {
         title={
           <div className="flex flex-wrap items-center gap-2.5">
             <span className="inline-flex items-center gap-2">
-              <FileSignature className="h-5 w-5 text-primary" />
+              <FileSignature className="h-5 w-5 text-foreground" />
               Editor Paket Ujian
             </span>
             <span
@@ -615,7 +615,7 @@ function UjianEditor() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-base">
-              <CalendarClock className="h-5 w-5 text-primary" />
+              <CalendarClock className="h-5 w-5 text-foreground" />
               Perpanjang Jadwal Ujian
             </DialogTitle>
             <DialogDescription className="text-label text-muted-foreground">
@@ -725,7 +725,7 @@ Perpanjang batas mulai ujian baru. Batas waktu sesi peserta yang sudah berjalan 
             <div className="rounded-lg border border-border/80 bg-muted/50 p-3.5 space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="ujian-begin-at" className="flex items-center gap-1.5 text-label font-semibold text-foreground">
-                  <Clock className="h-3.5 w-3.5 text-primary" />
+                  <Clock className="h-3.5 w-3.5 text-foreground" />
                   Waktu Mulai
                 </Label>
                 <span className="text-label text-muted-foreground">Awal gerbang dibuka</span>

@@ -126,9 +126,9 @@ function CommandCenter() {
         <h2 id="dash-ringkasan" className="sr-only">Ringkasan</h2>
         <dl className="grid grid-cols-2 divide-x divide-y rounded-lg border bg-card lg:grid-cols-4 lg:divide-y-0">
           {stats.map((item) => (
-            <div key={item.label} className="space-y-1 p-4">
-              <dt className="text-label text-muted-foreground">{item.label}</dt>
-              <dd className="text-display font-medium tabular-nums text-foreground">{item.value}</dd>
+            <div key={item.label} className="space-y-1.5 p-5">
+              <dt className="text-ui font-semibold text-muted-foreground">{item.label}</dt>
+              <dd className="text-5xl font-semibold leading-none tracking-tight tabular-nums text-foreground">{item.value}</dd>
               <dd className="text-label text-muted-foreground">{item.note}</dd>
             </div>
           ))}

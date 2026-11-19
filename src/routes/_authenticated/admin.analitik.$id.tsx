@@ -75,15 +75,15 @@ function HasilUjian() {
           <div className="grid grid-cols-3 gap-2 text-right">
             <div className="min-w-[5.5rem] rounded-lg border bg-card px-3 py-2">
               <div className="text-label font-medium text-muted-foreground">Durasi</div>
-              <div className="mt-0.5 inline-flex items-center gap-1 text-sm font-semibold tabular-nums"><Clock className="h-3.5 w-3.5 text-primary" />{ujian.durasiMenit}'</div>
+              <div className="mt-0.5 inline-flex items-center gap-1 text-sm font-semibold tabular-nums"><Clock className="h-3.5 w-3.5 text-foreground" />{ujian.durasiMenit}'</div>
             </div>
             <div className="min-w-[5.5rem] rounded-lg border bg-card px-3 py-2">
               <div className="text-label font-medium text-muted-foreground">Soal</div>
-              <div className="mt-0.5 inline-flex items-center gap-1 text-sm font-semibold tabular-nums"><FileText className="h-3.5 w-3.5 text-primary" />{totalSoal}</div>
+              <div className="mt-0.5 inline-flex items-center gap-1 text-sm font-semibold tabular-nums"><FileText className="h-3.5 w-3.5 text-foreground" />{totalSoal}</div>
             </div>
             <div className="min-w-[5.5rem] rounded-lg border bg-card px-3 py-2">
               <div className="text-label font-medium text-muted-foreground">Selesai</div>
-              <div className="mt-0.5 inline-flex items-center gap-1 text-sm font-semibold tabular-nums text-primary"><CheckCircle2 className="h-3.5 w-3.5" />{selesaiCount}</div>
+              <div className="mt-0.5 inline-flex items-center gap-1 text-sm font-semibold tabular-nums text-foreground"><CheckCircle2 className="h-3.5 w-3.5" />{selesaiCount}</div>
             </div>
           </div>
         }
@@ -93,7 +93,7 @@ function HasilUjian() {
         <TabsList className="grid h-auto w-full grid-cols-3 gap-1 rounded-lg border bg-muted/60 p-1 sm:inline-grid sm:w-auto">
           <TabsTrigger value="peserta" className="px-2 text-label sm:px-4 sm:text-sm">Daftar Peserta</TabsTrigger>
           <TabsTrigger value="report" className="px-2 text-label sm:px-4 sm:text-sm">Laporan Ujian</TabsTrigger>
-          <TabsTrigger value="ai" className="gap-1.5 px-2 text-label text-primary sm:px-4 sm:text-sm"><Sparkles className="h-3.5 w-3.5" /> Wawasan AI</TabsTrigger>
+          <TabsTrigger value="ai" className="gap-1.5 px-2 text-label text-foreground sm:px-4 sm:text-sm"><Sparkles className="h-3.5 w-3.5" /> Wawasan AI</TabsTrigger>
         </TabsList>
 
         <TabsContent value="peserta" className="mt-4 space-y-4 outline-none">
@@ -287,7 +287,7 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
               <Card className="border-primary/20 relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
                 <CardHeader className="bg-primary/5 pb-4 border-b">
-                  <CardTitle className="text-lg flex items-center gap-2 text-primary">
+                  <CardTitle className="text-lg flex items-center gap-2 text-foreground">
                     <Pencil className="h-5 w-5" /> Lembar Koreksi Penilaian
                   </CardTitle>
                 </CardHeader>
@@ -352,7 +352,7 @@ function DaftarPesertaTab({ ujian, sesis, refresh }: { ujian: Ujian, sesis: Sesi
                               return (
                                 <div key={opt.id} className={`flex items-start gap-2.5 p-2.5 rounded-lg ${bgStyle} ${textStyle}`}>
                                   <div className="mt-0.5 shrink-0">
-                                    {isBenar ? <CheckCircle2 className="h-4 w-4 text-success" /> : isSelected ? <X className="h-4 w-4 text-destructive" /> : <div className="h-4 w-4 rounded-full border-2 border-muted" />}
+                                    {isBenar ? <CheckCircle2 className="h-4 w-4 text-foreground" /> : isSelected ? <X className="h-4 w-4 text-destructive" /> : <div className="h-4 w-4 rounded-full border-2 border-muted" />}
                                   </div>
                                   <div className="flex-1 text-sm prose prose-sm leading-snug"><RichView html={opt.detail} /></div>
                                   {isSelected && <div className="text-label font-semibold bg-background px-1.5 py-0.5 rounded border opacity-70">Dipilih</div>}
@@ -657,7 +657,7 @@ function AiInsightTab({ ujian, sesis }: { ujian: Ujian, sesis: SesiUjian[] }) {
           <Card className="overflow-hidden">
             <CardHeader className="border-b bg-muted/20 pb-4">
               <CardTitle className="flex items-center gap-2 text-base">
-                <TrendingUp className="h-5 w-5 text-primary" /> Tren Kinerja Keseluruhan
+                <TrendingUp className="h-5 w-5 text-foreground" /> Tren Kinerja Keseluruhan
               </CardTitle>
             </CardHeader>
             <CardContent className="p-5">

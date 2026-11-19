@@ -362,7 +362,7 @@ function ImportPage() {
                 size="sm"
                 onClick={commit}
                 disabled={!preview.some((r) => r.valid) || isBusy}
-                className="font-semibold bg-primary hover:bg-primary/90 text-primary-foreground"
+                className="font-semibold bg-foreground hover:bg-foreground/85 text-background"
               >
                 {isSaving ? (
                   <>

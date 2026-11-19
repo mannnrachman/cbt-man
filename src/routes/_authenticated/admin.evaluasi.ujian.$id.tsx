@@ -98,7 +98,7 @@ function EvaluasiUjianList() {
                 </>
               ) : (
                 <>
-                  <CheckCircle2 className="h-10 w-10 text-primary mb-3 opacity-80" />
+                  <CheckCircle2 className="h-10 w-10 text-foreground mb-3 opacity-80" />
                   <span className="text-foreground font-semibold">Semua Essay Telah Dinilai</span>
                   <span className="text-sm text-muted-foreground mt-1">Tidak ada jawaban essay yang menunggu penilaian.</span>
                 </>

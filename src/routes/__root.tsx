@@ -11,6 +11,7 @@ import type { ErrorComponentProps } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
 import { Toaster } from "@/components/ui/sonner";
+import { APPEARANCE_INIT_SCRIPT } from "@/lib/cbt/theme-store";
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
@@ -25,7 +26,7 @@ function NotFoundComponent() {
         <div className="mt-6">
           <Link
             to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex items-center justify-center rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background transition-colors hover:bg-foreground/85"
           >
             Go home
           </Link>
@@ -66,7 +67,7 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex items-center justify-center rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background transition-colors hover:bg-foreground/85"
           >
             Try again
           </button>
@@ -95,6 +96,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
+    scripts: [{ children: APPEARANCE_INIT_SCRIPT }],
     links: [
       {
         rel: "preload",

@@ -130,7 +130,7 @@ function EvaluasiList() {
                 </>
               ) : (
                 <>
-                  <CheckCircle2 className="h-10 w-10 text-primary mb-3 opacity-80" />
+                  <CheckCircle2 className="h-10 w-10 text-foreground mb-3 opacity-80" />
                   <span className="text-foreground font-semibold">Semua Essay Telah Dinilai</span>
                   <span className="text-sm text-muted-foreground mt-1">Tidak ada jawaban essay yang menunggu penilaian.</span>
                 </>
@@ -155,7 +155,7 @@ function EvaluasiList() {
                       {/* Col 1: Exam Info */}
                       <div className="col-span-12 sm:col-span-5 flex items-center gap-3.5">
                         <div className="flex items-center justify-center h-10 w-10 shrink-0 rounded-[10px] bg-muted border border-border group-hover:bg-primary/10 group-hover:border-primary/20 transition-all duration-300 ease-spring">
-                          <ClipboardCheck className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-all duration-300 ease-spring" />
+                          <ClipboardCheck className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-all duration-300 ease-spring" />
                         </div>
                         <div className="min-w-0">
                           <div className="font-medium text-sm text-foreground truncate group-hover:text-primary transition-colors duration-300 ease-spring">

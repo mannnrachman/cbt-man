@@ -271,11 +271,11 @@ function ModulPage() {
 
                   <div className="flex items-center gap-1 relative z-10">
                     {canEdit && (
-                      <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors duration-300" onClick={() => { setEditingModul(m); setEditDialogOpen(true); }} title="Edit Modul">
+                      <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors duration-300" onClick={() => { setEditingModul(m); setEditDialogOpen(true); }} title="Edit Modul">
                         <Pencil className="h-4 w-4" />
                       </Button>
                     )}
-                    <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors duration-300" onClick={() => exportBank(m)} title="Export JSON">
+                    <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors duration-300" onClick={() => exportBank(m)} title="Export JSON">
                       <Download className="h-4 w-4" />
                     </Button>
                     {canEdit && (

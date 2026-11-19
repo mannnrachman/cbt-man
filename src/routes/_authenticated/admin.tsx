@@ -210,14 +210,14 @@ function SidebarLink({ item, isActive, sidebarCollapsed }: { item: NavItem; isAc
       aria-current={isActive ? "page" : undefined}
       title={sidebarCollapsed ? item.label : undefined}
       className={cn(
-        "flex items-center gap-3 rounded-md border-l-2 px-3 py-2.5 text-ui transition-colors",
+        "flex items-center gap-3 rounded-md border-l-2 px-3 py-2.5 text-ui font-semibold transition-colors",
         sidebarCollapsed && "lg:justify-center lg:px-0",
         isActive
-          ? "border-transparent bg-accent font-medium text-foreground"
+          ? "border-transparent bg-accent text-foreground"
           : "border-transparent text-muted-foreground hover:bg-accent hover:text-foreground",
       )}
     >
-      <Icon strokeWidth={2.25} className={cn("h-6 w-6 shrink-0", isActive && "text-primary")} />
+      <Icon strokeWidth={2.25} className={cn("h-6 w-6 shrink-0", isActive && "text-foreground")} />
       <span className={cn("leading-snug", sidebarCollapsed && "lg:sr-only")}>{item.label}</span>
     </Link>
   );
@@ -325,17 +325,17 @@ function AdminLayout() {
           )} id="admin-sidebar">
             <div className={cn(
               "flex h-16 items-center border-b border-border",
-              sidebarCollapsed ? "justify-between px-2 lg:flex-col lg:justify-center lg:gap-1" : "justify-between px-5",
+              sidebarCollapsed ? "justify-between px-2 lg:h-auto lg:flex-col lg:justify-center lg:gap-2 lg:py-3" : "justify-between px-5",
             )}>
-              <div className={cn("flex min-w-0 items-center gap-3", sidebarCollapsed && "lg:justify-center")} title={sidebarCollapsed ? appName : undefined}>
+              <div className={cn("flex min-w-0 items-center gap-3 rounded-lg bg-primary px-3 py-1.5 text-primary-foreground", sidebarCollapsed && "lg:justify-center lg:px-1.5")} title={sidebarCollapsed ? appName : undefined}>
                 {cfg.appLogo ? (
                   <img src={cfg.appLogo} alt="" className={cn("h-7 w-auto object-contain", sidebarCollapsed && "lg:h-7 lg:w-7")} />
                 ) : (
-                  <span aria-hidden="true" className="grid h-8 w-8 place-items-center rounded-md bg-primary text-primary-foreground text-ui font-semibold">
+                  <span aria-hidden="true" className="grid h-8 w-8 place-items-center rounded-md bg-primary-foreground text-primary text-ui font-semibold">
                     {appName.trim().charAt(0).toUpperCase() || "C"}
                   </span>
                 )}
-                <span className={cn("truncate text-base font-semibold tracking-tight text-foreground", sidebarCollapsed && "lg:hidden")}>{appName}</span>
+                <span className={cn("truncate text-base font-semibold tracking-tight text-primary-foreground", sidebarCollapsed && "lg:hidden")}>{appName}</span>
               </div>
               <div className="flex items-center gap-1">
                 {mobileMenuOpen && (
@@ -380,7 +380,7 @@ function AdminLayout() {
                       title={sidebarCollapsed ? group.label : undefined}
                       onClick={() => setOpenGroupId(isOpen ? undefined : group.id)}
                       className={cn(
-                        "flex w-full items-center justify-between gap-3 rounded-md px-3 py-2.5 text-left text-ui font-medium transition-colors",
+                        "flex w-full items-center justify-between gap-3 rounded-md px-3 py-2.5 text-left text-ui font-semibold transition-colors",
                         sidebarCollapsed && "lg:justify-center lg:px-0",
                         group.items.some((item) => isNavItemActive(item, pathname))
                           ? "text-foreground"
@@ -433,7 +433,7 @@ function AdminLayout() {
               >
                 <Menu className="h-5 w-5" />
               </Button>
-              <HeaderIcon aria-hidden="true" strokeWidth={2.25} className="hidden h-8 w-8 shrink-0 text-primary sm:block" />
+              <HeaderIcon aria-hidden="true" strokeWidth={2.25} className="hidden h-8 w-8 shrink-0 text-foreground sm:block" />
               <div className="min-w-0">
                 <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5 text-label text-muted-foreground">
                   {activeGroup && (

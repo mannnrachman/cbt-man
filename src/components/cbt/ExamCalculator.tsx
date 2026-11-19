@@ -61,7 +61,7 @@ export function ExamCalculator() {
     "h-10 text-label font-semibold bg-warn/10 text-warn hover:bg-warn/10 transition-colors";
   const acBtn =
     "h-10 text-label font-semibold bg-destructive/10 text-destructive hover:bg-destructive/10 transition-colors";
-  const eqBtn = "h-10 text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors";
+  const eqBtn = "h-10 text-sm font-semibold bg-foreground text-background hover:bg-foreground/85 transition-colors";
 
   return (
     <div className="mx-auto flex w-full max-w-sm flex-col gap-2.5 rounded-lg border bg-card p-3 select-none">

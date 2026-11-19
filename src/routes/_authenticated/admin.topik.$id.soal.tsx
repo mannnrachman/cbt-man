@@ -294,7 +294,7 @@ function SoalPage() {
                       </div>
                       {j.benar && (
                         <div className="flex shrink-0 items-center justify-center h-7">
-                          <CheckCircle2 className="h-5 w-5 text-primary" />
+                          <CheckCircle2 className="h-5 w-5 text-foreground" />
                         </div>
                       )}
                     </div>

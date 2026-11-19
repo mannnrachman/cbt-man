@@ -39,7 +39,7 @@ function UnitAkademikExplorer() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-semibold tracking-tight text-foreground flex items-center gap-2">
-            <FolderTree className="h-5 w-5 text-primary" />
+            <FolderTree className="h-5 w-5 text-foreground" />
             Struktur Organisasi Akademik
           </h2>
           <p className="text-label text-muted-foreground mt-0.5">
@@ -143,7 +143,7 @@ function FakultasSection({ data, onUpdated }: { data: UnitAkademik[]; onUpdated:
       <Card className="lg:col-span-2 border-border overflow-hidden">
         <CardHeader className="bg-muted/50 border-b border-border pb-3 flex flex-row items-center justify-between gap-4">
           <CardTitle className="text-base font-semibold flex items-center gap-2">
-            <Building2 className="h-4 w-4 text-primary" />
+            <Building2 className="h-4 w-4 text-foreground" />
             Daftar Fakultas ({filtered.length})
           </CardTitle>
           <div className="relative w-48 sm:w-64">
@@ -315,7 +315,7 @@ function ProdiSection({
       <Card className="lg:col-span-2 border-border overflow-hidden">
         <CardHeader className="bg-muted/50 border-b border-border pb-3 flex flex-row items-center justify-between gap-4">
           <CardTitle className="text-base font-semibold flex items-center gap-2">
-            <Library className="h-4 w-4 text-primary" />
+            <Library className="h-4 w-4 text-foreground" />
             Daftar Program Studi ({filtered.length})
           </CardTitle>
           <div className="relative w-48 sm:w-64">
@@ -518,7 +518,7 @@ function KelasSection({
       <Card className="lg:col-span-2 border-border overflow-hidden">
         <CardHeader className="bg-muted/50 border-b border-border pb-3 flex flex-row items-center justify-between gap-4">
           <CardTitle className="text-base font-semibold flex items-center gap-2">
-            <Users className="h-4 w-4 text-primary" />
+            <Users className="h-4 w-4 text-foreground" />
             Daftar Kelas / Rombel ({filtered.length})
           </CardTitle>
           <div className="relative w-48 sm:w-64">
