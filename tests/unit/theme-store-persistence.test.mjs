@@ -37,13 +37,35 @@ async function withLocalStorage(impl, run) {
   }
 }
 
+/** Minimal documentElement that records the data-* attributes apply() writes. */
+async function withDocumentElement(run) {
+  const attributes = new Map();
+  const root = {
+    setAttribute: (name, value) => attributes.set(name, value),
+    removeAttribute: (name) => attributes.delete(name),
+  };
+  const previous = globalThis.document;
+  globalThis.document = { documentElement: root };
+  try {
+    await run(attributes);
+  } finally {
+    if (previous === undefined) delete globalThis.document;
+    else globalThis.document = previous;
+  }
+}
+
 test("appearance setters survive localStorage write failures", async () => {
   await withLocalStorage(storageThatThrowsOnWrite(), async () => {
     const { useThemeStore } = await import("../../src/lib/cbt/theme-store.ts");
     const state = useThemeStore.getState();
-    assert.doesNotThrow(() => state.setFont("serif"));
-    assert.doesNotThrow(() => state.setFontSize("besar"));
-    assert.doesNotThrow(() => state.setAccent("hijau"));
+    await withDocumentElement(async (attributes) => {
+      assert.doesNotThrow(() => state.setFont("serif"));
+      assert.doesNotThrow(() => state.setFontSize("besar"));
+      assert.doesNotThrow(() => state.setAccent("hijau"));
+      assert.equal(attributes.get("data-font"), "serif");
+      assert.equal(attributes.get("data-font-size"), "besar");
+      assert.equal(attributes.get("data-accent"), "hijau");
+    });
     const after = useThemeStore.getState();
     assert.equal(after.font, "serif");
     assert.equal(after.fontSize, "besar");
