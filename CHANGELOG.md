@@ -43,6 +43,7 @@ Format ini mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/id/1.
 
 ### Fixed
 
+- Preferensi tampilan (jenis font, ukuran font, warna tema) tetap berlaku di sesi browser saat `localStorage` menolak penulisan (kuota penuh atau mode privat): penyimpanan gagal tidak lagi menghentikan pembaruan tampilan; pilihan hanya tidak bertahan setelah halaman dimuat ulang.
 - Demo Live Preview memakai jumlah soal aktual per topik, mencakup semua jenis soal serta alat bantu, dan tidak kedaluwarsa. Penyiapan ulang lokal mempertahankan sesi dan jawaban.
 
 - Impor soal Excel memakai topik yang dipilih saat menyimpan, memeriksa hasil setiap penyimpanan, dan mempertahankan baris yang belum tersimpan untuk dicoba ulang. File yang gagal dibaca menghapus preview lama dan menampilkan pesan error.
