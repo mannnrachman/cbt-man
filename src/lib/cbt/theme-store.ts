@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist, type StateStorage } from "zustand/middleware";
 
 export type FontType = "sn-pro" | "system" | "serif" | "mono";
 export type FontSize = "kecil" | "normal" | "besar" | "sangat-besar";
@@ -33,6 +33,36 @@ const pick = <T extends string>(value: unknown, allowed: readonly T[], fallback:
   allowed.includes(value as T) ? (value as T) : fallback;
 
 /**
+ * Persistence must never break the appearance itself: a full quota or a
+ * privacy-mode rejection only means the choice will not survive a reload, so
+ * the write failure is swallowed and the in-memory update plus the apply()
+ * DOM update still happen. Reads fail open to "nothing saved".
+ */
+const safeAppearanceStorage: StateStorage = {
+  getItem: (name) => {
+    try {
+      return globalThis.localStorage?.getItem(name) ?? null;
+    } catch {
+      return null;
+    }
+  },
+  setItem: (name, value) => {
+    try {
+      globalThis.localStorage?.setItem(name, value);
+    } catch {
+      // Quota exceeded or storage disabled: keep memory and DOM in sync anyway.
+    }
+  },
+  removeItem: (name) => {
+    try {
+      globalThis.localStorage?.removeItem(name);
+    } catch {
+      // Idem: losing the persisted choice is acceptable, throwing is not.
+    }
+  },
+};
+
+/**
  * Light/dark is a class on <html> managed by each layout. The persisted appearance choices
  * are the font, the text size and the colour theme; they are per browser, not per account.
  * Older versions stored only `font` (and, before that, a "neumorphism" theme under the same
@@ -59,6 +89,7 @@ export const useThemeStore = create<AppearanceState>()(
     }),
     {
       name: STORAGE_KEY,
+      storage: createJSONStorage(() => safeAppearanceStorage),
       partialize: (state) => ({ font: state.font, fontSize: state.fontSize, accent: state.accent }),
       merge: (persisted, current) => {
         const saved = (persisted ?? {}) as Partial<AppearanceState>;
