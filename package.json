@@ -70,7 +70,7 @@
     "katex": "^0.19.1",
     "lucide-react": "^0.575.0",
     "mammoth": "^1.12.0",
-    "prisma": "^6.16.2",
+    "prisma": "^7.10.1",
     "react": "^19.3.1",
     "react-day-picker": "^9.14.0",
     "react-dom": "^19.3.1",
